@@ -40,43 +40,22 @@ function clearAll() {
   showToast('Alle vragen verwijderd!');
 }
 
-// Removed categories, categoryTranslations, searchBox, filteredCategories, renderCategoryCheckboxes, and all related logic
-// Remove all code that references categoriesListDiv, searchBox, and category checkboxes
 
-// Populate the categories-list div with checkboxes
-// function renderCategoryCheckboxes() {
-//   categoriesListDiv.innerHTML = '';
-//   filteredCategories.forEach((cat, i) => {
-//     const id = `cat_${i}`;
-//     const wrapper = document.createElement('div');
-//     wrapper.style.display = 'flex';
-//     wrapper.style.alignItems = 'center';
-//     wrapper.style.gap = '6px';
-//     const checkbox = document.createElement('input');
-//     checkbox.type = 'checkbox';
-//     checkbox.id = id;
-//     checkbox.name = 'categories';
-//     checkbox.value = cat;
-//     const label = document.createElement('label');
-//     label.setAttribute('for', id);
-//     label.textContent = categoryTranslations[cat] || cat;
-//     wrapper.appendChild(checkbox);
-//     wrapper.appendChild(label);
-//     categoriesListDiv.appendChild(wrapper);
-//   });
-// }
-
-// searchBox.addEventListener('input', function() {
-//   const query = searchBox.value.trim().toLowerCase();
-//   filteredCategories = categories.filter(cat => {
-//     const dutch = (categoryTranslations[cat] || '').toLowerCase();
-//     return cat.toLowerCase().includes(query) || dutch.includes(query);
-//   });
-//   renderCategoryCheckboxes();
-// });
+// Function to save the last selected question type
+function saveLastQuestionType(type) {
+  localStorage.setItem('bijbelquiz_last_type', type);
+}
 
 window.addEventListener('DOMContentLoaded', () => {
-  // renderCategoryCheckboxes(); // This line is removed
+  // Restore last selected question type
+  const lastType = localStorage.getItem('bijbelquiz_last_type');
+  if (lastType) {
+    const typeSelect = document.getElementById('type');
+    typeSelect.value = lastType;
+    renderFields(lastType);
+  }
+
+  // Restore questions if they exist
   if (localStorage.getItem('bijbelquiz_questions')) {
     restoreBackup();
     document.getElementById('restoreBtn').style.display = '';
@@ -117,7 +96,9 @@ function renderFields(type) {
 
 form.type.addEventListener('change', e => {
   // Only reset dynamic fields, not the whole form
-  renderFields(e.target.value);
+  const selectedType = e.target.value;
+  renderFields(selectedType);
+  saveLastQuestionType(selectedType);
 });
 
 // Initial render
@@ -166,6 +147,8 @@ form.addEventListener('submit', function(e) {
   updatePreview();
   showToast('Vraag toegevoegd!');
   form.reset();
+  form.type.value = type; // Keep the same question type selected
+  saveLastQuestionType(type); // Save the type
   renderFields(type); // Reset dynamic fields
 });
 
