@@ -100,9 +100,14 @@ class QuestionCacheService {
     // Ensure we have metadata loaded first
     await _ensureMetadataLoaded(language);
     
-    // Default to batch size if count not specified
-    final batchSize = count ?? QuestionCacheConfig.defaultBatchSize;
-    final endIndex = startIndex + batchSize;
+    // Determine the end index. If `count` is provided we respect it; otherwise we
+    // load every remaining question starting from `startIndex`.
+    final int endIndex;
+    if (count != null) {
+      endIndex = startIndex + count;
+    } else {
+      endIndex = _questionMetadata[language]?.length ?? 0;
+    }
     
     // Check which questions need to be loaded
     final questionsToLoad = <int>[];
