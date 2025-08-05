@@ -96,6 +96,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     _initializeQuiz();
     _initializeAnimations();
     
+    // Add frame callback to monitor performance
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _monitorPerformance();
+    });
+    
     // Listen for game stats reset to reset question pool
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
@@ -141,91 +146,141 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     }
   }
 
-  /// Initialize animations with performance optimizations
+  /// Initialize animations with performance optimizations for high refresh rate displays
   void _initializeAnimations() {
+    // Get optimal durations based on device capabilities and refresh rate
     final optimalDuration = _performanceService.getOptimalAnimationDuration(
       const Duration(milliseconds: 800)
     );
+    final fastDuration = _performanceService.getOptimalAnimationDuration(
+      const Duration(milliseconds: 300)
+    );
     
+    // Initialize animation controllers with vsync and optimal durations
     _scoreAnimationController = AnimationController(
       duration: optimalDuration,
       vsync: this,
+      debugLabel: 'score_animation',
     );
+    
     _streakAnimationController = AnimationController(
       duration: optimalDuration,
       vsync: this,
+      debugLabel: 'streak_animation',
     );
+    
     _longestStreakAnimationController = AnimationController(
       duration: optimalDuration,
       vsync: this,
-    );
-    _timeAnimationController = AnimationController(
-      duration: _performanceService.getOptimalAnimationDuration(
-        const Duration(milliseconds: 600)
-      ),
-      vsync: this,
+      debugLabel: 'longest_streak_animation',
     );
     
-    // Initialize all animations with improved curves
+    _timeAnimationController = AnimationController(
+      duration: fastDuration,
+      vsync: this,
+      debugLabel: 'time_animation',
+    );
+    
+    // Use a more responsive curve for better feel on high refresh rate displays
+    const animationCurve = Curves.easeOutQuart;
+    
+    // Initialize all animations with optimized curves
     _scoreAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _scoreAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-    _streakAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _streakAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-    _longestStreakAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _longestStreakAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-    _timeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _timeAnimationController,
-        curve: Curves.easeInOut,
+        curve: animationCurve,
       ),
     );
     
-    // Add color animation for timer
+    _streakAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _streakAnimationController,
+        curve: animationCurve,
+      ),
+    );
+    
+    _longestStreakAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _longestStreakAnimationController,
+        curve: animationCurve,
+      ),
+    );
+    
+    _timeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _timeAnimationController,
+        curve: Curves.linear, // Use linear for time-based animations
+      ),
+    );
+    
+    // Add color animation for timer with optimized curve
     _timeColorAnimation = ColorTween(
       begin: Colors.green,
       end: Colors.red,
     ).animate(
       CurvedAnimation(
         parent: _timeAnimationController,
-        curve: Curves.easeInOut,
+        curve: Curves.easeInOutQuad, // Smoother color transition
       ),
     );
   }
 
+  // Monitor performance by tracking frame times
+  void _monitorPerformance() {
+    if (!mounted) return;
+    
+    // Update frame timing
+    _performanceService.updateFrameTime();
+    
+    // Schedule next frame callback
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _monitorPerformance();
+    });
+  }
+
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    // Cancel any active timers
     _timer?.cancel();
-    _scoreAnimationController.dispose();
-    _streakAnimationController.dispose();
-    _longestStreakAnimationController.dispose();
-    _timeAnimationController.dispose();
-    _performanceService.dispose();
-    _connectionService.dispose();
-    _soundService.dispose();
-    _hasLoggedScreenView = false;
+    _timer = null;
     
-    // Remove game stats listener
+    // Remove status listeners and dispose animation controllers
     try {
-      final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
-      gameStats.removeListener(_onGameStatsChanged);
+      _timeAnimationController.removeStatusListener((_) {});
+      _timeAnimationController.stop();
+      _timeAnimationController.dispose();
+      
+      _scoreAnimationController.stop();
+      _scoreAnimationController.dispose();
+      
+      _streakAnimationController.stop();
+      _streakAnimationController.dispose();
+      
+      _longestStreakAnimationController.stop();
+      _longestStreakAnimationController.dispose();
+      
+      // Dispose services
+      _performanceService.dispose();
+      _connectionService.dispose();
+      _soundService.dispose();
+      
+      // Remove game stats listener
+      try {
+        final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
+        gameStats.removeListener(_onGameStatsChanged);
+      } catch (e) {
+        // Ignore if context is no longer available
+      }
     } catch (e) {
-      // Ignore if context is no longer available
+      AppLogger.error('Error during dispose', e);
+    } finally {
+      // Ensure we always clean up the observer and reset state
+      WidgetsBinding.instance.removeObserver(this);
+      _hasLoggedScreenView = false;
+      
+      // Call super.dispose() last
+      super.dispose();
     }
-    
-    super.dispose();
   }
 
   @override
@@ -267,35 +322,46 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
 
   void _startTimer({bool reset = false}) {
     if (!mounted) return;
+    
     final localContext = context;
     final settings = Provider.of<SettingsProvider>(localContext, listen: false);
     final baseTimerDuration = settings.slowMode ? 35 : 20;
     final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
       Duration(seconds: baseTimerDuration)
     );
+    
+    // Reset the timer state if needed
     if (reset) {
       setState(() {
         _quizState = _quizState.copyWith(timeRemaining: optimalTimerDuration.inSeconds);
       });
     }
-    // Always reset and start the color animation
-    _timeAnimationController.reset();
+    
+    // Cancel any existing timer
+    _timer?.cancel();
+    
+    // Set up the animation controller for smooth timer updates
     _timeAnimationController.duration = optimalTimerDuration;
-    _timeAnimationController.forward();
-    if (!mounted) return;
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
+    _timeAnimationController.reset();
+    
+    // Update the time remaining based on the animation value
+    _timeAnimationController.addStatusListener((status) {
+      if (!mounted) return;
+      
+      final elapsed = _timeAnimationController.value * optimalTimerDuration.inMilliseconds;
+      final remainingMs = optimalTimerDuration.inMilliseconds - elapsed;
+      final remainingSeconds = (remainingMs / 1000).ceil();
+      
       setState(() {
-        if (_quizState.timeRemaining > 0) {
+        if (remainingSeconds < _quizState.timeRemaining) {
           _previousTime = _quizState.timeRemaining;
-          _quizState = _quizState.copyWith(
-            timeRemaining: _quizState.timeRemaining - 1,
-          );
-        } else {
-          timer.cancel();
+          _quizState = _quizState.copyWith(timeRemaining: remainingSeconds);
+        }
+      });
+      
+      // Handle timer completion
+      if (status == AnimationStatus.completed) {
+        if (mounted) {
           if (settings.hapticFeedback != 'disabled') {
             if (settings.hapticFeedback == 'medium') {
               HapticFeedback.heavyImpact();
@@ -305,7 +371,17 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
           }
           _showTimeUpDialog();
         }
-      });
+      }
+    });
+    
+    // Start the animation
+    _timeAnimationController.forward();
+    
+    // Fallback timer in case animation doesn't complete
+    _timer = Timer(optimalTimerDuration, () {
+      if (mounted && _timeAnimationController.status != AnimationStatus.completed) {
+        _timeAnimationController.animateTo(1.0, duration: Duration.zero);
+      }
     });
   }
 
