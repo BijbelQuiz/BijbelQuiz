@@ -603,7 +603,7 @@ class _FitbAnimatedBlankRowState extends State<_FitbAnimatedBlankRow> with Singl
                         fontWeight: FontWeight.w700,
                         color: i == 0 
                             ? (widget.selectedAnswerIndex != null 
-                                ? _colorAnimation.value 
+                                ? blankColor 
                                 : blankColor)
                             : widget.colorScheme.outlineVariant,
                         fontSize: getResponsiveFontSize(context, 24),
