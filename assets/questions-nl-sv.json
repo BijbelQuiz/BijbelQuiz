@@ -13,7 +13,7 @@
     },
     {
         "vraag": "Hoe noemde Hanna haar kind?",
-        "juisteAntwoord": "Samuel",
+        "juisteAntwoord": "Samuël (1 Samuël 1:20)",
         "fouteAntwoorden": [
             "Saul",
             "Simson",
@@ -22,11 +22,11 @@
         "moeilijkheidsgraad": 1,
         "type": "mc",
         "categories": [
-            "Genesis"
+            "Samuel"
         ]
     },
     {
-        "vraag": "Wie was verantwoordelijk voor de kindermoord in Bethlehem, vlak na de geboorte van de Heere Jezus?",
+        "vraag": "Wie was verantwoordelijk voor de kindermoord in Bethlehem, vlak na de geboorte van de Jezus (Matthéüs 1)?",
         "juisteAntwoord": "Herodes",
         "fouteAntwoorden": [
             "Pilatus",
@@ -36,28 +36,26 @@
         "moeilijkheidsgraad": 1,
         "type": "mc",
         "categories": [
-            "Matte\u00fcs",
-            "Lucas"
+            "Matte\u00fcs"
         ]
     },
     {
-        "vraag": "De Heere Jezus genas de schoonmoeder van Petrus. Wat mankeerde haar?",
+        "vraag": "Jezus genas de schoonmoeder van Petrus. Wat mankeerde haar (Markus 1)?",
         "juisteAntwoord": "Koorts",
         "fouteAntwoorden": [
             "Verlamming",
             "Blind aan een oog",
             "Bloedvloeiingen"
         ],
-        "moeilijkheidsgraad": 5,
+        "moeilijkheidsgraad": 4,
         "type": "mc",
         "categories": [
-            "Matte\u00fcs",
-            "Lucas"
+            "Markus"
         ]
     },
     {
-        "vraag": "Welke belofte krijgen de zachtmoedigen van de Heere Jezus in de zaligsprekingen?",
-        "juisteAntwoord": "Zij zullen het aardrijk be\u00ebrven",
+        "vraag": "Welke belofte krijgen de zachtmoedigen van de Heere Jezus in de zaligsprekingen (Matthéüs 5:5)?",
+        "juisteAntwoord": "Zij zullen het aardrijk beërven",
         "fouteAntwoorden": [
             "Voor hen is het Koninkrijk der hemelen",
             "Zij zullen kinderen van God genoemd worden",
@@ -70,27 +68,26 @@
         ]
     },
     {
-        "vraag": "Welke belofte staat na de zaligspreking 'zalig zijn de reinen van hart'?",
+        "vraag": "Welke belofte staat na de zaligspreking 'zalig zijn de reinen van hart (Matthéüs 5:8)'?",
         "juisteAntwoord": "zij zullen God zien",
         "fouteAntwoorden": [
             "Voor hen is het Koninkrijk der hemelen",
             "Zij zullen kinderen van God genoemd worden",
-            "Zij zullen het aardrijk be\u00ebrven"
+            "Zij zullen het aardrijk beërven"
         ],
         "moeilijkheidsgraad": 3,
         "type": "mc",
         "categories": [
-            "Lucas",
-            "Spreuken"
+            "mattheus"
         ]
     },
     {
-        "vraag": "Welke profeet mocht niet trouwen van de Heere?",
+        "vraag": "Welke profeet mocht niet trouwen van de Heere (Jeremia 16:2)?",
         "juisteAntwoord": "Jeremia",
         "fouteAntwoorden": [
             "Jesaja",
-            "Ezechiel",
-            "Hosea"
+            "Ezechiël",
+            "Hoséa"
         ],
         "moeilijkheidsgraad": 5,
         "type": "mc",
@@ -99,12 +96,12 @@
         ]
     },
     {
-        "vraag": "Welke profeet moest trouwen in opdracht van de Heere?",
-        "juisteAntwoord": "Hosea",
+        "vraag": "Welke profeet moest trouwen in opdracht van de Heere (Hoséa 1:2)?",
+        "juisteAntwoord": "Hoséa",
         "fouteAntwoorden": [
             "Jesaja",
             "Jeremia",
-            "Ezechiel"
+            "Ezechiël"
         ],
         "moeilijkheidsgraad": 5,
         "type": "mc",
@@ -113,36 +110,35 @@
         ]
     },
     {
-        "vraag": "Welke profeet en zijn kinderen waren een zinnebeeld voor Isra\u00ebl?",
+        "vraag": "Welke profeet en zijn kinderen waren een symbool voor Israël?",
         "juisteAntwoord": "Jesaja",
         "fouteAntwoorden": [
             "Jeremia",
-            "Ezechiel",
-            "Hosea"
+            "Ezechiël",
+            "Hoséa"
         ],
         "moeilijkheidsgraad": 5,
         "type": "mc",
         "categories": [
-            "Jona",
-            "Jeremia"
+            "Jesaja"
         ]
     },
     {
-        "vraag": "Welke profeet verloor zijn vrouw tijdens zijn tijd als profeet?",
-        "juisteAntwoord": "Ezechiel",
+        "vraag": "Welke profeet verloor zijn vrouw tijdens zijn tijd als profeet (Ezechiël 24: 16-24)?",
+        "juisteAntwoord": "Ezechiël",
         "fouteAntwoorden": [
             "Jesaja",
             "Jeremia",
-            "Hosea"
+            "Hoséa"
         ],
         "moeilijkheidsgraad": 5,
         "type": "mc",
         "categories": [
-            "Jeremia"
+            "Ezechiël"
         ]
     },
     {
-        "vraag": "Op de 1e dag schiep God _____",
+        "vraag": "Op de 1e dag schiep God ... (Genesis 1:4)",
         "juisteAntwoord": "het licht",
         "fouteAntwoorden": [
             "de mens",
@@ -156,7 +152,7 @@
         ]
     },
     {
-        "vraag": "Op de 2e dag kwam er scheiding tussen _____",
+        "vraag": "Op de 2e dag kwam er scheiding tussen ... (Genesis 1:6-8)",
         "juisteAntwoord": "zee en lucht",
         "fouteAntwoorden": [
             "zee en land",
@@ -170,7 +166,7 @@
         ]
     },
     {
-        "vraag": "God rustte op de _____",
+        "vraag": "God rustte op de ... (Genesis 2:2)",
         "juisteAntwoord": "7e dag",
         "fouteAntwoorden": [
             "1e dag",
@@ -184,7 +180,7 @@
         ]
     },
     {
-        "vraag": "Waar stond de boom der kennis, des goeds en des kwaads?",
+        "vraag": "Waar stond de boom der kennis, des goeds en des kwaads (Genesis 2 en 3)?",
         "juisteAntwoord": "In de hof van Eden",
         "fouteAntwoorden": [
             "In de hof van Aden",
@@ -198,7 +194,7 @@
         ]
     },
     {
-        "vraag": "Wie werd door Kain vermoord?",
+        "vraag": "Wie werd door Kaïn vermoord?",
         "juisteAntwoord": "Abel",
         "fouteAntwoorden": [
             "Zijn moeder",
@@ -212,7 +208,7 @@
         ]
     },
     {
-        "vraag": "Hoe oud was Methusalach toen hij stierf?",
+        "vraag": "Hoe oud was Methúsalah toen hij stierf (Genesis 5:27)?",
         "juisteAntwoord": "969",
         "fouteAntwoorden": [
             "996",
@@ -226,7 +222,7 @@
         ]
     },
     {
-        "vraag": "Hoe lang is Noach en zijn gezin in de ark?",
+        "vraag": "Hoe lang is Noach met zijn gezin in de ark (Genesis 8)?",
         "juisteAntwoord": "Ruim een jaar",
         "fouteAntwoorden": [
             "40 dagen",
@@ -240,8 +236,8 @@
         ]
     },
     {
-        "vraag": "De top van de toren van Babel moest reiken tot _____",
-        "juisteAntwoord": "de hemel",
+        "vraag": "De top van de toren van Babel moest reiken tot (Genesis 11:4)" ,
+        "juisteAntwoord": "in de hemel",
         "fouteAntwoorden": [
             "de wolken",
             "grote hoogte",
@@ -254,7 +250,7 @@
         ]
     },
     {
-        "vraag": "Wat betekent het woord 'Babel'?",
+        "vraag": "Wat betekent het woord 'Babel' (Genesis 11)?",
         "juisteAntwoord": "Verwarring",
         "fouteAntwoorden": [
             "Grote stad",
@@ -268,10 +264,10 @@
         ]
     },
     {
-        "vraag": "Waar is Abram geboren?",
-        "juisteAntwoord": "Ur der Chaldee\u00ebn",
+        "vraag": "Waar is Abram geboren (Genesis 11:26)?",
+        "juisteAntwoord": "Ur der Chaldeeën",
         "fouteAntwoorden": [
-            "Kanaan",
+            "Kanaän",
             "Egypte",
             "Sinear"
         ],
@@ -282,8 +278,8 @@
         ]
     },
     {
-        "vraag": "Hoe heette de vader van Abram?",
-        "juisteAntwoord": "Terach",
+        "vraag": "Hoe heette de vader van Abram (Genesis 11:26)?",
+        "juisteAntwoord": "Terah",
         "fouteAntwoorden": [
             "Lot",
             "Izak",
@@ -296,7 +292,7 @@
         ]
     },
     {
-        "vraag": "Waarom ging Abram naar Kanaan?",
+        "vraag": "Waarom ging Abram naar Kanaän (Genesis 12)?",
         "juisteAntwoord": "God vroeg het aan hem",
         "fouteAntwoorden": [
             "Daar was werk genoeg",
@@ -310,7 +306,7 @@
         ]
     },
     {
-        "vraag": "Wie was de vrouw van Abram?",
+        "vraag": "Wie was de vrouw van Abram (Genesis 11)?",
         "juisteAntwoord": "Sarai",
         "fouteAntwoorden": [
             "Rebekka",
@@ -324,8 +320,8 @@
         ]
     },
     {
-        "vraag": "Waarom gingen Abram en Sarai naar Egypte?",
-        "juisteAntwoord": "Er was hongersnood in Kanaan",
+        "vraag": "Waarom gingen Abram en Sarai naar Egypte (Genesis 12:10)?",
+        "juisteAntwoord": "Er was hongersnood in Kanaän",
         "fouteAntwoorden": [
             "Daar was veel geld te verdienen",
             "Ze gingen op familiebezoek",
@@ -338,7 +334,7 @@
         ]
     },
     {
-        "vraag": "Abram en Lot gaan terug naar Kanaan. Waar gaat Lot wonen?",
+        "vraag": "Abram en Lot gaan terug naar Kanaän. Waar gaat Lot wonen (Genesis 19)?",
         "juisteAntwoord": "In de Jordaanstreek",
         "fouteAntwoorden": [
             "Aan de kust",
@@ -352,7 +348,7 @@
         ]
     },
     {
-        "vraag": "Sarai blijft onvruchtbaar. Wie wordt de 2e vrouw van Abram?",
+        "vraag": "Sarai blijft onvruchtbaar. Wie wordt de 2e vrouw van Abram (Genesis 16:3)?",
         "juisteAntwoord": "Hagar",
         "fouteAntwoorden": [
             "Rachel",
@@ -366,8 +362,8 @@
         ]
     },
     {
-        "vraag": "Abram en Hagar krijgen een zoon, zijn naam is _____",
-        "juisteAntwoord": "Ismael",
+        "vraag": "Abram en Hagar krijgen een zoon, zijn naam is ... (Genesis 16:11)",
+        "juisteAntwoord": "Ismaël",
         "fouteAntwoorden": [
             "Lot",
             "Izak",
@@ -380,7 +376,7 @@
         ]
     },
     {
-        "vraag": "Wat deed de vrouw van Lot?",
+        "vraag": "Wat deed de vrouw van Lot (Genesis 19:26)?",
         "juisteAntwoord": "Ze kijkt achterom bij het verlaten van Sodom",
         "fouteAntwoorden": [
             "Ze waarschuwt haar man Lot",
@@ -394,7 +390,7 @@
         ]
     },
     {
-        "vraag": "Abraham en Sara krijgen eindelijk een zoon. Hoe oud is Abraham dan?",
+        "vraag": "Abraham en Sara krijgen eindelijk een zoon. Hoe oud is Abraham dan (Genesis 21:5) ?",
         "juisteAntwoord": "100",
         "fouteAntwoorden": [
             "80",
@@ -408,10 +404,10 @@
         ]
     },
     {
-        "vraag": "Waar moet Abraham Izak offeren?",
+        "vraag": "Waar moet Abraham Izak offeren (Genesis 22:2)?",
         "juisteAntwoord": "Op de berg Moria",
         "fouteAntwoorden": [
-            "Op de berg Sinai",
+            "Op de berg Sinaï",
             "Op de berg Karmel",
             "Op de berg Horeb"
         ],
@@ -422,7 +418,7 @@
         ]
     },
     {
-        "vraag": "Met wie trouwt Izak?",
+        "vraag": "Met wie trouwt Izak (Genesis 24)?",
         "juisteAntwoord": "Rebekka",
         "fouteAntwoorden": [
             "Rachel",
@@ -436,23 +432,22 @@
         ]
     },
     {
-        "vraag": "Wie volgt Mozes op?",
+        "vraag": "Wie volgt Mozes op (Jozua 1)?",
         "juisteAntwoord": "Jozua",
         "fouteAntwoorden": [
-            "Aaron",
-            "Jaleb",
+            "Aäron",
+            "Kaleb",
             "Elia"
         ],
         "moeilijkheidsgraad": 1,
         "type": "mc",
         "categories": [
-            "Exodus",
-            "Genesis"
+            "Jozua"
         ]
     },
     {
-        "vraag": "Waar sloeg Mozes op de rots?",
-        "juisteAntwoord": "bij Kades",
+        "vraag": "Waar sloeg Mozes op de rots (Exodus 17:7)?",
+        "juisteAntwoord": "bij Meríba",
         "fouteAntwoorden": [
             "bij Edom",
             "bij Mara",
@@ -461,11 +456,11 @@
         "moeilijkheidsgraad": 3,
         "type": "mc",
         "categories": [
-            "Genesis"
+            "Exodus"
         ]
     },
     {
-        "vraag": "Na _____ is een groot gedeelte van Kanaan veroverd",
+        "vraag": "Na ... is een groot gedeelte van Kanaän veroverd (Jozua)",
         "juisteAntwoord": "7 jaar",
         "fouteAntwoorden": [
             "4 jaar",
@@ -475,12 +470,11 @@
         "moeilijkheidsgraad": 5,
         "type": "fitb",
         "categories": [
-            "Jozua",
-            "Genesis"
+            "Jozua"
         ]
     },
     {
-        "vraag": "Na het overlijden van Jozua _____",
+        "vraag": "Na het overlijden van Jozua ... (Jozua 24)",
         "juisteAntwoord": "is er geen leider meer",
         "fouteAntwoorden": [
             "volgt zijn zoon hem op",
@@ -490,13 +484,12 @@
         "moeilijkheidsgraad": 3,
         "type": "fitb",
         "categories": [
-            "Jozua",
-            "Handelingen"
+            "Jozua"
         ]
     },
     {
-        "vraag": "Wat was de eerste taak van Isra\u00ebl na de dood van Jozua?",
-        "juisteAntwoord": "Vechten tegen de overgebleven Kaananieten",
+        "vraag": "Wat was de eerste taak van Israël na de dood van Jozua (Richteren 1:1)?",
+        "juisteAntwoord": "Vechten tegen de overgebleven Kaänanieten",
         "fouteAntwoorden": [
             "Het vinden van een nieuwe leider",
             "Het volk kreeg een periode rust",
@@ -505,43 +498,39 @@
         "moeilijkheidsgraad": 3,
         "type": "mc",
         "categories": [
-            "Jozua",
-            "Deuteronomium",
-            "Handelingen"
+            "Richteren"
         ]
     },
     {
-        "vraag": "Een lange periode na het overlijden van Jozua komt er _____",
+        "vraag": "Een lange periode na het overlijden van Jozua komt er ... (Richteren 3:9)",
         "juisteAntwoord": "een richter",
         "fouteAntwoorden": [
             "een koning",
             "een keizer",
             "een profeet"
         ],
-        "moeilijkheidsgraad": 1,
+        "moeilijkheidsgraad": 3,
         "type": "fitb",
         "categories": [
-            "Jozua",
-            "Deuteronomium",
-            "Handelingen"
+            "Richteren"
         ]
     },
     {
-        "vraag": "Wie was de eerste richter?",
-        "juisteAntwoord": "Otniel",
+        "vraag": "Wie was de eerste richter (Richteren 3:9)?",
+        "juisteAntwoord": "Othniël",
         "fouteAntwoorden": [
             "Ehud",
             "Samgar",
             "Barak"
         ],
-        "moeilijkheidsgraad": 1,
+        "moeilijkheidsgraad": 2,
         "type": "mc",
         "categories": [
             "Genesis"
         ]
     },
     {
-        "vraag": "Onder leiding van de eerste richter _____",
+        "vraag": "Onder leiding van de eerste richter ... (Richteren 3)",
         "juisteAntwoord": "gaat men God weer dienen",
         "fouteAntwoorden": [
             "gaat men de afgoden weer dienen",
@@ -550,24 +539,26 @@
         ],
         "moeilijkheidsgraad": 3,
         "type": "fitb",
-        "categories": []
+        "categories": [
+            "Richteren"
+        ]
     },
     {
-        "vraag": "Wie zijn de meest bekende richters?",
-        "juisteAntwoord": "Gideon, Simson en Samuel",
+        "vraag": "Wie zijn de meest bekende richters (Richteren, Samuël)?",
+        "juisteAntwoord": "Gideon, Simson en Samuël",
         "fouteAntwoorden": [
             "Saul, David en Salomo",
             "Jeftha, Debora en Barak",
-            "Otniel, Ehud en Samgar"
+            "Otniël, Ehud en Samgar"
         ],
         "moeilijkheidsgraad": 1,
         "type": "mc",
         "categories": [
-            "Ruth"
+            "Richteren","Samuël"
         ]
     },
     {
-        "vraag": "Met hoeveel man verjaagt Gideon een groot leger van de Midianieten?",
+        "vraag": "Met hoeveel man verjaagt Gideon een groot leger van de Midianieten (Richteren 7)?",
         "juisteAntwoord": "300 man",
         "fouteAntwoorden": [
             "1000 man",
@@ -577,7 +568,7 @@
         "moeilijkheidsgraad": 3,
         "type": "mc",
         "categories": [
-            "Genesis"
+            "Richteren"
         ]
     },
     {
