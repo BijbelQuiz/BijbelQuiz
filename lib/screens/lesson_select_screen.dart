@@ -78,12 +78,28 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
     final progress = Provider.of<LessonProgressProvider>(context);
     final colorScheme = Theme.of(context).colorScheme;
 
-    // Responsive: adjust grid for devices
+    // Responsive: adapt grid by max tile width instead of fixed column count
     final screenWidth = MediaQuery.sizeOf(context).width;
-    final isTablet = screenWidth >= 600;
-    final isSmallPhone = screenWidth < 360;
-    final crossAxisCount = isTablet ? 3 : 2;
-    final gridAspect = isTablet ? 1.05 : (isSmallPhone ? 0.92 : 0.98);
+    final double tileMaxExtent = screenWidth >= 1400
+        ? 260
+        : screenWidth >= 1200
+            ? 240
+            : screenWidth >= 1000
+                ? 220
+                : screenWidth >= 840
+                    ? 210
+                    : screenWidth >= 600
+                        ? 200
+                        : screenWidth >= 400
+                            ? 170
+                            : 160;
+    final double gridAspect = screenWidth >= 1000
+        ? 1.12
+        : screenWidth >= 600
+            ? 1.05
+            : screenWidth >= 360
+                ? 0.98
+                : 0.92;
 
     // Simplified: show all lessons without search/filters
     final filteredIndices = List.generate(_lessons.length, (i) => i);
@@ -174,8 +190,8 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                         SliverPadding(
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                           sliver: SliverGrid(
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: crossAxisCount,
+                            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: tileMaxExtent,
                               mainAxisSpacing: 14,
                               crossAxisSpacing: 14,
                               childAspectRatio: gridAspect,
@@ -551,18 +567,34 @@ class _LessonGridSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // Responsive: adjust grid for devices
+    // Responsive: adapt grid by max tile width instead of fixed column count
     final screenWidth = MediaQuery.sizeOf(context).width;
-    final isTablet = screenWidth >= 600;
-    final isSmallPhone = screenWidth < 360;
-    final crossAxisCount = isTablet ? 3 : 2;
-    final gridAspect = isTablet ? 1.05 : (isSmallPhone ? 0.92 : 0.98);
+    final double tileMaxExtent = screenWidth >= 1400
+        ? 260
+        : screenWidth >= 1200
+            ? 240
+            : screenWidth >= 1000
+                ? 220
+                : screenWidth >= 840
+                    ? 210
+                    : screenWidth >= 600
+                        ? 200
+                        : screenWidth >= 400
+                            ? 170
+                            : 160;
+    final double gridAspect = screenWidth >= 1000
+        ? 1.12
+        : screenWidth >= 600
+            ? 1.05
+            : screenWidth >= 360
+                ? 0.98
+                : 0.92;
 
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: 6,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: tileMaxExtent,
         mainAxisSpacing: 14,
         crossAxisSpacing: 14,
         childAspectRatio: gridAspect,
