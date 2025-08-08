@@ -611,19 +611,17 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
         throw Exception('No valid questions found');
       }
 
-      // Initialize quiz state with the first question
+      // Initialize quiz state with PQU (Progressive Question Up-selection)
       final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
         Duration(seconds: settings.slowMode ? 35 : 20)
       );
-
+      
+      final firstQuestion = _pquPickNextQuestion(0.0);
       _quizState = QuizState(
-        question: _allQuestions[0],
+        question: firstQuestion,
         timeRemaining: optimalTimerDuration.inSeconds,
         currentDifficulty: 0.0,
       );
-
-      // Mark the first question as used
-      _usedQuestions.add(_allQuestions[0].question);
 
       // Reset lesson session counters if in lesson mode
       if (_lessonMode) {
@@ -650,13 +648,15 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     }
   }
 
-  // Helper function to get the next question based on current difficulty
-  QuizQuestion _getNextQuestion(double currentDifficulty) {
+  // PQU: Progressive Question Up-selection algorithm
+  // Picks the next question based on the current normalized difficulty and the JSON difficulty levels [1..5]
+  QuizQuestion _pquPickNextQuestion(double currentDifficulty) {
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
     double targetDifficulty = currentDifficulty;
     final totalQuestions = gameStats.score + gameStats.incorrectAnswers;
+
     if (totalQuestions > 0) {
-      final correctRatio = gameStats.score / totalQuestions;
+      final correctRatio = totalQuestions > 0 ? gameStats.score / totalQuestions : 0.0;
       if (correctRatio > 0.8) {
         targetDifficulty += 0.02;
       } else if (correctRatio > 0.65) {
@@ -664,47 +664,55 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       } else if (correctRatio < 0.4) {
         targetDifficulty -= 0.01;
       }
+      // Dampen shifts in long sessions
       if (totalQuestions > 50) {
         targetDifficulty = currentDifficulty + (targetDifficulty - currentDifficulty) * 0.5;
       }
     }
+
+    // Clamp to [0,2] as normalized internal difficulty used by PQU
     targetDifficulty = targetDifficulty.clamp(0.0, 2.0);
-    final difficultyOrder = {'MAKKELIJK': 0, 'GEMIDDELD': 1, 'MOEILIJK': 2};
-    final targetLevel = (targetDifficulty * 2).round();
-    
-    // Get available questions (not used yet)
-    final availableQuestions = _allQuestions.where((q) => !_usedQuestions.contains(q.question)).toList();
-    
-    // If all questions have been used, reset the used questions set
+
+    // Map normalized [0..2] to JSON difficulty levels [1..5]
+    final int targetLevel = (1 + (targetDifficulty * 2).round()).clamp(1, 5);
+
+    // Available questions not used in current pool
+    List<QuizQuestion> availableQuestions =
+        _allQuestions.where((q) => !_usedQuestions.contains(q.question)).toList();
+
+    // If exhausted, reset pool
     if (availableQuestions.isEmpty) {
       AppLogger.info('All questions used, resetting question pool');
       _usedQuestions.clear();
-      return _getNextQuestion(currentDifficulty); // Recursive call with fresh pool
+      availableQuestions = List<QuizQuestion>.from(_allQuestions);
     }
-    
-    // Filter by difficulty
-    final eligibleQuestions = availableQuestions.where((q) {
-      final questionLevel = difficultyOrder[q.difficulty] ?? 0;
-      return (questionLevel - targetLevel).abs() <= 1;
+
+    // Prefer questions within ±1 band of target level
+    List<QuizQuestion> eligibleQuestions = availableQuestions.where((q) {
+      final int qLevel = int.tryParse(q.difficulty.toString()) ?? 3;
+      return (qLevel - targetLevel).abs() <= 1;
     }).toList();
-    
-    // If no questions match difficulty, expand the range
+
+    // If none, try exact level
     if (eligibleQuestions.isEmpty) {
-      eligibleQuestions.addAll(availableQuestions.where((q) => (difficultyOrder[q.difficulty] ?? 0) == targetLevel));
+      eligibleQuestions = availableQuestions.where((q) {
+        final int qLevel = int.tryParse(q.difficulty.toString()) ?? 3;
+        return qLevel == targetLevel;
+      }).toList();
     }
-    
-    // If still no questions, use any available question
+
+    // Fallback to any available
     if (eligibleQuestions.isEmpty) {
-      eligibleQuestions.addAll(availableQuestions);
+      eligibleQuestions = availableQuestions;
     }
-    
-    // Select a random question from eligible ones
+
+    // Random pick among eligible
     final random = Random();
     final selectedQuestion = eligibleQuestions[random.nextInt(eligibleQuestions.length)];
-    
-    // Mark the selected question as used
+
+    // Mark as used
     _usedQuestions.add(selectedQuestion.question);
-    
+
     return selectedQuestion;
   }
 
@@ -779,8 +787,9 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     }
   }
 
-  // Helper function to calculate the next difficulty based on performance, streak, and answer speed
-  double _calculateNextDifficulty({
+  // PQU: Progressive difficulty update function
+  // Computes the next normalized difficulty [0..2] based on performance, streak, and speed
+  double _pquCalculateNextDifficulty({
     required double currentDifficulty,
     required bool isCorrect,
     required int streak,
@@ -791,23 +800,26 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
   }) {
     double targetDifficulty = currentDifficulty;
     final correctRatio = totalQuestions > 0 ? correctAnswers / totalQuestions : 0.5;
-    // Base adjustment
+
+    // Base adjustment (small, smooth steps)
     if (isCorrect) {
       targetDifficulty += 0.05;
-      if (streak >= 3) targetDifficulty += 0.05 * (streak ~/ 3); // More for longer streaks
-      if (timeRemaining > 10) targetDifficulty += 0.03; // Reward fast answers
+      if (streak >= 3) targetDifficulty += 0.05 * (streak ~/ 3); // reward sustained streaks
+      if (timeRemaining > 10) targetDifficulty += 0.03; // faster answers push up slightly
     } else {
       targetDifficulty -= 0.07;
-      if (streak == 0) targetDifficulty -= 0.03; // Penalize breaking streak
-      if (timeRemaining < 5) targetDifficulty -= 0.02; // Penalize slow, wrong answers
+      if (streak == 0) targetDifficulty -= 0.03; // streak broken
+      if (timeRemaining < 5) targetDifficulty -= 0.02; // slow & wrong
     }
-    // Long-term performance
+
+    // Long-term bias
     if (correctRatio > 0.85) {
       targetDifficulty += 0.03;
     } else if (correctRatio < 0.5) {
       targetDifficulty -= 0.03;
     }
-    // Clamp between 0 and 2
+
+    // Clamp to normalized domain
     return targetDifficulty.clamp(0.0, 2.0);
   }
 
@@ -893,7 +905,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     if (!mounted) return;
     AppLogger.info('Transitioning to next question');
     // Calculate new difficulty
-    final newDifficulty = _calculateNextDifficulty(
+    final newDifficulty = _pquCalculateNextDifficulty(
       currentDifficulty: _quizState.currentDifficulty,
       isCorrect: isCorrect,
       streak: gameStats.currentStreak,
@@ -903,7 +915,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       incorrectAnswers: gameStats.incorrectAnswers,
     );
     setState(() {
-      final nextQuestion = _getNextQuestion(newDifficulty);
+      final nextQuestion = _pquPickNextQuestion(newDifficulty);
       final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
         Duration(seconds: settings.slowMode ? 35 : 20)
       );
@@ -1248,7 +1260,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                                       if (!mounted) return;
                                       final newDifficulty = _quizState.currentDifficulty;
                                       setState(() {
-                                        final nextQuestion = _getNextQuestion(newDifficulty);
+                                        final nextQuestion = _pquPickNextQuestion(newDifficulty);
                                         final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
                                           Duration(seconds: settings.slowMode ? 35 : 20)
                                         );

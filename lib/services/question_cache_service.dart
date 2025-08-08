@@ -207,9 +207,9 @@ class QuestionCacheService {
       
       // Sort questions by difficulty for better performance
       metadata.sort((a, b) {
-        final difficultyOrder = {'MAKKELIJK': 0, 'GEMIDDELD': 1, 'MOEILIJK': 2};
-        return (difficultyOrder[a['difficulty']] ?? 0)
-            .compareTo(difficultyOrder[b['difficulty']] ?? 0);
+        final int da = int.tryParse(a['difficulty']?.toString() ?? '') ?? 3;
+        final int db = int.tryParse(b['difficulty']?.toString() ?? '') ?? 3;
+        return da.compareTo(db);
       });
       
       _questionMetadata[language] = metadata;

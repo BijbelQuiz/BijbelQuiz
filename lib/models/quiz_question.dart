@@ -70,15 +70,23 @@ class QuizQuestion {
     final correctAnswer = json['juisteAntwoord']?.toString() ?? '';
     List<String> incorrectAnswers;
 
+    final rawIncorrect = json['fouteAntwoorden'];
     if (type == QuestionType.tf) {
-      // For true/false, generate the opposite answer
-      if (correctAnswer.toLowerCase() == 'true') {
-        incorrectAnswers = ['false'];
+      // Use provided incorrect answers when present, otherwise generate a sensible opposite
+      if (rawIncorrect is List && rawIncorrect.isNotEmpty) {
+        incorrectAnswers = rawIncorrect.map((e) => e.toString()).toList();
       } else {
-        incorrectAnswers = ['true'];
+        final lc = correctAnswer.toLowerCase();
+        if (lc == 'true' || lc == 'waar') {
+          incorrectAnswers = ['Niet waar'];
+        } else if (lc == 'false' || lc == 'niet waar') {
+          incorrectAnswers = ['Waar'];
+        } else {
+          // Fallback assumes Dutch labeling in dataset
+          incorrectAnswers = ['Niet waar'];
+        }
       }
     } else {
-      final rawIncorrect = json['fouteAntwoorden'];
       if (rawIncorrect is List) {
         incorrectAnswers = rawIncorrect.map((e) => e.toString()).toList();
       } else {

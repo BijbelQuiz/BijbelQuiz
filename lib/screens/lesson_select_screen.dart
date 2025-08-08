@@ -5,7 +5,6 @@ import '../models/lesson.dart';
 import '../providers/lesson_progress_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/lesson_service.dart';
-import '../screens/lesson_quiz_screen.dart';
 import '../screens/quiz_screen.dart';
 
 class LessonSelectScreen extends StatefulWidget {
