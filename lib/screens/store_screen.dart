@@ -121,7 +121,7 @@ class _StoreScreenState extends State<StoreScreen> {
                         ),
                         SizedBox(height: isDesktop ? 12 : 8),
                         Text(
-                          'Beschikbare Sterren',
+                          'Beschikbare sterren',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: colorScheme.onSurface.withAlpha((0.7 * 255).round()),
                             fontWeight: FontWeight.w500,
@@ -146,7 +146,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildPowerupCard(
                     context,
-                    title: 'Dubbele Sterren (5 vragen)',
+                    title: 'Dubbele sterren (5 vragen)',
                     description: 'Verdien dubbele sterren voor je volgende 5 vragen',
                     icon: Icons.flash_on_rounded,
                     iconColor: colorScheme.primary,
@@ -164,7 +164,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildPowerupCard(
                     context,
-                    title: 'Driedubbele Sterren (5 vragen)',
+                    title: 'Driedubbele sterren (5 vragen)',
                     description: 'Verdien driedubbele sterren voor je volgende 5 vragen',
                     icon: Icons.flash_on_rounded,
                     iconColor: Colors.deepOrange,
@@ -182,7 +182,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildPowerupCard(
                     context,
-                    title: '5x Sterren (5 vragen)',
+                    title: '5x sterren (5 vragen)',
                     description: 'Verdien 5x sterren voor je volgende 5 vragen',
                     icon: Icons.flash_on_rounded,
                     iconColor: Colors.redAccent,
@@ -200,7 +200,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildPowerupCard(
                     context,
-                    title: 'Dubbele Sterren (60 seconden)',
+                    title: 'Dubbele sterren (60 seconden)',
                     description: 'Verdien dubbele sterren gedurende 60 seconden',
                     icon: Icons.timer_rounded,
                     iconColor: Colors.orangeAccent,
@@ -229,7 +229,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildThemeCard(
                     context,
-                    title: 'OLED Thema',
+                    title: 'OLED thema',
                     description: 'Ontgrendel een echt zwart, hoog-contrast thema',
                     icon: Icons.nights_stay_rounded,
                     iconColor: Colors.black,
@@ -246,7 +246,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildThemeCard(
                     context,
-                    title: 'Groen Thema',
+                    title: 'Groen thema',
                     description: 'Ontgrendel een fris groen thema',
                     icon: Icons.eco_rounded,
                     iconColor: Colors.green[700]!,
@@ -263,7 +263,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildThemeCard(
                     context,
-                    title: 'Oranje Thema',
+                    title: 'Oranje thema',
                     description: 'Ontgrendel een levendig oranje thema',
                     icon: Icons.circle_rounded,
                     iconColor: Colors.orange[700]!,
@@ -394,7 +394,7 @@ class _StoreScreenState extends State<StoreScreen> {
                             // Navigate back to quiz screen
                             Navigator.of(localContext).pop();
                           },
-                          child: Text('Naar de Quiz', style: TextStyle(color: colorScheme.primary)),
+                          child: Text('Naar de quiz', style: TextStyle(color: colorScheme.primary)),
                         ),
                       ],
                     );
@@ -467,7 +467,7 @@ class _StoreScreenState extends State<StoreScreen> {
                       ),
                       SizedBox(width: isDesktop ? 6 : 4),
                       Text(
-                        isDev ? 'Free' : '$cost',
+                        isDev ? 'Gratis' : '$cost',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colorScheme.primary,
@@ -617,7 +617,7 @@ class _StoreScreenState extends State<StoreScreen> {
                             ),
                             SizedBox(width: isDesktop ? 6 : 4),
                             Text(
-                              isDev ? 'Free' : '$cost',
+                              isDev ? 'Gratis' : '$cost',
                               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: colorScheme.primary,

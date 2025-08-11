@@ -248,7 +248,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              title: 'Langzame Modus',
+              title: 'Langzame modus',
               subtitle: 'Geeft je meer tijd om elke vraag te beantwoorden',
               icon: Icons.timer,
               child: Switch(
@@ -265,7 +265,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              title: 'Geluidseffecten Dempen',
+              title: 'Geluidseffecten dempen',
               subtitle: 'Schakel alle spelgeluiden uit',
               icon: Icons.volume_off,
               child: Switch(
@@ -300,7 +300,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     DropdownMenuItem(
                       value: 'medium',
-                      child: Text('Medium'),
+                      child: Text('Gemiddeld'),
                     ),
                   ],
                   onChanged: (String? value) {
@@ -331,13 +331,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              title: 'App Bijwerken',
+              title: 'App bijwerken',
               subtitle: 'Controleer op een nieuwe versie van de app',
               icon: Icons.update,
               child: IconButton(
                 icon: const Icon(Icons.update),
                 onPressed: () => _checkForUpdate(context),
-                tooltip: 'Controleer op Updates',
+                tooltip: 'Controleer op updates',
               ),
             ),
             _buildSettingItem(
@@ -352,7 +352,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: IconButton(
                 icon: const Icon(Icons.open_in_new),
                 onPressed: _openStatusPage,
-                tooltip: 'Open Statuspagina',
+                tooltip: 'Open statuspagina',
               ),
             ),
           ],
@@ -430,7 +430,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 );
               },
-              label: 'Gids Tonen',
+              label: 'Introductie tonen',
               icon: Icons.help_outline,
             ),
             _buildActionButton(
@@ -440,7 +440,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () => _launchBugReportEmail(context),
-              label: 'Bug Melden',
+              label: 'Probleem melden',
               icon: Icons.bug_report,
             ),
             _buildActionButton(
@@ -478,7 +478,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   }
                 }
               },
-              label: 'Neem Contact Op',
+              label: 'Neem contact op',
               icon: Icons.email,
             ),
           ],
@@ -512,7 +512,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           builder: (context, snapshot) {
             final version = snapshot.data?.version ?? '';
             return Text(
-              'Version $version',
+              'Versie $version',
               style: TextStyle(
                 fontSize: isSmallScreen ? 12 : 14,
                 color: colorScheme.onSurface.withValues(alpha: (0.7 * 255)),

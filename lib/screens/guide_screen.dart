@@ -184,8 +184,8 @@ List<GuidePage> buildGuidePages({required bool showNotificationPage}) {
       icon: Icons.church,
     ),
     GuidePage(
-      title: 'Meerkeuzevragen',
-      description: 'Beantwoord vragen over Bijbelverhalen, geschiedenis en meer',
+      title: 'Ontdek en Leer',
+      description: 'Beantwoord vragen uit alle Bijbelboeken en Bijbelse geschiedenissen om je kennis te vergroten.',
       icon: Icons.quiz,
     ),
     GuidePage(
@@ -195,7 +195,7 @@ List<GuidePage> buildGuidePages({required bool showNotificationPage}) {
     ),
     GuidePage(
       title: 'Pas Je Ervaring Aan',
-      description: 'Pas taal, thema en spelsnelheid aan in de instellingen. Heeft u nog vragen? Contacteer onze klantenservice.',
+      description: 'Pas je thema, speelsnelheid en de geluidseffecten aan in de instellingen. Heeft u nog vragen? Neem gerust contact met ons op.',
       icon: Icons.settings,
     ),
   ];
