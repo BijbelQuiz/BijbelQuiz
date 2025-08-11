@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:provider/single_child_widget.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/strings_nl.dart' as strings;
 
 import 'providers/game_stats_provider.dart';
 import 'providers/settings_provider.dart';
@@ -123,24 +125,29 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = Provider.of<SettingsProvider>(context);
-    final gameStats = Provider.of<GameStatsProvider>(context);
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
+    final isDesktop = MediaQuery.of(context).size.width > 1200 || kIsWeb;
+    final isTablet = MediaQuery.of(context).size.width > 600 && !isDesktop;
+    final isSmallPhone = MediaQuery.of(context).size.width < 350;
     // Show a loading indicator if settings are still loading
     if (!_servicesInitialized) {
-      final platformDispatcher = WidgetsBinding.instance.platformDispatcher;
-      final size = platformDispatcher.views.isNotEmpty
-          ? platformDispatcher.views.first.physicalSize / platformDispatcher.views.first.devicePixelRatio
-          : const Size(400, 800); // Fallback size
-      final isDesktop = size.width > 800;
-      final isTablet = size.width > 600 && size.width <= 800;
-      final isSmallPhone = size.width < 350;
       return MaterialApp(
         key: const ValueKey('loading'),
-        title: 'BijbelQuiz',
+        title: strings.AppStrings.appName,
         debugShowCheckedModeBanner: false,
         theme: appLightTheme,
         darkTheme: appDarkTheme,
         themeMode: settings.themeMode,
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('nl', ''), // Dutch only
+        ],
+        locale: const Locale('nl', ''), // Force Dutch locale
         home: Scaffold(
           body: Center(
             child: QuizSkeleton(
@@ -167,11 +174,20 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
     final app = MaterialApp(
       key: ValueKey('${settings.selectedCustomThemeKey}_${settings.themeMode}'),
       navigatorKey: gameStats.navigatorKey,
-      title: 'BijbelQuiz',
+      title: strings.AppStrings.appName,
       debugShowCheckedModeBanner: false,
       theme: customTheme ?? appLightTheme,
       darkTheme: customTheme ?? appDarkTheme,
       themeMode: customTheme != null ? ThemeMode.light : settings.themeMode,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('nl', ''), // Dutch only
+      ],
+      locale: const Locale('nl', ''), // Force Dutch locale
       routes: {
         '/store': (context) => const StoreScreen(),
         '/settings': (context) => const SettingsScreen(),

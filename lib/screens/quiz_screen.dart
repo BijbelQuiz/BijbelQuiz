@@ -22,6 +22,7 @@ import '../services/logger.dart';
 import 'dart:math';
 import '../widgets/quiz_skeleton.dart';
 import '../widgets/top_snackbar.dart';
+import '../l10n/strings_nl.dart' as strings;
 
 /// The main quiz screen that displays questions and handles user interactions
 /// with performance optimizations for low-end devices and poor connections.
@@ -438,7 +439,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                'Onvoldoende punten',
+                strings.AppStrings.notEnoughPoints,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -465,14 +466,14 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: Text(
-            'Tijd is om!',
+            strings.AppStrings.timeUp,
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
           content: Text(
-            'Je hebt niet op tijd geantwoord. Je reeks is gereset.',
+            strings.AppStrings.timeUpMessage,
             style: const TextStyle(fontSize: 16),
           ),
           actions: [
@@ -501,7 +502,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      settings.language == 'en' ? 'Try Again' : 'Opnieuw proberen',
+                      strings.AppStrings.retry,
                       style: TextStyle(
                         color: hasEnoughPoints 
                           ? Theme.of(context).colorScheme.primary
@@ -541,7 +542,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                 _handleAnswerSequence(false);
               },
               child: Text(
-                settings.language == 'en' ? 'Next Question' : 'Volgende Vraag',
+                strings.AppStrings.next,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
                   fontSize: 16,
@@ -620,7 +621,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       }
 
       if (_allQuestions.isEmpty) {
-        throw Exception('No valid questions found');
+        throw Exception(strings.AppStrings.errorNoQuestions);
       }
 
       // Initialize quiz state with PQU (Progressive Question Up-selection)
@@ -648,7 +649,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Failed to load questions: ${e.toString()}';
+        _error = '${strings.AppStrings.errorLoadQuestions}: ${e.toString()}';
       });
       AppLogger.error('Failed to load questions in QuizScreen', e);
     } finally {
@@ -953,7 +954,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Schermgrootte niet ondersteund',
+              strings.AppStrings.screenSizeNotSupported,
               style: TextStyle(
                 color: colorScheme.error,
                 fontWeight: FontWeight.bold,
@@ -1200,7 +1201,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                                     MetricItem(
                                       icon: Icons.local_fire_department_rounded,
                                       value: gameStats.currentStreak.toString(),
-                                      label: 'Reeks',
+                                      label: strings.AppStrings.streak,
                                       colorScheme: colorScheme,
                                       color: const Color(0xFFF59E0B),
                                       animation: _streakAnimation,
@@ -1213,7 +1214,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                                     MetricItem(
                                       icon: Icons.emoji_events_rounded,
                                       value: gameStats.longestStreak.toString(),
-                                      label: 'Beste',
+                                      label: strings.AppStrings.best,
                                       colorScheme: colorScheme,
                                       color: const Color(0xFFF59E0B),
                                       animation: _longestStreakAnimation,
@@ -1226,7 +1227,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                                     MetricItem(
                                       icon: Icons.timer_rounded,
                                       value: _quizState.timeRemaining.toString(),
-                                      label: 'Tijd',
+                                      label: strings.AppStrings.time,
                                       colorScheme: colorScheme,
                                       color: _timeColorAnimation.value ?? const Color(0xFF10B981),
                                       animation: _timeAnimation,

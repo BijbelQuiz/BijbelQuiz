@@ -5,6 +5,7 @@ import '../services/activation_service.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import './guide_screen.dart';
+import '../l10n/strings_nl.dart' as strings;
 
 /// Wrap your main screen with this gate to enforce activation before using the app.
 /// Example:
@@ -171,7 +172,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Activeer BijbelQuiz',
+                      strings.AppStrings.activationTitle,
                       style: textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                         fontFamily: GoogleFonts.quicksand().fontFamily,
@@ -180,7 +181,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Voer je activatiecode in om de app te gebruiken.',
+                      strings.AppStrings.activationSubtitle,
                       style: textTheme.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(0.8)),
                       textAlign: TextAlign.center,
                     ),
@@ -194,7 +195,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
                       ],
                       onSubmitted: (_) => _verify(),
                       decoration: InputDecoration(
-                        hintText: 'Voer je activatiecode in',
+                        hintText: strings.AppStrings.activationCodeHint,
                         filled: true,
                         fillColor: cs.surface,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
@@ -243,12 +244,12 @@ class _ActivationScreenState extends State<ActivationScreen> {
                                 ),
                               )
                             : const Icon(Icons.lock_open_rounded),
-                        label: Text(_verifying ? 'Verifiëren...' : 'Verifieer code'),
+                        label: Text(_verifying ? strings.AppStrings.verifying : strings.AppStrings.verifyButton),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Tip: Codes zijn hoofdletterongevoelig.',
+                      strings.AppStrings.activationTip,
                       style: textTheme.bodySmall?.copyWith(color: cs.onSurface.withOpacity(0.7)),
                     ),
                   ],

@@ -5,6 +5,7 @@ import '../providers/game_stats_provider.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/top_snackbar.dart';
+import '../l10n/strings_nl.dart' as strings;
 
 class StoreScreen extends StatefulWidget {
   const StoreScreen({super.key});
@@ -52,7 +53,7 @@ class _StoreScreenState extends State<StoreScreen> {
             ),
             const SizedBox(width: 12),
             Text(
-              'Winkel',
+              strings.AppStrings.store,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: colorScheme.onSurface.withAlpha((0.7 * 255).round()),

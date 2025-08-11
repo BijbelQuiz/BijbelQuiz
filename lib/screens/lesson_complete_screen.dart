@@ -5,6 +5,7 @@ import './quiz_screen.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/lesson_service.dart';
+import '../l10n/strings_nl.dart' as strings;
 
 class LessonCompleteScreen extends StatefulWidget {
   final Lesson lesson;
@@ -105,7 +106,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                               Icon(Icons.emoji_events_rounded, color: cs.primary, size: 36),
                               const SizedBox(width: 12),
                               Text(
-                                'Les voltooid',
+                                strings.AppStrings.lessonComplete,
                                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.w800,
                                 ),
@@ -186,18 +187,18 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                         children: [
                           _AnimatedNumberCard(
                             icon: Icons.check_circle_rounded,
-                            label: 'Correct',
+                            label: strings.AppStrings.correct,
                             target: widget.correct,
                           ),
                           _AnimatedNumberCard(
                             icon: Icons.percent_rounded,
-                            label: 'Percentage',
+                            label: strings.AppStrings.percentage,
                             target: pctValue.round(),
                             suffix: '%',
                           ),
                           _StatCard(
                             icon: Icons.local_fire_department_rounded,
-                            label: 'Beste reeks',
+                            label: strings.AppStrings.bestStreak,
                             value: '${widget.bestStreak}',
                           ),
                         ],
@@ -209,23 +210,35 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                       Row(
                         children: [
                           Expanded(
-                            child: OutlinedButton.icon(
+                            child: OutlinedButton(
                               onPressed: widget.onRetry,
-                              icon: const Icon(Icons.refresh_rounded),
-                              label: const Text('Opnieuw'),
                               style: OutlinedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 14),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.refresh_rounded, size: 20),
+                                  const SizedBox(width: 8),
+                                  const Text(strings.AppStrings.retryLesson),
+                                ],
                               ),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: ElevatedButton.icon(
+                            child: ElevatedButton(
                               onPressed: widget.stars > 0 ? _startNextQuiz : null,
-                              icon: const Icon(Icons.arrow_forward_rounded),
-                              label: const Text('Volgende quiz'),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 14),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(strings.AppStrings.nextLesson),
+                                  const SizedBox(width: 8),
+                                  const Icon(Icons.arrow_forward_rounded, size: 20),
+                                ],
                               ),
                             ),
                           ),

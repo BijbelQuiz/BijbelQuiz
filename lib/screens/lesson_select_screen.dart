@@ -7,6 +7,7 @@ import '../providers/settings_provider.dart';
 import '../services/lesson_service.dart';
 import '../screens/quiz_screen.dart';
 import '../widgets/top_snackbar.dart';
+import '../l10n/strings_nl.dart' as strings;
 
 class LessonSelectScreen extends StatefulWidget {
   const LessonSelectScreen({super.key});
@@ -62,7 +63,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Kon lessen niet laden';
+        _error = strings.AppStrings.couldNotLoadLessons;
       });
     } finally {
       if (mounted) {

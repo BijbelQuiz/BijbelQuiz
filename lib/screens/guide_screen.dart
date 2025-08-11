@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import '../services/logger.dart';
 import '../widgets/quiz_skeleton.dart';
 import '../widgets/top_snackbar.dart';
+import '../l10n/strings_nl.dart' as strings;
 
 class GuideScreen extends StatefulWidget {
   const GuideScreen({super.key});
@@ -127,7 +128,7 @@ class _GuideScreenState extends State<GuideScreen> {
                       }
                     },
                     child: Text(
-                      isLastPage ? 'Beginnen' : 'Volgende',
+                      isLastPage ? strings.AppStrings.getStarted : strings.AppStrings.next,
                     ),
                   ),
                 ],
@@ -156,7 +157,7 @@ class _GuideScreenState extends State<GuideScreen> {
       Navigator.of(localContext).pop();
     } catch (e) {
       if (!mounted) return;
-      final errorMessage = 'Setup voltooien mislukt. Probeer het opnieuw.';
+      final errorMessage = strings.AppStrings.unknownError;
       showTopSnackBar(localContext, errorMessage, style: TopSnackBarStyle.error);
     }
   }
@@ -179,13 +180,13 @@ class GuidePage {
 List<GuidePage> buildGuidePages({required bool showNotificationPage}) {
   final pages = <GuidePage>[
     GuidePage(
-      title: 'Welkom bij BijbelQuiz!',
-      description: 'Test je bijbelkennis',
+      title: strings.AppStrings.welcomeTitle,
+      description: 'Ontdek de Bijbel op een leuke en interactieve manier met uitdagende vragen en lessen.',
       icon: Icons.church,
     ),
     GuidePage(
-      title: 'Ontdek en Leer',
-      description: 'Beantwoord vragen uit alle Bijbelboeken en Bijbelse geschiedenissen om je kennis te vergroten.',
+      title: strings.AppStrings.howToPlayTitle,
+      description: strings.AppStrings.howToPlayDescription,
       icon: Icons.quiz,
     ),
     GuidePage(
@@ -203,8 +204,8 @@ List<GuidePage> buildGuidePages({required bool showNotificationPage}) {
   if (showNotificationPage) {
     pages.add(
       GuidePage(
-        title: 'Blijf Gemotiveerd!',
-        description: 'Schakel meldingen in om dagelijkse motivatie en herinneringen te ontvangen voor BijbelQuiz.',
+        title: strings.AppStrings.notificationsTitle,
+        description: strings.AppStrings.notificationsDescription,
         icon: Icons.notifications_active_outlined,
         isNotificationPage: true,
       ),

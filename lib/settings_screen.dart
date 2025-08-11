@@ -17,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/activation_screen.dart';
 import 'screens/lesson_select_screen.dart';
 import 'widgets/quiz_skeleton.dart';
+import 'l10n/strings_nl.dart' as strings;
 
 /// The settings screen that allows users to customize app preferences
 class SettingsScreen extends StatefulWidget {
@@ -43,7 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final Uri url = Uri.parse('https://oneuptime.com/status-page/df067f1b-2beb-42d2-9ddd-719e9ce51238');
     if (!await launchUrl(url)) {
       if (mounted) {
-        showTopSnackBar(context, 'Kon de statuspagina niet openen.', style: TopSnackBarStyle.error);
+        showTopSnackBar(context, strings.AppStrings.couldNotOpenStatusPage, style: TopSnackBarStyle.error);
       }
     }
   }
@@ -78,7 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(width: 12),
             Text(
-              'Instellingen',
+              strings.AppStrings.settings,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: colorScheme.onSurface,
@@ -152,7 +153,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           colorScheme,
           isSmallScreen,
           isDesktop,
-          title: 'Weergave',
+          title: strings.AppStrings.display,
           children: [
             _buildSettingItem(
               context,
@@ -160,8 +161,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              title: 'Thema',
-              subtitle: 'Kies je thema',
+              title: strings.AppStrings.theme,
+              subtitle: strings.AppStrings.chooseTheme,
               icon: Icons.palette,
               child: (() {
                 // Compute available values
@@ -181,30 +182,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   items: [
                     DropdownMenuItem(
                       value: ThemeMode.light.name,
-                      child: Text('Licht'),
+                      child: Text(strings.AppStrings.lightTheme),
                     ),
                     DropdownMenuItem(
                       value: ThemeMode.system.name,
-                      child: Text('Systeem'),
+                      child: Text(strings.AppStrings.systemTheme),
                     ),
                     DropdownMenuItem(
                       value: ThemeMode.dark.name,
-                      child: Text('Donker'),
+                      child: Text(strings.AppStrings.darkTheme),
                     ),
                     if (settings.unlockedThemes.contains('oled'))
                       DropdownMenuItem(
                         value: 'oled',
-                        child: Text('OLED'),
+                        child: Text(strings.AppStrings.oledTheme),
                       ),
                     if (settings.unlockedThemes.contains('green'))
                       DropdownMenuItem(
                         value: 'green',
-                        child: Text('Green'),
+                        child: Text(strings.AppStrings.greenTheme),
                       ),
                     if (settings.unlockedThemes.contains('orange'))
                       DropdownMenuItem(
                         value: 'orange',
-                        child: Text('Orange'),
+                        child: Text(strings.AppStrings.orangeTheme),
                       ),
                   ],
                   onChanged: (String? value) {
