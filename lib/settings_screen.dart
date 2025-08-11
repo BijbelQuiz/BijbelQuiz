@@ -943,7 +943,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       String version = packageInfo.version;
       String platform = kIsWeb ? 'web' : Platform.operatingSystem.toLowerCase();
 
-      final Uri url = Uri.parse('https://bijbelquiz.rf.gd/update.php?version=$version&platform=$platform');
+      final Uri url = Uri.parse('https://bijbelquiz.vercel.app/update.php?version=$version&platform=$platform');
 
       if (await canLaunchUrl(url)) {
         await launchUrl(url);
