@@ -3265,7 +3265,9 @@
         "type": "mc",
         "categories": [],
         "fouteAntwoorden": [
-            "Kolossenzen"
+            "Kolossenzen",
+            "Silas",
+            "Timotheus"
         ],
         "biblicalReference": "Kolossenzen 1: 1 en 2"
     },
@@ -5148,7 +5150,7 @@
         "biblicalReference": "Numeri 1"
     },
     {
-        "vraag": "Mozes dan sprak tot de kinderen Isra\u00ebls, dat zij het ... houden zouden (Numeri)",
+        "vraag": "Mozes dan sprak tot de kinderen Isra\u00ebls, dat zij het ... houden zouden",
         "juisteAntwoord": "pascha",
         "moeilijkheidsgraad": 2,
         "type": "fitb",
@@ -5421,7 +5423,7 @@
         "biblicalReference": "Ruth 1:20"
     },
     {
-        "vraag": "Na\u00f3mi nu had een bloedvriend van haar man, een man, geweldig van ... (Ruth)",
+        "vraag": "Na\u00f3mi nu had een bloedvriend van haar man, een man, geweldig van ...",
         "juisteAntwoord": "vermogen",
         "moeilijkheidsgraad": 2,
         "type": "fitb",
@@ -5733,7 +5735,7 @@
         "biblicalReference": "1 Kronieken 1"
     },
     {
-        "vraag": "en zijn moeder had hem ... genoemd, zeggende: Want ik heb hem met smarten gebaard (1 Kronieken)",
+        "vraag": "en zijn moeder had hem ... genoemd, zeggende: Want ik heb hem met smarten gebaard",
         "juisteAntwoord": "Jabez",
         "moeilijkheidsgraad": 1,
         "type": "fitb",
