@@ -203,16 +203,24 @@ class _AnswerButtonState extends State<AnswerButton> with SingleTickerProviderSt
                           semanticsLabel: widget.label,
                         ),
                       ),
-                      if (widget.feedback == AnswerFeedback.correct)
+                      if (widget.feedback == AnswerFeedback.correct || widget.feedback == AnswerFeedback.revealedCorrect)
                         Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withAlpha((0.2 * 255).round()),
+                            color: widget.feedback == AnswerFeedback.correct 
+                                ? Colors.white.withAlpha((0.2 * 255).round())
+                                : widget.colorScheme.primary.withAlpha((0.1 * 255).round()),
                             borderRadius: BorderRadius.circular(8),
+                            border: widget.feedback == AnswerFeedback.revealedCorrect
+                                ? Border.all(
+                                    color: widget.colorScheme.primary.withAlpha((0.3 * 255).round()),
+                                    width: 1,
+                                  )
+                                : null,
                           ),
                           child: Icon(
                             Icons.check_rounded,
-                            color: Colors.white,
+                            color: widget.feedback == AnswerFeedback.correct ? Colors.white : widget.colorScheme.primary,
                             size: iconSize,
                           ),
                         ),
