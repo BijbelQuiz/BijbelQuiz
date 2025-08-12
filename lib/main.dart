@@ -75,6 +75,9 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
   @override
   void initState() {
     super.initState();
+    // Initialize emergency service first to set up the navigator key
+    _emergencyService = EmergencyService();
+    
     // Defer service initialization; don't block first render
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final performanceService = PerformanceService();
@@ -88,9 +91,8 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
         questionCacheService.initialize(),
       ]);
 
-      // Initialize emergency service after the first frame is rendered
+      // Start emergency service polling after the first frame is rendered
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _emergencyService = EmergencyService(context);
         _emergencyService!.startPolling();
       });
 
@@ -181,7 +183,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
     }
     final app = MaterialApp(
       key: ValueKey('${settings.selectedCustomThemeKey}_${settings.themeMode}'),
-      navigatorKey: gameStats.navigatorKey,
+      navigatorKey: EmergencyService.navigatorKey,
       title: strings.AppStrings.appName,
       debugShowCheckedModeBanner: false,
       theme: customTheme ?? appLightTheme,
