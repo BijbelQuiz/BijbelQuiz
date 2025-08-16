@@ -45,6 +45,9 @@ class QuizQuestion {
   /// The categories this question belongs to
   final List<String> categories;
 
+  /// The biblical reference for this question
+  final String? biblicalReference;
+
   /// A private list of all answer options (correct and incorrect) in a shuffled order.
   final List<String> _shuffledOptions;
 
@@ -59,6 +62,7 @@ class QuizQuestion {
     required this.difficulty,
     required this.type,
     this.categories = const [],
+    this.biblicalReference,
   }) : _shuffledOptions = _createShuffledOptions(correctAnswer, incorrectAnswers);
 
   /// Creates a [QuizQuestion] from a JSON map.
@@ -101,6 +105,11 @@ class QuizQuestion {
       categories = rawCategories.map((e) => e.toString()).toList();
     }
 
+    // Parse biblical reference
+    final biblicalReference = json['biblicalReference'] is String 
+        ? json['biblicalReference'] as String 
+        : null;
+
     return QuizQuestion(
       question: json['vraag']?.toString() ?? '',
       correctAnswer: correctAnswer,
@@ -108,6 +117,7 @@ class QuizQuestion {
       difficulty: json['moeilijkheidsgraad']?.toString() ?? '',
       type: type,
       categories: categories,
+      biblicalReference: biblicalReference,
     );
   }
 
@@ -122,6 +132,7 @@ class QuizQuestion {
       'moeilijkheidsgraad': difficulty,
       'type': _questionTypeToString(type),
       'categories': categories,
+      'biblicalReference': biblicalReference,
     };
   }
 

@@ -16,6 +16,7 @@ import 'lesson_complete_screen.dart';
 
 import '../widgets/metric_item.dart';
 import '../widgets/question_card.dart';
+import '../widgets/biblical_reference_dialog.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'dart:async';
 import '../services/logger.dart';
@@ -331,9 +332,43 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
   void _resumeTimer() {
     if (_isTimerPaused) {
       _timeAnimationController.forward(); // Resume color animation
-      _startTimer(reset: false);
+      _restartTimer();
       _isTimerPaused = false;
     }
+  }
+
+  /// Restart the timer without resetting the animation controller
+  void _restartTimer() {
+    if (!mounted) return;
+    
+    final localContext = context;
+    final settings = Provider.of<SettingsProvider>(localContext, listen: false);
+    final baseTimerDuration = settings.slowMode ? 35 : 20;
+    final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
+      Duration(seconds: baseTimerDuration)
+    );
+    
+    // Update the animation controller duration
+    _timeAnimationController.duration = optimalTimerDuration;
+    
+    // Cancel any existing timer
+    _timer?.cancel();
+    
+    // Calculate remaining time based on current animation value
+    final currentProgress = _timeAnimationController.value;
+    final remainingDuration = Duration(
+      milliseconds: (optimalTimerDuration.inMilliseconds * (1.0 - currentProgress)).round()
+    );
+    
+    // Start the animation from current value
+    _timeAnimationController.forward();
+    
+    // Fallback timer in case animation doesn't complete
+    _timer = Timer(remainingDuration, () {
+      if (mounted && _timeAnimationController.status != AnimationStatus.completed) {
+        _timeAnimationController.animateTo(1.0, duration: Duration.zero);
+      }
+    });
   }
 
   // Live timer tick: update timeRemaining once per second using controller value
@@ -1353,6 +1388,95 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                           );
                         },
                       ),
+                      const SizedBox(height: 8),
+                      Builder(
+                        builder: (context) {
+                          // Only show the biblical reference button if the question has a biblical reference
+                          final hasBiblicalReference = _quizState.question.biblicalReference != null && 
+                                                    _quizState.question.biblicalReference!.isNotEmpty;
+                          final canUnlock = gameStats.score >= 10 && 
+                                           !_quizState.isAnswering && 
+                                           !_quizState.isTransitioning && 
+                                           hasBiblicalReference;
+                          final textColor = canUnlock ? Theme.of(context).colorScheme.primary : Colors.grey;
+                          
+                          return TextButton(
+                            onPressed: canUnlock
+                                ? () async {
+                                    // First check if the reference can be parsed
+                                    final parsed = _parseBiblicalReference(_quizState.question.biblicalReference!);
+                                    if (parsed == null) {
+                                      if (mounted && context.mounted) {
+                                        showTopSnackBar(context, 'Ongeldige bijbelverwijzing', style: TopSnackBarStyle.error);
+                                      }
+                                      return;
+                                    }
+                                    
+                                    // Spend 10 stars for unlocking the biblical reference
+                                    final success = await gameStats.spendStars(10);
+                                    if (success) {
+                                      // Pause the timer
+                                      _pauseTimer();
+                                      
+                                      // Show the biblical reference dialog
+                                      await showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return BiblicalReferenceDialog(
+                                            reference: _quizState.question.biblicalReference!,
+                                          );
+                                        },
+                                      );
+                                      
+                                      // Resume the timer when dialog is closed
+                                      if (mounted) {
+                                        _resumeTimer();
+                                      }
+                                    } else {
+                                      // Not enough stars
+                                      if (mounted && context.mounted) {
+                                        showTopSnackBar(context, strings.AppStrings.notEnoughStars, style: TopSnackBarStyle.warning);
+                                      }
+                                    }
+                                  }
+                                : hasBiblicalReference 
+                                    ? () {
+                                        if (gameStats.score < 10 && mounted && context.mounted) {
+                                          showTopSnackBar(context, strings.AppStrings.notEnoughStars, style: TopSnackBarStyle.warning);
+                                        }
+                                      }
+                                    : null,
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  strings.AppStrings.unlockBiblicalReference,
+                                  style: TextStyle(
+                                    color: textColor,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.book,
+                                  size: 16,
+                                  color: textColor,
+                                ),
+                                Text(
+                                  ' 10',
+                                  style: TextStyle(
+                                    color: textColor,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -1473,13 +1597,57 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     );
   }
 
-  int _computeStars(int correct, int total) {
-    if (total <= 0) return 0;
-    final pct = correct / total;
-    if (pct >= 0.9) return 3;
-    if (pct >= 0.7) return 2;
-    if (pct >= 0.5) return 1;
-    return 0;
+  Map<String, dynamic>? _parseBiblicalReference(String reference) {
+    try {
+      // Handle different reference formats:
+      // "Genesis 1:1" -> book: Genesis, chapter: 1, startVerse: 1
+      // "Genesis 1:1-3" -> book: Genesis, chapter: 1, startVerse: 1, endVerse: 3
+      // "Genesis 1" -> book: Genesis, chapter: 1
+      
+      // Remove extra spaces and split by space
+      reference = reference.trim();
+      final parts = reference.split(' ');
+      
+      if (parts.length < 2) return null;
+      
+      // Extract book name (everything except the last part)
+      final book = parts.sublist(0, parts.length - 1).join(' ');
+      final chapterAndVerses = parts.last;
+      
+      // Split chapter and verses by colon
+      final chapterVerseParts = chapterAndVerses.split(':');
+      
+      if (chapterVerseParts.isEmpty) return null;
+      
+      final chapter = int.tryParse(chapterVerseParts[0]);
+      if (chapter == null) return null;
+      
+      int? startVerse;
+      int? endVerse;
+      
+      if (chapterVerseParts.length > 1) {
+        // Has verse information
+        final versePart = chapterVerseParts[1];
+        if (versePart.contains('-')) {
+          // Range of verses
+          final verseRange = versePart.split('-');
+          startVerse = int.tryParse(verseRange[0]);
+          endVerse = int.tryParse(verseRange[1]);
+        } else {
+          // Single verse
+          startVerse = int.tryParse(versePart);
+        }
+      }
+      
+      return {
+        'book': book,
+        'chapter': chapter,
+        'startVerse': startVerse,
+        'endVerse': endVerse,
+      };
+    } catch (e) {
+      return null;
+    }
   }
  
 
@@ -1491,7 +1659,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     final total = widget.sessionLimit ?? _sessionAnswered;
     final correct = _sessionCorrect;
     final bestStreak = _sessionBestStreak;
-    final stars = _computeStars(correct, total);
+    final stars = LessonProgressProvider().computeStars(correct: correct, total: total);
 
     // Persist lesson progress
     final progress = Provider.of<LessonProgressProvider>(context, listen: false);

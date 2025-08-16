@@ -79,7 +79,7 @@ class LessonProgressProvider extends ChangeNotifier {
     required int correct,
     required int total,
   }) async {
-    final stars = _computeStars(correct: correct, total: total);
+    final stars = computeStars(correct: correct, total: total);
     final prev = _bestStarsByLesson[lesson.id] ?? 0;
     if (stars > prev) {
       _bestStarsByLesson[lesson.id] = stars;
@@ -116,7 +116,7 @@ class LessonProgressProvider extends ChangeNotifier {
   /// 2 ⭐: ≥ 70%
   /// 1 ⭐: ≥ 50%
   /// 0 ⭐: otherwise
-  int _computeStars({required int correct, required int total}) {
+  int computeStars({required int correct, required int total}) {
     if (total <= 0) return 0;
     final pct = correct / total;
     if (pct >= 0.9) return 3;

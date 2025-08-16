@@ -182,6 +182,7 @@ class QuestionCacheService {
             'difficulty': json['moeilijkheidsgraad']?.toString() ?? '',
             'categories': (json['categories'] as List<dynamic>?)?.cast<String>() ?? [],
             'type': json['type']?.toString() ?? 'mc',
+            'biblicalReference': json['biblicalReference'] is String ? json['biblicalReference'] as String : null,
           };
         } catch (e) {
           throw Exception('Invalid question format: $e');

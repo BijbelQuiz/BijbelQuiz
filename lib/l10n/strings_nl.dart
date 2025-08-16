@@ -15,6 +15,9 @@ class AppStrings {
   static const String incorrect = 'Niet correct';
   static const String quizComplete = 'Quiz voltooid!';
   static const String yourScore = 'Jouw score: ';
+  static const String unlockBiblicalReference = 'Ontgrendel Bijbelverwijzing';
+  static const String biblicalReference = 'Bijbelverwijzing';
+  static const String close = 'Sluiten';
   
   // Settings
   static const String settings = 'Instellingen';
