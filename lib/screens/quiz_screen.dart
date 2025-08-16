@@ -612,12 +612,23 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       final settings = Provider.of<SettingsProvider>(context, listen: false);
       final language = settings.language;
 
-      // Load all questions at once and shuffle them
+      // Load questions - if in lesson mode with a specific category, load category questions
+      // Otherwise load all questions
       if (!_allQuestionsLoaded) {
-        _allQuestions = await _questionCacheService.getQuestions(language);
+        if (_lessonMode && widget.lesson?.category != null && widget.lesson!.category != 'Algemeen') {
+          // Load questions for specific category
+          _allQuestions = await _questionCacheService.getQuestionsByCategory(
+            language, 
+            widget.lesson!.category
+          );
+          AppLogger.info('Loaded category questions for language: $language, category: ${widget.lesson!.category}, count: ${_allQuestions.length}');
+        } else {
+          // Load all questions at once and shuffle them
+          _allQuestions = await _questionCacheService.getQuestions(language);
+          AppLogger.info('Loaded all questions for language: $language, count: ${_allQuestions.length}');
+        }
         _allQuestions.shuffle(Random());
         _allQuestionsLoaded = true;
-        AppLogger.info('Loaded all questions for language: $language, count: ${_allQuestions.length}');
       }
 
       if (_allQuestions.isEmpty) {
@@ -693,10 +704,12 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     List<QuizQuestion> availableQuestions =
         _allQuestions.where((q) => !_usedQuestions.contains(q.question)).toList();
 
-    // If exhausted, reset pool
+    // If exhausted, reset pool and reshuffle for better distribution
     if (availableQuestions.isEmpty) {
       AppLogger.info('All questions used, resetting question pool');
       _usedQuestions.clear();
+      // Reshuffle questions for better distribution across the database
+      _allQuestions.shuffle(Random());
       availableQuestions = List<QuizQuestion>.from(_allQuestions);
     }
 
@@ -831,6 +844,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     } else if (correctRatio < 0.5) {
       targetDifficulty -= 0.03;
     }
+
+    // Add some randomness to prevent getting stuck on the same difficulty level
+    // This helps ensure we sample questions across the difficulty spectrum
+    final random = Random();
+    targetDifficulty += (random.nextDouble() - 0.5) * 0.1; // ±0.05 random adjustment
 
     // Clamp to normalized domain
     return targetDifficulty.clamp(0.0, 2.0);
