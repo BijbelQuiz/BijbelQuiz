@@ -792,8 +792,9 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       // Handle the answer sequence
       _handleAnswerSequence(isCorrect);
     } else if (_quizState.question.type == QuestionType.tf) {
-      // For true/false: index 0 = true, index 1 = false
-      final selectedAnswer = selectedIndex == 0 ? 'true' : 'false';
+      // For true/false: index 0 = 'Goed', index 1 = 'Fout'
+      final tfOptions = ['Goed', 'Fout'];
+      final selectedAnswer = tfOptions[selectedIndex];
       final isCorrect = selectedAnswer.toLowerCase() == _quizState.question.correctAnswer.toLowerCase();
       final settings = Provider.of<SettingsProvider>(context, listen: false);
 
