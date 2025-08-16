@@ -469,41 +469,6 @@ class _LessonTile extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final gradient = _tileGradientForIndex(cs, index);
 
-    IconData iconData = Icons.menu_book;
-    switch ((lesson.iconHint ?? 'book').toLowerCase()) {
-      case 'church':
-        iconData = Icons.church;
-        break;
-      case 'stars':
-        iconData = Icons.stars;
-        break;
-      case 'castle':
-        iconData = Icons.fort;
-        break;
-      case 'forum':
-        iconData = Icons.forum;
-        break;
-      case 'music_note':
-        iconData = Icons.music_note;
-        break;
-      case 'emoji_objects':
-        iconData = Icons.emoji_objects;
-        break;
-      case 'record_voice_over':
-        iconData = Icons.record_voice_over;
-        break;
-      case 'auto_awesome':
-        iconData = Icons.auto_awesome;
-        break;
-      case 'mail':
-        iconData = Icons.mail;
-        break;
-      case 'book':
-      default:
-        iconData = Icons.menu_book;
-        break;
-    }
-
     return InkWell(
       onTap: playable ? onTap : null,
       borderRadius: BorderRadius.circular(18),
@@ -547,7 +512,7 @@ class _LessonTile extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 32,
                     backgroundColor: cs.primary.withValues(alpha: 0.15),
-                    child: Icon(iconData, color: cs.primary, size: 36),
+                    child: Icon(Icons.menu_book, color: cs.primary, size: 36),
                   ),
                 ),
               )
