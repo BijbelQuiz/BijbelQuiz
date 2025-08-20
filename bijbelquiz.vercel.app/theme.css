@@ -563,6 +563,11 @@ input:-webkit-autofill:active {
   }
 }
 
+/* Hide the play on web button */
+#playWebBtn {
+  display: none;
+}
+
 /* Footer */
 footer {
   margin-top: var(--space-xxl);
