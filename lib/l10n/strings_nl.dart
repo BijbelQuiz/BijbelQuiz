@@ -142,4 +142,13 @@ class AppStrings {
   static const String purchaseSuccess = 'Thema succesvol ontgrendeld!';
   static const String purchaseError = 'Niet genoeg sterren om dit thema te ontgrendelen.';
   static const String couldNotOpenDownloadPage = 'Kon de downloadpagina niet openen';
+  
+  // Update dialog
+  static const String updateAvailable = 'Update beschikbaar';
+  static const String newVersionAvailable = 'Er is een nieuwe versie van de app beschikbaar.';
+  static const String currentVersion = 'Huidige versie';
+  static const String newVersion = 'Nieuwe versie';
+  static const String whatsNew = 'Wat is er nieuw';
+  static const String later = 'Later';
+  static const String downloadNow = 'Download nu';
 }

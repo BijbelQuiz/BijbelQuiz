@@ -73,7 +73,7 @@ class UpdateService {
   
   /// Gets the URL for the unified download page
   String getDownloadPageUrl({String? platform, String? currentVersion}) {
-    final params = <String, String>[];
+    final params = <String>[];
     if (platform != null) params.add('platform=$platform');
     if (currentVersion != null) params.add('current=$currentVersion');
     
