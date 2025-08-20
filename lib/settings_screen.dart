@@ -956,31 +956,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 if (!context.mounted) return;
                 nav.pop(); // Close dialog
                 
-                // Navigate to LessonSelectScreen which will show the guide
-                // since we've reset the guide status
+                // Navigate to LessonSelectScreen
                 nav.pushAndRemoveUntil(
                   MaterialPageRoute(
                     builder: (_) => const LessonSelectScreen(),
                   ),
                   (route) => false,
                 );
-                
-                // Force a rebuild of the widget tree to ensure the guide shows up
-                if (context.mounted) {
-                  // Use a small delay to ensure the navigation is complete
-                  Future.delayed(const Duration(milliseconds: 100), () {
-                    if (context.mounted) {
-                      final settings = Provider.of<SettingsProvider>(context, listen: false);
-                      if (!settings.hasSeenGuide) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const GuideScreen(),
-                          ),
-                        );
-                      }
-                    }
-                  });
-                }
               },
               style: TextButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.error,

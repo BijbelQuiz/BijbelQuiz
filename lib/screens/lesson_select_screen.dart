@@ -32,19 +32,37 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
     
     // Check if we need to show the guide screen
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      
-      final settings = Provider.of<SettingsProvider>(context, listen: false);
-      if (!settings.isLoading && !settings.hasSeenGuide) {
-        if (!mounted) return;
-        
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const GuideScreen(),
-          ),
-        );
-      }
+      _checkAndShowGuide();
     });
+  }
+
+  void _checkAndShowGuide() {
+    if (!mounted) return;
+    
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    if (!settings.isLoading && !settings.hasSeenGuide) {
+      // Use a delayed future to ensure we're not in the build phase
+      Future.microtask(() {
+        if (mounted) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const GuideScreen(),
+            ),
+          );
+        }
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Also check when dependencies change (e.g., after reset)
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _checkAndShowGuide();
+      });
+    }
   }
 
   Future<void> _loadLessons() async {
