@@ -99,19 +99,20 @@ class SettingsProvider extends ChangeNotifier {
       final themeModeIndex = _prefs?.getInt(_themeModeKey) ?? 0;
       _themeMode = ThemeMode.values[themeModeIndex];
       // Load old boolean slow mode setting for backward compatibility
-      final oldSlowMode = _prefs?.getBool(_slowModeKey) ?? false;
+      final oldSlowMode = _getBoolSetting(_slowModeKey, defaultValue: false);
       _gameSpeed = oldSlowMode ? 'slow' : 'medium';
       
       // Migrate to new string-based setting if needed
       if (oldSlowMode) {
         await _prefs?.setString(_slowModeKey, 'slow');
       }
-      _hasSeenGuide = _prefs?.getBool(_hasSeenGuideKey) ?? false;
-      _mute = _prefs?.getBool(_muteKey) ?? false;
+      // Safely load boolean settings with type checking
+      _hasSeenGuide = _getBoolSetting(_hasSeenGuideKey, defaultValue: false);
+      _mute = _getBoolSetting(_muteKey, defaultValue: false);
       _hapticFeedback = _prefs?.getString(_hapticFeedbackKey) ?? 'medium';
-      _notificationEnabled = _prefs?.getBool(_notificationEnabledKey) ?? true;
-      _hasDonated = _prefs?.getBool(_hasDonatedKey) ?? false;
-      _hasCheckedForUpdate = _prefs?.getBool(_hasCheckedForUpdateKey) ?? false;
+      _notificationEnabled = _getBoolSetting(_notificationEnabledKey, defaultValue: true);
+      _hasDonated = _getBoolSetting(_hasDonatedKey, defaultValue: false);
+      _hasCheckedForUpdate = _getBoolSetting(_hasCheckedForUpdateKey, defaultValue: false);
       final unlocked = _prefs?.getStringList(_unlockedThemesKey);
       if (unlocked != null) {
         _unlockedThemes = unlocked.toSet();
@@ -240,8 +241,9 @@ class SettingsProvider extends ChangeNotifier {
   /// Marks the guide as seen
   Future<void> markGuideAsSeen() async {
     try {
+      _prefs ??= await SharedPreferences.getInstance(); // Ensure _prefs is initialized
       _hasSeenGuide = true;
-      await _prefs?.setBool(_hasSeenGuideKey, true);
+      await _prefs!.setBool(_hasSeenGuideKey, true);
       notifyListeners();
     } catch (e) {
       _error = 'Failed to save guide status: ${e.toString()}';
@@ -253,8 +255,9 @@ class SettingsProvider extends ChangeNotifier {
   /// Resets the guide status so it can be shown again
   Future<void> resetGuideStatus() async {
     try {
+      _prefs ??= await SharedPreferences.getInstance(); // Ensure _prefs is initialized
       _hasSeenGuide = false;
-      await _prefs?.setBool(_hasSeenGuideKey, false);
+      await _prefs!.setBool(_hasSeenGuideKey, false);
       notifyListeners();
     } catch (e) {
       _error = 'Failed to reset guide status: ${e.toString()}';
@@ -295,5 +298,23 @@ class SettingsProvider extends ChangeNotifier {
     }
   }
   
-
+  // Helper method to safely get a boolean setting with type checking
+  bool _getBoolSetting(String key, {required bool defaultValue}) {
+    try {
+      final value = _prefs?.get(key);
+      if (value is bool) {
+        return value;
+      } else if (value is String) {
+        // Handle case where boolean was saved as a string
+        return value.toLowerCase() == 'true';
+      } else if (value is int) {
+        // Handle case where boolean was saved as an integer (0 or 1)
+        return value == 1;
+      }
+      return defaultValue;
+    } catch (e) {
+      // If there's any error, return the default value
+      return defaultValue;
+    }
+  }
 } 
