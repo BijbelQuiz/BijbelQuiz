@@ -94,8 +94,12 @@ class UpdateService {
   
   /// Compares two version strings (e.g., "1.2.3" vs "1.2.4")
   bool _isVersionHigher(String newVersion, String currentVersion) {
-    final newParts = newVersion.split('.').map(int.parse).toList();
-    final currentParts = currentVersion.split('.').map(int.parse).toList();
+    // Remove build metadata (everything after +)
+    final cleanNewVersion = newVersion.split('+').first;
+    final cleanCurrentVersion = currentVersion.split('+').first;
+    
+    final newParts = cleanNewVersion.split('.').map(int.parse).toList();
+    final currentParts = cleanCurrentVersion.split('.').map(int.parse).toList();
     
     // Pad shorter version with zeros
     while (newParts.length < currentParts.length) {
