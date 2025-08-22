@@ -122,7 +122,7 @@ class _StoreScreenState extends State<StoreScreen> {
                         ),
                         SizedBox(height: isDesktop ? 12 : 8),
                         Text(
-                          'Beschikbare sterren',
+                          strings.AppStrings.availableStars,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: colorScheme.onSurface.withAlpha((0.7 * 255).round()),
                             fontWeight: FontWeight.w500,
@@ -137,7 +137,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   // Power-ups section
                   _buildSectionHeader(
                     context,
-                    'Power-ups',
+                    strings.AppStrings.powerUps,
                     Icons.flash_on_rounded,
                     colorScheme.primary,
                     isDesktop,
@@ -147,8 +147,8 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildPowerupCard(
                     context,
-                    title: 'Dubbele sterren (5 vragen)',
-                    description: 'Verdien dubbele sterren voor je volgende 5 vragen',
+                    title: strings.AppStrings.doubleStars5Questions,
+                    description: strings.AppStrings.doubleStars5QuestionsDesc,
                     icon: Icons.flash_on_rounded,
                     iconColor: colorScheme.primary,
                     cost: 100,
@@ -165,8 +165,8 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildPowerupCard(
                     context,
-                    title: 'Driedubbele sterren (5 vragen)',
-                    description: 'Verdien driedubbele sterren voor je volgende 5 vragen',
+                    title: strings.AppStrings.tripleStars5Questions,
+                    description: strings.AppStrings.tripleStars5QuestionsDesc,
                     icon: Icons.flash_on_rounded,
                     iconColor: Colors.deepOrange,
                     cost: 180,
@@ -183,8 +183,8 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildPowerupCard(
                     context,
-                    title: '5x sterren (5 vragen)',
-                    description: 'Verdien 5x sterren voor je volgende 5 vragen',
+                    title: strings.AppStrings.fiveTimesStars5Questions,
+                    description: strings.AppStrings.fiveTimesStars5QuestionsDesc,
                     icon: Icons.flash_on_rounded,
                     iconColor: Colors.redAccent,
                     cost: 350,
@@ -201,8 +201,8 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildPowerupCard(
                     context,
-                    title: 'Dubbele sterren (60 seconden)',
-                    description: 'Verdien dubbele sterren gedurende 60 seconden',
+                    title: strings.AppStrings.doubleStars60Seconds,
+                    description: strings.AppStrings.doubleStars60SecondsDesc,
                     icon: Icons.timer_rounded,
                     iconColor: Colors.orangeAccent,
                     cost: 120,
@@ -220,7 +220,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   // Themes section
                   _buildSectionHeader(
                     context,
-                    'Thema’s',
+                    strings.AppStrings.themes,
                     Icons.palette_rounded,
                     colorScheme.secondary,
                     isDesktop,
@@ -230,8 +230,8 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildThemeCard(
                     context,
-                    title: 'OLED thema',
-                    description: 'Ontgrendel een echt zwart, hoog-contrast thema',
+                    title: strings.AppStrings.oledThemeName,
+                    description: strings.AppStrings.oledThemeDesc,
                     icon: Icons.nights_stay_rounded,
                     iconColor: Colors.black,
                     cost: 150,
@@ -247,8 +247,8 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildThemeCard(
                     context,
-                    title: 'Groen thema',
-                    description: 'Ontgrendel een fris groen thema',
+                    title: strings.AppStrings.greenThemeName,
+                    description: strings.AppStrings.greenThemeDesc,
                     icon: Icons.eco_rounded,
                     iconColor: Colors.green[700]!,
                     cost: 120,
@@ -264,8 +264,8 @@ class _StoreScreenState extends State<StoreScreen> {
                   
                   _buildThemeCard(
                     context,
-                    title: 'Oranje thema',
-                    description: 'Ontgrendel een levendig oranje thema',
+                    title: strings.AppStrings.orangeThemeName,
+                    description: strings.AppStrings.orangeThemeDesc,
                     icon: Icons.circle_rounded,
                     iconColor: Colors.orange[700]!,
                     cost: 120,

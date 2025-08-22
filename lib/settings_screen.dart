@@ -138,7 +138,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ElevatedButton.icon(
               onPressed: () { settings.reloadSettings(); },
               icon: const Icon(Icons.refresh),
-              label: Text('Opnieuw proberen'),
+              label: Text(strings.AppStrings.retry),
             ),
           ],
         ),
@@ -165,7 +165,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Ondersteun ons',
+                    strings.AppStrings.supportUsTitle,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
@@ -310,7 +310,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           colorScheme,
           isSmallScreen,
           isDesktop,
-          title: 'Spelinstellingen',
+          title: strings.AppStrings.gameSettings,
           children: [
             _buildSettingItem(
               context,
@@ -318,23 +318,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              title: 'Spelsnelheid',
-              subtitle: 'Kies de snelheid van het spel',
+              title: strings.AppStrings.gameSpeed,
+              subtitle: strings.AppStrings.chooseGameSpeed,
               icon: Icons.speed,
               child: DropdownButton<String>(
                 value: settings.gameSpeed,
                 items: [
                   DropdownMenuItem(
                     value: 'slow',
-                    child: Text('Langzaam'),
+                    child: Text(strings.AppStrings.slow),
                   ),
                   DropdownMenuItem(
                     value: 'medium',
-                    child: Text('Gemiddeld'),
+                    child: Text(strings.AppStrings.medium),
                   ),
                   DropdownMenuItem(
                     value: 'fast',
-                    child: Text('Snel'),
+                    child: Text(strings.AppStrings.fast),
                   ),
                 ],
                 onChanged: (String? value) {
@@ -355,8 +355,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              title: 'Geluidseffecten dempen',
-              subtitle: 'Schakel alle spelgeluiden uit',
+              title: strings.AppStrings.muteSoundEffects,
+              subtitle: strings.AppStrings.muteSoundEffectsDesc,
               icon: Icons.volume_off,
               child: Switch(
                 value: settings.mute,
@@ -375,7 +375,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           colorScheme,
           isSmallScreen,
           isDesktop,
-          title: 'Over',
+          title: strings.AppStrings.about,
           children: [
             // Only show update option on non-web platforms
             if (!kIsWeb)
@@ -385,13 +385,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 colorScheme,
                 isSmallScreen,
                 isDesktop,
-                title: 'App bijwerken',
-                subtitle: 'Controleer op een nieuwe versie van de app',
+                title: strings.AppStrings.updateApp,
+                subtitle: strings.AppStrings.checkForUpdates,
                 icon: Icons.update,
                 child: IconButton(
                   icon: const Icon(Icons.update),
                   onPressed: () => _checkForUpdate(context),
-                  tooltip: 'Controleer op updates',
+                  tooltip: strings.AppStrings.checkForUpdatesTooltip,
                 ),
               ),
             _buildSettingItem(
@@ -400,13 +400,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              title: 'Serverstatus',
-              subtitle: 'Controleer de status van onze services',
+              title: strings.AppStrings.serverStatus,
+              subtitle: strings.AppStrings.checkServiceStatus,
               icon: Icons.cloud_done_outlined,
               child: IconButton(
                 icon: const Icon(Icons.open_in_new),
                 onPressed: _openStatusPage,
-                tooltip: 'Open statuspagina',
+                tooltip: strings.AppStrings.openStatusPage,
               ),
             ),
           ],
@@ -420,7 +420,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             colorScheme,
             isSmallScreen,
             isDesktop,
-            title: 'Meldingen',
+            title: strings.AppStrings.notifications,
             children: [
               _buildSettingItem(
                 context,
@@ -428,8 +428,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 colorScheme,
                 isSmallScreen,
                 isDesktop,
-                title: 'Motivatie-meldingen (Béta)',
-                subtitle: 'Ontvang dagelijkse herinneringen voor BijbelQuiz',
+                title: strings.AppStrings.motivationNotifications,
+                subtitle: strings.AppStrings.motivationNotificationsDesc,
                 icon: Icons.notifications,
                 child: Switch(
                   value: settings.notificationEnabled,
@@ -455,7 +455,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           colorScheme,
           isSmallScreen,
           isDesktop,
-          title: 'Acties',
+          title: strings.AppStrings.actions,
           children: [
             _buildActionButton(
               context,
@@ -464,10 +464,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () => _showResetAndLogoutDialog(context, settings),
-              label: 'Resetten en uitloggen',
+              label: strings.AppStrings.resetAndLogout,
               icon: Icons.logout,
               isDestructive: true,
-              subtitle: 'Alle gegevens wissen en app deactiveren',
+              subtitle: strings.AppStrings.resetAndLogoutDesc,
             ),
             _buildActionButton(
               context,
@@ -484,7 +484,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 );
               },
-              label: 'Introductie tonen',
+              label: strings.AppStrings.showIntroduction,
               icon: Icons.help_outline,
             ),
             _buildActionButton(
@@ -494,7 +494,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () => _launchBugReportEmail(context),
-              label: 'Probleem melden',
+              label: strings.AppStrings.reportIssue,
               icon: Icons.bug_report,
             ),
             _buildActionButton(
@@ -506,10 +506,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: () async {
                 await QuestionCacheService().clearCache();
                 if (context.mounted) {
-                  showTopSnackBar(context, 'Vragencache gewist!', style: TopSnackBarStyle.success);
+                  showTopSnackBar(context, strings.AppStrings.cacheCleared, style: TopSnackBarStyle.success);
                 }
               },
-              label: 'Vragencache wissen',
+              label: strings.AppStrings.clearQuestionCache,
               icon: Icons.delete_sweep,
               isDestructive: true,
             ),
@@ -528,11 +528,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   await launchUrl(emailLaunchUri);
                 } else {
                   if (context.mounted) {
-                    showTopSnackBar(context, 'Kon e-mailclient niet openen', style: TopSnackBarStyle.error);
+                    showTopSnackBar(context, strings.AppStrings.emailNotAvailable, style: TopSnackBarStyle.error);
                   }
                 }
               },
-              label: 'Neem contact op',
+              label: strings.AppStrings.contactUs,
               icon: Icons.email,
             ),
           ],
@@ -543,7 +543,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             padding: const EdgeInsets.only(bottom: 16.0),
             child: ElevatedButton.icon(
               icon: const Icon(Icons.bug_report),
-              label: Text('Test Alle Functies'),
+              label: Text(strings.AppStrings.testAllFeatures),
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -554,7 +554,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         Text(
-          '© 2024-2025 ThomasNow Productions',
+          strings.AppStrings.copyright,
           style: TextStyle(
             fontSize: isSmallScreen ? 12 : 14,
             color: colorScheme.onSurface.withValues(alpha: (0.7 * 255)),
@@ -566,7 +566,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           builder: (context, snapshot) {
             final version = snapshot.data?.version ?? '';
             return Text(
-              'Versie $version',
+              '${strings.AppStrings.version} $version',
               style: TextStyle(
                 fontSize: isSmallScreen ? 12 : 14,
                 color: colorScheme.onSurface.withValues(alpha: (0.7 * 255)),

@@ -100,7 +100,7 @@ class _GuideScreenState extends State<GuideScreen> {
                           curve: Curves.easeInOut,
                         );
                       },
-                      child: Text('Vorige'),
+                      child: Text(strings.AppStrings.previous),
                     )
                   else
                     const SizedBox(width: 80),
@@ -195,7 +195,7 @@ List<GuidePage> buildGuidePages({required bool showNotificationPage, required Bu
   final pages = <GuidePage>[
     GuidePage(
       title: strings.AppStrings.welcomeTitle,
-      description: 'Ontdek de Bijbel op een leuke en interactieve manier met uitdagende vragen en lessen.',
+      description: strings.AppStrings.welcomeDescription,
       icon: Icons.church,
     ),
     GuidePage(
@@ -204,13 +204,13 @@ List<GuidePage> buildGuidePages({required bool showNotificationPage, required Bu
       icon: Icons.quiz,
     ),
     GuidePage(
-      title: 'Volg Je Voortgang',
-      description: 'Houd je scores bij en verbeter jezelf in de loop van de tijd.',
+      title: strings.AppStrings.trackProgressTitle,
+      description: strings.AppStrings.trackProgressDescription,
       icon: Icons.insights,
     ),
     GuidePage(
-      title: 'Pas Je Ervaring Aan',
-      description: 'Pas je thema, speelsnelheid en de geluidseffecten aan in de instellingen. Heeft u nog vragen of suggesties? We horen graag van je via thomasnowprod@proton.me',
+      title: strings.AppStrings.customizeExperienceTitle,
+      description: strings.AppStrings.customizeExperienceDescription,
       icon: Icons.settings,
     ),
   ];
@@ -231,10 +231,10 @@ List<GuidePage> buildGuidePages({required bool showNotificationPage, required Bu
   if (!settings.hasDonated) {
     pages.add(
       GuidePage(
-        title: 'Ondersteun Ons',
-        description: 'Vind je deze app nuttig? Overweeg dan een donatie om ons te helpen de app te onderhouden en te verbeteren. 50% van elke donatie gaat naar een goed doel. Elke bijdrage wordt gewaardeerd!',
+        title: strings.AppStrings.supportUsTitle,
+        description: strings.AppStrings.supportUsDescription,
         icon: Icons.favorite,
-        buttonText: 'Doneer Nu',
+        buttonText: strings.AppStrings.donateNow,
         buttonIcon: Icons.volunteer_activism,
         isDonationPage: true,
       ),
