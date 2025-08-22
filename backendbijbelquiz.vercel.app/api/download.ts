@@ -53,6 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       // Stream the file
       const fileStream = await fs.readFile(filePath);
+      res.setHeader('Content-Length', fileStream.length);
       res.status(200).send(fileStream);
     } catch (error) {
       console.error('Error handling GET request:', error);

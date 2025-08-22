@@ -12,12 +12,12 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1.ts"
+      "src": "/api/(?<path>.*)",
+      "dest": "/api/$path"
     },
     {
-      "src": "/(.*)",
-      "dest": "/public/$1"
+      "src": "/downloads/(?<file>.*)",
+      "dest": "/public/downloads/$file"
     },
     {
       "src": "/donate.html",
