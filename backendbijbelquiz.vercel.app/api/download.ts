@@ -37,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       // Get the file name for this platform
       const fileName = PLATFORM_FILES[platform];
-      const filePath = path.join(process.cwd(), 'downloads', fileName);
+      const filePath = path.join(process.cwd(), 'public', 'downloads', fileName);
       
       // Check if file exists
       try {
