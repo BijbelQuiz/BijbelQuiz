@@ -428,7 +428,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 colorScheme,
                 isSmallScreen,
                 isDesktop,
-                title: 'Motivatie-meldingen',
+                title: 'Motivatie-meldingen (Béta)',
                 subtitle: 'Ontvang dagelijkse herinneringen voor BijbelQuiz',
                 icon: Icons.notifications,
                 child: Switch(
