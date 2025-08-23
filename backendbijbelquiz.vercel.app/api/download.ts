@@ -53,11 +53,11 @@ export default async function handler(
       });
     }
 
-    const { filename, contentType, path } = PLATFORM_FILES[platform];
+    const { filename, contentType } = PLATFORM_FILES[platform];
     
     // Redirect to the file in the public directory
-    // This will be served by Vercel's static file server
-    return res.redirect(307, path);
+    // Use the correct path that we know works
+    return res.redirect(307, `/downloads/${filename}`);
     
   } catch (error) {
     console.error('Download error:', error);
