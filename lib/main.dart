@@ -134,7 +134,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Show guide on first run if not seen yet
+    // Show guide on first run if not seen yet (fallback)
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     if (!settings.isLoading && !settings.hasSeenGuide && !_hasShownGuide) {
       _hasShownGuide = true;

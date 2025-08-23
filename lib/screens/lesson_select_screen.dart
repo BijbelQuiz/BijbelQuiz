@@ -40,9 +40,11 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
     if (!mounted) return;
     
     final settings = Provider.of<SettingsProvider>(context, listen: false);
-    if (!settings.isLoading && !settings.hasSeenGuide) {
-      // Use a delayed future to ensure we're not in the build phase
-      Future.microtask(() {
+    // Add a small delay to ensure everything is properly initialized
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (!mounted) return;
+      
+      if (!settings.isLoading && !settings.hasSeenGuide) {
         if (mounted) {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -50,8 +52,8 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
             ),
           );
         }
-      });
-    }
+      }
+    });
   }
 
   @override
