@@ -55,9 +55,34 @@ export default async function handler(
 
     const { filename, contentType } = PLATFORM_FILES[platform];
     
-    // Redirect to the file in the public directory
-    // Use the correct path that we know works
-    return res.redirect(307, `/downloads/${filename}`);
+    // Construct the direct URL to the file
+    const fileUrl = `https://${process.env.VERCEL_URL || 'backendbijbelquiz.vercel.app'}/downloads/${filename}`;
+    
+    try {
+      // Fetch the file
+      const response = await fetch(fileUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch file: ${response.statusText}`);
+      }
+      
+      // Get the file content as a buffer
+      const fileBuffer = await response.arrayBuffer();
+      
+      // Set the appropriate headers
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', fileBuffer.byteLength);
+      
+      // Send the file content
+      return res.status(200).send(Buffer.from(fileBuffer));
+      
+    } catch (error) {
+      console.error('Error serving file:', error);
+      return res.status(500).json({ 
+        error: 'Failed to serve file',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
     
   } catch (error) {
     console.error('Download error:', error);
