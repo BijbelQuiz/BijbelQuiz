@@ -1,16 +1,18 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 // Map of platforms to their file names and content types
 const PLATFORM_FILES = {
   android: {
     filename: 'bijbelquiz-android.apk',
     contentType: 'application/vnd.android.package-archive',
-    path: '/downloads/bijbelquiz-android.apk'
+    path: 'public/downloads/bijbelquiz-android.apk'
   },
   linux: {
     filename: 'bijbelquiz-linux.AppImage',
     contentType: 'application/octet-stream',
-    path: '/downloads/bijbelquiz-linux.AppImage'
+    path: 'public/downloads/bijbelquiz-linux.AppImage'
   },
   // Add other platforms as needed
 } as const;
@@ -53,28 +55,20 @@ export default async function handler(
       });
     }
 
-    const { filename, contentType } = PLATFORM_FILES[platform];
-    
-    // Construct the direct URL to the file
-    const fileUrl = `https://${process.env.VERCEL_URL || 'backendbijbelquiz.vercel.app'}/downloads/${filename}`;
+    const { filename, contentType, path } = PLATFORM_FILES[platform];
     
     try {
-      // Fetch the file
-      const response = await fetch(fileUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch file: ${response.statusText}`);
-      }
-      
-      // Get the file content as a buffer
-      const fileBuffer = await response.arrayBuffer();
+      // Read the file directly from the file system
+      const filePath = join(process.cwd(), path);
+      const fileContent = readFileSync(filePath);
       
       // Set the appropriate headers
       res.setHeader('Content-Type', contentType);
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.setHeader('Content-Length', fileBuffer.byteLength);
+      res.setHeader('Content-Length', fileContent.length);
       
       // Send the file content
-      return res.status(200).send(Buffer.from(fileBuffer));
+      return res.status(200).send(fileContent);
       
     } catch (error) {
       console.error('Error serving file:', error);
