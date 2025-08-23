@@ -183,7 +183,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 12),
                   FilledButton.tonalIcon(
                     onPressed: () async {
-                      final Uri url = Uri.parse('https://backendbijbelquiz.vercel.app/donate.html');
+                      final Uri url = Uri.parse('https://bijbelquiz.vercel.app/donate.html');
                       // Mark as donated before launching the URL
                       await settings.markAsDonated();
                       
