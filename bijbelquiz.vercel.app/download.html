@@ -126,12 +126,14 @@
                 const platformCard = document.createElement('div');
                 platformCard.className = 'platform-card';
                 platformCard.innerHTML = `
-                    <div class="platform-icon">
-                        <i class="material-icons">${platformInfo.icon}</i>
-                    </div>
-                    <div class="platform-info">
-                        <h3>${platformInfo.name}</h3>
-                        <p>${platformInfo.description}</p>
+                    <div class="platform-header">
+                        <div class="platform-icon">
+                            <i class="material-icons">${platformInfo.icon}</i>
+                        </div>
+                        <div class="platform-info">
+                            <h3>${platformInfo.name}</h3>
+                            <p>${platformInfo.description}</p>
+                        </div>
                     </div>
                     <div class="platform-actions">
                         <a href="${platformInfo.downloadUrl}" class="btn primary" target="_blank" rel="noopener">
@@ -248,7 +250,6 @@
         .platform-card {
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
             gap: 1rem;
             padding: 1.5rem;
             background: var(--surface);
@@ -265,6 +266,13 @@
             border-color: var(--primary);
         }
         
+        .platform-header {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 1rem;
+        }
+        
         .platform-icon {
             position: relative;
             width: 60px;
@@ -275,7 +283,6 @@
             background: var(--surface-highest);
             border-radius: 50%;
             border: 2px solid var(--outline);
-            margin-bottom: 0.5rem;
             flex-shrink: 0;
         }
         
@@ -340,7 +347,6 @@
             
             .platform-card {
                 flex-direction: row;
-                align-items: center;
             }
             
             .platform-info {
@@ -348,8 +354,9 @@
             }
             
             .platform-actions {
-                flex-direction: column;
+                flex-direction: row;
                 width: auto;
+                gap: 0.5rem;
             }
             
             .platform-actions .btn {
@@ -394,6 +401,10 @@
             
             .platform-icon i {
                 font-size: 36px;
+            }
+            
+            .platform-header {
+                flex: 1;
             }
         }
         
