@@ -147,75 +147,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Donation Section - Only show if user hasn't donated yet
-        if (!settings.hasDonated) 
-          Card(
-            elevation: isDesktop ? 2 : 1,
-            color: colorScheme.surfaceContainerHighest,
-            margin: EdgeInsets.symmetric(vertical: isSmallScreen ? 4 : 8, horizontal: 0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 18),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: isSmallScreen ? 8 : 12,
-                horizontal: isDesktop ? 16 : (isSmallScreen ? 8 : 12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    strings.AppStrings.supportUsTitle,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    strings.AppStrings.donateExplanation,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurface.withValues(alpha: 0.8),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  FilledButton.tonalIcon(
-                    onPressed: () async {
-                      final Uri url = Uri.parse('https://bijbelquiz.vercel.app/donate.html');
-                      // Mark as donated before launching the URL
-                      await settings.markAsDonated();
-                      
-                      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-                        if (mounted && context.mounted) {
-                          showTopSnackBar(
-                            context,
-                            strings.AppStrings.couldNotOpenDonationPage,
-                            style: TopSnackBarStyle.error,
-                          );
-                        }
-                      }
-                    },
-                    icon: const Icon(Icons.favorite, size: 18),
-                    label: Text(
-                      strings.AppStrings.donateButton,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: colorScheme.primaryContainer,
-                      foregroundColor: colorScheme.onPrimaryContainer,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                ),
-                const SizedBox(height: 4),
-              ],
-            ),
-          ),
-        ),
         _buildSettingsGroup(
           context,
           settings,
@@ -457,6 +388,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
           isDesktop,
           title: strings.AppStrings.actions,
           children: [
+            _buildActionButton(
+              context,
+              settings,
+              colorScheme,
+              isSmallScreen,
+              isDesktop,
+              onPressed: () async {
+                final Uri url = Uri.parse('https://bijbelquiz.vercel.app/donate.html');
+                // Mark as donated before launching the URL
+                await settings.markAsDonated();
+                
+                if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                  if (mounted && context.mounted) {
+                    showTopSnackBar(
+                      context,
+                      strings.AppStrings.couldNotOpenDonationPage,
+                      style: TopSnackBarStyle.error,
+                    );
+                  }
+                }
+              },
+              label: strings.AppStrings.donateButton,
+              icon: Icons.favorite,
+              subtitle: strings.AppStrings.supportUsTitle,
+            ),
             _buildActionButton(
               context,
               settings,
