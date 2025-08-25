@@ -182,9 +182,6 @@ class AppStrings {
   static const String muteSoundEffects = 'Geluidseffecten dempen';
   static const String muteSoundEffectsDesc = 'Schakel alle spelgeluiden uit';
   static const String about = 'Over';
-  static const String updateApp = 'App bijwerken';
-  static const String checkForUpdates = 'Controleer op een nieuwe versie van de app';
-  static const String checkForUpdatesTooltip = 'Controleer op updates';
   
   // Server status
   static const String serverStatus = 'Serverstatus';
@@ -216,12 +213,4 @@ class AppStrings {
   // Errors
   static const String couldNotOpenEmail = 'Kon e-mailclient niet openen';
   
-  // Update dialog
-  static const String updateAvailable = 'Update beschikbaar';
-  static const String newVersionAvailable = 'Er is een nieuwe versie van de app beschikbaar.';
-  static const String currentVersion = 'Huidige versie';
-  static const String newVersion = 'Nieuwe versie';
-  static const String whatsNew = 'Wat is er nieuw';
-  static const String later = 'Later';
-  static const String downloadNow = 'Download nu';
 }

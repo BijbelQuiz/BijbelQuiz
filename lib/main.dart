@@ -17,8 +17,6 @@ import 'services/performance_service.dart';
 import 'services/connection_service.dart';
 import 'services/question_cache_service.dart';
 import 'services/emergency_service.dart';
-import 'services/update_service.dart';
-import 'widgets/update_dialog.dart';
 import 'screens/store_screen.dart';
 import 'providers/lesson_progress_provider.dart';
 import 'screens/lesson_select_screen.dart';
@@ -81,7 +79,6 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
       final connectionService = ConnectionService();
       final questionCacheService = QuestionCacheService();
       final emergencyService = EmergencyService();
-      final updateService = UpdateService();
 
       // Kick off initialization in background
       final initFuture = Future.wait([
@@ -103,20 +100,6 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
 
       // Start polling for emergency messages
       emergencyService.startPolling();
-      
-      // Set up update notification callback
-      updateService.onUpdateAvailable = (updateInfo) {
-        // Show update dialog if we have a context
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (context) => UpdateDialog(updateInfo: updateInfo),
-          );
-        }
-      };
-      
-      // Start periodic update checks
-      updateService.startPeriodicChecks();
 
       if (!kIsWeb && !Platform.isLinux) {
         WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -233,8 +216,6 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
 
   @override
   void dispose() {
-    // Cancel the periodic update checks timer
-    UpdateService().stopPeriodicChecks();
     _mounted = false;
     super.dispose();
   }

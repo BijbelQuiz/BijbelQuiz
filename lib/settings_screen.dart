@@ -16,8 +16,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/lesson_select_screen.dart';
 import 'widgets/quiz_skeleton.dart';
 import 'l10n/strings_nl.dart' as strings;
-import 'services/update_service.dart';
-import 'widgets/update_dialog.dart';
 
 /// The settings screen that allows users to customize app preferences
 class SettingsScreen extends StatefulWidget {
@@ -308,23 +306,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           isDesktop,
           title: strings.AppStrings.about,
           children: [
-            // Only show update option on non-web platforms
-            if (!kIsWeb)
-              _buildSettingItem(
-                context,
-                settings,
-                colorScheme,
-                isSmallScreen,
-                isDesktop,
-                title: strings.AppStrings.updateApp,
-                subtitle: strings.AppStrings.checkForUpdates,
-                icon: Icons.update,
-                child: IconButton(
-                  icon: const Icon(Icons.update),
-                  onPressed: () => _checkForUpdate(context),
-                  tooltip: strings.AppStrings.checkForUpdatesTooltip,
-                ),
-              ),
             _buildSettingItem(
               context,
               settings,
@@ -959,63 +940,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _checkForUpdate(BuildContext context) async {
-    final localContext = context;
-    try {
-      final updateService = UpdateService();
-
-      // Get current app version
-      final packageInfo = await PackageInfo.fromPlatform();
-      final currentVersion = packageInfo.version;
-
-      // Get platform
-      String platform;
-      if (kIsWeb) {
-        platform = 'web';
-      } else if (Platform.isAndroid) {
-        platform = 'android';
-      } else if (Platform.isIOS) {
-        platform = 'ios';
-      } else if (Platform.isWindows) {
-        platform = 'windows';
-      } else if (Platform.isMacOS) {
-        platform = 'macos';
-      } else if (Platform.isLinux) {
-        platform = 'linux';
-      } else {
-        platform = 'android'; // default fallback
-      }
-
-      // Construct URL with platform and version parameters
-      final downloadUrl = updateService.getDownloadPageUrl(
-        platform: platform,
-        currentVersion: currentVersion,
-      );
-
-      final url = Uri.parse(downloadUrl);
-
-      if (!await launchUrl(url)) {
-        if (localContext.mounted) {
-          showTopSnackBar(
-            localContext,
-            strings.AppStrings.couldNotOpenDownloadPage,
-            style: TopSnackBarStyle.error
-          );
-        }
-      }
-    } catch (e) {
-      // Use a post-frame callback to ensure the context is still valid
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (localContext.mounted) {
-          showTopSnackBar(
-            localContext,
-            strings.AppStrings.couldNotOpenDownloadPage,
-            style: TopSnackBarStyle.error
-          );
-        }
-      });
-    }
-  }
 
 }
 
