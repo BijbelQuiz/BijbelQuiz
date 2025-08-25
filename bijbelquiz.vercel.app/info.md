@@ -1,1 +1,0 @@
-# In this directory, there is code for our promotional website, bijbelquiz.rf.gd
