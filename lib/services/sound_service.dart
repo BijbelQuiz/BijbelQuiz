@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
@@ -14,8 +15,13 @@ class SoundService {
   // Check if the current platform is supported by just_audio
   bool _isPlatformSupported() {
     try {
+      // just_audio does not support Linux
+      if (Platform.isLinux) {
+        return false;
+      }
+
       // just_audio has limited support on desktop platforms
-      // Return false for unsupported platforms
+      // Return false for other unsupported platforms
       return !(identical(0, 0.0)); // This is a simple way to check if we're in a VM
     } catch (e) {
       return false;
@@ -45,7 +51,11 @@ class SoundService {
     if (!_isPlatformSupported()) {
       _isInitialized = true;
       _isEnabled = false;
-      AppLogger.info('SoundService: Platform not supported. Running without sound.');
+      if (Platform.isLinux) {
+        AppLogger.info('SoundService: Linux platform detected. just_audio does not support Linux. Running without sound.');
+      } else {
+        AppLogger.info('SoundService: Platform not supported. Running without sound.');
+      }
       return;
     }
     
@@ -85,7 +95,17 @@ class SoundService {
   /// Play a named sound (extensible)
   Future<void> play(String soundName) async {
     if (!_isEnabled) return;
-    
+
+    // Check platform support first
+    if (!_isPlatformSupported()) {
+      if (Platform.isLinux) {
+        AppLogger.info('SoundService: Cannot play sound on Linux (just_audio not supported)');
+      } else {
+        AppLogger.info('SoundService: Cannot play sound on unsupported platform');
+      }
+      return;
+    }
+
     // Ensure service is initialized
     if (!_isInitialized) {
       try {
@@ -178,7 +198,16 @@ class SoundService {
 
   /// Stop any currently playing sound
   Future<void> stop() async {
-    await _audioPlayer.stop();
+    // Skip if platform not supported
+    if (!_isPlatformSupported()) {
+      return;
+    }
+
+    try {
+      await _audioPlayer.stop();
+    } catch (e) {
+      AppLogger.warning('Error stopping audio player', e);
+    }
   }
 
   /// Play the 'correct' sound
@@ -191,16 +220,28 @@ class SoundService {
         'isInitialized': _isInitialized,
         'isEnabled': _isEnabled,
         'player': 'just_audio',
+        'platformSupported': _isPlatformSupported(),
+        'platform': Platform.operatingSystem,
       };
 
   /// Dispose of resources
   Future<void> dispose() async {
-    if (!_isInitialized || !_isEnabled) {
+    if (!_isInitialized) {
       _isInitialized = false;
       _isEnabled = false;
       return;
     }
-    
+
+    // Skip dispose on unsupported platforms
+    if (!_isPlatformSupported()) {
+      _isInitialized = false;
+      _isEnabled = false;
+      if (Platform.isLinux) {
+        AppLogger.info('SoundService: Skipping dispose on Linux (just_audio not supported)');
+      }
+      return;
+    }
+
     try {
       await _audioPlayer.dispose();
     } on MissingPluginException {
