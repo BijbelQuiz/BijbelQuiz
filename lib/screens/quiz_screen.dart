@@ -459,19 +459,19 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
   Future<void> _showTimeUpDialog() async {
     final localContext = context;
     if (ModalRoute.of(localContext)?.isCurrent != true) return;
-    
+
     final settings = Provider.of<SettingsProvider>(localContext, listen: false);
     final gameStats = Provider.of<GameStatsProvider>(localContext, listen: false);
     final hasEnoughPoints = gameStats.score >= 50;
-    
+
     OverlayEntry? tooltipEntry;
-    
+
     void showInsufficientPointsTooltip(BuildContext context, RenderBox buttonBox) {
       tooltipEntry?.remove();
-      
+
       final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
       final buttonPosition = buttonBox.localToGlobal(Offset.zero, ancestor: overlay);
-      
+
       tooltipEntry = OverlayEntry(
         builder: (context) => Positioned(
           left: buttonPosition.dx,
@@ -495,17 +495,17 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
           ),
         ),
       );
-      
+
       if (tooltipEntry != null) {
         Overlay.of(localContext).insert(tooltipEntry!);
       }
-      
+
       Future.delayed(const Duration(seconds: 2), () {
         tooltipEntry?.remove();
         tooltipEntry = null;
       });
     }
-    
+
     await showDialog(
       context: localContext,
       barrierDismissible: false,
@@ -529,15 +529,19 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                   gameStats.spendPointsForRetry().then((success) {
                     if (success && mounted) {
                       Navigator.of(dialogContext).pop();
-                      setState(() {
-                        final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
-                          Duration(seconds: settings.slowMode ? 35 : 20)
-                        );
-                        _quizState = _quizState.copyWith(
-                          timeRemaining: optimalTimerDuration.inSeconds,
-                        );
-                      });
-                      _startTimer(reset: true);
+                      if (mounted) {
+                        setState(() {
+                          final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
+                            Duration(seconds: settings.slowMode ? 35 : 20)
+                          );
+                          _quizState = _quizState.copyWith(
+                            timeRemaining: optimalTimerDuration.inSeconds,
+                          );
+                        });
+                        if (mounted) {
+                          _startTimer(reset: true);
+                        }
+                      }
                     }
                   });
                 } : () {
@@ -552,7 +556,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                       }
                     }
                   }
-                  
+
                   // Call the function immediately
                   showTooltip();
                 },
@@ -562,8 +566,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                     Text(
                       strings.AppStrings.retry,
                       style: TextStyle(
-                        color: hasEnoughPoints 
-                          ? Theme.of(context).colorScheme.primary
+                        color: hasEnoughPoints
+                          ? Theme.of(localContext).colorScheme.primary
                           : Colors.grey,
                         fontSize: 16,
                       ),
@@ -572,15 +576,15 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                     Icon(
                       Icons.star,
                       size: 16,
-                      color: hasEnoughPoints 
-                        ? Theme.of(context).colorScheme.primary
+                      color: hasEnoughPoints
+                        ? Theme.of(localContext).colorScheme.primary
                         : Colors.grey,
                     ),
                     Text(
                       ' 50',
                       style: TextStyle(
-                        color: hasEnoughPoints 
-                          ? Theme.of(context).colorScheme.primary
+                        color: hasEnoughPoints
+                          ? Theme.of(localContext).colorScheme.primary
                           : Colors.grey,
                         fontSize: 16,
                       ),
@@ -602,7 +606,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
               child: Text(
                 strings.AppStrings.next,
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(localContext).colorScheme.primary,
                   fontSize: 16,
                 ),
               ),
@@ -611,7 +615,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
         );
       },
     );
-    
+
     if (tooltipEntry != null && localContext.mounted) {
       Overlay.of(localContext).insert(tooltipEntry!);
     }
@@ -1204,6 +1208,14 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
             : null,
         actions: const [],
       ),
+      bottomNavigationBar: _QuizBottomBar(
+        quizState: _quizState,
+        gameStats: gameStats,
+        settings: settings,
+        onSkipPressed: _handleSkip,
+        onUnlockPressed: _handleUnlockBiblicalReference,
+        isDesktop: isDesktop,
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -1337,168 +1349,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                         language: settings.language,
                       ),
                       const SizedBox(height: 16),
-                      Builder(
-                        builder: (context) {
-                          final canSkip = gameStats.score >= 35 && !_quizState.isAnswering && !_quizState.isTransitioning;
-                          final textColor = canSkip ? Theme.of(context).colorScheme.primary : Colors.grey;
-                          return TextButton(
-                            onPressed: canSkip
-                                ? () async {
-                                    final success = await gameStats.spendStars(35);
-                                    if (success) {
-                                      _timer?.cancel();
-                                      setState(() {
-                                        _quizState = _quizState.copyWith(
-                                          selectedAnswerIndex: null,
-                                          isTransitioning: true,
-                                        );
-                                      });
-                                      await Future.delayed(_performanceService.getOptimalAnimationDuration(const Duration(milliseconds: 300)));
-                                      if (!mounted) return;
-                                      final newDifficulty = _quizState.currentDifficulty;
-                                      setState(() {
-                                        final nextQuestion = _pquPickNextQuestion(newDifficulty);
-                                        final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
-                                          Duration(seconds: settings.slowMode ? 35 : 20)
-                                        );
-                                        _quizState = QuizState(
-                                          question: nextQuestion,
-                                          timeRemaining: optimalTimerDuration.inSeconds,
-                                          currentDifficulty: newDifficulty,
-                                        );
-                                        _startTimer(reset: true);
-                                      });
-                                      
-                                    } else {
-                                      if (mounted && context.mounted) {
-                                        showTopSnackBar(context, strings.AppStrings.notEnoughStarsForSkip, style: TopSnackBarStyle.warning);
-                                      }
-                                    }
-                                  }
-                                : null,
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  settings.language == 'en' ? strings.AppStrings.skip : strings.AppStrings.overslaan,
-                                  style: TextStyle(
-                                    color: textColor,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.star,
-                                  size: 16,
-                                  color: textColor,
-                                ),
-                                Text(
-                                  ' 35',
-                                  style: TextStyle(
-                                    color: textColor,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      Builder(
-                        builder: (context) {
-                          // Only show the biblical reference button if the question has a biblical reference
-                          final hasBiblicalReference = _quizState.question.biblicalReference != null && 
-                                                    _quizState.question.biblicalReference!.isNotEmpty;
-                          final canUnlock = gameStats.score >= 10 && 
-                                           !_quizState.isAnswering && 
-                                           !_quizState.isTransitioning && 
-                                           hasBiblicalReference;
-                          final textColor = canUnlock ? Theme.of(context).colorScheme.primary : Colors.grey;
-                          
-                          return TextButton(
-                            onPressed: canUnlock
-                                ? () async {
-                                    // First check if the reference can be parsed
-                                    final parsed = _parseBiblicalReference(_quizState.question.biblicalReference!);
-                                    if (parsed == null) {
-                                      if (mounted && context.mounted) {
-                                        showTopSnackBar(context, strings.AppStrings.invalidBiblicalReference, style: TopSnackBarStyle.error);
-                                      }
-                                      return;
-                                    }
-                                    
-                                    // Spend 10 stars for unlocking the biblical reference
-                                    final success = await gameStats.spendStars(10);
-                                    if (success) {
-                                      // Pause the timer
-                                      _pauseTimer();
-                                      
-                                      // Show the biblical reference dialog
-                                      await showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return BiblicalReferenceDialog(
-                                            reference: _quizState.question.biblicalReference!,
-                                          );
-                                        },
-                                      );
-                                      
-                                      // Resume the timer when dialog is closed
-                                      if (mounted) {
-                                        _resumeTimer();
-                                      }
-                                    } else {
-                                      // Not enough stars
-                                      if (mounted && context.mounted) {
-                                        showTopSnackBar(context, strings.AppStrings.notEnoughStars, style: TopSnackBarStyle.warning);
-                                      }
-                                    }
-                                  }
-                                : hasBiblicalReference 
-                                    ? () {
-                                        if (gameStats.score < 10 && mounted && context.mounted) {
-                                          showTopSnackBar(context, strings.AppStrings.notEnoughStars, style: TopSnackBarStyle.warning);
-                                        }
-                                      }
-                                    : null,
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    strings.AppStrings.unlockBiblicalReference,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: textColor,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.book,
-                                  size: 16,
-                                  color: textColor,
-                                ),
-                                Text(
-                                  ' 10',
-                                  style: TextStyle(
-                                    color: textColor,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
                     ],
                   ),
                 ),
@@ -1739,6 +1589,238 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
             Navigator.of(ctx).pop();
             Navigator.of(quizContext).pop();
           },
+        ),
+      ),
+    );
+  }
+
+  // Callback methods for bottom bar buttons
+  Future<void> _handleSkip() async {
+    final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+
+    final success = await gameStats.spendStars(35);
+    if (success) {
+      _timer?.cancel();
+      setState(() {
+        _quizState = _quizState.copyWith(
+          selectedAnswerIndex: null,
+          isTransitioning: true,
+        );
+      });
+      await Future.delayed(_performanceService.getOptimalAnimationDuration(const Duration(milliseconds: 300)));
+      if (!mounted) return;
+      final newDifficulty = _quizState.currentDifficulty;
+      setState(() {
+        final nextQuestion = _pquPickNextQuestion(newDifficulty);
+        final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
+          Duration(seconds: settings.slowMode ? 35 : 20)
+        );
+        _quizState = QuizState(
+          question: nextQuestion,
+          timeRemaining: optimalTimerDuration.inSeconds,
+          currentDifficulty: newDifficulty,
+        );
+        _startTimer(reset: true);
+      });
+    } else {
+      if (mounted) {
+        showTopSnackBar(context, strings.AppStrings.notEnoughStarsForSkip, style: TopSnackBarStyle.warning);
+      }
+    }
+  }
+
+  Future<void> _handleUnlockBiblicalReference() async {
+    final localContext = context;
+    final gameStats = Provider.of<GameStatsProvider>(localContext, listen: false);
+
+    // First check if the reference can be parsed
+    final parsed = _parseBiblicalReference(_quizState.question.biblicalReference!);
+    if (parsed == null) {
+      if (mounted) {
+        showTopSnackBar(localContext, strings.AppStrings.invalidBiblicalReference, style: TopSnackBarStyle.error);
+      }
+      return;
+    }
+
+    // Spend 10 stars for unlocking the biblical reference
+    final success = await gameStats.spendStars(10);
+    if (success) {
+      // Pause the timer
+      if (mounted) {
+        _pauseTimer();
+      }
+
+      // Show the biblical reference dialog
+      if (mounted) {
+        await showDialog(
+          context: localContext,
+          builder: (BuildContext context) {
+            return BiblicalReferenceDialog(
+              reference: _quizState.question.biblicalReference!,
+            );
+          },
+        );
+      }
+
+      // Resume the timer when dialog is closed
+      if (mounted) {
+        _resumeTimer();
+      }
+    } else {
+      // Not enough stars
+      if (mounted) {
+        showTopSnackBar(localContext, strings.AppStrings.notEnoughStars, style: TopSnackBarStyle.warning);
+      }
+    }
+  }
+}
+
+// Bottom bar widget for quiz actions
+class _QuizBottomBar extends StatelessWidget {
+  final QuizState quizState;
+  final GameStatsProvider gameStats;
+  final SettingsProvider settings;
+  final VoidCallback onSkipPressed;
+  final VoidCallback onUnlockPressed;
+  final bool isDesktop;
+
+  const _QuizBottomBar({
+    required this.quizState,
+    required this.gameStats,
+    required this.settings,
+    required this.onSkipPressed,
+    required this.onUnlockPressed,
+    required this.isDesktop,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final canSkip = gameStats.score >= 35 && !quizState.isAnswering && !quizState.isTransitioning;
+    final hasBiblicalReference = quizState.question.biblicalReference != null &&
+                               quizState.question.biblicalReference!.isNotEmpty;
+    final canUnlock = gameStats.score >= 10 &&
+                     !quizState.isAnswering &&
+                     !quizState.isTransitioning &&
+                     hasBiblicalReference;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: colorScheme.outline.withAlpha((0.1 * 255).round()),
+            width: 1,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha((0.05 * 255).round()),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Skip button
+            _buildActionButton(
+              context: context,
+              icon: Icons.skip_next_rounded,
+              label: settings.language == 'en' ? strings.AppStrings.skip : strings.AppStrings.overslaan,
+              cost: 35,
+              canUse: canSkip,
+              onPressed: onSkipPressed,
+              isDesktop: isDesktop,
+            ),
+
+            // Unlock biblical reference button
+            if (hasBiblicalReference)
+              _buildActionButton(
+                context: context,
+                icon: Icons.book_rounded,
+                label: strings.AppStrings.unlockBiblicalReference,
+                cost: 10,
+                canUse: canUnlock,
+                onPressed: onUnlockPressed,
+                isDesktop: isDesktop,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required int cost,
+    required bool canUse,
+    required VoidCallback onPressed,
+    required bool isDesktop,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textColor = canUse ? colorScheme.primary : Colors.grey;
+
+    return Container(
+      constraints: BoxConstraints(
+        minWidth: isDesktop ? 140 : 100,
+        maxWidth: isDesktop ? 220 : 140,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: canUse ? onPressed : null,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: isDesktop ? 20 : 18,
+                  color: textColor,
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.star_rounded,
+                  size: isDesktop ? 16 : 14,
+                  color: textColor,
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  cost.toString(),
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: isDesktop ? 14 : 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (isDesktop) ...[
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );
