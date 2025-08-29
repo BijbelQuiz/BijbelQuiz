@@ -1471,11 +1471,14 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  strings.AppStrings.unlockBiblicalReference,
-                                  style: TextStyle(
-                                    color: textColor,
-                                    fontSize: 16,
+                                Flexible(
+                                  child: Text(
+                                    strings.AppStrings.unlockBiblicalReference,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontSize: 16,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 4),
