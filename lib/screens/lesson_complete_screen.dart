@@ -40,209 +40,232 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
     final cs = Theme.of(context).colorScheme;
     final pctValue = widget.total > 0 ? (widget.correct / widget.total * 100.0) : 0.0;
 
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: Stack(
-        children: [
-          // Background gradient
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  cs.primary.withValues(alpha: 0.10),
-                  cs.primaryContainer.withValues(alpha: 0.06),
-                  cs.surface,
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        return false;
+      },
+      child: GestureDetector(
+        onHorizontalDragEnd: (DragEndDetails details) {
+          if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }
+        },
+        child: Scaffold(
+          backgroundColor: cs.surface,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: cs.onSurface),
+              onPressed: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
             ),
           ),
-          // Confetti removed
-          SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 640),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-                  child: SingleChildScrollView(
-                    child: Column(
-                    children: [
-                      const SizedBox(height: 8),
-                      // Heading + Icon (animated)
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.9, end: 1.0),
-                        duration: const Duration(milliseconds: 500),
-                        curve: Curves.easeOutBack,
-                        builder: (context, value, child) => Transform.scale(scale: value, child: child),
-                        child: Container(
-                          padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: cs.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: cs.outlineVariant),
-                            boxShadow: [
-                              BoxShadow(
-                                color: cs.primary.withValues(alpha: 0.15),
-                                blurRadius: 18,
-                                spreadRadius: 2,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.emoji_events_rounded, color: cs.primary, size: 36),
-                              const SizedBox(width: 12),
-                              Text(
-                                strings.AppStrings.lessonComplete,
-                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-                      // Lesson title/badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: cs.surface,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: cs.outlineVariant),
-                        ),
-                        child: Text(
-                          widget.lesson.title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-                      // Animated Stars row (celebration)
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Soft glow
-                          Container(
-                            width: 160,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              gradient: RadialGradient(
-                                colors: [
-                                  cs.primary.withValues(alpha: 0.18),
-                                  Colors.transparent,
-                                ],
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(3, (i) {
-                              final filled = i < widget.stars;
-                              final delayMs = 150 * i;
-                              return TweenAnimationBuilder<double>(
-                                key: ValueKey('star_$i-${widget.stars}'),
-                                tween: Tween(begin: 0.0, end: 1.0),
-                                duration: Duration(milliseconds: 500 + delayMs),
-                                curve: Curves.easeOutBack,
-                                builder: (context, value, child) => Transform.scale(
-                                  scale: value.clamp(0.0, 1.0),
-                                  child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.only(right: i == 2 ? 0 : 12),
-                                  child: Icon(
-                                    Icons.star_rounded,
-                                    size: 48,
-                                    color: filled ? cs.primary : cs.outlineVariant,
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 28),
-                      // Stats cards
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          _AnimatedNumberCard(
-                            icon: Icons.check_circle_rounded,
-                            label: strings.AppStrings.correct,
-                            target: widget.correct,
-                          ),
-                          _AnimatedNumberCard(
-                            icon: Icons.percent_rounded,
-                            label: strings.AppStrings.percentage,
-                            target: pctValue.round(),
-                            suffix: '%',
-                          ),
-                          _StatCard(
-                            icon: Icons.local_fire_department_rounded,
-                            label: strings.AppStrings.bestStreak,
-                            value: '${widget.bestStreak}',
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Call-to-actions
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: widget.onRetry,
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.refresh_rounded, size: 20),
-                                  const SizedBox(width: 8),
-                                  const Text(strings.AppStrings.retryLesson),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: widget.stars > 0 ? _startNextQuiz : null,
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Text(strings.AppStrings.nextLesson),
-                                  const SizedBox(width: 8),
-                                  const Icon(Icons.arrow_forward_rounded, size: 20),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+          body: Stack(
+            children: [
+              // Background gradient
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      cs.primary.withValues(alpha: 0.10),
+                      cs.primaryContainer.withValues(alpha: 0.06),
+                      cs.surface,
                     ],
-                  )),
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
                 ),
               ),
-            ),
+              // Confetti removed
+              SafeArea(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 640),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+                      child: SingleChildScrollView(
+                        child: Column(
+                        children: [
+                          const SizedBox(height: 8),
+                          // Heading + Icon (animated)
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.9, end: 1.0),
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeOutBack,
+                            builder: (context, value, child) => Transform.scale(scale: value, child: child),
+                            child: Container(
+                              padding: const EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                color: cs.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: cs.outlineVariant),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: cs.primary.withValues(alpha: 0.15),
+                                    blurRadius: 18,
+                                    spreadRadius: 2,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.emoji_events_rounded, color: cs.primary, size: 36),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    strings.AppStrings.lessonComplete,
+                                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+                          // Lesson title/badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: cs.surface,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: cs.outlineVariant),
+                            ),
+                            child: Text(
+                              widget.lesson.title,
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+                          // Animated Stars row (celebration)
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Soft glow
+                              Container(
+                                width: 160,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  gradient: RadialGradient(
+                                    colors: [
+                                      cs.primary.withValues(alpha: 0.18),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(3, (i) {
+                                  final filled = i < widget.stars;
+                                  final delayMs = 150 * i;
+                                  return TweenAnimationBuilder<double>(
+                                    key: ValueKey('star_$i-${widget.stars}'),
+                                    tween: Tween(begin: 0.0, end: 1.0),
+                                    duration: Duration(milliseconds: 500 + delayMs),
+                                    curve: Curves.easeOutBack,
+                                    builder: (context, value, child) => Transform.scale(
+                                      scale: value.clamp(0.0, 1.0),
+                                      child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.only(right: i == 2 ? 0 : 12),
+                                      child: Icon(
+                                        Icons.star_rounded,
+                                        size: 48,
+                                        color: filled ? cs.primary : cs.outlineVariant,
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 28),
+                          // Stats cards
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: [
+                              _AnimatedNumberCard(
+                                icon: Icons.check_circle_rounded,
+                                label: strings.AppStrings.correct,
+                                target: widget.correct,
+                              ),
+                              _AnimatedNumberCard(
+                                icon: Icons.percent_rounded,
+                                label: strings.AppStrings.percentage,
+                                target: pctValue.round(),
+                                suffix: '%',
+                              ),
+                              _StatCard(
+                                icon: Icons.local_fire_department_rounded,
+                                label: strings.AppStrings.bestStreak,
+                                value: '${widget.bestStreak}',
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Call-to-actions
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: widget.onRetry,
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.refresh_rounded, size: 20),
+                                      const SizedBox(width: 8),
+                                      const Text(strings.AppStrings.retryLesson),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: widget.stars > 0 ? _startNextQuiz : null,
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text(strings.AppStrings.nextLesson),
+                                      const SizedBox(width: 8),
+                                      const Icon(Icons.arrow_forward_rounded, size: 20),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

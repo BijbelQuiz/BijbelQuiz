@@ -135,6 +135,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
 
   /// Called when game stats change
   void _onGameStatsChanged() {
+    if (!mounted) return;
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
     // If score and streak are both 0, it might be a new game
     if (gameStats.score == 0 && gameStats.currentStreak == 0 && gameStats.incorrectAnswers == 0) {
