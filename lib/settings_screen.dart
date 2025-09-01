@@ -519,7 +519,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: () async {
                 final Uri emailLaunchUri = Uri(
                   scheme: 'mailto',
-                  path: 'thomasnowprod@proton.me',
+                  path: AppUrls.contactEmail,
                 );
                 if (await canLaunchUrl(emailLaunchUri)) {
                   await launchUrl(emailLaunchUri);
@@ -952,7 +952,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _launchBugReportEmail(BuildContext context) async {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
-      path: 'thomasnowprod@proton.me',
+      path: AppUrls.contactEmail,
       queryParameters: {
         'subject': 'BijbelQuiz error report',
       },
@@ -983,7 +983,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(strings.AppStrings.emailAddress),
-          content: const Text('thomasnowprod@proton.me'),
+          content: Text(AppUrls.contactEmail),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),

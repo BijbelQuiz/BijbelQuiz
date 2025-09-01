@@ -1,6 +1,6 @@
 # BijbelQuiz-backend
 
-backendbijbelquiz.vercel.app
+backend.bijbelquiz.app
 
 ## Inhoud
 

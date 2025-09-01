@@ -1,3 +1,3 @@
 # BijbelQuiz-website
 
-bijbelquiz.vercel.app
+bijbelquiz.app

@@ -9,7 +9,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const { platform, currentVersion } = req.query;
 
   // Build the download page URL with parameters
-  const baseUrl = 'https://bijbelquiz.vercel.app/download.html';
+  const baseUrl = 'https://bijbelquiz.app/download.html';
   const params = new URLSearchParams();
 
   if (platform) params.append('platform', platform as string);

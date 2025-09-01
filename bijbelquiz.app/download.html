@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Download BijbelQuiz</title>
-    <link rel="stylesheet" href="https://bijbelquiz.vercel.app/theme.css">
+    <link rel="stylesheet" href="https://bijbelquiz.app/theme.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title>Download BijbelQuiz</title>
 </head>
@@ -28,7 +28,7 @@
         
         <div class="web-play-section" id="webPlaySection" style="display: none;">
             <p>Of speel direct in uw browser:</p>
-            <a href="https://playbijbelquiz.vercel.app" class="btn secondary" target="_blank" rel="noopener">
+            <a href="https://play.bijbelquiz.app" class="btn secondary" target="_blank" rel="noopener">
                 <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">play_arrow</i>
                 Speel op Web
             </a>
@@ -53,42 +53,42 @@
                 name: 'Android',
                 icon: 'android',
                 description: 'Android App',
-                downloadUrl: 'https://bijbelquiz.vercel.app/downloads/android.apk',
+                downloadUrl: 'https://bijbelquiz.app/downloads/android.apk',
                 currentVersion: '1.1.0'
             },
             'ios': {
                 name: 'iOS',
                 icon: 'phone_iphone',
                 description: 'iOS App',
-                downloadUrl: 'https://bijbelquiz.vercel.app/downloads/ios.ipa',
+                downloadUrl: 'https://bijbelquiz.app/downloads/ios.ipa',
                 currentVersion: '1.1.0'
             },
             'windows': {
                 name: 'Windows',
                 icon: 'desktop_windows',
                 description: 'Desktop App',
-                downloadUrl: 'https://bijbelquiz.vercel.app/downloads/windows.exe',
+                downloadUrl: 'https://bijbelquiz.app/downloads/windows.exe',
                 currentVersion: '1.1.0'
             },
             'macos': {
                 name: 'macOS',
                 icon: 'laptop_mac',
                 description: 'Desktop App',
-                downloadUrl: 'https://bijbelquiz.vercel.app/downloads/macos.dmg',
+                downloadUrl: 'https://bijbelquiz.app/downloads/macos.dmg',
                 currentVersion: '1.1.0'
             },
             'linux': {
                 name: 'Linux',
                 icon: 'linux',
                 description: 'Desktop App',
-                downloadUrl: 'https://bijbelquiz.vercel.app/downloads/linux.AppImage',
+                downloadUrl: 'https://bijbelquiz.app/downloads/linux.AppImage',
                 currentVersion: '1.1.0'
             },
             'web': {
                 name: 'Web',
                 icon: 'public',
                 description: 'Web App',
-                downloadUrl: 'https://bijbelquiz.vercel.app/downloads/web.zip',
+                downloadUrl: 'https://bijbelquiz.app/downloads/web.zip',
                 currentVersion: '1.1.0'
             }
         };
@@ -120,7 +120,7 @@
 
                 // Add installation instructions link
                 const instructionsLink = document.createElement('a');
-                instructionsLink.href = `https://bijbelquiz.vercel.app/instructie/${platform}.html`;
+                instructionsLink.href = `https://bijbelquiz.app/instructie/${platform}.html`;
                 instructionsLink.className = 'btn secondary';
                 instructionsLink.innerHTML = `<i class="material-icons" style="vertical-align: middle; margin-right: 8px;">help</i> Installatiehulp`;
                 instructionsLink.target = '_blank';
@@ -163,7 +163,7 @@
                             <i class="material-icons" style="font-size: 18px; margin-right: 4px;">download</i>
                             Download
                         </a>
-                        <a href="https://bijbelquiz.vercel.app/instructie/${platformKey}.html" class="btn secondary">
+                        <a href="https://bijbelquiz.app/instructie/${platformKey}.html" class="btn secondary">
                             <i class="material-icons" style="font-size: 18px; margin-right: 4px;">help</i>
                             Installatiehulp
                         </a>

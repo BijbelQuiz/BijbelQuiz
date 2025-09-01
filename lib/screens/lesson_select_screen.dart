@@ -11,6 +11,7 @@ import '../screens/quiz_screen.dart';
 import '../screens/guide_screen.dart';
 import '../widgets/top_snackbar.dart';
 import '../l10n/strings_nl.dart' as strings;
+import '../constants/urls.dart';
 
 class LessonSelectScreen extends StatefulWidget {
   const LessonSelectScreen({super.key});
@@ -131,7 +132,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
   }
 
   void _openDonationPage() {
-    _launchUrl('https://bijbelquiz.vercel.app/donate.html');
+    _launchUrl(AppUrls.donateUrl);
   }
 
 
