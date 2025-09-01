@@ -41,7 +41,7 @@ class QuizState {
   /// preserving the immutability of the state.
   QuizState copyWith({
     QuizQuestion? question,
-    int? selectedAnswerIndex,
+    Object? selectedAnswerIndex = _sentinel,
     bool? isAnswering,
     bool? isTransitioning,
     int? timeRemaining,
@@ -49,11 +49,13 @@ class QuizState {
   }) {
     return QuizState(
       question: question ?? this.question,
-      selectedAnswerIndex: selectedAnswerIndex,
+      selectedAnswerIndex: selectedAnswerIndex == _sentinel ? this.selectedAnswerIndex : selectedAnswerIndex as int?,
       isAnswering: isAnswering ?? this.isAnswering,
       isTransitioning: isTransitioning ?? this.isTransitioning,
       timeRemaining: timeRemaining ?? this.timeRemaining,
       currentDifficulty: currentDifficulty ?? this.currentDifficulty,
     );
   }
+
+  static const _sentinel = Object();
 } 
