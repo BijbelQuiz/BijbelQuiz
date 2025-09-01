@@ -17,6 +17,8 @@ import 'screens/lesson_select_screen.dart';
 import 'widgets/quiz_skeleton.dart';
 import 'constants/urls.dart';
 import 'l10n/strings_nl.dart' as strings;
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 /// The settings screen that allows users to customize app preferences
 class SettingsScreen extends StatefulWidget {
@@ -470,6 +472,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: () => _launchBugReportEmail(context),
               label: strings.AppStrings.reportIssue,
               icon: Icons.bug_report,
+            ),
+            _buildActionButton(
+              context,
+              settings,
+              colorScheme,
+              isSmallScreen,
+              isDesktop,
+              onPressed: () => _exportStats(context),
+              label: strings.AppStrings.exportStats,
+              subtitle: strings.AppStrings.exportStatsDesc,
+              icon: Icons.download,
+            ),
+            _buildActionButton(
+              context,
+              settings,
+              colorScheme,
+              isSmallScreen,
+              isDesktop,
+              onPressed: () => _importStats(context),
+              label: strings.AppStrings.importStats,
+              subtitle: strings.AppStrings.importStatsDesc,
+              icon: Icons.upload,
             ),
             _buildActionButton(
               context,
@@ -975,6 +999,163 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       },
     );
+  }
+
+  Future<void> _exportStats(BuildContext context) async {
+    try {
+      final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
+      final lessonProgress = Provider.of<LessonProgressProvider>(context, listen: false);
+      final settings = Provider.of<SettingsProvider>(context, listen: false);
+
+      // Collect all data
+      final data = {
+        'gameStats': gameStats.getExportData(),
+        'lessonProgress': lessonProgress.getExportData(),
+        'settings': settings.getExportData(),
+        'version': '1.0', // For future compatibility
+      };
+
+      // Serialize to JSON
+      final jsonString = json.encode(data);
+
+      // Create hash for tamper-proofing
+      final hash = sha256.convert(utf8.encode(jsonString)).toString();
+
+      // Combine hash and data
+      final exportData = {
+        'hash': hash,
+        'data': jsonString,
+      };
+
+      final exportString = base64.encode(utf8.encode(json.encode(exportData)));
+
+      // Show dialog with export string
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(strings.AppStrings.exportStatsTitle),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(strings.AppStrings.exportStatsMessage),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: SelectableText(
+                      exportString,
+                      style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(strings.AppStrings.close),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showTopSnackBar(context, '${strings.AppStrings.failedToExportStats} $e', style: TopSnackBarStyle.error);
+      }
+    }
+  }
+
+  Future<void> _importStats(BuildContext context) async {
+    final controller = TextEditingController();
+
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(strings.AppStrings.importStatsTitle),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(strings.AppStrings.importStatsMessage),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: controller,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: strings.AppStrings.importStatsHint,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(strings.AppStrings.cancel),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final importString = controller.text.trim();
+                  if (importString.isEmpty) {
+                    showTopSnackBar(context, strings.AppStrings.pleaseEnterValidString, style: TopSnackBarStyle.error);
+                    return;
+                  }
+
+                  try {
+                    // Decode and verify
+                    final decoded = utf8.decode(base64.decode(importString));
+                    final importData = json.decode(decoded) as Map<String, dynamic>;
+
+                    final hash = importData['hash'] as String;
+                    final jsonString = importData['data'] as String;
+
+                    // Verify hash
+                    final computedHash = sha256.convert(utf8.encode(jsonString)).toString();
+                    if (computedHash != hash) {
+                      showTopSnackBar(context, strings.AppStrings.invalidOrTamperedData, style: TopSnackBarStyle.error);
+                      return;
+                    }
+
+                    // Parse data
+                    final data = json.decode(jsonString) as Map<String, dynamic>;
+
+                    // Load data into providers
+                    final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
+                    final lessonProgress = Provider.of<LessonProgressProvider>(context, listen: false);
+                    final settings = Provider.of<SettingsProvider>(context, listen: false);
+
+                    // Load game stats
+                    final gameStatsData = data['gameStats'] as Map<String, dynamic>;
+                    await gameStats.loadImportData(gameStatsData);
+
+                    // Load lesson progress
+                    final lessonData = data['lessonProgress'] as Map<String, dynamic>;
+                    await lessonProgress.loadImportData(lessonData);
+
+                    // Load settings
+                    final settingsData = data['settings'] as Map<String, dynamic>;
+                    await settings.loadImportData(settingsData);
+
+                    Navigator.of(context).pop();
+                    showTopSnackBar(context, strings.AppStrings.statsImportedSuccessfully, style: TopSnackBarStyle.success);
+                  } catch (e) {
+                    showTopSnackBar(context, '${strings.AppStrings.failedToImportStats} $e', style: TopSnackBarStyle.error);
+                  }
+                },
+                child: const Text('Import'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import './settings_provider.dart';
 import '../services/logger.dart';
@@ -306,7 +305,31 @@ class GameStatsProvider extends ChangeNotifier {
       return false;
     }
   }
-} 
+
+  /// Gets all game stats data for export
+  Map<String, dynamic> getExportData() {
+    return {
+      'score': _score,
+      'currentStreak': _currentStreak,
+      'longestStreak': _longestStreak,
+      'incorrectAnswers': _incorrectAnswers,
+    };
+  }
+
+  /// Loads game stats data from import
+  Future<void> loadImportData(Map<String, dynamic> data) async {
+    _score = data['score'] ?? 0;
+    _currentStreak = data['currentStreak'] ?? 0;
+    _longestStreak = data['longestStreak'] ?? 0;
+    _incorrectAnswers = data['incorrectAnswers'] ?? 0;
+
+    await _prefs?.setInt(_scoreKey, _score);
+    await _prefs?.setInt(_currentStreakKey, _currentStreak);
+    await _prefs?.setInt(_longestStreakKey, _longestStreak);
+    await _prefs?.setInt(_incorrectAnswersKey, _incorrectAnswers);
+    notifyListeners();
+  }
+}
 
 // Powerup model
 class Powerup {

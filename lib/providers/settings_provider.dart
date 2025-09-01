@@ -293,4 +293,43 @@ class SettingsProvider extends ChangeNotifier {
       return defaultValue;
     }
   }
+
+  /// Gets all settings data for export
+  Map<String, dynamic> getExportData() {
+    return {
+      'themeMode': _themeMode.index,
+      'gameSpeed': _gameSpeed,
+      'hasSeenGuide': _hasSeenGuide,
+      'mute': _mute,
+      'notificationEnabled': _notificationEnabled,
+      'hasDonated': _hasDonated,
+      'hasCheckedForUpdate': _hasCheckedForUpdate,
+      'selectedCustomThemeKey': _selectedCustomThemeKey,
+      'unlockedThemes': _unlockedThemes.toList(),
+    };
+  }
+
+  /// Loads settings data from import
+  Future<void> loadImportData(Map<String, dynamic> data) async {
+    _themeMode = ThemeMode.values[data['themeMode'] ?? 0];
+    _gameSpeed = data['gameSpeed'] ?? 'medium';
+    _hasSeenGuide = data['hasSeenGuide'] ?? false;
+    _mute = data['mute'] ?? false;
+    _notificationEnabled = data['notificationEnabled'] ?? true;
+    _hasDonated = data['hasDonated'] ?? false;
+    _hasCheckedForUpdate = data['hasCheckedForUpdate'] ?? false;
+    _selectedCustomThemeKey = data['selectedCustomThemeKey'];
+    _unlockedThemes = Set<String>.from(data['unlockedThemes'] ?? []);
+
+    await _prefs?.setInt(_themeModeKey, _themeMode.index);
+    await _prefs?.setString(_slowModeKey, _gameSpeed);
+    await _prefs?.setBool(_hasSeenGuideKey, _hasSeenGuide);
+    await _prefs?.setBool(_muteKey, _mute);
+    await _prefs?.setBool(_notificationEnabledKey, _notificationEnabled);
+    await _prefs?.setBool(_hasDonatedKey, _hasDonated);
+    await _prefs?.setBool(_hasCheckedForUpdateKey, _hasCheckedForUpdate);
+    await _prefs?.setString(_customThemeKey, _selectedCustomThemeKey ?? '');
+    await _prefs?.setStringList(_unlockedThemesKey, _unlockedThemes.toList());
+    notifyListeners();
+  }
 }

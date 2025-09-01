@@ -194,6 +194,10 @@ class AppStrings {
   
   // Actions
   static const String actions = 'Acties';
+  static const String exportStats = 'Statistieken exporteren';
+  static const String exportStatsDesc = 'Sla je voortgang en scores op als tekst';
+  static const String importStats = 'Statistieken importeren';
+  static const String importStatsDesc = 'Laad eerder geëxporteerde statistieken';
   static const String resetAndLogout = 'Resetten en uitloggen';
   static const String resetAndLogoutDesc = 'Alle gegevens wissen en app deactiveren';
   static const String showIntroduction = 'Introductie tonen';
@@ -263,5 +267,18 @@ class AppStrings {
   static const String failedToResetGuideStatus = 'Kon gidsstatus niet resetten:';
   static const String failedToResetCheckForUpdateStatus = 'Kon update-controle status niet resetten:';
   static const String failedToSaveNotificationSetting = 'Kon meldingsinstelling niet opslaan:';
+
+  // Export/Import Stats
+  static const String exportStatsTitle = 'Statistieken exporteren';
+  static const String exportStatsMessage = 'Kopieer deze tekst om je voortgang op te slaan:';
+  static const String importStatsTitle = 'Statistieken importeren';
+  static const String importStatsMessage = 'Plak je eerder geëxporteerde statistieken hier:';
+  static const String importStatsHint = 'Plak hier...';
+  static const String statsExportedSuccessfully = 'Statistieken succesvol geëxporteerd!';
+  static const String statsImportedSuccessfully = 'Statistieken succesvol geïmporteerd!';
+  static const String failedToExportStats = 'Kon statistieken niet exporteren:';
+  static const String failedToImportStats = 'Kon statistieken niet importeren:';
+  static const String invalidOrTamperedData = 'Ongeldige of gemanipuleerde gegevens';
+  static const String pleaseEnterValidString = 'Voer een geldige tekst in';
 
 }

@@ -124,4 +124,25 @@ class LessonProgressProvider extends ChangeNotifier {
     if (pct >= 0.5) return 1;
     return 0;
   }
+
+  /// Gets all lesson progress data for export
+  Map<String, dynamic> getExportData() {
+    return {
+      'unlockedCount': _unlockedCount,
+      'bestStarsByLesson': Map<String, int>.from(_bestStarsByLesson),
+    };
+  }
+
+  /// Loads lesson progress data from import
+  Future<void> loadImportData(Map<String, dynamic> data) async {
+    _unlockedCount = data['unlockedCount'] ?? 1;
+    _bestStarsByLesson.clear();
+    final bestStars = Map<String, int>.from(data['bestStarsByLesson'] ?? {});
+    bestStars.forEach((k, v) {
+      _bestStarsByLesson[k] = (v as int).clamp(0, 3);
+    });
+
+    await _persist();
+    notifyListeners();
+  }
 }
