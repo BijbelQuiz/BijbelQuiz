@@ -14,13 +14,12 @@ import '../models/lesson.dart';
 import '../providers/lesson_progress_provider.dart';
 import 'lesson_complete_screen.dart';
 
-import '../widgets/metric_item.dart';
-import '../widgets/question_card.dart';
 import '../widgets/biblical_reference_dialog.dart';
-import '../widgets/quiz_metrics_display.dart';
 import '../widgets/quiz_error_display.dart';
-import '../widgets/lesson_progress_bar.dart';
 import '../widgets/quiz_bottom_bar.dart';
+import '../widgets/question_widget.dart';
+import '../widgets/metrics_widget.dart';
+import '../widgets/app_bar_widget.dart';
 import 'dart:async';
 import '../services/logger.dart';
 import 'dart:math';
@@ -1179,45 +1178,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withAlpha((0.1 * 255).round()),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                Icons.quiz_rounded,
-                color: colorScheme.primary,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              strings.AppStrings.appName,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: colorScheme.onSurface.withAlpha((0.7 * 255).round()),
-              ),
-            ),
-          ],
-        ),
-        bottom: _lessonMode
-            ? PreferredSize(
-                preferredSize: const Size.fromHeight(24),
-                child: LessonProgressBar(
-                  current: _sessionAnswered,
-                  total: widget.sessionLimit ?? 1,
-                ),
-              )
-            : null,
-        actions: const [],
+      appBar: AppBarWidget(
+        lesson: widget.lesson,
+        sessionAnswered: _sessionAnswered,
+        sessionLimit: widget.sessionLimit,
+        lessonMode: _lessonMode,
       ),
       bottomNavigationBar: QuizBottomBar(
         quizState: _quizState,
@@ -1246,7 +1211,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Compact metrics row above the question
-                      QuizMetricsDisplay(
+                      MetricsWidget(
                         scoreAnimation: _scoreAnimation,
                         streakAnimation: _streakAnimation,
                         longestStreakAnimation: _longestStreakAnimation,
@@ -1262,7 +1227,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                       ),
                       SizedBox(height: isDesktop ? 24 : 20),
                       // Question card below metrics
-                      QuestionCard(
+                      QuestionWidget(
                         question: _quizState.question,
                         selectedAnswerIndex: _quizState.selectedAnswerIndex,
                         isAnswering: _quizState.isAnswering,
