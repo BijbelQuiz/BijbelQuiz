@@ -59,14 +59,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
-        if (mounted) {
-          showTopSnackBar(context, 'Kon update pagina niet openen', style: TopSnackBarStyle.error);
-        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            showTopSnackBar(context, 'Kon update pagina niet openen', style: TopSnackBarStyle.error);
+          }
+        });
       }
     } catch (e) {
-      if (mounted) {
-        showTopSnackBar(context, 'Fout bij openen update pagina: ${e.toString()}', style: TopSnackBarStyle.error);
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          showTopSnackBar(context, 'Fout bij openen update pagina: ${e.toString()}', style: TopSnackBarStyle.error);
+        }
+      });
     }
   }
 
@@ -315,7 +319,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (bool value) {
                   settings.setMute(value);
                 },
-                activeColor: colorScheme.primary,
+                activeThumbColor: colorScheme.primary,
               ),
             ),
           ],
@@ -394,6 +398,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       await NotificationService().cancelAllNotifications();
                     }
                   },
+                  activeThumbColor: colorScheme.primary,
                 ),
               ),
             ],
@@ -1137,8 +1142,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     final settingsData = data['settings'] as Map<String, dynamic>;
                     await settings.loadImportData(settingsData);
 
-                    Navigator.of(context).pop();
-                    showTopSnackBar(context, strings.AppStrings.statsImportedSuccessfully, style: TopSnackBarStyle.success);
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+                        showTopSnackBar(context, strings.AppStrings.statsImportedSuccessfully, style: TopSnackBarStyle.success);
+                      }
+                    });
                   } catch (e) {
                     showTopSnackBar(context, '${strings.AppStrings.failedToImportStats} $e', style: TopSnackBarStyle.error);
                   }
@@ -1225,11 +1234,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: InkWell(
           onTap: () async {
             final Uri uri = Uri.parse(url);
-            final mounted = context.mounted;
             if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-              if (mounted) {
-                showTopSnackBar(context, 'Kon $platform niet openen', style: TopSnackBarStyle.error);
-              }
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (context.mounted) {
+                  showTopSnackBar(context, 'Kon $platform niet openen', style: TopSnackBarStyle.error);
+                }
+              });
             }
           },
           borderRadius: BorderRadius.circular(12),

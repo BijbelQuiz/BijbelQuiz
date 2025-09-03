@@ -40,10 +40,12 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
     final cs = Theme.of(context).colorScheme;
     final pctValue = widget.total > 0 ? (widget.correct / widget.total * 100.0) : 0.0;
 
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        return false;
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
       },
       child: GestureDetector(
         onHorizontalDragEnd: (DragEndDetails details) {

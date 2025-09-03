@@ -533,19 +533,21 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                   gameStats.spendPointsForRetry().then((success) {
                     if (success && mounted) {
                       Navigator.of(dialogContext).pop();
-                      if (mounted) {
-                        setState(() {
-                          final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
-                            Duration(seconds: settings.slowMode ? 35 : 20)
-                          );
-                          _quizState = _quizState.copyWith(
-                            timeRemaining: optimalTimerDuration.inSeconds,
-                          );
-                        });
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted) {
-                          _startTimer(reset: true);
+                          setState(() {
+                            final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
+                              Duration(seconds: settings.slowMode ? 35 : 20)
+                            );
+                            _quizState = _quizState.copyWith(
+                              timeRemaining: optimalTimerDuration.inSeconds,
+                            );
+                          });
+                          if (mounted) {
+                            _startTimer(reset: true);
+                          }
                         }
-                      }
+                      });
                     }
                   });
                 } : () {
@@ -1431,26 +1433,30 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       }
 
       // Show the biblical reference dialog
-      if (mounted) {
-        await showDialog(
-          context: localContext,
-          builder: (BuildContext context) {
-            return BiblicalReferenceDialog(
-              reference: _quizState.question.biblicalReference!,
-            );
-          },
-        );
-      }
-
-      // Resume the timer when dialog is closed
-      if (mounted) {
-        _resumeTimer();
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          showDialog(
+            context: localContext,
+            builder: (BuildContext context) {
+              return BiblicalReferenceDialog(
+                reference: _quizState.question.biblicalReference!,
+              );
+            },
+          ).then((_) {
+            // Resume the timer when dialog is closed
+            if (mounted) {
+              _resumeTimer();
+            }
+          });
+        }
+      });
     } else {
       // Not enough stars
-      if (mounted) {
-        showTopSnackBar(localContext, strings.AppStrings.notEnoughStars, style: TopSnackBarStyle.warning);
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          showTopSnackBar(localContext, strings.AppStrings.notEnoughStars, style: TopSnackBarStyle.warning);
+        }
+      });
     }
   }
 }

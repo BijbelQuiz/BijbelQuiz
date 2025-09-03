@@ -536,7 +536,7 @@ class _GuidePageViewState extends State<GuidePageView> {
                                       onChanged: (bool value) {
                                         settings.setMute(value);
                                       },
-                                      activeColor: widget.colorScheme.primary,
+                                      activeThumbColor: widget.colorScheme.primary,
                                     ),
                                   ],
                                 ),

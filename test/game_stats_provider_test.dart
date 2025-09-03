@@ -274,16 +274,20 @@ void main() {
       expect(provider.isPowerupActive, false);
     });
 
-    test('should decrement question-based powerup', () {
+    test('should decrement question-based powerup', () async {
+      when(mockPrefs.getInt(any)).thenReturn(0);
+      when(mockPrefs.setInt(any, any)).thenAnswer((_) async => true);
+
       provider = GameStatsProvider();
+      await Future.delayed(Duration.zero);
       provider.activatePowerup(multiplier: 2, questions: 3);
 
-      provider._decrementPowerup();
+      await provider.updateStats(isCorrect: true);
 
       expect(provider.powerupQuestionsLeft, 2);
 
-      provider._decrementPowerup();
-      provider._decrementPowerup();
+      await provider.updateStats(isCorrect: true);
+      await provider.updateStats(isCorrect: true);
 
       expect(provider.activePowerup, isNull);
     });
