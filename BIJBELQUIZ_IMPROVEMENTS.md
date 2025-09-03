@@ -3,16 +3,9 @@
 ## Overview
 This document outlines comprehensive improvements for the BijbelQuiz Flutter application based on a thorough code analysis. The suggestions are organized by priority with implementation timelines.
 
-
 ## 🔧 MEDIUM PRIORITY - Architecture & Performance
 
 ### Refactoring
-- **Split large classes**:
-  - Break down `QuizScreen` (1457 lines) into smaller components:
-    - Extract timer management to `QuizTimerManager`
-    - Extract animation logic to `QuizAnimationController`
-    - Extract PQU algorithm to `ProgressiveQuestionSelector`
-    - Extract answer handling to `QuizAnswerHandler`
 - **Extract helper methods**:
   - Move responsive grid calculations to `lib/utils/responsive_utils.dart`
   - Create `lib/utils/theme_utils.dart` for theme switching logic
