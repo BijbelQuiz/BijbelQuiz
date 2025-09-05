@@ -1,366 +1,70 @@
 # BijbelQuiz
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?logo=flutter)](https://flutter.dev)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-
-BijbelQuiz is a cross-platform Bible quiz app designed to test and improve your knowledge of the Bible. Built with Flutter, it features multiple question types, performance optimizations for low-end devices, and comprehensive offline capabilities.
-
-**Note: The app is only available in Dutch. All in-app content, questions, and UI are in Dutch.**
-
-## ✨ Features
-
-### Core Functionality
-- **Multiple Question Types**: Multiple choice, fill-in-the-blank, and true/false questions
-- **Adaptive Difficulty**: Progressive Question Up-selection (PQU) algorithm adjusts difficulty based on performance
-- **Comprehensive Scoring**: Tracks score, streaks, longest streaks, and incorrect answers
-- **Lesson Mode**: Structured learning with unlockable content and progress tracking
-
-### User Experience
-- **Performance Optimized**: Special optimizations for low-end devices and poor connections
-- **Offline First**: Complete offline functionality with question caching
-- **Sound & Haptics**: Audio feedback and haptic responses (where supported)
-- **Customizable Themes**: Multiple theme options including OLED-friendly dark theme
-- **Responsive Design**: Optimized for phones, tablets, and desktop
-
-### Advanced Features
-- **Power-ups**: Score multipliers and time bonuses
-- **Biblical References**: Unlockable scripture references for deeper study
-- **Local Notifications**: Daily motivation reminders
-- **Telemetry & Analytics**: Optional usage analytics with user consent
-- **Data Export/Import**: Backup and restore user progress and settings
-
-### Technical Features
-- **Cross-Platform**: Android, iOS, Web, Linux, macOS, Windows
-- **Provider Architecture**: Clean state management with ChangeNotifier
-- **Service-Oriented Design**: Modular services for different app functions
-- **Performance Monitoring**: Real-time frame rate and memory usage tracking
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- **Flutter**: Version 3.0 or higher
-- **Dart**: Version 2.19 or higher
-- **Android Studio** (for Android development)
-- **Xcode** (for iOS development, macOS only)
-
-### Installation
-
-1. **Clone the repository**:
-    ```bash
-    git clone <repository-url>
-    cd BijbelQuiz
-    ```
-
-2. **Install dependencies**:
-    ```bash
-    flutter pub get
-    ```
-
-3. **Set up development environment**:
-    ```bash
-    # For Android development
-    flutter config --android-studio-dir /path/to/android/studio
-
-    # For iOS development (macOS only)
-    sudo gem install cocoapods
-    ```
-
-4. **Run the app**:
-    ```bash
-    # For Android
-    flutter run
-
-    # For iOS (macOS only)
-    flutter run --device-id <iOS-device-id>
-
-    # For Web
-    flutter run -d chrome
-
-    # For Desktop
-    flutter run -d linux  # or macos, windows
-    ```
-
-### Development Commands
-
-```bash
-# Run tests
-flutter test
-
-# Run tests with coverage
-flutter test --coverage
-
-# Analyze code
-flutter analyze
-
-# Format code
-flutter format lib/
-
-# Build for production
-flutter build apk --release
-flutter build ios --release
-flutter build web --release
-```
-
-## 🏗️ Architecture
-
-### Project Structure
-
-```
-lib/
-├── main.dart                 # App entry point and theme configuration
-├── providers/                # State management using Provider pattern
-│   ├── settings_provider.dart    # App settings and preferences
-│   ├── game_stats_provider.dart  # Game statistics and scoring
-│   └── lesson_progress_provider.dart # Lesson unlock progress
-├── services/                 # Business logic and external integrations
-│   ├── logger.dart              # Centralized logging
-│   ├── performance_service.dart # Performance monitoring
-│   ├── sound_service.dart       # Audio playback
-│   ├── connection_service.dart  # Network connectivity
-│   └── question_cache_service.dart # Question caching
-├── models/                   # Data models
-│   ├── quiz_question.dart       # Question data structure
-│   ├── quiz_state.dart          # Quiz session state
-│   └── lesson.dart              # Lesson configuration
-├── screens/                  # UI screens
-│   ├── quiz_screen.dart         # Main quiz interface
-│   ├── lesson_select_screen.dart # Lesson selection
-│   └── settings_screen.dart     # Settings interface
-├── widgets/                  # Reusable UI components
-│   ├── question_card.dart       # Question display
-│   ├── answer_button.dart       # Answer selection
-│   └── metric_item.dart         # Statistics display
-└── theme/                    # Theme definitions
-    └── app_theme.dart           # App theming
-```
-
-### Design Patterns
-
-- **Provider Pattern**: State management for reactive UI updates
-- **Service Layer**: Separation of business logic from UI
-- **Repository Pattern**: Data access abstraction
-- **Factory Pattern**: Object creation for models
-- **Observer Pattern**: Event handling and notifications
-
-### Key Components
-
-#### Progressive Question Up-selection (PQU)
-The app uses an intelligent difficulty adjustment algorithm that:
-- Analyzes user performance across multiple metrics
-- Adjusts question difficulty dynamically
-- Prevents getting stuck at the same difficulty level
-- Balances challenge with achievability
-
-#### Performance Optimization
-- **Frame Rate Monitoring**: Real-time performance tracking
-- **Memory Management**: Automatic cache optimization
-- **Adaptive Animations**: Duration adjustment based on device capabilities
-- **Lazy Loading**: Progressive question loading to reduce startup time
-
-#### Offline-First Design
-- **Question Caching**: Local storage of question data
-- **Background Sync**: Automatic data updates when online
-- **Graceful Degradation**: Full functionality without network
-
-## 🔧 Troubleshooting
-
-### Notifications Not Working
-
-If you're not receiving daily motivation notifications:
-
-**Android:**
-1. **App Settings**: Ensure notifications are enabled in app settings
-2. **System Permissions**: Check notification permissions in device settings
-3. **Android 12+**: Enable "Schedule exact alarms" permission
-4. **Battery Optimization**: Disable battery optimization for the app
-5. **Background Execution**: Allow background execution in battery settings
-
-**iOS:**
-1. **System Settings**: Enable notifications for the app
-2. **Focus Modes**: Check if notifications are blocked by Focus/DND modes
-3. **Background Refresh**: Ensure background app refresh is enabled
-
-**General:**
-1. **Restart App**: Force stop and restart the application
-2. **Check Time Zone**: Verify device time zone is correct
-3. **Network**: Ensure device has internet for initial setup
-
-### Performance Issues
-
-**Low Frame Rate:**
-- The app automatically detects low-end devices and adjusts animations
-- Try restarting the app to reset performance monitoring
-- Check for background apps consuming resources
-
-**Slow Loading:**
-- Clear app cache in device settings
-- Ensure stable internet connection for initial data load
-- Try restarting the app
-
-**Memory Issues:**
-- The app includes automatic memory optimization
-- Restart the app if memory usage seems high
-- Check available device storage
-
-### Audio Problems
-
-**No Sound Effects:**
-- Check if sound is muted in app settings
-- Verify device volume is not muted
-- For Linux: Install audio players (mpg123, ffplay)
-
-**Audio Playback Errors:**
-- Try restarting the app
-- Check system audio configuration
-- For Linux: Verify audio drivers are working
-
-## 📚 API Reference
-
-### Core Classes
-
-#### QuizQuestion
-```dart
-class QuizQuestion {
-  final String question;
-  final String correctAnswer;
-  final List<String> incorrectAnswers;
-  final String difficulty;
-  final QuestionType type;
-  final List<String> categories;
-  final String? biblicalReference;
-
-  // Factory constructor for JSON parsing
-  factory QuizQuestion.fromJson(Map<String, dynamic> json)
-
-  // Convert to JSON for caching
-  Map<String, dynamic> toJson()
-}
-```
-
-#### GameStatsProvider
-```dart
-class GameStatsProvider extends ChangeNotifier {
-  int get score;
-  int get currentStreak;
-  int get longestStreak;
-
-  Future<void> updateStats({required bool isCorrect});
-  Future<bool> spendPointsForRetry();
-  Future<bool> spendStars(int amount);
-}
-```
-
-#### SettingsProvider
-```dart
-class SettingsProvider extends ChangeNotifier {
-  ThemeMode get themeMode;
-  String get gameSpeed;
-  bool get mute;
-  bool get notificationEnabled;
-
-  Future<void> setThemeMode(ThemeMode mode);
-  Future<void> setGameSpeed(String speed);
-  Future<void> setMute(bool enabled);
-}
-```
-
-### Services
-
-- **PerformanceService**: Monitors and optimizes app performance
-- **SoundService**: Handles audio playback across platforms
-- **ConnectionService**: Manages network connectivity
-- **QuestionCacheService**: Caches questions for offline use
-- **Logger**: Centralized logging with configurable levels
-
-## 🤝 Contributing
-
-We welcome contributions! Here's how you can help:
-
-### Development Workflow
-
-1. **Fork** the repository
-2. **Create** a feature branch: `git checkout -b feature/your-feature-name`
-3. **Make** your changes with proper documentation
-4. **Test** thoroughly on multiple platforms
-5. **Commit** with clear messages: `git commit -m "Add: feature description"`
-6. **Push** to your branch: `git push origin feature/your-feature-name`
-7. **Create** a Pull Request
-
-### Code Guidelines
-
-- **Dart/Flutter Best Practices**: Follow official style guides
-- **Documentation**: Add doc comments for public APIs
-- **Testing**: Include unit tests for new features
-- **Performance**: Consider performance impact of changes
-- **Cross-Platform**: Test on Android, iOS, and Web
-
-### Areas for Contribution
-
-- **Question Content**: Add new Bible questions
-- **UI/UX Improvements**: Enhance user interface
-- **Performance**: Optimize for low-end devices
-- **Accessibility**: Improve screen reader support
-- **Internationalization**: Add support for other languages
-- **Testing**: Increase test coverage
-
-### Issue Reporting
-
-When reporting bugs, please include:
-- Device/platform information
-- Steps to reproduce
-- Expected vs actual behavior
-- Screenshots/logs if applicable
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
-
-## Build & Test
-
-To build for your platform:
-
-- **Web:**
-  ```sh
-  flutter build web
-  ```
-- **Android:**
-  ```sh
-  flutter build apk --release
-  ```
-- **iOS:**
-  ```sh
-  flutter build ios --release
-  ```
-- **Linux:**
-  ```sh
-  flutter build linux --release
-  ```
-- **macOS:**
-  ```sh
-  flutter build macos --release
-  ```
-- **Windows:**
-  ```sh
-  flutter build windows --release
-  ```
-
-To run tests:
-
-```sh
-flutter test
-```
-
-## Security
-
-See [SECURITY_DOCS.md](SECURITY_DOCS.md) for details on security measures implemented in this app.
-
-## Asset Licenses
-
-See [ASSETS_LICENSES.md](ASSETS_LICENSES.md) for details on the licenses of fonts, images, and sounds used in this app.
-
-## License
-
-This project is licensed under the GNU General Public License v3.0 (GPL-3.0). See [LICENSE.md](LICENSE.md) for details.
-
-## Contact
-
-For questions, suggestions, or security issues, contact: thomasnowprod@proton.me
+BijbelQuiz is a Flutter-based mobile application designed for Bible quizzes, featuring interactive lessons, questions, and progress tracking.
+
+## Project Structure
+
+### Root Directory
+- `.gitignore`: Git ignore rules
+- `app/`: Main Flutter application
+- `docs/`: Documentation files
+- `websites/`: Web applications and services
+
+### app/ Directory
+The core Flutter application with the following structure:
+
+- `android/`: Android-specific configuration and code
+  - `app/src/main/`: Main Android source code
+  - `gradle/`: Gradle build files
+- `ios/`: iOS-specific configuration and code
+  - `Runner/`: iOS runner app
+- `lib/`: Dart source code
+  - `config/`: Application configuration
+  - `constants/`: Constant values and URLs
+  - `l10n/`: Localization strings
+  - `models/`: Data models (Lesson, QuizQuestion, QuizState)
+  - `providers/`: State management providers
+  - `screens/`: UI screens (Quiz, Lesson Select, etc.)
+  - `services/`: Business logic services (Sound, Notifications, etc.)
+  - `theme/`: Application theming
+  - `utils/`: Utility functions
+  - `widgets/`: Reusable UI widgets
+- `assets/`: Static assets
+  - `categories.json`: Quiz categories
+  - `questions-nl-sv.json`: Questions in Dutch and Swedish
+  - `fonts/`: Custom fonts (Quicksand)
+  - `icon/`: App icons
+  - `sounds/`: Audio files for feedback
+- `linux/`, `macos/`, `web/`, `windows/`: Platform-specific code
+- `test/`: Unit tests
+
+### docs/ Directory
+Documentation for the project.
+
+### websites/ Directory
+Web applications:
+- `backend.bijbelquiz.app/`: Backend API and services
+  - `api/`: API endpoints
+  - `question-editor/`: Question editing interface
+- `bijbelquiz.app/`: Main website
+  - `blog/`: Blog content
+  - `downloads/`: Downloadable resources
+  - `instructie/`: Download instructions
+- `play.bijbelquiz.app/`: Web version of the app
+
+## Getting Started
+
+1. Ensure Flutter is installed: https://flutter.dev/docs/get-started/install
+2. Clone the repository
+3. Navigate to `app/` directory
+4. Run `flutter pub get` to install dependencies
+5. Run `flutter run` to start the app
+
+## Features
+
+- Interactive Bible quizzes
+- Multiple languages (Dutch, Swedish)
+- Progress tracking
+- Sound effects
+- Offline support
+- Cross-platform (Android, iOS, Web, Desktop)
