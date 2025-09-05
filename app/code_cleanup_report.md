@@ -4,18 +4,6 @@
 
 This report documents the findings from a comprehensive analysis of the BijbelQuiz Flutter app for duplicate and unused code. The analysis was performed using Flutter's static analyzer and manual code review.
 
-## Unused Code
-
-### Unused Local Variables
-
-- `settings` in `quiz_answer_handler.dart:147`
-- `newDifficulty` in `quiz_answer_handler.dart:156`
-
-### Unused Imports
-
-- `../providers/settings_provider.dart` in `common_widgets.dart` (line 4)
-- `../widgets/common_widgets.dart` in `question_card.dart` (line 6)
-
 ## Duplicate Code
 
 ### Sound Playing Functions

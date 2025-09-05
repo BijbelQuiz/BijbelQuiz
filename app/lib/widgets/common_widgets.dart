@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/responsive_utils.dart';
 import '../utils/theme_utils.dart';
-import '../providers/settings_provider.dart';
 
 /// A reusable card widget with consistent styling and responsive design
 class AppCard extends StatelessWidget {

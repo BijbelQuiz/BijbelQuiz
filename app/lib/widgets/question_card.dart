@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import '../models/quiz_question.dart';
 import '../theme/app_theme.dart';
 import '../utils/responsive_utils.dart';
-import '../widgets/common_widgets.dart';
 import '../services/performance_service.dart';
 import 'answer_button.dart';
 
@@ -339,7 +338,7 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                                     feedback: feedback,
                                     label: options[index],
                                     colorScheme: colorScheme,
-                                    letter: null,
+                                    letter: String.fromCharCode(65 + index),
                                     isDisabled: widget.isAnswering || widget.selectedAnswerIndex != null,
                                     externalScaleAnimation: _animationController.answerButtonScaleAnimation,
                                   ),
@@ -440,7 +439,7 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                                     feedback: feedback,
                                     label: tfOptions[index],
                                     colorScheme: colorScheme,
-                                    letter: null,
+                                    letter: String.fromCharCode(65 + index),
                                     isLarge: true,
                                     isDisabled: widget.isAnswering || widget.selectedAnswerIndex != null,
                                     externalScaleAnimation: _animationController.answerButtonScaleAnimation,
@@ -463,8 +462,8 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
     }
 
     if (isDesktop) {
-      // Only MC supports keyboard shortcuts for now
-      if (widget.question.type == QuestionType.mc) {
+      // All question types support keyboard shortcuts
+      if (widget.question.type == QuestionType.mc || widget.question.type == QuestionType.fitb || widget.question.type == QuestionType.tf) {
         final options = widget.question.allOptions;
         content = Focus(
           autofocus: true,

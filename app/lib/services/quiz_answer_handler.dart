@@ -136,16 +136,11 @@ class QuizAnswerHandler {
     required UpdateQuizStateCallback updateQuizState,
   }) async {
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
-    final settings = Provider.of<SettingsProvider>(context, listen: false);
 
     // Update stats using the provider
     gameStats.updateStats(isCorrect: isCorrect);
     // Trigger animations for stats updates
     triggerAnimations();
-
-    // Calculate new difficulty (this will be handled by ProgressiveQuestionSelector)
-    // For now, just return the current difficulty
-    final newDifficulty = quizState.currentDifficulty;
 
     // Update quiz state with new question and difficulty
     // This will be called after picking next question
