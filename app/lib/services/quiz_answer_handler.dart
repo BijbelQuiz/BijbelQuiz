@@ -125,24 +125,4 @@ class QuizAnswerHandler {
     // Phase 4: Transition to next question
     await handleNextQuestion(isCorrect, quizState.currentDifficulty);
   }
-
-
-  /// Process answer result and update stats
-  Future<void> processAnswerResult({
-    required bool isCorrect,
-    required QuizState quizState,
-    required BuildContext context,
-    required TriggerAnimationsCallback triggerAnimations,
-    required UpdateQuizStateCallback updateQuizState,
-  }) async {
-    final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
-
-    // Update stats using the provider
-    gameStats.updateStats(isCorrect: isCorrect);
-    // Trigger animations for stats updates
-    triggerAnimations();
-
-    // Update quiz state with new question and difficulty
-    // This will be called after picking next question
-  }
 }

@@ -190,12 +190,25 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
   
   // Simple text sanitization to prevent XSS
   String _sanitizeText(String text) {
-    return text
+    // First decode Unicode escape sequences
+    String decodedText = _decodeUnicodeEscapes(text);
+    
+    return decodedText
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#x27;');
+  }
+  
+  // Decode Unicode escape sequences like \u00ebl
+  String _decodeUnicodeEscapes(String text) {
+    final RegExp unicodeRegex = RegExp(r'\u([0-9a-fA-F]{4})');
+    return text.replaceAllMapped(unicodeRegex, (Match match) {
+      final String hexCode = match.group(1)!;
+      final int charCode = int.parse(hexCode, radix: 16);
+      return String.fromCharCode(charCode);
+    });
   }
 
   Map<String, dynamic>? _parseReference(String reference) {

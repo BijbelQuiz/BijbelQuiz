@@ -406,9 +406,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
             TextButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                gameStats.updateStats(isCorrect: false);
-                // Trigger animations for stats updates
-                _animationController.triggerAllStatsAnimations();
                 _handleNextQuestion(false, _quizState.currentDifficulty);
               },
               child: Text(
@@ -563,6 +560,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
   Future<void> _handleNextQuestion(bool isCorrect, double newDifficulty) async {
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
+
+    // Update game stats first
+    await gameStats.updateStats(isCorrect: isCorrect);
+    // Trigger animations for stats updates
+    _animationController.triggerAllStatsAnimations();
 
     // Update lesson session counters
     if (_lessonMode) {
