@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signal - BijbelQuiz</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Bezig met doorverwijzen...</h1>
+        <p>Je wordt doorverwezen naar onze Signal groep.</p>
+        <p>Als je niet automatisch wordt doorgestuurd, <a href="https://signal.group/#CjQKILlX0njMt_UqlaFrlk_ePLdUkNel9p4w_CHvgkKbAoHYEhCZIoaUq_8G36p1w-Xpq1xq" id="redirect-link">klik dan hier</a>.</p>
+    </div>
+
+    <script>
+        // Redirect immediately to the Signal group
+        window.location.href = 'https://signal.group/#CjQKILlX0njMt_UqlaFrlk_ePLdUkNel9p4w_CHvgkKbAoHYEhCZIoaUq_8G36p1w-Xpq1xq';
+    </script>
+</body>
+</html>

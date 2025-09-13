@@ -15,11 +15,11 @@ class AppUrls {
   static final String donateUrl = '$baseDomain/donate.html';
   static final String updateUrl = '$baseDomain/download.html';
 
-  // Social media URLs
-  static String get mastodonUrl => AppConfig.mastodonUrl;
-  static String get kweblerUrl => AppConfig.kweblerUrl;
-  static String get discordUrl => AppConfig.discordUrl;
-  static String get signalUrl => AppConfig.signalUrl;
+  // Social media URLs (redirect through our own domain)
+  static String get mastodonUrl => '$baseDomain/r/mastodon';
+  static String get kweblerUrl => '$baseDomain/r/kwebler';
+  static String get discordUrl => '$baseDomain/r/discord';
+  static String get signalUrl => '$baseDomain/r/signal';
 
   // Contact
   static String get contactEmail => AppConfig.contactEmail;
