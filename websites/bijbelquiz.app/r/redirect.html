@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, follow">
+    <title>Doorverwijzen - BijbelQuiz</title>
+    
+    <!-- Social media meta tags will be dynamically set by JavaScript -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="BijbelQuiz">
+    
+    <!-- Twitter meta tags -->
+    <meta name="twitter:card" content="summary">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 500px;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin: 1rem;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #2563eb;
+        }
+        
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: #475569;
+        }
+        
+        a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .spinner {
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #0f172a;
+                color: #f8fafc;
+            }
+            
+            .container {
+                background: #1e293b;
+            }
+            
+            p {
+                color: #94a3b8;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <h1>Bezig met doorverwijzen...</h1>
+        <p id="redirect-message">Je wordt doorverwezen.</p>
+        <p>Als je niet automatisch wordt doorgestuurd, <a href="#" id="redirect-link">klik dan hier</a>.</p>
+    </div>
+
+    <script>
+        // Define redirect mappings
+        const redirects = {
+            'discord': {
+                url: 'https://discord.gg/ADbhWr4UnK',
+                title: 'BijbelQuiz Discord Community',
+                description: 'Word lid van onze BijbelQuiz Discord community voor interactie met andere spelers en updates.'
+            },
+            'donate': {
+                url: 'https://tikkie.me/pay/q0lsb26m93ll6m6htk3r',
+                title: 'Doneren aan BijbelQuiz',
+                description: 'Steun BijbelQuiz door te doneren via Tikkie. Elke donatie helpt bij het onderhouden en verbeteren van de app.'
+            },
+            'email': {
+                url: 'mailto:info@bijbelquiz.app',
+                title: 'Contact - BijbelQuiz',
+                description: 'Neem contact op met het BijbelQuiz team via e-mail.'
+            },
+            'index': {
+                url: 'https://bijbelquiz.app',
+                title: 'BijbelQuiz Hoofdpagina',
+                description: 'Terug naar de hoofdpagina van BijbelQuiz.'
+            },
+            'kwebler': {
+                url: 'https://kwebler.nl',
+                title: 'Kwebler',
+                description: 'Bezoek de website van Kwebler.'
+            },
+            'mastodon': {
+                url: 'https://toot.community/@BijbelQuiz',
+                title: 'BijbelQuiz op Mastodon',
+                description: 'Volg BijbelQuiz op Mastodon.'
+            },
+            'signal-contact': {
+                url: 'https://signal.me/#p/+31683726261',
+                title: 'Signal Contact - BijbelQuiz',
+                description: 'Neem contact op via Signal.'
+            },
+            'signal-group': {
+                url: 'https://signal.me/#np/+31683726261',
+                title: 'Signal Groep - BijbelQuiz',
+                description: 'Word lid van onze Signal groep.'
+            }
+        };
+        
+        // Get the redirect key from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectKey = urlParams.get('to') || 'index';
+        
+        // Get redirect info or default to index
+        const redirectInfo = redirects[redirectKey] || redirects['index'];
+        
+        // Update page title and meta tags
+        document.title = redirectInfo.title;
+        
+        // Update meta description
+        let metaDescription = document.querySelector('meta[name="description"]');
+        if (!metaDescription) {
+            metaDescription = document.createElement('meta');
+            metaDescription.name = 'description';
+            document.head.appendChild(metaDescription);
+        }
+        metaDescription.content = redirectInfo.description;
+        
+        // Update Open Graph tags
+        document.querySelector('meta[property="og:title"]').content = redirectInfo.title;
+        document.querySelector('meta[property="og:description"]').content = redirectInfo.description;
+        document.querySelector('meta[property="og:url"]').content = window.location.href;
+        
+        // Update Twitter tags
+        document.querySelector('meta[name="twitter:title"]').content = redirectInfo.title;
+        document.querySelector('meta[name="twitter:description"]').content = redirectInfo.description;
+        
+        // Update page content
+        document.getElementById('redirect-message').textContent = `Je wordt doorverwezen naar ${redirectInfo.title}.`;
+        document.getElementById('redirect-link').href = redirectInfo.url;
+        document.getElementById('redirect-link').textContent = `Ga naar ${redirectInfo.title}`;
+        
+        // Add preconnect for external domains
+        if (redirectInfo.url.startsWith('https://')) {
+            const domain = new URL(redirectInfo.url).hostname;
+            const preconnect = document.createElement('link');
+            preconnect.rel = 'preconnect';
+            preconnect.href = `https://${domain}`;
+            document.head.appendChild(preconnect);
+        }
+        
+        // Redirect after a short delay to allow page to load
+        setTimeout(() => {
+            window.location.href = redirectInfo.url;
+        }, 100);
+    </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+{
+  "redirects": [
+    {
+      "source": "/r/discord",
+      "destination": "https://discord.gg/ADbhWr4UnK"
+    },
+    {
+      "source": "/r/donate",
+      "destination": "https://tikkie.me/pay/q0lsb26m93ll6m6htk3r"
+    },
+    {
+      "source": "/r/email",
+      "destination": "mailto:info@bijbelquiz.app"
+    },
+    {
+      "source": "/r/index",
+      "destination": "https://bijbelquiz.app"
+    },
+    {
+      "source": "/r/kwebler",
+      "destination": "https://kwebler.nl"
+    },
+    {
+      "source": "/r/mastodon",
+      "destination": "https://toot.community/@BijbelQuiz"
+    },
+    {
+      "source": "/r/signal-contact",
+      "destination": "https://signal.me/#p/+31683726261"
+    },
+    {
+      "source": "/r/signal-group",
+      "destination": "https://signal.me/#np/+31683726261"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/r/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/r/:path*",
+      "destination": "/r/redirect.html"
+    }
+  ]
+}
