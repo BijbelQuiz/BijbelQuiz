@@ -6,6 +6,8 @@ This document explains the analytics setup in the BijbelQuiz application, which 
 
 We use the `posthog_flutter` package to send events to PostHog. This allows us to understand how users interact with the app, identify areas for improvement, and make data-driven decisions.
 
+Users can opt out of analytics collection through a setting in the app's settings screen.
+
 ## AnalyticsService
 
 The `AnalyticsService` is a wrapper around the `posthog_flutter` package that provides a simple interface for tracking events. It is located in `app/lib/services/analytics_service.dart`.
@@ -14,8 +16,8 @@ The `AnalyticsService` is a wrapper around the `posthog_flutter` package that pr
 
 -   `init()`: Initializes the PostHog SDK. This should be called once when the app starts.
 -   `getObserver()`: Returns a `PosthogObserver` that can be used to automatically track screen views.
--   `screen(String screenName)`: Tracks a screen view.
--   `capture(String eventName, {Map<String, Object>? properties})`: Tracks an event.
+-   `screen(BuildContext context, String screenName)`: Tracks a screen view. Respects the user's analytics preference setting.
+-   `capture(BuildContext context, String eventName, {Map<String, Object>? properties})`: Tracks an event. Respects the user's analytics preference setting.
 
 ## Tracked Events
 
@@ -99,5 +101,7 @@ To add a new tracking event, you can use the `AnalyticsService`.
 2.  Call the `capture` method with the event name and any properties.
 
 ```dart
-Provider.of<AnalyticsService>(context, listen: false).capture('my_event', properties: {'my_property': 'my_value'});
+Provider.of<AnalyticsService>(context, listen: false).capture(context, 'my_event', properties: {'my_property': 'my_value'});
 ```
+
+Note that both the `screen` and `capture` methods now require a `BuildContext` parameter to check the user's analytics preference setting.

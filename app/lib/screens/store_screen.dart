@@ -19,7 +19,7 @@ class _StoreScreenState extends State<StoreScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<AnalyticsService>(context, listen: false).screen('StoreScreen');
+    Provider.of<AnalyticsService>(context, listen: false).screen(context, 'StoreScreen');
   }
 
   @override
@@ -354,7 +354,7 @@ class _StoreScreenState extends State<StoreScreen> {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () async {
-            Provider.of<AnalyticsService>(context, listen: false).capture('purchase_powerup', properties: {'title': title, 'cost': cost});
+            Provider.of<AnalyticsService>(context, listen: false).capture(context, 'purchase_powerup', properties: {'title': title, 'cost': cost});
             final localContext = context;
             final localGameStats = gameStats;
             final canAfford = isDev || localGameStats.score >= cost;
@@ -529,7 +529,7 @@ class _StoreScreenState extends State<StoreScreen> {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () async {
-            Provider.of<AnalyticsService>(context, listen: false).capture('purchase_theme', properties: {'theme': themeKey, 'cost': cost});
+            Provider.of<AnalyticsService>(context, listen: false).capture(context, 'purchase_theme', properties: {'theme': themeKey, 'cost': cost});
             final localContext = context;
             final localGameStats = gameStats;
             final localSettings = settings;

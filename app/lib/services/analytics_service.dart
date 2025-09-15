@@ -1,4 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart';
 
 /// A service that provides an interface to the PostHog analytics service.
 ///
@@ -22,7 +25,12 @@ class AnalyticsService {
   ///
   /// This should be called when a screen is displayed.
   /// The [screenName] is the name of the screen.
-  Future<void> screen(String screenName) async {
+  Future<void> screen(BuildContext context, String screenName) async {
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    // Skip tracking if analytics are disabled
+    if (!settings.analyticsEnabled) {
+      return;
+    }
     await Posthog().screen(screenName: screenName);
   }
 
@@ -30,7 +38,12 @@ class AnalyticsService {
   ///
   /// The [eventName] is the name of the event.
   /// The [properties] are any additional data to send with the event.
-  Future<void> capture(String eventName, {Map<String, Object>? properties}) async {
+  Future<void> capture(BuildContext context, String eventName, {Map<String, Object>? properties}) async {
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    // Skip tracking if analytics are disabled
+    if (!settings.analyticsEnabled) {
+      return;
+    }
     await Posthog().capture(eventName: eventName, properties: properties);
   }
 }

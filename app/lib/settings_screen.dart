@@ -33,7 +33,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<AnalyticsService>(context, listen: false).screen('SettingsScreen');
+    Provider.of<AnalyticsService>(context, listen: false).screen(context, 'SettingsScreen');
     // Attach error handler for notification service
     NotificationService.onError = (message) {
       if (mounted) {
@@ -43,7 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _openStatusPage() async {
-    Provider.of<AnalyticsService>(context, listen: false).capture('open_status_page');
+    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'open_status_page');
     final Uri url = Uri.parse('https://oneuptime.com/status-page/df067f1b-2beb-42d2-9ddd-719e9ce51238');
     if (!await launchUrl(url)) {
       if (mounted) {
@@ -53,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _checkForUpdates(BuildContext context, SettingsProvider settings) async {
-    Provider.of<AnalyticsService>(context, listen: false).capture('check_for_updates');
+    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'check_for_updates');
     try {
       final info = await PackageInfo.fromPlatform();
       final version = info.version;
@@ -239,7 +239,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                   onChanged: (String? value) {
                     if (value != null) {
-                      Provider.of<AnalyticsService>(context, listen: false).capture('change_theme', properties: {'theme': value});
+                      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'change_theme', properties: {'theme': value});
                       if (value == ThemeMode.light.name) {
                         settings.setCustomTheme(null);
                         settings.setThemeMode(ThemeMode.light);
@@ -302,7 +302,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
                 onChanged: (String? value) {
                   if (value != null) {
-                    Provider.of<AnalyticsService>(context, listen: false).capture('change_game_speed', properties: {'speed': value});
+                    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'change_game_speed', properties: {'speed': value});
                     settings.setGameSpeed(value);
                   }
                 },
@@ -325,7 +325,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Switch(
                 value: settings.mute,
                 onChanged: (bool value) {
-                  Provider.of<AnalyticsService>(context, listen: false).capture('toggle_mute', properties: {'muted': value});
+                  Provider.of<AnalyticsService>(context, listen: false).capture(context, 'toggle_mute', properties: {'muted': value});
                   settings.setMute(value);
                 },
                 activeThumbColor: colorScheme.primary,
@@ -372,6 +372,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 tooltip: 'Controleer op updates',
               ),
             ),
+            _buildSettingItem(
+              context,
+              settings,
+              colorScheme,
+              isSmallScreen,
+              isDesktop,
+              title: 'Privacybeleid',
+              subtitle: 'Lees ons privacybeleid',
+              icon: Icons.privacy_tip,
+              child: IconButton(
+                icon: const Icon(Icons.open_in_new),
+                onPressed: () async {
+                  final Uri url = Uri.parse('https://bijbelquiz.app/privacy.html');
+                  if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                    if (mounted) {
+                      showTopSnackBar(context, 'Kon privacybeleid niet openen', style: TopSnackBarStyle.error);
+                    }
+                  }
+                },
+                tooltip: 'Open privacybeleid',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        _buildSettingsGroup(
+          context,
+          settings,
+          colorScheme,
+          isSmallScreen,
+          isDesktop,
+          title: 'Privacy & Analytics',
+          children: [
+            _buildSettingItem(
+              context,
+              settings,
+              colorScheme,
+              isSmallScreen,
+              isDesktop,
+              title: 'Analytics',
+              subtitle: 'Help ons de app te verbeteren door anonieme gebruiksgegevens te verzenden',
+              icon: Icons.analytics,
+              child: Switch(
+                value: settings.analyticsEnabled,
+                onChanged: (bool value) {
+                  // Note: We don't track this event since it's about toggling analytics
+                  settings.setAnalyticsEnabled(value);
+                },
+                activeThumbColor: colorScheme.primary,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 24),
@@ -397,7 +448,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Switch(
                   value: settings.notificationEnabled,
                   onChanged: (bool value) async {
-                    Provider.of<AnalyticsService>(context, listen: false).capture('toggle_notifications', properties: {'enabled': value});
+                    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'toggle_notifications', properties: {'enabled': value});
                     await settings.setNotificationEnabled(value);
                     if (value) {
                       final granted = await NotificationService.requestNotificationPermission();
@@ -429,7 +480,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () async {
-                Provider.of<AnalyticsService>(context, listen: false).capture('donate');
+                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'donate');
                 final Uri url = Uri.parse(AppUrls.donateUrl);
                 // Mark as donated before launching the URL
                 await settings.markAsDonated();
@@ -455,7 +506,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () {
-                Provider.of<AnalyticsService>(context, listen: false).capture('show_reset_and_logout_dialog');
+                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'show_reset_and_logout_dialog');
                 _showResetAndLogoutDialog(context, settings);
               },
               label: strings.AppStrings.resetAndLogout,
@@ -470,7 +521,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () {
-                Provider.of<AnalyticsService>(context, listen: false).capture('show_introduction');
+                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'show_introduction');
                 final nav = Navigator.of(context);
                 if (widget.onOpenGuide != null) widget.onOpenGuide!();
                 nav.push(
@@ -489,7 +540,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () {
-                Provider.of<AnalyticsService>(context, listen: false).capture('report_issue');
+                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'report_issue');
                 _launchBugReportEmail(context);
               },
               label: strings.AppStrings.reportIssue,
@@ -502,7 +553,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () {
-                Provider.of<AnalyticsService>(context, listen: false).capture('export_stats');
+                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'export_stats');
                 _exportStats(context);
               },
               label: strings.AppStrings.exportStats,
@@ -516,7 +567,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () {
-                Provider.of<AnalyticsService>(context, listen: false).capture('import_stats');
+                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'import_stats');
                 _importStats(context);
               },
               label: strings.AppStrings.importStats,
@@ -530,7 +581,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () async {
-                Provider.of<AnalyticsService>(context, listen: false).capture('clear_question_cache');
+                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'clear_question_cache');
                 await QuestionCacheService().clearCache();
                 if (context.mounted) {
                   showTopSnackBar(context, strings.AppStrings.cacheCleared, style: TopSnackBarStyle.success);
@@ -547,7 +598,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () async {
-                Provider.of<AnalyticsService>(context, listen: false).capture('contact_us');
+                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'contact_us');
                 final Uri url = Uri.parse(AppUrls.contactEmailUrl);
                 if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
                   if (context.mounted) {
@@ -565,7 +616,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () {
-                Provider.of<AnalyticsService>(context, listen: false).capture('show_social_media_dialog');
+                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'show_social_media_dialog');
                 _showSocialMediaDialog(context);
               },
               label: 'Volg op social media',
@@ -927,7 +978,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             TextButton(
               onPressed: () async {
-                Provider.of<AnalyticsService>(context, listen: false).capture('reset_and_logout');
+                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'reset_and_logout');
                 final nav = Navigator.of(context);
                 final settings = Provider.of<SettingsProvider>(context, listen: false);
                 try {
@@ -1267,7 +1318,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            Provider.of<AnalyticsService>(context, listen: false).capture('follow_social_media', properties: {'platform': platform});
+            Provider.of<AnalyticsService>(context, listen: false).capture(context, 'follow_social_media', properties: {'platform': platform});
             final Uri uri = Uri.parse(url);
             if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
               WidgetsBinding.instance.addPostFrameCallback((_) {

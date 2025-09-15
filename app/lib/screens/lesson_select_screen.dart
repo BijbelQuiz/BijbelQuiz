@@ -36,7 +36,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<AnalyticsService>(context, listen: false).screen('LessonSelectScreen');
+    Provider.of<AnalyticsService>(context, listen: false).screen(context, 'LessonSelectScreen');
     _loadLessons();
 
     // Check if we need to show the guide screen (only once)
@@ -81,7 +81,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
   }
 
   Future<void> _loadLessons() async {
-    Provider.of<AnalyticsService>(context, listen: false).capture('load_lessons');
+    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'load_lessons');
     final progress = Provider.of<LessonProgressProvider>(context, listen: false);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     try {
@@ -112,7 +112,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
       await progress.ensureUnlockedCountAtLeast(1);
     } catch (e) {
       if (!mounted) return;
-      Provider.of<AnalyticsService>(context, listen: false).capture('load_lessons_error', properties: {'error': e.toString()});
+      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'load_lessons_error', properties: {'error': e.toString()});
       setState(() {
         _error = strings.AppStrings.couldNotLoadLessons;
       });
@@ -135,7 +135,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
               _isDonationPromo = false;
               _isSatisfactionPromo = true;
             }
-            Provider.of<AnalyticsService>(context, listen: false).capture('show_promo_card', properties: {
+            Provider.of<AnalyticsService>(context, listen: false).capture(context, 'show_promo_card', properties: {
               'is_donation': _isDonationPromo,
               'is_satisfaction': _isSatisfactionPromo,
             });
@@ -265,7 +265,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                 icon: Icons.settings_rounded,
                 label: 'Instellingen',
                 onTap: () {
-                  Provider.of<AnalyticsService>(context, listen: false).capture('tap_settings');
+                  Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_settings');
                   Navigator.of(context).pushNamed('/settings');
                 },
               ),
@@ -280,7 +280,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                 icon: Icons.store_rounded,
                 label: 'Winkel',
                 onTap: () {
-                  Provider.of<AnalyticsService>(context, listen: false).capture('tap_store');
+                  Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_store');
                   Navigator.of(context).pushNamed('/store');
                 },
               ),
@@ -325,7 +325,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                                   isDonation: _isDonationPromo,
                                   isSatisfaction: _isSatisfactionPromo,
                                   onDismiss: () {
-                                    Provider.of<AnalyticsService>(context, listen: false).capture('dismiss_promo_card');
+                                    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'dismiss_promo_card');
                                     setState(() {
                                       _showPromoCard = false;
                                     });
@@ -334,17 +334,17 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                                     final settings = Provider.of<SettingsProvider>(context, listen: false);
                                     
                                     if (_isDonationPromo) {
-                                      Provider.of<AnalyticsService>(context, listen: false).capture('tap_donation_promo');
+                                      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_donation_promo');
                                       await settings.markDonationLinkAsClicked();
                                       await settings.updateLastDonationPopup();
                                       _openDonationPage();
                                     } else if (_isSatisfactionPromo) {
-                                      Provider.of<AnalyticsService>(context, listen: false).capture('tap_satisfaction_promo');
+                                      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_satisfaction_promo');
                                       await settings.markSatisfactionLinkAsClicked();
                                       await settings.updateLastSatisfactionPopup();
                                       _launchUrl(AppUrls.satisfactionSurveyUrl);
                                     } else {
-                                      Provider.of<AnalyticsService>(context, listen: false).capture('tap_follow_promo', properties: {'url': url});
+                                      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_follow_promo', properties: {'url': url});
                                       await settings.markFollowLinkAsClicked();
                                       await settings.updateLastFollowPopup();
                                       _launchUrl(url);
@@ -408,16 +408,16 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                                           recommended: unlocked && recommended,
                                           onTap: () async {
                                             if (!unlocked) {
-                                              Provider.of<AnalyticsService>(context, listen: false).capture('tap_locked_lesson', properties: {'lesson_id': lesson.id});
+                                              Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_locked_lesson', properties: {'lesson_id': lesson.id});
                                               showTopSnackBar(context, 'Les is nog vergrendeld', style: TopSnackBarStyle.warning);
                                               return;
                                             }
                                             if (!playable) {
-                                              Provider.of<AnalyticsService>(context, listen: false).capture('tap_unplayable_lesson', properties: {'lesson_id': lesson.id});
+                                              Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_unplayable_lesson', properties: {'lesson_id': lesson.id});
                                               showTopSnackBar(context, 'Je kunt alleen de meest recente ontgrendelde les spelen', style: TopSnackBarStyle.info);
                                               return;
                                             }
-                                            Provider.of<AnalyticsService>(context, listen: false).capture('tap_lesson', properties: {'lesson_id': lesson.id});
+                                            Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_lesson', properties: {'lesson_id': lesson.id});
                                             await Navigator.of(context).push(
                                               MaterialPageRoute(
                                                 builder: (_) => QuizScreen(lesson: lesson, sessionLimit: lesson.maxQuestions),
@@ -571,7 +571,7 @@ class _ProgressHeader extends StatelessWidget {
                     button: true,
                     child: ElevatedButton.icon(
                       onPressed: () async {
-                        Provider.of<AnalyticsService>(context, listen: false).capture('start_quiz', properties: {
+                                                                    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'start_quiz', properties: {
                           if (continueLesson?.id != null) 'lesson_id': continueLesson!.id,
                         });
                         await Navigator.of(context).push(
@@ -602,7 +602,7 @@ class _ProgressHeader extends StatelessWidget {
                     button: true,
                     child: OutlinedButton.icon(
                       onPressed: () {
-                        Provider.of<AnalyticsService>(context, listen: false).capture('start_practice_quiz');
+                                                                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'start_practice_quiz');
                         Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QuizScreen()));
                       },
                       style: OutlinedButton.styleFrom(

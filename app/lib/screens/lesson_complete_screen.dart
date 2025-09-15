@@ -38,7 +38,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<AnalyticsService>(context, listen: false).screen('LessonCompleteScreen');
+    Provider.of<AnalyticsService>(context, listen: false).screen(context, 'LessonCompleteScreen');
     final cs = Theme.of(context).colorScheme;
     final pctValue = widget.total > 0 ? (widget.correct / widget.total * 100.0) : 0.0;
 
@@ -229,7 +229,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                               Expanded(
                                 child: OutlinedButton(
                                   onPressed: () {
-                                    Provider.of<AnalyticsService>(context, listen: false).capture('retry_lesson_from_complete');
+                                    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'retry_lesson_from_complete');
                                     widget.onRetry();
                                   },
                                   style: OutlinedButton.styleFrom(
@@ -249,7 +249,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                               Expanded(
                                 child: ElevatedButton(
                                   onPressed: widget.stars > 0 ? () {
-                                    Provider.of<AnalyticsService>(context, listen: false).capture('start_next_lesson_from_complete');
+                                    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'start_next_lesson_from_complete');
                                     _startNextQuiz();
                                   } : null,
                                   style: ElevatedButton.styleFrom(

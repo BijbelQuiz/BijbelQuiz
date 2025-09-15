@@ -18,6 +18,7 @@ class SettingsProvider extends ChangeNotifier {
   static const String _hasClickedDonationLinkKey = 'has_clicked_donation_link';
   static const String _hasClickedFollowLinkKey = 'has_clicked_follow_link';
   static const String _hasClickedSatisfactionLinkKey = 'has_clicked_satisfaction_link';
+  static const String _analyticsEnabledKey = 'analytics_enabled';
   
   SharedPreferences? _prefs;
   String _language = 'nl';
@@ -34,6 +35,7 @@ class SettingsProvider extends ChangeNotifier {
   bool _hasClickedDonationLink = false;
   bool _hasClickedFollowLink = false;
   bool _hasClickedSatisfactionLink = false;
+  bool _analyticsEnabled = true; // Default to true to maintain current behavior
   bool _isLoading = true;
   String? _error;
   String? _selectedCustomThemeKey;
@@ -79,6 +81,9 @@ class SettingsProvider extends ChangeNotifier {
   bool get hasClickedDonationLink => _hasClickedDonationLink;
   bool get hasClickedFollowLink => _hasClickedFollowLink;
   bool get hasClickedSatisfactionLink => _hasClickedSatisfactionLink;
+  
+  /// Whether analytics are enabled
+  bool get analyticsEnabled => _analyticsEnabled;
 
   String? get selectedCustomThemeKey => _selectedCustomThemeKey;
   Set<String> get unlockedThemes => _unlockedThemes;
@@ -149,6 +154,7 @@ class SettingsProvider extends ChangeNotifier {
       _notificationEnabled = _getBoolSetting(_notificationEnabledKey, defaultValue: true);
       _hasDonated = _getBoolSetting(_hasDonatedKey, defaultValue: false);
       _hasCheckedForUpdate = _getBoolSetting(_hasCheckedForUpdateKey, defaultValue: false);
+      _analyticsEnabled = _getBoolSetting(_analyticsEnabledKey, defaultValue: true); // Default to true
       
       // Load popup tracking data
       final lastDonationPopupMs = _prefs?.getInt(_lastDonationPopupKey);
@@ -375,6 +381,17 @@ class SettingsProvider extends ChangeNotifier {
     );
   }
 
+  /// Updates the analytics enabled setting
+  Future<void> setAnalyticsEnabled(bool enabled) async {
+    await _saveSetting(
+      action: () async {
+        _analyticsEnabled = enabled;
+        await _prefs?.setBool(_analyticsEnabledKey, enabled);
+      },
+      errorMessage: 'Failed to save analytics setting',
+    );
+  }
+
 
   // Helper method to safely get a boolean setting with type checking
   bool _getBoolSetting(String key, {required bool defaultValue}) {
@@ -414,6 +431,7 @@ class SettingsProvider extends ChangeNotifier {
       'hasClickedDonationLink': _hasClickedDonationLink,
       'hasClickedFollowLink': _hasClickedFollowLink,
       'hasClickedSatisfactionLink': _hasClickedSatisfactionLink,
+      'analyticsEnabled': _analyticsEnabled,
     };
   }
 
@@ -426,6 +444,7 @@ class SettingsProvider extends ChangeNotifier {
     _notificationEnabled = data['notificationEnabled'] ?? true;
     _hasDonated = data['hasDonated'] ?? false;
     _hasCheckedForUpdate = data['hasCheckedForUpdate'] ?? false;
+    _analyticsEnabled = data['analyticsEnabled'] ?? true;
     _selectedCustomThemeKey = data['selectedCustomThemeKey'];
     _unlockedThemes = Set<String>.from(data['unlockedThemes'] ?? []);
     
@@ -450,6 +469,7 @@ class SettingsProvider extends ChangeNotifier {
     await _prefs?.setBool(_notificationEnabledKey, _notificationEnabled);
     await _prefs?.setBool(_hasDonatedKey, _hasDonated);
     await _prefs?.setBool(_hasCheckedForUpdateKey, _hasCheckedForUpdate);
+    await _prefs?.setBool(_analyticsEnabledKey, _analyticsEnabled);
     await _prefs?.setString(_customThemeKey, _selectedCustomThemeKey ?? '');
     await _prefs?.setStringList(_unlockedThemesKey, _unlockedThemes.toList());
     
