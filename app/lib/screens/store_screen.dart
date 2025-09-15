@@ -1,3 +1,4 @@
+import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -18,6 +19,7 @@ class _StoreScreenState extends State<StoreScreen> {
   @override
   void initState() {
     super.initState();
+    Provider.of<AnalyticsService>(context, listen: false).screen('StoreScreen');
   }
 
   @override
@@ -352,6 +354,7 @@ class _StoreScreenState extends State<StoreScreen> {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () async {
+            Provider.of<AnalyticsService>(context, listen: false).capture('purchase_powerup', properties: {'title': title, 'cost': cost});
             final localContext = context;
             final localGameStats = gameStats;
             final canAfford = isDev || localGameStats.score >= cost;
@@ -526,6 +529,7 @@ class _StoreScreenState extends State<StoreScreen> {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () async {
+            Provider.of<AnalyticsService>(context, listen: false).capture('purchase_theme', properties: {'theme': themeKey, 'cost': cost});
             final localContext = context;
             final localGameStats = gameStats;
             final localSettings = settings;

@@ -351,6 +351,7 @@ class SettingsProvider extends ChangeNotifier {
 
 ## 📚 Additional Documentation
 
+- **[ANALYTICS.md](ANALYTICS.md)**: Detailed documentation of the analytics setup
 - **[SERVICES.md](SERVICES.md)**: Detailed documentation of all application services
 - **[EMERGENCY_SYSTEM.md](EMERGENCY_SYSTEM.md)**: Emergency messaging system documentation
 - **[LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md)**: Local development setup guide

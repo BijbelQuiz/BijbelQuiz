@@ -1,3 +1,4 @@
+import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
@@ -38,6 +39,7 @@ class _GuideScreenState extends State<GuideScreen> {
   }
 
   void _onPageChanged(int page) {
+    Provider.of<AnalyticsService>(context, listen: false).capture('guide_page_viewed', properties: {'page': page});
     setState(() {
       _currentPage = page;
     });
@@ -46,6 +48,7 @@ class _GuideScreenState extends State<GuideScreen> {
   @override
   void initState() {
     super.initState();
+    Provider.of<AnalyticsService>(context, listen: false).screen('GuideScreen');
     AppLogger.info('GuideScreen loaded');
   }
 
@@ -146,6 +149,7 @@ class _GuideScreenState extends State<GuideScreen> {
   }
 
   Future<void> _handleGuideCompletion(BuildContext context) async {
+    Provider.of<AnalyticsService>(context, listen: false).capture('guide_completed');
     final localContext = context;
     final settings = Provider.of<SettingsProvider>(localContext, listen: false);
     try {
@@ -265,6 +269,7 @@ class _GuidePageViewState extends State<GuidePageView> {
   bool _isLoading = false;
 
   Future<void> _handleDonation() async {
+    Provider.of<AnalyticsService>(context, listen: false).capture('guide_donation_button_clicked');
     if (_isLoading) return;
     
     setState(() {
@@ -337,6 +342,7 @@ class _GuidePageViewState extends State<GuidePageView> {
   }
 
   Future<void> _requestPermission() async {
+    Provider.of<AnalyticsService>(context, listen: false).capture('guide_notification_permission_requested');
     setState(() { _isLoading = true; });
     final granted = await NotificationService.requestNotificationPermission();
     setState(() {

@@ -1,3 +1,4 @@
+import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -22,12 +23,16 @@ import 'screens/lesson_select_screen.dart';
 import 'settings_screen.dart';
 import 'l10n/strings_nl.dart' as strings;
 
+final analyticsService = AnalyticsService();
+
 /// The main entry point of the BijbelQuiz application with performance optimizations.
 void main() async {
   // Ensure that the Flutter binding is initialized before running the app.
   WidgetsFlutterBinding.ensureInitialized();
   // Initialize logging
   AppLogger.init();
+  // Initialize analytics
+  await analyticsService.init();
   
   // Set preferred screen orientations. On web, this helps maintain a consistent layout.
   if (kIsWeb) {
@@ -45,6 +50,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider.value(value: gameStatsProvider),
         ChangeNotifierProvider(create: (_) => LessonProgressProvider()),
+        Provider.value(value: analyticsService),
       ],
       child: BijbelQuizApp(),
     ),
@@ -124,6 +130,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
   Widget _buildMaterialApp(SettingsProvider settings) {
     return MaterialApp(
       navigatorKey: EmergencyService.navigatorKey,
+      navigatorObservers: [analyticsService.getObserver()],
       title: strings.AppStrings.appName,
       debugShowCheckedModeBanner: false,
       theme: ThemeUtils.getLightTheme(settings),

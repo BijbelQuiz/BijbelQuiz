@@ -1,3 +1,4 @@
+import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
@@ -93,6 +94,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
   @override
   void initState() {
     super.initState();
+    Provider.of<AnalyticsService>(context, listen: false).screen('QuizScreen');
     WidgetsBinding.instance.addObserver(this);
     AppLogger.info('QuizScreen loaded');
     
@@ -265,6 +267,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
 
 
   Future<void> _showTimeUpDialog() async {
+    Provider.of<AnalyticsService>(context, listen: false).capture('show_time_up_dialog');
     final localContext = context;
     if (ModalRoute.of(localContext)?.isCurrent != true) return;
 
@@ -334,6 +337,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
             Builder(
               builder: (ctx) => TextButton(
                 onPressed: hasEnoughPoints ? () {
+                  Provider.of<AnalyticsService>(context, listen: false).capture('retry_with_points');
                   gameStats.spendPointsForRetry().then((success) {
                     if (!dialogContext.mounted) return;
                     if (success) {
@@ -406,6 +410,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
             ),
             TextButton(
               onPressed: () {
+                Provider.of<AnalyticsService>(context, listen: false).capture('next_question_from_time_up');
                 Navigator.of(dialogContext).pop();
                 _handleNextQuestion(false, _quizState.currentDifficulty);
               },
@@ -446,6 +451,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     
     // Reset question pool if language changed
     if (_lastLanguage != null && _lastLanguage != language) {
+      Provider.of<AnalyticsService>(context, listen: false).capture('language_changed', properties: {'from': _lastLanguage!, 'to': language});
       AppLogger.info('Language changed from $_lastLanguage to $language, resetting question pool');
       _resetQuestionPool();
     }
@@ -835,6 +841,12 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
 
 
   Future<void> _completeLessonSession() async {
+    Provider.of<AnalyticsService>(context, listen: false).capture('lesson_completed', properties: {
+      if (widget.lesson?.id != null) 'lesson_id': widget.lesson!.id,
+      'session_answered': _sessionAnswered,
+      'session_correct': _sessionCorrect,
+      'session_best_streak': _sessionBestStreak,
+    });
     // Stop any timers
     _timerManager.timeAnimationController.stop();
 
@@ -876,6 +888,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
 
   // Callback methods for bottom bar buttons
   Future<void> _handleSkip() async {
+    Provider.of<AnalyticsService>(context, listen: false).capture('skip_question');
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
 
@@ -911,6 +924,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
   }
 
   Future<void> _handleUnlockBiblicalReference() async {
+    Provider.of<AnalyticsService>(context, listen: false).capture('unlock_biblical_reference');
     final localContext = context;
     final gameStats = Provider.of<GameStatsProvider>(localContext, listen: false);
 

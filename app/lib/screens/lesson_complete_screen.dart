@@ -1,3 +1,4 @@
+import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 
 import '../models/lesson.dart';
@@ -37,6 +38,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<AnalyticsService>(context, listen: false).screen('LessonCompleteScreen');
     final cs = Theme.of(context).colorScheme;
     final pctValue = widget.total > 0 ? (widget.correct / widget.total * 100.0) : 0.0;
 
@@ -226,7 +228,10 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                             children: [
                               Expanded(
                                 child: OutlinedButton(
-                                  onPressed: widget.onRetry,
+                                  onPressed: () {
+                                    Provider.of<AnalyticsService>(context, listen: false).capture('retry_lesson_from_complete');
+                                    widget.onRetry();
+                                  },
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(vertical: 14),
                                   ),
@@ -243,7 +248,10 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                               const SizedBox(width: 12),
                               Expanded(
                                 child: ElevatedButton(
-                                  onPressed: widget.stars > 0 ? _startNextQuiz : null,
+                                  onPressed: widget.stars > 0 ? () {
+                                    Provider.of<AnalyticsService>(context, listen: false).capture('start_next_lesson_from_complete');
+                                    _startNextQuiz();
+                                  } : null,
                                   style: ElevatedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(vertical: 14),
                                   ),

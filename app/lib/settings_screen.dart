@@ -1,3 +1,4 @@
+import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/settings_provider.dart';
@@ -32,6 +33,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
+    Provider.of<AnalyticsService>(context, listen: false).screen('SettingsScreen');
     // Attach error handler for notification service
     NotificationService.onError = (message) {
       if (mounted) {
@@ -41,6 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _openStatusPage() async {
+    Provider.of<AnalyticsService>(context, listen: false).capture('open_status_page');
     final Uri url = Uri.parse('https://oneuptime.com/status-page/df067f1b-2beb-42d2-9ddd-719e9ce51238');
     if (!await launchUrl(url)) {
       if (mounted) {
@@ -50,6 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _checkForUpdates(BuildContext context, SettingsProvider settings) async {
+    Provider.of<AnalyticsService>(context, listen: false).capture('check_for_updates');
     try {
       final info = await PackageInfo.fromPlatform();
       final version = info.version;
@@ -234,18 +238,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                   ],
                   onChanged: (String? value) {
-                    if (value == ThemeMode.light.name) {
-                      settings.setCustomTheme(null);
-                      settings.setThemeMode(ThemeMode.light);
-                    } else if (value == ThemeMode.dark.name) {
-                      settings.setCustomTheme(null);
-                      settings.setThemeMode(ThemeMode.dark);
-                    } else if (value == ThemeMode.system.name) {
-                      settings.setCustomTheme(null);
-                      settings.setThemeMode(ThemeMode.system);
-                    } else {
-                      settings.setCustomTheme(value);
-                      settings.setThemeMode(ThemeMode.light);
+                    if (value != null) {
+                      Provider.of<AnalyticsService>(context, listen: false).capture('change_theme', properties: {'theme': value});
+                      if (value == ThemeMode.light.name) {
+                        settings.setCustomTheme(null);
+                        settings.setThemeMode(ThemeMode.light);
+                      } else if (value == ThemeMode.dark.name) {
+                        settings.setCustomTheme(null);
+                        settings.setThemeMode(ThemeMode.dark);
+                      } else if (value == ThemeMode.system.name) {
+                        settings.setCustomTheme(null);
+                        settings.setThemeMode(ThemeMode.system);
+                      } else {
+                        settings.setCustomTheme(value);
+                        settings.setThemeMode(ThemeMode.light);
+                      }
                     }
                   },
                   style: TextStyle(
@@ -295,6 +302,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
                 onChanged: (String? value) {
                   if (value != null) {
+                    Provider.of<AnalyticsService>(context, listen: false).capture('change_game_speed', properties: {'speed': value});
                     settings.setGameSpeed(value);
                   }
                 },
@@ -317,6 +325,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Switch(
                 value: settings.mute,
                 onChanged: (bool value) {
+                  Provider.of<AnalyticsService>(context, listen: false).capture('toggle_mute', properties: {'muted': value});
                   settings.setMute(value);
                 },
                 activeThumbColor: colorScheme.primary,
@@ -388,6 +397,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Switch(
                   value: settings.notificationEnabled,
                   onChanged: (bool value) async {
+                    Provider.of<AnalyticsService>(context, listen: false).capture('toggle_notifications', properties: {'enabled': value});
                     await settings.setNotificationEnabled(value);
                     if (value) {
                       final granted = await NotificationService.requestNotificationPermission();
@@ -419,6 +429,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () async {
+                Provider.of<AnalyticsService>(context, listen: false).capture('donate');
                 final Uri url = Uri.parse(AppUrls.donateUrl);
                 // Mark as donated before launching the URL
                 await settings.markAsDonated();
@@ -443,7 +454,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              onPressed: () => _showResetAndLogoutDialog(context, settings),
+              onPressed: () {
+                Provider.of<AnalyticsService>(context, listen: false).capture('show_reset_and_logout_dialog');
+                _showResetAndLogoutDialog(context, settings);
+              },
               label: strings.AppStrings.resetAndLogout,
               icon: Icons.logout,
               isDestructive: true,
@@ -456,6 +470,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () {
+                Provider.of<AnalyticsService>(context, listen: false).capture('show_introduction');
                 final nav = Navigator.of(context);
                 if (widget.onOpenGuide != null) widget.onOpenGuide!();
                 nav.push(
@@ -473,7 +488,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              onPressed: () => _launchBugReportEmail(context),
+              onPressed: () {
+                Provider.of<AnalyticsService>(context, listen: false).capture('report_issue');
+                _launchBugReportEmail(context);
+              },
               label: strings.AppStrings.reportIssue,
               icon: Icons.bug_report,
             ),
@@ -483,7 +501,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              onPressed: () => _exportStats(context),
+              onPressed: () {
+                Provider.of<AnalyticsService>(context, listen: false).capture('export_stats');
+                _exportStats(context);
+              },
               label: strings.AppStrings.exportStats,
               subtitle: strings.AppStrings.exportStatsDesc,
               icon: Icons.download,
@@ -494,7 +515,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              onPressed: () => _importStats(context),
+              onPressed: () {
+                Provider.of<AnalyticsService>(context, listen: false).capture('import_stats');
+                _importStats(context);
+              },
               label: strings.AppStrings.importStats,
               subtitle: strings.AppStrings.importStatsDesc,
               icon: Icons.upload,
@@ -506,6 +530,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () async {
+                Provider.of<AnalyticsService>(context, listen: false).capture('clear_question_cache');
                 await QuestionCacheService().clearCache();
                 if (context.mounted) {
                   showTopSnackBar(context, strings.AppStrings.cacheCleared, style: TopSnackBarStyle.success);
@@ -522,6 +547,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isSmallScreen,
               isDesktop,
               onPressed: () async {
+                Provider.of<AnalyticsService>(context, listen: false).capture('contact_us');
                 final Uri url = Uri.parse(AppUrls.contactEmailUrl);
                 if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
                   if (context.mounted) {
@@ -538,7 +564,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              onPressed: () => _showSocialMediaDialog(context),
+              onPressed: () {
+                Provider.of<AnalyticsService>(context, listen: false).capture('show_social_media_dialog');
+                _showSocialMediaDialog(context);
+              },
               label: 'Volg op social media',
               icon: Icons.share,
             ),
@@ -898,6 +927,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             TextButton(
               onPressed: () async {
+                Provider.of<AnalyticsService>(context, listen: false).capture('reset_and_logout');
                 final nav = Navigator.of(context);
                 final settings = Provider.of<SettingsProvider>(context, listen: false);
                 try {
@@ -1237,6 +1267,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
+            Provider.of<AnalyticsService>(context, listen: false).capture('follow_social_media', properties: {'platform': platform});
             final Uri uri = Uri.parse(url);
             if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
               WidgetsBinding.instance.addPostFrameCallback((_) {

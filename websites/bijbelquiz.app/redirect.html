@@ -173,7 +173,13 @@
         // Update page content
         document.getElementById('redirect-message').textContent = `Je wordt doorverwezen naar ${redirectInfo.title}.`;
         document.getElementById('redirect-link').href = redirectInfo.url;
-        document.getElementById('redirect-link').textContent = `Ga naar ${redirectInfo.title}`;
+        
+        // Set appropriate link text based on link type
+        if (redirectInfo.url.startsWith('mailto:')) {
+            document.getElementById('redirect-link').textContent = 'E-mail versturen naar info@bijbelquiz.app';
+        } else {
+            document.getElementById('redirect-link').textContent = `Ga naar ${redirectInfo.title}`;
+        }
         
         // Add preconnect for external domains
         if (redirectInfo.url.startsWith('https://')) {
@@ -186,7 +192,17 @@
         
         // Redirect after a short delay to allow page to load
         setTimeout(() => {
-            window.location.href = redirectInfo.url;
+            // Handle mailto links differently to avoid issues with window.location.href
+            if (redirectInfo.url.startsWith('mailto:')) {
+                // Try to open the mailto link in a new window/tab
+                const newWindow = window.open(redirectInfo.url, '_blank');
+                // If popup blocking prevented opening, update the message to inform the user
+                if (!newWindow) {
+                    document.getElementById('redirect-message').innerHTML = 'Klik op de link hieronder om je e-mailclient te openen:<br>Als je niets ziet gebeuren, controleer dan of pop-ups niet geblokkeerd worden.';
+                }
+            } else {
+                window.location.href = redirectInfo.url;
+            }
         }, 100);
     </script>
     <script>
