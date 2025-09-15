@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import '../l10n/strings_nl.dart' as strings;
+import '../constants/urls.dart';
 
 class BiblicalReferenceDialog extends StatefulWidget {
   final String reference;
@@ -55,18 +56,18 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
       String url;
       if (startVerse != null && endVerse != null) {
         // Multiple verses
-        url = 'https://www.scriptura-api.com/api/passage?book=$book&chapter=$chapter&start=$startVerse&end=$endVerse&version=statenvertaling';
+        url = '${AppUrls.scripturaApiBase}/passage?book=$book&chapter=$chapter&start=$startVerse&end=$endVerse&version=statenvertaling';
       } else if (startVerse != null) {
         // Single verse
-        url = 'https://www.scriptura-api.com/api/verse?book=$book&chapter=$chapter&verse=$startVerse&version=statenvertaling';
+        url = '${AppUrls.scripturaApiBase}/verse?book=$book&chapter=$chapter&verse=$startVerse&version=statenvertaling';
       } else {
         // Entire chapter
-        url = 'https://www.scriptura-api.com/api/chapter?book=$book&chapter=$chapter&version=statenvertaling';
+        url = '${AppUrls.scripturaApiBase}/chapter?book=$book&chapter=$chapter&version=statenvertaling';
       }
 
       // Validate URL to ensure it's from our trusted domain
       final uri = Uri.parse(url);
-      if (uri.host != 'www.scriptura-api.com') {
+      if (uri.host != Uri.parse(AppUrls.scripturaApiBase).host) {
         throw Exception('Ongeldige API URL');
       }
 

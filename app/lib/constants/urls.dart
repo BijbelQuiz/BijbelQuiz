@@ -10,6 +10,7 @@ class AppUrls {
 
   // API endpoints
   static final String emergencyApi = '$baseDomainAPI/emergency.ts';
+  static final String scripturaApiBase = 'https://www.scriptura-api.com/api';
 
   // App-specific URLs
   static final String donateUrl = '$baseDomain/donate';
