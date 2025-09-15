@@ -180,6 +180,8 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
   @override
   void dispose() {
     _mounted = false;
+    _questionCacheService?.dispose();
+    _connectionService?.dispose();
     super.dispose();
   }
 }

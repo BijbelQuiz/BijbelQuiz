@@ -1,0 +1,11 @@
+{
+  "name": "backend.bijbelquiz.app",
+  "version": "1.0.0",
+  "description": "Backend API for BijbelQuiz app",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}

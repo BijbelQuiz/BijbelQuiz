@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'logger.dart';
 
@@ -27,6 +28,9 @@ class ConnectionService {
   
   /// Whether to use offline mode
   bool get shouldUseOfflineMode => !_isConnected || _isSlowConnection;
+  
+  /// Whether we're connected to WiFi
+  bool get isWiFiConnected => _connectionType == ConnectionType.fast;
 
   /// Initialize the connection service
   Future<void> initialize() async {
@@ -48,18 +52,37 @@ class ConnectionService {
   /// Check current connection status
   Future<void> _checkConnection() async {
     try {
-      // Test connection with a simple ping
-      final result = await InternetAddress.lookup('google.com')
-          .timeout(_connectionTimeout);
+      // Use connectivity_plus to check connection type
+      final connectivityResults = await (Connectivity().checkConnectivity());
       
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        _isConnected = true;
-        await _determineConnectionType();
-        AppLogger.info('Connection checked: connected');
-      } else {
+      // Get the first result or none if empty
+      final connectivityResult = connectivityResults.isNotEmpty ? connectivityResults.first : ConnectivityResult.none;
+      
+      if (connectivityResult == ConnectivityResult.none) {
         _isConnected = false;
         _connectionType = ConnectionType.none;
         AppLogger.info('Connection checked: not connected');
+      } else {
+        _isConnected = true;
+        
+        // Test connection with a simple ping
+        final result = await InternetAddress.lookup('google.com')
+            .timeout(_connectionTimeout);
+        
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          // Determine connection type based on connectivity result
+          if (connectivityResult == ConnectivityResult.wifi) {
+            _connectionType = ConnectionType.fast;
+            _isSlowConnection = false;
+          } else {
+            await _determineConnectionType();
+          }
+          AppLogger.info('Connection checked: connected via ${connectivityResult.toString()}');
+        } else {
+          _isConnected = false;
+          _connectionType = ConnectionType.none;
+          AppLogger.info('Connection checked: not connected');
+        }
       }
     } catch (e) {
       _isConnected = false;
