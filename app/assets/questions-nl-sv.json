@@ -7371,5 +7371,445 @@
             "Nahor",
             "Serug"
         ]
-    }
+    },
+    {
+        "vraag": "Hoeveel sikkelen zilver moest Abraham aan Efron geven voor voor Sara's graf?",
+        "juisteAntwoord": "400",
+        "moeilijkheidsgraad": 4,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Genesis 23:16",
+        "fouteAntwoorden": [
+          "200",
+          "500",
+          "600"
+        ]
+      },
+      {
+        "vraag": "Hoe oud was Abraham toen hij stierf?",
+        "juisteAntwoord": "175",
+        "moeilijkheidsgraad": 2,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Genesis 25:7",
+        "fouteAntwoorden": [
+          "150",
+          "155",
+          "180"
+        ]
+      },
+      {
+        "vraag": "Wie moest er bij Jozef in Egypte blijven?",
+        "juisteAntwoord": "Simeon",
+        "moeilijkheidsgraad": 2,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Genesis 42:24",
+        "fouteAntwoorden": [
+          "Ruben",
+          "Juda",
+          "Zebulon"
+        ]
+      },
+      {
+        "vraag": "Wie was de eerstgeboren zoon van Ruben?",
+        "juisteAntwoord": "Hanoch",
+        "moeilijkheidsgraad": 4,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Genesis 46:9",
+        "fouteAntwoorden": [
+          "Pallu",
+          "Hezron",
+          "Charmi"
+        ]
+      },
+      {
+        "vraag": "Jakob werd gebalsemd, hoeveel dagen?",
+        "juisteAntwoord": "40",
+        "moeilijkheidsgraad": 3,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Genesis 50:3",
+        "fouteAntwoorden": [
+          "20",
+          "30",
+          "60"
+        ]
+      },
+      {
+        "vraag": "Hoeveel dagen was er rouw bij de begrafenis van Jakob bij de Jordaan?",
+        "juisteAntwoord": "7",
+        "moeilijkheidsgraad": 3,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Genesis 50:10",
+        "fouteAntwoorden": [
+          "3",
+          "5",
+          "10"
+        ]
+      },
+      {
+        "vraag": "Hoe lang leefde Jozef?",
+        "juisteAntwoord": "110",
+        "moeilijkheidsgraad": 2,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Genesis 50:26",
+        "fouteAntwoorden": [
+          "120",
+          "130",
+          "150"
+        ]
+      },
+      {
+        "vraag": "Wat was de derde plaag in Egypte?",
+        "juisteAntwoord": "Luizen",
+        "moeilijkheidsgraad": 2,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Éxodus 8:16",
+        "fouteAntwoorden": [
+          "Kikvorsen",
+          "Ongedierte",
+          "Veepest"
+        ]
+      },
+      {
+        "vraag": "Hoeveel dagen duisternis was er tijdens de 9e plaag in Egypte?",
+        "juisteAntwoord": "2",
+        "moeilijkheidsgraad": 1,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Éxodus 10:22",
+        "fouteAntwoorden": [
+          "3",
+          "4",
+          "6"
+        ]
+      },
+      {
+        "vraag": "Welk gebod heeft een belofte?",
+        "juisteAntwoord": "5",
+        "moeilijkheidsgraad": 1,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Éxodus 20:12",
+        "fouteAntwoorden": [
+          "2",
+          "3",
+          "6"
+        ]
+      },
+      {
+        "vraag": "Op welke rij van de borslap van Aäron waren een hyacint, agaat en amethist?",
+        "juisteAntwoord": "3",
+        "moeilijkheidsgraad": 1,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Éxodus 28:19",
+        "fouteAntwoorden": [
+          "1",
+          "2",
+          "4"
+        ]
+      },
+      {
+        "vraag": "Jesaja was een profeet in het koninkrijk van Juda",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 4,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Jesaja 1:1",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Jesaja had een visioen van de Heere, staande voor hogen en verheven troon",
+        "juisteAntwoord": "Niet waar",
+        "moeilijkheidsgraad": 4,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Jesaja 6:1",
+        "fouteAntwoorden": [
+          "Waar"
+        ]
+      },
+      {
+        "vraag": "Jesaja was een tijdgenoot van koning Saul",
+        "juisteAntwoord": "Niet waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Jesaja 1:1",
+        "fouteAntwoorden": [
+          "Waar"
+        ]
+      },
+      {
+        "vraag": "Jesaja profeteerde over nieuwe hemelen en een nieuwe aarde",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Jesaja 65:17",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Jeremía was een profeet in het koninkrijk van Juda",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 4,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Jeremía 1:1",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Jeremía profeteerde alleen tijdens de regering van koning David",
+        "juisteAntwoord": "Niet waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Jeremía 1:3",
+        "fouteAntwoorden": [
+          "Waar"
+        ]
+      },
+      {
+        "vraag": "Pashur nam Jeremía gevangen",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 4,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Jeremía 20:2",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Jeremía schrijft in zijn brief: Dan zult gij Mij aanroepen en heengaan en tot Mij bidden; en Ik zal naar u niet horen",
+        "juisteAntwoord": "Niet waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Jeremía 29:12",
+        "fouteAntwoorden": [
+          "Waar"
+        ]
+      },
+      {
+        "vraag": "Ezechiël was een profeet in ballingschap in Babel",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Ezechiël 1: 1-3",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Ezechiël werd tot een wachter gesteld over het huis van Jeruzalem",
+        "juisteAntwoord": "Niet waar",
+        "moeilijkheidsgraad": 4,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Ezechiël 3:17",
+        "fouteAntwoorden": [
+          "Waar"
+        ]
+      },
+      {
+        "vraag": "Ezechiël werd geroepen om de zonden van Israël te verkondigen",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Ezechiël 2: 3-5",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Joël voorspelde de uitstorting van de Heilige Geest",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Joël 2: 28, 29",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Joël eindigt met een waarschuwing voor Israëls vijanden",
+        "juisteAntwoord": "Niet waar",
+        "moeilijkheidsgraad": 4,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Joël 3: 18-21",
+        "fouteAntwoorden": [
+          "Waar"
+        ]
+      },
+      {
+        "vraag": "Hoséa sprak over de terugkeer van het volk naar God",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 4,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Hoséa 6: 1-2",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Hoséa schrijft dat Assur ons niet zal behouden, wij zullen rijden op paarden",
+        "juisteAntwoord": "Niet waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Hoséa 14:4",
+        "fouteAntwoorden": [
+          "Waar"
+        ]
+      },
+      {
+        "vraag": "Amos was een ossenherder en las wilde vijgen af (plukker)",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Amos 7:14",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Amos voorspelde de verwoesting van Jeruzalem",
+        "juisteAntwoord": "Niet waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Amos 9: 8-10",
+        "fouteAntwoorden": [
+          "Waar"
+        ]
+      },
+      {
+        "vraag": "De brief aan de Romeinen is de kortste van Paulus' brieven",
+        "juisteAntwoord": "Niet waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Romeinen 16",
+        "fouteAntwoorden": [
+          "Waar"
+        ]
+      },
+      {
+        "vraag": "Paulus spreekt over het nieuwe leven door de Heilige Geest",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Romeinen 8",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Paulus schrijft de brief aan de Galaten vanwege hun trouw aan het evangelie",
+        "juisteAntwoord": "Niet waar",
+        "moeilijkheidsgraad": 4,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Galaten 1: 6,7",
+        "fouteAntwoorden": [
+          "Waar"
+        ]
+      },
+      {
+        "vraag": "De Galaten worden opgeroepen om elkaars lasten te dragen en zo de wet van Christus te vervullen",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Galaten 6:2",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Paulus behandelt in de brief aan Éfeze de eenheid van de gemeente",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Éfeze 4: 3-6",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Paulus spreekt in de brief aan Éfeze over de liefde van Christus",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Éfeze 3: 17-19",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Paulus schreef de brief aan de Filippenzen terwijl hij in vrijheid was",
+        "juisteAntwoord": "Niet waar",
+        "moeilijkheidsgraad": 4,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Filippenzen 1:7",
+        "fouteAntwoorden": [
+          "Waar"
+        ]
+      },
+      {
+        "vraag": "Paulus schrijft in Filippenzen: Ik vermag alle dingen door Christus, Die mij kracht geeft",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Filippenzen 4:13",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Paulus waarschuwt in Kolossenzen voor valse leringen",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Kolossenzen 2:8",
+        "fouteAntwoorden": [
+          "Niet waar"
+        ]
+      },
+      {
+        "vraag": "Paulus schrijft Kolossenzen terwijl hij in vrijheid is",
+        "juisteAntwoord": "Niet waar",
+        "moeilijkheidsgraad": 4,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Kolossenzen 4:10",
+        "fouteAntwoorden": [
+          "Waar"
+        ]
+      }
 ]
