@@ -26,14 +26,6 @@
             <a href="#" id="primaryBtn" class="btn primary btn-large">Download Android App</a>
         </div>
         
-        <div class="web-play-section" id="webPlaySection" style="display: none;">
-            <p>Of speel direct in uw browser:</p>
-            <a href="https://play.bijbelquiz.app" class="btn secondary" target="_blank" rel="noopener">
-                <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">play_arrow</i>
-                Speel op Web
-            </a>
-        </div>
-        
         <footer>
             &copy; 2025 BijbelQuiz
         </footer>
@@ -79,7 +71,7 @@
             },
             'linux': {
                 name: 'Linux',
-                icon: 'linux',
+                icon: 'desktop_windows',
                 description: 'Desktop App',
                 downloadUrl: 'https://bijbelquiz.app/downloads/linux.AppImage',
                 currentVersion: '1.1.0'
@@ -88,7 +80,7 @@
                 name: 'Web',
                 icon: 'public',
                 description: 'Web App',
-                downloadUrl: 'https://bijbelquiz.app/downloads/web.zip',
+                downloadUrl: 'https://play.bijbelquiz.app',
                 currentVersion: '1.1.0'
             }
         };
@@ -142,12 +134,45 @@
             const platformGrid = document.getElementById('platformGrid');
             const singleDownloadActions = document.getElementById('singleDownloadActions');
             
-            // Create platform cards for main platforms (Android only for now, Windows temporarily hidden)
-            const mainPlatforms = ['android']; // Removed 'windows' temporarily
+            // Create platform cards for main platforms
+            // Order: Android, Web, Windows, iOS, macOS, Linux
+            const mainPlatforms = ['android', 'web', 'windows', 'ios', 'macos', 'linux'];
             mainPlatforms.forEach(platformKey => {
                 const platformInfo = platforms[platformKey];
                 const platformCard = document.createElement('div');
                 platformCard.className = 'platform-card';
+                
+                // Special handling for web platform
+                if (platformKey === 'web') {
+                    platformCard.innerHTML = `
+                        <div class="platform-header">
+                            <div class="platform-icon">
+                                <i class="material-icons">${platformInfo.icon}</i>
+                            </div>
+                            <div class="platform-info">
+                                <h3>${platformInfo.name}</h3>
+                                <p>${platformInfo.description}</p>
+                            </div>
+                        </div>
+                        <div class="platform-actions">
+                            <a href="${platformInfo.downloadUrl}" class="btn primary" target="_blank" rel="noopener">
+                                <i class="material-icons" style="font-size: 18px; margin-right: 4px;">play_arrow</i>
+                                Speel nu
+                            </a>
+                        </div>
+                    `;
+                    platformGrid.appendChild(platformCard);
+                    return;
+                }
+                
+                // Check if platform is available (Android is available, others are coming soon)
+                const isAvailable = platformKey === 'android';
+                const buttonClass = isAvailable ? 'btn primary' : 'btn secondary disabled';
+                const buttonText = isAvailable ? 'Download' : 'Komt later';
+                const icon = isAvailable ? 'download' : 'hourglass_empty';
+                const targetAttr = isAvailable ? 'target="_blank"' : '';
+                const relAttr = isAvailable ? 'rel="noopener"' : '';
+                
                 platformCard.innerHTML = `
                     <div class="platform-header">
                         <div class="platform-icon">
@@ -159,14 +184,14 @@
                         </div>
                     </div>
                     <div class="platform-actions">
-                        <a href="${platformInfo.downloadUrl}" class="btn primary" target="_blank" rel="noopener">
-                            <i class="material-icons" style="font-size: 18px; margin-right: 4px;">download</i>
-                            Download
+                        <a href="${isAvailable ? platformInfo.downloadUrl : '#'}" class="${buttonClass}" ${targetAttr} ${relAttr}>
+                            <i class="material-icons" style="font-size: 18px; margin-right: 4px;">${icon}</i>
+                            ${buttonText}
                         </a>
-                        <a href="https://bijbelquiz.app/instructie/${platformKey}.html" class="btn secondary">
+                        ${isAvailable ? `<a href="https://bijbelquiz.app/instructie/${platformKey}.html" class="btn secondary" target="_blank" rel="noopener">
                             <i class="material-icons" style="font-size: 18px; margin-right: 4px;">help</i>
                             Installatiehulp
-                        </a>
+                        </a>` : ''}
                     </div>
                 `;
                 platformGrid.appendChild(platformCard);
@@ -311,6 +336,15 @@
             width: 100%;
             text-align: center;
             justify-content: center;
+        }
+        
+        /* Disabled button styles */
+        .btn.disabled {
+            background-color: #cccccc !important;
+            color: #666666 !important;
+            cursor: not-allowed;
+            opacity: 0.6;
+            pointer-events: none;
         }
         
         @media (min-width: 480px) {
