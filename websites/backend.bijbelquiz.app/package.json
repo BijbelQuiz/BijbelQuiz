@@ -4,8 +4,15 @@
   "description": "Backend API for BijbelQuiz app",
   "main": "server.js",
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js"
+    "dev": "npm run build && node server.js",
+    "start": "npm run build && node server.js",
+    "build": "tsc"
   },
-  "dependencies": {}
+  "dependencies": {
+    "next": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "typescript": "latest"
+  }
 }
