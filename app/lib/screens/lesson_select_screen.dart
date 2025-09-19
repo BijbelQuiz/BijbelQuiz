@@ -255,38 +255,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                 ),
           ),
         ),
-        actions: [
-          Semantics(
-            label: 'App settings',
-            hint: 'Open application settings',
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: _HeaderActionButton(
-                icon: Icons.settings_rounded,
-                label: 'Instellingen',
-                onTap: () {
-                  Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_settings');
-                  Navigator.of(context).pushNamed('/settings');
-                },
-              ),
-            ),
-          ),
-          Semantics(
-            label: 'Store',
-            hint: 'Open the store to purchase items',
-            child: Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: _HeaderActionButton(
-                icon: Icons.store_rounded,
-                label: 'Winkel',
-                onTap: () {
-                  Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_store');
-                  Navigator.of(context).pushNamed('/store');
-                },
-              ),
-            ),
-          ),
-        ],
+        actions: [],
       ),
       body: _loading
           ? const _LessonGridSkeleton()
@@ -694,9 +663,8 @@ class _ProgressHeaderState extends State<_ProgressHeader>
                       },
                       label: 'Vrij oefenen (random)',
                       icon: Icons.flash_on_rounded,
-                      color: cs.surface,
-                      textColor: cs.onSurface,
-                      borderColor: cs.outlineVariant,
+                      color: cs.primary,
+                      textColor: cs.onPrimary,
                     ),
                   ),
                 ],
@@ -713,9 +681,8 @@ class _ProgressHeaderState extends State<_ProgressHeader>
                   },
                   label: 'Vrij oefenen (random)',
                   icon: Icons.flash_on_rounded,
-                  color: cs.surface,
-                  textColor: cs.onSurface,
-                  borderColor: cs.outlineVariant,
+                  color: cs.primary,
+                  textColor: cs.onPrimary,
                 ),
               ),
             ],

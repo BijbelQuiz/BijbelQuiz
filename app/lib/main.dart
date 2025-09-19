@@ -20,6 +20,7 @@ import 'services/emergency_service.dart';
 import 'screens/store_screen.dart';
 import 'providers/lesson_progress_provider.dart';
 import 'screens/lesson_select_screen.dart';
+import 'screens/main_navigation_screen.dart';
 import 'settings_screen.dart';
 import 'l10n/strings_nl.dart' as strings;
 
@@ -149,7 +150,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
         '/store': (context) => const StoreScreen(),
         '/settings': (context) => const SettingsScreen(),
       },
-      home: const LessonSelectScreen(),
+      home: const MainNavigationScreen(),
     );
   }
 
