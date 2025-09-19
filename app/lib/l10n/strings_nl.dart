@@ -216,6 +216,11 @@ class AppStrings {
   static const String copyright = '© 2024-2025 ThomasNow Productions';
   static const String version = 'Versie';
   
+  // Social
+  static const String social = 'Sociaal';
+  static const String comingSoon = 'Binnenkort beschikbaar!';
+  static const String socialComingSoonMessage = 'De sociale functies van BijbelQuiz zijn binnenkort beschikbaar. Blijf op de hoogte voor updates!';
+  
   // Errors
   static const String couldNotOpenEmail = 'Kon e-mailclient niet openen';
 

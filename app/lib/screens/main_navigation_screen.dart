@@ -4,6 +4,7 @@ import 'package:bijbelquiz/services/analytics_service.dart';
 
 import '../screens/lesson_select_screen.dart';
 import '../screens/store_screen.dart';
+import '../screens/social_screen.dart';
 import '../settings_screen.dart';
 import '../l10n/strings_nl.dart' as strings;
 
@@ -20,6 +21,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   final List<Widget> _screens = [
     const LessonSelectScreen(),
     const StoreScreen(),
+    const SocialScreen(),
     const SettingsScreen(),
   ];
 
@@ -28,7 +30,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       _currentIndex = index;
       
       // Track screen view in analytics
-      final screenNames = ['LessonSelectScreen', 'StoreScreen', 'SettingsScreen'];
+      final screenNames = ['LessonSelectScreen', 'StoreScreen', 'SocialScreen', 'SettingsScreen'];
       Provider.of<AnalyticsService>(context, listen: false)
           .screen(context, screenNames[index]);
     });
@@ -57,6 +59,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             icon: const Icon(Icons.store_outlined),
             selectedIcon: const Icon(Icons.store),
             label: strings.AppStrings.store,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.groups_outlined),
+            selectedIcon: const Icon(Icons.groups),
+            label: strings.AppStrings.social,
           ),
           NavigationDestination(
             icon: const Icon(Icons.settings_outlined),
