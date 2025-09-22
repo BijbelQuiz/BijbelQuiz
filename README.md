@@ -72,7 +72,7 @@ Web applications:
 - Progress tracking
 - Sound effects
 - Offline support
-- Cross-platform (Android, iOS, Web, Desktop)
+- Cross-platform (Android, iOS, Web, Desktop, some aren't finished yet)
 
 ## Git repositories
 
