@@ -79,3 +79,5 @@ Web applications:
 - [Codeberg](https://codeberg.org/ThomasNowProductions/BijbelQuiz) (primary)
 - [GitHub](https://github.com/ThomasNowProductions/BijbelQuiz) (secondary)
 - [GitLab](https://gitlab.com/ThomasNow/bijbelquiz) (tertiary)
+
+Please open as much as possible issues and pull requests on Codeberg.
