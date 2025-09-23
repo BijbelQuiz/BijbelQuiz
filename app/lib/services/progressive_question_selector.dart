@@ -154,6 +154,14 @@ class ProgressiveQuestionSelector {
       _recentlyUsedQuestions.clear();
     }
 
+    // Additional fallback: if we still have no questions after clearing recent list,
+    // it means we have a logic error - reset everything
+    if (filteredQuestions.isEmpty) {
+      _usedQuestions.clear();
+      _recentlyUsedQuestions.clear();
+      filteredQuestions = eligibleQuestions;
+    }
+
     // PHASE 9: Random selection from eligible questions
     final random = Random();
     final selectedQuestion = filteredQuestions[random.nextInt(filteredQuestions.length)];
