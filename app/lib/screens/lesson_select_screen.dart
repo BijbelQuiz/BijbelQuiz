@@ -13,7 +13,6 @@ import '../screens/guide_screen.dart';
 import '../widgets/top_snackbar.dart';
 import '../l10n/strings_nl.dart' as strings;
 import '../constants/urls.dart';
-import '../providers/game_stats_provider.dart';
 
 class LessonSelectScreen extends StatefulWidget {
   const LessonSelectScreen({super.key});
@@ -603,17 +602,13 @@ class _ProgressHeaderState extends State<_ProgressHeader>
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final progress = Provider.of<LessonProgressProvider>(context, listen: true);
-    final gameStats = Provider.of<GameStatsProvider>(context, listen: true);
     final total = widget.lessons.length;
     final unlocked = progress.unlockedCount.clamp(0, total == 0 ? 1 : total);
     final percent = total > 0 ? unlocked / total : 0.0;
 
-    // Total points from GameStatsProvider
-    final totalPoints = gameStats.score;
-
     return Semantics(
       label: 'Progress overview',
-      hint: 'Shows your current progress through lessons and earned points',
+      hint: 'Shows your current progress through lessons',
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -660,25 +655,11 @@ class _ProgressHeaderState extends State<_ProgressHeader>
               ),
             ),
             const SizedBox(height: 10),
-            Semantics(
-              label: 'Points earned',
-              hint: 'You have earned $totalPoints points',
-              child: Row(
-                children: [
-                  Icon(Icons.bolt_rounded, color: cs.primary, semanticLabel: 'Points'),
-                  const SizedBox(width: 4),
-                  Text('$totalPoints punten verdiend', style: Theme.of(context).textTheme.bodyMedium),
-                ],
-              ),
-            ),
+            
             const SizedBox(height: 12),
             // CTA zone to incentivize starting a game
             if (widget.continueLesson != null) ...[
-              Text(
-                'Klaar voor je volgende uitdaging?',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 8),
+              
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -720,8 +701,9 @@ class _ProgressHeaderState extends State<_ProgressHeader>
                       },
                       label: 'Vrij oefenen (random)',
                       icon: Icons.flash_on_rounded,
-                      color: cs.primary,
-                      textColor: cs.onPrimary,
+                      color: Colors.transparent,
+                      textColor: cs.primary,
+                      borderColor: cs.primary,
                     ),
                   ),
                 ],
@@ -738,8 +720,9 @@ class _ProgressHeaderState extends State<_ProgressHeader>
                   },
                   label: 'Vrij oefenen (random)',
                   icon: Icons.flash_on_rounded,
-                  color: cs.primary,
-                  textColor: cs.onPrimary,
+                  color: Colors.transparent,
+                  textColor: cs.primary,
+                  borderColor: cs.primary,
                 ),
               ),
             ],
@@ -1369,8 +1352,8 @@ class _AnimatedButtonState extends State<_AnimatedButton>
   @override
   Widget build(BuildContext context) {
     final isOutlined = widget.borderColor != null;
-    final minHeight = widget.label.contains('Vrij oefenen') ? 44.0 : 48.0;
-    final borderRadius = widget.label.contains('Vrij oefenen') ? 12.0 : 14.0;
+    final minHeight = 48.0;
+    final borderRadius = 14.0;
 
     return AnimatedBuilder(
       animation: _animationController,
