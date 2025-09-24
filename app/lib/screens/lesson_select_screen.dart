@@ -31,6 +31,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
   bool _showPromoCard = false;
   bool _isDonationPromo = true; // true for donation, false for follow
   bool _isSatisfactionPromo = false; // true for satisfaction survey
+  bool _isDifficultyPromo = false; // true for difficulty feedback
   // Search and filters removed for simplified UI
 
   @override
@@ -125,19 +126,27 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
           if (_showPromoCard) {
             // Determine which type of promo to show
             final rand = Random().nextDouble();
-            if (rand < 0.33) {
+            if (rand < 0.25) {
               _isDonationPromo = true;
               _isSatisfactionPromo = false;
-            } else if (rand < 0.66) {
+              _isDifficultyPromo = false;
+            } else if (rand < 0.50) {
               _isDonationPromo = false;
               _isSatisfactionPromo = false;
+              _isDifficultyPromo = true;
+            } else if (rand < 0.75) {
+              _isDonationPromo = false;
+              _isSatisfactionPromo = false;
+              _isDifficultyPromo = false;
             } else {
               _isDonationPromo = false;
               _isSatisfactionPromo = true;
+              _isDifficultyPromo = false;
             }
             Provider.of<AnalyticsService>(context, listen: false).capture(context, 'show_promo_card', properties: {
               'is_donation': _isDonationPromo,
               'is_satisfaction': _isSatisfactionPromo,
+              'is_difficulty': _isDifficultyPromo,
             });
           }
         });
@@ -182,6 +191,15 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
       }
     }
     
+    // For difficulty feedback popup
+    if (settings.hasClickedDifficultyLink && settings.lastDifficultyPopup != null) {
+      final lastPopup = settings.lastDifficultyPopup!;
+      final nextAllowed = DateTime(lastPopup.year, lastPopup.month + 1, 1); // First of next month
+      if (now.isBefore(nextAllowed)) {
+        // Don't show difficulty popup
+      }
+    }
+    
     // If we get here, we can show a popup
     return true;
   }
@@ -197,6 +215,19 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     await settings.markDonationLinkAsClicked();
     _launchUrl(AppUrls.donateUrl);
+  }
+
+  /// Adjusts the difficulty level based on user feedback
+  /// The ProgressiveQuestionSelector dynamically adjusts difficulty based on performance
+  /// so we'll store the user's preference to potentially influence future difficulty
+  Future<void> _adjustDifficulty(String feedback) async {
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    
+    // Store the user's difficulty preference
+    await settings.setDifficultyPreference(feedback);
+    
+    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'difficulty_adjusted', 
+      properties: {'feedback': feedback});
   }
 
 
@@ -293,6 +324,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                                 child: _PromoCard(
                                   isDonation: _isDonationPromo,
                                   isSatisfaction: _isSatisfactionPromo,
+                                  isDifficulty: _isDifficultyPromo,
                                   onDismiss: () {
                                     Provider.of<AnalyticsService>(context, listen: false).capture(context, 'dismiss_promo_card');
                                     setState(() {
@@ -312,6 +344,28 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                                       await settings.markSatisfactionLinkAsClicked();
                                       await settings.updateLastSatisfactionPopup();
                                       _launchUrl(AppUrls.satisfactionSurveyUrl);
+                                    } else if (_isDifficultyPromo) {
+                                      // Handle difficulty feedback
+                                      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_difficulty_feedback', properties: {'feedback': url});
+                                      await settings.markDifficultyLinkAsClicked();
+                                      await settings.updateLastDifficultyPopup();
+                                      
+                                      // Handle the different feedback options
+                                      if (url == 'too_hard') {
+                                        // User feels questions are too hard
+                                        await _adjustDifficulty('too_hard');
+                                      } else if (url == 'too_easy') {
+                                        // User feels questions are too easy
+                                        await _adjustDifficulty('too_easy');
+                                      } else if (url == 'good') {
+                                        // User feels questions are just right
+                                        await _adjustDifficulty('good');
+                                      }
+                                      
+                                      // Hide the promo after action
+                                      setState(() {
+                                        _showPromoCard = false;
+                                      });
                                     } else {
                                       Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_follow_promo', properties: {'url': url});
                                       await settings.markFollowLinkAsClicked();
@@ -1002,12 +1056,14 @@ class _LessonGridSkeleton extends StatelessWidget {
 class _PromoCard extends StatelessWidget {
   final bool isDonation;
   final bool isSatisfaction;
+  final bool isDifficulty;
   final VoidCallback onDismiss;
   final Function(String) onAction;
 
   const _PromoCard({
     required this.isDonation,
     required this.isSatisfaction,
+    required this.isDifficulty,
     required this.onDismiss,
     required this.onAction,
   });
@@ -1021,6 +1077,8 @@ class _PromoCard extends StatelessWidget {
     if (isDonation) {
       gradientColors = [cs.primary.withValues(alpha: 0.14), cs.primary.withValues(alpha: 0.06)];
     } else if (isSatisfaction) {
+      gradientColors = [cs.primary.withValues(alpha: 0.14), cs.primary.withValues(alpha: 0.06)];
+    } else if (isDifficulty) {
       gradientColors = [cs.primary.withValues(alpha: 0.14), cs.primary.withValues(alpha: 0.06)];
     } else {
       gradientColors = [cs.primary.withValues(alpha: 0.14), cs.primary.withValues(alpha: 0.06)];
@@ -1057,7 +1115,9 @@ class _PromoCard extends StatelessWidget {
                   ? Icons.favorite_rounded 
                   : isSatisfaction 
                     ? Icons.feedback_rounded 
-                    : Icons.group_add_rounded,
+                    : isDifficulty
+                      ? Icons.tune_rounded
+                      : Icons.group_add_rounded,
                 color: cs.onSurface.withValues(alpha: 0.7),
                 size: 20,
               ),
@@ -1068,7 +1128,9 @@ class _PromoCard extends StatelessWidget {
                     ? strings.AppStrings.donate 
                     : isSatisfaction 
                       ? strings.AppStrings.satisfactionSurvey 
-                      : strings.AppStrings.followUs,
+                      : isDifficulty
+                        ? strings.AppStrings.difficultyFeedbackTitle
+                        : strings.AppStrings.followUs,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: cs.onSurface,
@@ -1089,7 +1151,9 @@ class _PromoCard extends StatelessWidget {
               ? strings.AppStrings.donateExplanation 
               : isSatisfaction 
                 ? strings.AppStrings.satisfactionSurveyMessage 
-                : strings.AppStrings.followUsMessage,
+                : isDifficulty
+                  ? strings.AppStrings.difficultyFeedbackMessage
+                  : strings.AppStrings.followUsMessage,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 12),
@@ -1125,6 +1189,49 @@ class _PromoCard extends StatelessWidget {
                     ),
                     icon: const Icon(Icons.feedback_rounded),
                     label: Text(strings.AppStrings.satisfactionSurveyButton),
+                  ),
+                ),
+              ],
+            ),
+          ] else if (isDifficulty) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => onAction('too_hard'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: cs.primary,
+                      foregroundColor: cs.onPrimary,
+                      minimumSize: const Size.fromHeight(44),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(strings.AppStrings.difficultyTooHard),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => onAction('good'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: cs.primary,
+                      foregroundColor: cs.onPrimary,
+                      minimumSize: const Size.fromHeight(44),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(strings.AppStrings.difficultyGood),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => onAction('too_easy'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: cs.primary,
+                      foregroundColor: cs.onPrimary,
+                      minimumSize: const Size.fromHeight(44),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(strings.AppStrings.difficultyTooEasy),
                   ),
                 ),
               ],

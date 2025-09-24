@@ -625,6 +625,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       totalQuestions: gameStats.score + gameStats.incorrectAnswers,
       correctAnswers: gameStats.score,
       incorrectAnswers: gameStats.incorrectAnswers,
+      context: context,
     );
     setState(() {
       final nextQuestion = _questionSelector.pickNextQuestion(calculatedNewDifficulty, context);

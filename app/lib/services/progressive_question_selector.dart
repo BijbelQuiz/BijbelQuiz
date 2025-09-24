@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/quiz_question.dart';
 import '../providers/game_stats_provider.dart';
+import '../providers/settings_provider.dart';
 import '../services/question_cache_service.dart';
 import '../services/question_loading_service.dart';
 
@@ -45,7 +46,7 @@ class ProgressiveQuestionSelector {
   Set<String> get usedQuestions => _usedQuestions;
   List<String> get recentlyUsedQuestions => _recentlyUsedQuestions;
 
-  /// PQU: Progressive Question Up-selection algorithm
+    /// PQU: Progressive Question Up-selection algorithm
   /// This algorithm dynamically adjusts question difficulty based on player performance
   /// to maintain an optimal challenge level and prevent boredom or frustration.
   ///
@@ -56,6 +57,7 @@ class ProgressiveQuestionSelector {
   /// 4. Mapping internal difficulty scale [0..2] to JSON levels [1..5]
   /// 5. Selecting questions from level 1 up to the target difficulty level (cumulative selection)
   /// 6. Filtering out recently used questions to prevent repetition
+  /// 7. Applying user feedback preferences to adjust difficulty
   ///
   /// @param currentDifficulty The current normalized difficulty [0..2]
   /// @return The next question selected by the algorithm
@@ -95,20 +97,38 @@ class ProgressiveQuestionSelector {
       }
     }
 
-    // PHASE 3: Constrain difficulty to valid range
+    // PHASE 3: Apply user difficulty preference if available
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    if (settings.difficultyPreference != null) {
+      switch (settings.difficultyPreference) {
+        case 'too_hard':
+          // User finds questions too hard, decrease difficulty slightly
+          targetDifficulty = (targetDifficulty - 0.2).clamp(0.0, 2.0);
+          break;
+        case 'too_easy':
+          // User finds questions too easy, increase difficulty slightly
+          targetDifficulty = (targetDifficulty + 0.2).clamp(0.0, 2.0);
+          break;
+        case 'good':
+          // User finds questions good, maintain current difficulty (no change needed)
+          break;
+      }
+    }
+
+    // PHASE 4: Constrain difficulty to valid range
     // Internal difficulty scale: [0..2] maps to JSON levels [1..5]
     targetDifficulty = targetDifficulty.clamp(0.0, 2.0);
 
-    // PHASE 4: Map internal difficulty to JSON difficulty levels
+    // PHASE 5: Map internal difficulty to JSON difficulty levels
     // Formula: level = 1 + (normalized_difficulty * 2).round()
     // Examples: 0.0 -> 1 (easiest), 0.5 -> 2 (easy), 1.0 -> 3 (medium), 1.5 -> 4 (hard), 2.0 -> 5 (hardest)
     final int targetLevel = (1 + (targetDifficulty * 2).round()).clamp(1, 5);
 
-    // PHASE 5: Select available questions (not used in current session)
+    // PHASE 6: Select available questions (not used in current session)
     List<QuizQuestion> availableQuestions =
         allQuestions.where((q) => !_usedQuestions.contains(q.question)).toList();
 
-    // PHASE 6: Handle question pool exhaustion
+    // PHASE 7: Handle question pool exhaustion
     // When all questions are used, reset and reshuffle for continued gameplay
     if (availableQuestions.isEmpty) {
       // Instead of clearing _usedQuestions and _recentlyUsedQuestions,
@@ -129,7 +149,7 @@ class ProgressiveQuestionSelector {
       }
     }
 
-    // PHASE 7: Filter questions by difficulty (cumulative level selection)
+    // PHASE 8: Filter questions by difficulty (cumulative level selection)
     // Users get questions from level 1 up to their current target level (inclusive)
     // For example: if user is at level 3, they get questions from levels 1, 2, and 3
     // For example: if user is at level 4, they get questions from levels 1, 2, 3, and 4
@@ -157,7 +177,7 @@ class ProgressiveQuestionSelector {
       eligibleQuestions = availableQuestions;
     }
 
-    // PHASE 8: Apply anti-repetition filter
+    // PHASE 9: Apply anti-repetition filter
     // Prevent showing recently used questions to maintain engagement
     List<QuizQuestion> filteredQuestions = eligibleQuestions.where((q) =>
         !_recentlyUsedQuestions.contains(q.question)).toList();
@@ -176,11 +196,11 @@ class ProgressiveQuestionSelector {
       filteredQuestions = eligibleQuestions;
     }
 
-    // PHASE 9: Random selection from eligible questions
+    // PHASE 10: Random selection from eligible questions
     final random = Random();
     final selectedQuestion = filteredQuestions[random.nextInt(filteredQuestions.length)];
 
-    // PHASE 10: Update usage tracking
+    // PHASE 11: Update usage tracking
     _usedQuestions.add(selectedQuestion.question);
     _recentlyUsedQuestions.add(selectedQuestion.question);
 
@@ -200,6 +220,7 @@ class ProgressiveQuestionSelector {
   /// - Current streak length (reward/punish sustained performance)
   /// - Time remaining when answered (speed bonus/malus)
   /// - Overall session performance ratio (long-term adjustment)
+  /// - User difficulty preference (feedback-based adjustment)
   /// - Random variation (prevents difficulty stagnation)
   ///
   /// @param currentDifficulty Current normalized difficulty [0..2]
@@ -209,6 +230,7 @@ class ProgressiveQuestionSelector {
   /// @param totalQuestions Total questions answered in session
   /// @param correctAnswers Number of correct answers in session
   /// @param incorrectAnswers Number of incorrect answers in session
+  /// @param context BuildContext to access SettingsProvider
   /// @return New normalized difficulty level [0..2]
   double calculateNextDifficulty({
     required double currentDifficulty,
@@ -218,6 +240,7 @@ class ProgressiveQuestionSelector {
     required int totalQuestions,
     required int correctAnswers,
     required int incorrectAnswers,
+    required BuildContext? context,
   }) {
     double targetDifficulty = currentDifficulty;
     final correctRatio = totalQuestions > 0 ? correctAnswers / totalQuestions : 0.5;
@@ -266,7 +289,32 @@ class ProgressiveQuestionSelector {
     final random = Random();
     targetDifficulty += (random.nextDouble() - 0.5) * 0.15;
 
-    // PHASE 4: Constrain to valid difficulty range
+    // PHASE 4: Apply user difficulty preference if available
+    if (context != null) {
+      try {
+        final settings = Provider.of<SettingsProvider>(context, listen: false);
+        if (settings.difficultyPreference != null) {
+          switch (settings.difficultyPreference) {
+            case 'too_hard':
+              // User finds questions too hard, decrease difficulty slightly
+              targetDifficulty = (targetDifficulty - 0.2).clamp(0.0, 2.0);
+              break;
+            case 'too_easy':
+              // User finds questions too easy, increase difficulty slightly
+              targetDifficulty = (targetDifficulty + 0.2).clamp(0.0, 2.0);
+              break;
+            case 'good':
+              // User finds questions good, maintain current difficulty (no change needed)
+              break;
+          }
+        }
+      } catch (e) {
+        // If context is not valid (e.g., disposed), skip settings access
+        // This can happen during app lifecycle changes
+      }
+    }
+
+    // PHASE 5: Constrain to valid difficulty range
     return targetDifficulty.clamp(0.0, 2.0);
   }
 

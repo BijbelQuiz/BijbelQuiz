@@ -242,6 +242,13 @@ class AppStrings {
   static const String satisfactionSurvey = 'Help ons te verbeteren';
   static const String satisfactionSurveyMessage = 'Neem een paar minuten om ons te helpen de app te verbeteren. Uw feedback is belangrijk!';
   static const String satisfactionSurveyButton = 'Vul enquête in';
+  
+  // Difficulty Feedback
+  static const String difficultyFeedbackTitle = 'Hoe bevalt de moeilijkheidsgraad?';
+  static const String difficultyFeedbackMessage = 'Laat ons weten of de vragen te makkelijk of te moeilijk zijn.';
+  static const String difficultyTooHard = 'Te moeilijk';
+  static const String difficultyGood = 'Goed';
+  static const String difficultyTooEasy = 'Te makkelijk';
 
   // Quiz Screen
   static const String skip = 'Skip';

@@ -18,6 +18,9 @@ class SettingsProvider extends ChangeNotifier {
   static const String _hasClickedDonationLinkKey = 'has_clicked_donation_link';
   static const String _hasClickedFollowLinkKey = 'has_clicked_follow_link';
   static const String _hasClickedSatisfactionLinkKey = 'has_clicked_satisfaction_link';
+  static const String _lastDifficultyPopupKey = 'last_difficulty_popup';
+  static const String _hasClickedDifficultyLinkKey = 'has_clicked_difficulty_link';
+  static const String _difficultyPreferenceKey = 'difficulty_preference';
   static const String _analyticsEnabledKey = 'analytics_enabled';
   
   SharedPreferences? _prefs;
@@ -32,9 +35,12 @@ class SettingsProvider extends ChangeNotifier {
   DateTime? _lastDonationPopup;
   DateTime? _lastFollowPopup;
   DateTime? _lastSatisfactionPopup;
+  DateTime? _lastDifficultyPopup;
+  String? _difficultyPreference;
   bool _hasClickedDonationLink = false;
   bool _hasClickedFollowLink = false;
   bool _hasClickedSatisfactionLink = false;
+  bool _hasClickedDifficultyLink = false;
   bool _analyticsEnabled = true; // Default to true to maintain current behavior
   bool _isLoading = true;
   String? _error;
@@ -78,9 +84,12 @@ class SettingsProvider extends ChangeNotifier {
   DateTime? get lastDonationPopup => _lastDonationPopup;
   DateTime? get lastFollowPopup => _lastFollowPopup;
   DateTime? get lastSatisfactionPopup => _lastSatisfactionPopup;
+  DateTime? get lastDifficultyPopup => _lastDifficultyPopup;
+  String? get difficultyPreference => _difficultyPreference;
   bool get hasClickedDonationLink => _hasClickedDonationLink;
   bool get hasClickedFollowLink => _hasClickedFollowLink;
   bool get hasClickedSatisfactionLink => _hasClickedSatisfactionLink;
+  bool get hasClickedDifficultyLink => _hasClickedDifficultyLink;
   
   /// Whether analytics are enabled
   bool get analyticsEnabled => _analyticsEnabled;
@@ -165,6 +174,11 @@ class SettingsProvider extends ChangeNotifier {
       
       final lastSatisfactionPopupMs = _prefs?.getInt(_lastSatisfactionPopupKey);
       _lastSatisfactionPopup = lastSatisfactionPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSatisfactionPopupMs) : null;
+      
+      final lastDifficultyPopupMs = _prefs?.getInt(_lastDifficultyPopupKey);
+      _lastDifficultyPopup = lastDifficultyPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastDifficultyPopupMs) : null;
+      
+      _difficultyPreference = _prefs?.getString(_difficultyPreferenceKey);
       
       _hasClickedDonationLink = _getBoolSetting(_hasClickedDonationLinkKey, defaultValue: false);
       _hasClickedFollowLink = _getBoolSetting(_hasClickedFollowLinkKey, defaultValue: false);
@@ -338,6 +352,17 @@ class SettingsProvider extends ChangeNotifier {
     );
   }
 
+  /// Updates the last difficulty popup timestamp
+  Future<void> updateLastDifficultyPopup() async {
+    await _saveSetting(
+      action: () async {
+        _lastDifficultyPopup = DateTime.now();
+        await _prefs?.setInt(_lastDifficultyPopupKey, _lastDifficultyPopup!.millisecondsSinceEpoch);
+      },
+      errorMessage: 'Failed to update difficulty popup timestamp',
+    );
+  }
+
   /// Marks that the user has clicked the donation link
   Future<void> markDonationLinkAsClicked() async {
     await _saveSetting(
@@ -368,6 +393,32 @@ class SettingsProvider extends ChangeNotifier {
         await _prefs?.setBool(_hasClickedSatisfactionLinkKey, true);
       },
       errorMessage: 'Failed to update satisfaction link status',
+    );
+  }
+
+  /// Marks that the user has clicked the difficulty feedback link
+  Future<void> markDifficultyLinkAsClicked() async {
+    await _saveSetting(
+      action: () async {
+        _hasClickedDifficultyLink = true;
+        await _prefs?.setBool(_hasClickedDifficultyLinkKey, true);
+      },
+      errorMessage: 'Failed to update difficulty link status',
+    );
+  }
+
+  /// Sets the user's difficulty preference
+  Future<void> setDifficultyPreference(String? preference) async {
+    await _saveSetting(
+      action: () async {
+        _difficultyPreference = preference;
+        if (preference != null) {
+          await _prefs?.setString(_difficultyPreferenceKey, preference);
+        } else {
+          await _prefs?.remove(_difficultyPreferenceKey);
+        }
+      },
+      errorMessage: 'Failed to update difficulty preference',
     );
   }
 
@@ -431,6 +482,9 @@ class SettingsProvider extends ChangeNotifier {
       'hasClickedDonationLink': _hasClickedDonationLink,
       'hasClickedFollowLink': _hasClickedFollowLink,
       'hasClickedSatisfactionLink': _hasClickedSatisfactionLink,
+      'lastDifficultyPopup': _lastDifficultyPopup?.millisecondsSinceEpoch,
+      'hasClickedDifficultyLink': _hasClickedDifficultyLink,
+      'difficultyPreference': _difficultyPreference,
       'analyticsEnabled': _analyticsEnabled,
     };
   }
@@ -461,6 +515,11 @@ class SettingsProvider extends ChangeNotifier {
     _hasClickedDonationLink = data['hasClickedDonationLink'] ?? false;
     _hasClickedFollowLink = data['hasClickedFollowLink'] ?? false;
     _hasClickedSatisfactionLink = data['hasClickedSatisfactionLink'] ?? false;
+    _hasClickedDifficultyLink = data['hasClickedDifficultyLink'] ?? false;
+    _difficultyPreference = data['difficultyPreference'];
+    
+    final lastDifficultyPopupMs = data['lastDifficultyPopup'];
+    _lastDifficultyPopup = lastDifficultyPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastDifficultyPopupMs) : null;
 
     await _prefs?.setInt(_themeModeKey, _themeMode.index);
     await _prefs?.setString(_slowModeKey, _gameSpeed);
@@ -486,6 +545,15 @@ class SettingsProvider extends ChangeNotifier {
     await _prefs?.setBool(_hasClickedDonationLinkKey, _hasClickedDonationLink);
     await _prefs?.setBool(_hasClickedFollowLinkKey, _hasClickedFollowLink);
     await _prefs?.setBool(_hasClickedSatisfactionLinkKey, _hasClickedSatisfactionLink);
+    await _prefs?.setBool(_hasClickedDifficultyLinkKey, _hasClickedDifficultyLink);
+    if (_difficultyPreference != null) {
+      await _prefs?.setString(_difficultyPreferenceKey, _difficultyPreference!);
+    }
+    
+    // Save difficulty popup tracking data
+    if (_lastDifficultyPopup != null) {
+      await _prefs?.setInt(_lastDifficultyPopupKey, _lastDifficultyPopup!.millisecondsSinceEpoch);
+    }
     
     notifyListeners();
   }
