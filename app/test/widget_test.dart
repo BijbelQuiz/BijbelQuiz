@@ -13,6 +13,7 @@ import 'package:bijbelquiz/providers/game_stats_provider.dart';
 
 import 'package:bijbelquiz/services/connection_service.dart';
 
+import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:bijbelquiz/screens/quiz_screen.dart';
 
 void main() {
@@ -31,7 +32,7 @@ void main() {
         providers: [
           ChangeNotifierProvider(create: (_) => SettingsProvider()),
           ChangeNotifierProvider(create: (_) => GameStatsProvider()),
-
+          Provider(create: (_) => AnalyticsService()),
         ],
         child: const MaterialApp(home: QuizScreen()),
       ),

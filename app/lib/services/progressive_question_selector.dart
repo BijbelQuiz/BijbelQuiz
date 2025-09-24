@@ -107,8 +107,10 @@ class ProgressiveQuestionSelector {
     // PHASE 6: Handle question pool exhaustion
     // When all questions are used, reset and reshuffle for continued gameplay
     if (availableQuestions.isEmpty) {
-      _usedQuestions.clear();
-      _recentlyUsedQuestions.clear();
+      // Instead of clearing _usedQuestions and _recentlyUsedQuestions,
+      // we will just reshuffle allQuestions and repopulate availableQuestions.
+      // This ensures that questions are eventually repeated, but only after
+      // all questions have been seen at least once in the current session.
       allQuestions.shuffle(Random()); // Randomize order for variety
       availableQuestions = List<QuizQuestion>.from(allQuestions);
 
