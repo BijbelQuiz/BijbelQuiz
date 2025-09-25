@@ -568,8 +568,9 @@ Widget _buildDayCircle(BuildContext context, _DayIndicator indicator, {bool isCe
       border = cs.primary;
       break;
     case _DayState.fail:
-      fill = Colors.redAccent;
-      border = Colors.redAccent;
+      // Muted red without contrasting outline to avoid visible white halo
+      fill = cs.errorContainer;
+      border = cs.errorContainer;
       break;
     case _DayState.freeze:
       fill = cs.surfaceContainerHighest;
@@ -588,7 +589,7 @@ Widget _buildDayCircle(BuildContext context, _DayIndicator indicator, {bool isCe
       color: fill,
       shape: BoxShape.circle,
       border: Border.all(color: border, width: isCenter ? 3.0 : 1.8),
-      boxShadow: isCenter && indicator.state != _DayState.future
+      boxShadow: isCenter && indicator.state == _DayState.success
           ? [
               BoxShadow(color: border.withValues(alpha: 0.35), blurRadius: 8, spreadRadius: 0, offset: const Offset(0, 2)),
             ]
