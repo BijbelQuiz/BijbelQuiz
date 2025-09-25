@@ -419,6 +419,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
               onPressed: () {
                 Provider.of<AnalyticsService>(context, listen: false).capture(context, 'next_question_from_time_up');
                 Navigator.of(dialogContext).pop();
+                // For time up scenario, we call handleNextQuestion which will record the result
                 _handleNextQuestion(false, _quizState.currentDifficulty);
               },
               child: Text(
@@ -620,6 +621,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     // Phase 4: Transition to next question
     if (!mounted) return;
     AppLogger.info('Transitioning to next question');
+    // Record the answer result so the question selector knows if the previous question was answered correctly
+    _questionSelector.recordAnswerResult(_quizState.question.question, isCorrect);
     // Calculate new difficulty
     final calculatedNewDifficulty = _questionSelector.calculateNextDifficulty(
       currentDifficulty: _quizState.currentDifficulty,
@@ -919,6 +922,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       if (!mounted) return;
       final newDifficulty = _quizState.currentDifficulty;
       setState(() {
+        // Record that the current question was not answered correctly (since it was skipped)
+        _questionSelector.recordAnswerResult(_quizState.question.question, false);
         final nextQuestion = _questionSelector.pickNextQuestion(newDifficulty, context);
         final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
           Duration(seconds: settings.slowMode ? 35 : 20)

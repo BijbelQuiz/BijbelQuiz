@@ -25,8 +25,9 @@ class ProgressiveQuestionSelector {
   final QuestionLoadingService _questionLoadingService;
 
   // Track used questions to avoid repetition
-  final Set<String> _usedQuestions = {};
-  final List<String> _recentlyUsedQuestions = [];
+  final Set<String> _correctlyAnsweredQuestions = {}; // Questions answered correctly (should not appear again)
+  final Set<String> _shownQuestions = {}; // Questions that have been shown (regardless of answer correctness)
+  final List<String> _recentlyUsedQuestions = []; // Recently used questions to prevent immediate repetition
   static const int _recentlyUsedLimit = 50;
 
   // All loaded questions - made public instead of using getters/setters
@@ -51,7 +52,8 @@ class ProgressiveQuestionSelector {
     _mounted = mounted;
   }
 
-  Set<String> get usedQuestions => _usedQuestions;
+  Set<String> get usedQuestions => _correctlyAnsweredQuestions;
+  Set<String> get shownQuestions => _shownQuestions;
   List<String> get recentlyUsedQuestions => _recentlyUsedQuestions;
 
   
@@ -134,9 +136,10 @@ class ProgressiveQuestionSelector {
     // Examples: 0.0 -> 1 (easiest), 0.5 -> 2 (easy), 1.0 -> 3 (medium), 1.5 -> 4 (hard), 2.0 -> 5 (hardest)
     final int targetLevel = (1 + (targetDifficulty * 2).round()).clamp(1, 5);
 
-    // PHASE 6: Select available questions (not used in current session)
+    // PHASE 6: Select available questions (not answered correctly in current session)
+    // Questions that were answered incorrectly can be shown again
     List<QuizQuestion> availableQuestions =
-        allQuestions.where((q) => !_usedQuestions.contains(q.question)).toList();
+        allQuestions.where((q) => !_correctlyAnsweredQuestions.contains(q.question)).toList();
 
     // PHASE 7: Handle question pool exhaustion (3-phase strategy)
     // 1) Use unique questions filtered by level (handled below in PHASE 8)
@@ -153,10 +156,11 @@ class ProgressiveQuestionSelector {
         );
       }
       // Recompute after background load attempt
-      availableQuestions = allQuestions.where((q) => !_usedQuestions.contains(q.question)).toList();
+      availableQuestions = allQuestions.where((q) => !_correctlyAnsweredQuestions.contains(q.question)).toList();
       if (availableQuestions.isEmpty) {
         // Phase 3: all unique questions exhausted -> reset session usage and start over
-        _usedQuestions.clear();
+        _correctlyAnsweredQuestions.clear();
+        _shownQuestions.clear();
         _recentlyUsedQuestions.clear();
         allQuestions.shuffle(Random());
         availableQuestions = List<QuizQuestion>.from(allQuestions);
@@ -205,7 +209,8 @@ class ProgressiveQuestionSelector {
     // Additional fallback: if we still have no questions after clearing recent list,
     // it means we have a logic error - reset everything
     if (filteredQuestions.isEmpty) {
-      _usedQuestions.clear();
+      _correctlyAnsweredQuestions.clear();
+      _shownQuestions.clear();
       _recentlyUsedQuestions.clear();
       filteredQuestions = eligibleQuestions;
     }
@@ -215,7 +220,9 @@ class ProgressiveQuestionSelector {
     final selectedQuestion = filteredQuestions[random.nextInt(filteredQuestions.length)];
 
     // PHASE 11: Update usage tracking
-    _usedQuestions.add(selectedQuestion.question);
+    // Add to shown questions but not necessarily to correctly answered questions
+    // Questions are only added to _correctlyAnsweredQuestions if answered correctly later
+    _shownQuestions.add(selectedQuestion.question);
     _recentlyUsedQuestions.add(selectedQuestion.question);
 
     // Maintain recent questions list size limit (FIFO eviction)
@@ -336,15 +343,30 @@ class ProgressiveQuestionSelector {
 
   /// Reset question pool for new game or language change
   void resetQuestionPool() {
-    _usedQuestions.clear();
+    _correctlyAnsweredQuestions.clear();
+    _shownQuestions.clear();
     _recentlyUsedQuestions.clear();
     allQuestionsLoaded = false;
     allQuestions.clear();
   }
 
+  /// Record the result of answering a question
+  /// If the answer was correct, the question will not be shown again
+  /// If the answer was incorrect, the question can be shown again
+  void recordAnswerResult(String questionText, bool isCorrect) {
+    if (isCorrect) {
+      _correctlyAnsweredQuestions.add(questionText);
+    } else {
+      // If the answer was incorrect, remove from shown questions 
+      // to allow it to potentially be shown again (though it will still be in recently used for a while)
+      // We don't need to remove from shown set because availability is based on _correctlyAnsweredQuestions only
+    }
+  }
+
   /// Reset for new game session
   void resetForNewGame() {
-    _usedQuestions.clear();
+    _correctlyAnsweredQuestions.clear();
+    _shownQuestions.clear();
     _recentlyUsedQuestions.clear();
     allQuestions.shuffle(Random());
   }
