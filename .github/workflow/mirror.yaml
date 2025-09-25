@@ -1,0 +1,20 @@
+name: Mirror to Codeberg
+
+on:
+  push:
+    branches:
+      - main  # your default branch
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Mirror push to Codeberg
+        env:
+          CODEBERG_REPO: https://ThomasNowProductions:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/ThomasNowProductions/BijbelQuiz.git
+        run: |
+          git remote add mirror $CODEBERG_REPO || true
+          git push --mirror mirror
