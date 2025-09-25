@@ -151,21 +151,42 @@ class NotificationService {
 
     AppLogger.info('Scheduling daily motivation notifications');
 
-    // Genereer 3 willekeurige tijden tussen 8:00 en 22:00 voor vandaag
+    // Genereer 3 tijden gelijkmatig verspreid over de dag met wat willekeur
     final now = DateTime.now();
     final random = Random(now.year * 10000 + now.month * 100 + now.day); // Seed voor reproduceerbaarheid per dag
     final List<TimeOfDay> times = [];
-    final Set<int> usedMinutes = {};
-    while (times.length < 3) {
-      final hour = 8 + random.nextInt(15); // 8 tot 22
-      final minute = random.nextInt(60);
-      final totalMinutes = hour * 60 + minute;
-      if (!usedMinutes.contains(totalMinutes)) {
-        times.add(TimeOfDay(hour: hour, minute: minute));
-        usedMinutes.add(totalMinutes);
+    
+    // Verdeel de dag in 3 gelijke blokken tussen 8:00 en 22:00 (14 uur = 840 minuten)
+    // Blokken: 8:00-12:40, 12:40-17:20, 17:20-22:00
+    const int startHour = 8;
+    const int endHour = 22;
+    const int totalMinutes = (endHour - startHour) * 60; // 14 * 60 = 840 minuten
+    const int blockDuration = totalMinutes ~/ 3; // ~280 minuten per blok
+    
+    for (int i = 0; i < 3; i++) {
+      // Berekent begin van dit blok
+      int blockStartMinutes = i * blockDuration;
+      int blockEndMinutes = (i + 1) * blockDuration;
+      
+      // Voeg wat willekeur toe binnen het blok
+      int randomMinutesInBlock = blockStartMinutes + random.nextInt(blockDuration ~/ 2);
+      
+      // Zorg dat we binnen de toegestane uren blijven
+      int totalMinutesOfDay = 8 * 60 + randomMinutesInBlock;
+      int hour = totalMinutesOfDay ~/ 60;
+      int minute = totalMinutesOfDay % 60;
+      
+      // Zorg dat het resultaat binnen bereik is
+      if (hour >= endHour) {
+        hour = endHour - 1;
+        minute = 59;
       }
+      
+      times.add(TimeOfDay(hour: hour, minute: minute));
     }
-    times.sort((a, b) => a.hour != b.hour ? a.hour - b.hour : a.minute - b.minute);
+    
+    // Shuffle de tijden om de volgorde te willekeurigeren
+    times.shuffle(random);
 
     final List<String> messages = [
       'Doe mee met een quiz! \ud83d\ude80',
