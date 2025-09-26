@@ -8418,5 +8418,196 @@
             "2 Koningen",
             "2 Kronieken"
         ]
+    },
+    {
+        "vraag": "Welke discipel zei: Gij hebt de woorden des eeuwigen levens?",
+        "juisteAntwoord": "Petrus",
+        "moeilijkheidsgraad": 4,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Johannes 6:68",
+        "fouteAntwoorden": [
+            "Andr\u00e9as",
+            "Johannes",
+            "Jakobus"
+        ]
+    },
+    {
+        "vraag": "Welke discipel zei: Laat ons ook gaan, opdat wij met hem sterven?",
+        "juisteAntwoord": "Thomas",
+        "moeilijkheidsgraad": 1,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Johannes 11:16",
+        "fouteAntwoorden": [
+            "Johannes",
+            "Petrus",
+            "Jakobus"
+        ]
+    },
+    {
+        "vraag": "Welke discipel zei: Heere, wij weten niet waar Gij heengaat, en hoe kunnen wij de weg weten?",
+        "juisteAntwoord": "Thomas",
+        "moeilijkheidsgraad": 4,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Johannes 14:5",
+        "fouteAntwoorden": [
+            "Lukas",
+            "Andr\u00e9as",
+            "Johannes"
+        ]
+    },
+    {
+        "vraag": "Welke discipel zei: Heere, toon ons de Vader, en het is ons genoeg?",
+        "juisteAntwoord": "Filippus",
+        "moeilijkheidsgraad": 3,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Johannes 14:8",
+        "fouteAntwoorden": [
+            "Andr\u00e9as",
+            "Johannes",
+            "Jakobus"
+        ]
+    },
+    {
+        "vraag": "Na het pascha wisten Jozef en Maria niet waar Jezus was. Na hoeveel dagen vonden zij  Hem in Jeruzalem?",
+        "juisteAntwoord": "Drie",
+        "moeilijkheidsgraad": 1,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Lukas 2:46",
+        "fouteAntwoorden": [
+            "\u00c9\u00e9n",
+            "Twee",
+            "Vier"
+        ]
+    },
+    {
+        "vraag": "En Jezus zei tot hen: Hoeveel broden hebt gij (2e wonderbare spijziging)?",
+        "juisteAntwoord": "Zeven",
+        "moeilijkheidsgraad": 3,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Matth\u00e9us 15:34",
+        "fouteAntwoorden": [
+            "Vijf",
+            "Drie",
+            "Tien"
+        ]
+    },
+    {
+        "vraag": "Wie zei: Gij zijt de Christus, de Zoon des levenden Gods?",
+        "juisteAntwoord": "Petrus",
+        "moeilijkheidsgraad": 2,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Matth\u00e9\u00fcs 16:16",
+        "fouteAntwoorden": [
+            "Johannes",
+            "Lukas",
+            "Thomas"
+        ]
+    },
+    {
+        "vraag": "Wat was de 2e gelijkenis die Jezus uitsprak in Lukas 15?",
+        "juisteAntwoord": "De verloren penning",
+        "moeilijkheidsgraad": 3,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Lukas 15:8-10",
+        "fouteAntwoorden": [
+            "Het verloren schaap",
+            "De verloren zoon",
+            "De barmhartige Samaritaan"
+        ]
+    },
+    {
+        "vraag": "Hoeveel mannen had de Samaritaanse vrouw gehad?",
+        "juisteAntwoord": "Vijf",
+        "moeilijkheidsgraad": 2,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Johannes 4:18",
+        "fouteAntwoorden": [
+            "Drie",
+            "Zes",
+            "Zeven"
+        ]
+    },
+    {
+        "vraag": "Aan welke poort van Jeruzalem is er een badwater?",
+        "juisteAntwoord": "De Schaapspoort",
+        "moeilijkheidsgraad": 4,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Johannes 5:2",
+        "fouteAntwoorden": [
+            "De Oostpoort",
+            "De Vispoort",
+            "De Leeuwenpoort"
+        ]
+    },
+    {
+        "vraag": "Hoeveel dagen duurde het Loofhuttenfeest?",
+        "juisteAntwoord": "Zeven",
+        "moeilijkheidsgraad": 1,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Leviticus 23:34",
+        "fouteAntwoorden": [
+            "Vijf",
+            "Vier",
+            "Tien"
+        ]
+    },
+    {
+        "vraag": "Waar kwamen de wijzen vandaan?",
+        "juisteAntwoord": "Oosten",
+        "moeilijkheidsgraad": 1,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Matth\u00e9\u00fcs 2:1",
+        "fouteAntwoorden": [
+            "Noorden",
+            "Zuiden",
+            "Westen"
+        ]
+    },
+    {
+        "vraag": "De derde verzoeking in de woestijn was: de duivel aanbidden",
+        "juisteAntwoord": "Waar",
+        "moeilijkheidsgraad": 3,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Matth\u00e9\u00fcs 4:9",
+        "fouteAntwoorden": [
+            "Niet waar"
+        ]
+    },
+    {
+        "vraag": "De vijfde zaligspreking is: Zalig zijn de reinen van hart",
+        "juisteAntwoord": "Niet waar",
+        "moeilijkheidsgraad": 4,
+        "type": "tf",
+        "categories": [],
+        "biblicalReference": "Matth\u00e9\u00fcs 5:7",
+        "fouteAntwoorden": [
+            "Waar"
+        ]
+    },
+    {
+        "vraag": "Hoeveel korven brood bleven er over na de eerste wonderbare spijziging?",
+        "juisteAntwoord": "Twaalf",
+        "moeilijkheidsgraad": 2,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Matth\u00e9\u00fcs 14:20",
+        "fouteAntwoorden": [
+            "Vijf",
+            "Twee",
+            "Tien"
+        ]
     }
 ]
