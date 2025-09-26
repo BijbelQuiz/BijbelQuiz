@@ -1,9 +1,0 @@
-fastapi
-uvicorn
-python-dotenv
-slowapi
-sqlalchemy
-stripe
-pydantic
-requests
-tqdm

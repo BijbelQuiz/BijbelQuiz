@@ -1,8 +1,0 @@
-/* TEAM */
-Developer: Alex Lamper
-Contact: devlamper06@gmail.com
-
-/* SITE */
-Site: https://bijbel-api.nl
-Version: v1.0
-Description: REST API voor het opvragen van Nederlandse bijbelteksten
