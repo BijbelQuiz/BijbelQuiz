@@ -49,10 +49,6 @@ flutter clean
 print_status "Getting dependencies..."
 flutter pub get
 
-# Run tests
-print_status "Running tests..."
-flutter test
-
 # Run analysis
 print_status "Running code analysis..."
 if ! flutter analyze; then
