@@ -197,7 +197,7 @@ class _BibleChatScreenState extends State<BibleChatScreen>
       setState(() {
         _messages = [];
       });
-      throw e;
+      rethrow;
     }
   }
 

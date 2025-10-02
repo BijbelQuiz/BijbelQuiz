@@ -1,5 +1,4 @@
 import 'package:bijbelquiz/services/analytics_service.dart';
-import 'package:bijbelquiz/services/feature_flags_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';

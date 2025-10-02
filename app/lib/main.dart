@@ -22,7 +22,6 @@ import 'services/gemini_service.dart';
 import 'services/feature_flags_service.dart';
 import 'screens/store_screen.dart';
 import 'providers/lesson_progress_provider.dart';
-import 'screens/lesson_select_screen.dart';
 import 'screens/main_navigation_screen.dart';
 import 'settings_screen.dart';
 import 'l10n/strings_nl.dart' as strings;

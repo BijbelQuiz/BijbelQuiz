@@ -324,7 +324,7 @@ class _BibleReferenceWidgetState extends State<BibleReferenceWidget>
           content: Text('Bible reference copied for sharing'),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: const BorderRadius.all(Radius.circular(12)),
+            borderRadius: BorderRadius.all(Radius.circular(12)),
           ),
         ),
       );
@@ -352,7 +352,7 @@ class BibleReferenceFormatter {
   /// Formats a Bible reference for display
   static String formatReference(BibleReference reference, {bool includeTranslation = true}) {
     final base = reference.shortReference;
-    return includeTranslation ? '${base} (${reference.displayString})' : base;
+    return includeTranslation ? '$base (${reference.displayString})' : base;
   }
 
   /// Creates a BibleReference from a string (e.g., "Genesis 1:1-3")

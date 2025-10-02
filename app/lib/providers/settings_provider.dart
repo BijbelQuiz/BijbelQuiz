@@ -49,7 +49,7 @@ class SettingsProvider extends ChangeNotifier {
   String? _error;
   String? _selectedCustomThemeKey;
   Set<String> _unlockedThemes = {};
-  Map<String, AITheme> _aiThemes = {};
+  final Map<String, AITheme> _aiThemes = {};
   
 
 

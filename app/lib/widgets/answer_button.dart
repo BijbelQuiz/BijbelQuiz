@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/logger.dart';
-import '../services/logger.dart';
 
 enum AnswerFeedback { none, correct, incorrect, revealedCorrect }
 

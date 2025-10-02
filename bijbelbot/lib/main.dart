@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
-import 'models/bible_chat_message.dart';
 import 'models/bible_chat_conversation.dart';
 import 'providers/bible_chat_provider.dart';
 import 'screens/bible_chat_screen.dart';

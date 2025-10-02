@@ -12,7 +12,6 @@ import '../services/logger.dart';
 import '../services/gemini_service.dart';
 import '../services/feature_flags_service.dart';
 import '../models/ai_theme.dart';
-import '../utils/color_parser.dart';
 
 // Extension for capitalizing strings
 extension StringExtension on String {

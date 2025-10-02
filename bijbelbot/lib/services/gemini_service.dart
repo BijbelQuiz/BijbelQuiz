@@ -106,7 +106,7 @@ class GeminiService {
       }
 
       // If still no API key, try to load .env file directly
-      if (apiKey == null || apiKey.isEmpty) {
+      if (apiKey.isEmpty) {
         try {
           await dotenv.load(fileName: '.env');
           apiKey = dotenv.env['GEMINI_API_KEY'];

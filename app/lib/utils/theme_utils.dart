@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
-import '../models/ai_theme.dart';
 
 /// Utility class for theme management and switching logic
 class ThemeUtils {
