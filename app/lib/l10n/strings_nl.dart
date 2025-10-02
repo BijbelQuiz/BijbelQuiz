@@ -288,6 +288,37 @@ class AppStrings {
   // Settings Screen
   static const String emailAddress = 'E-mailadres';
 
+  // AI Theme
+  static const String aiThemeFallback = 'AI Thema';
+  static const String aiThemeGenerator = 'AI Thema Generator';
+  static const String aiThemeGeneratorDescription = 'Beschrijf je gewenste kleuren en laat AI een thema voor je maken';
+
+  // Settings Screen - Updates
+  static const String checkForUpdates = 'Controleer op updates';
+  static const String checkForUpdatesDescription = 'Zoek naar nieuwe app-versies';
+  static const String checkForUpdatesTooltip = 'Controleer op updates';
+
+  // Settings Screen - Privacy
+  static const String privacyPolicy = 'Privacybeleid';
+  static const String privacyPolicyDescription = 'Lees ons privacybeleid';
+  static const String couldNotOpenPrivacyPolicy = 'Kon privacybeleid niet openen';
+  static const String openPrivacyPolicyTooltip = 'Open privacybeleid';
+
+  // Settings Screen - Privacy & Analytics
+  static const String privacyAndAnalytics = 'Privacy & Analytics';
+  static const String analytics = 'Analytics';
+  static const String analyticsDescription = 'Help ons de app te verbeteren door anonieme gebruiksgegevens te verzenden';
+
+  // Social Media
+  static const String followOnSocialMedia = 'Volg op social media';
+  static const String followUsOnSocialMedia = 'Volg ons op social media';
+  static const String mastodon = 'Mastodon';
+  static const String pixelfed = 'Pixelfed';
+  static const String kwebler = 'Kwebler';
+  static const String discord = 'Discord';
+  static const String signal = 'Signal';
+  static const String couldNotOpenPlatform = 'Kon {platform} niet openen';
+
   // Settings Provider Errors
   static const String languageMustBeNl = 'Taal moet "nl" zijn (alleen Nederlands toegestaan)';
   static const String failedToSaveTheme = 'Kon thema-instelling niet opslaan:';

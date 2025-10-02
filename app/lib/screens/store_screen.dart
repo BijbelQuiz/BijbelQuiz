@@ -296,8 +296,8 @@ class _StoreScreenState extends State<StoreScreen> {
 
                   _buildAIThemeCard(
                     context,
-                    title: 'AI Thema Generator',
-                    description: 'Beschrijf je gewenste kleuren en laat AI een thema voor je maken',
+                    title: strings.AppStrings.aiThemeGenerator,
+                    description: strings.AppStrings.aiThemeGeneratorDescription,
                     icon: Icons.smart_toy_rounded,
                     iconColor: Colors.purple,
                     cost: 200,

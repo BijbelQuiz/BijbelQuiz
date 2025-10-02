@@ -245,7 +245,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       final aiTheme = settings.getAITheme(themeId);
                       return DropdownMenuItem(
                         value: themeId,
-                        child: Text(aiTheme?.name ?? 'AI Theme'),
+                        child: Text(aiTheme?.name ?? strings.AppStrings.aiThemeFallback),
                       );
                     }),
                   ],
@@ -382,13 +382,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              title: 'Controleer op updates',
-              subtitle: 'Zoek naar nieuwe app-versies',
+              title: strings.AppStrings.checkForUpdates,
+              subtitle: strings.AppStrings.checkForUpdatesDescription,
               icon: Icons.system_update,
               child: IconButton(
                 icon: const Icon(Icons.refresh),
                 onPressed: () => _checkForUpdates(context, settings),
-                tooltip: 'Controleer op updates',
+                tooltip: strings.AppStrings.checkForUpdatesTooltip,
               ),
             ),
             _buildSettingItem(
@@ -397,8 +397,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              title: 'Privacybeleid',
-              subtitle: 'Lees ons privacybeleid',
+              title: strings.AppStrings.privacyPolicy,
+              subtitle: strings.AppStrings.privacyPolicyDescription,
               icon: Icons.privacy_tip,
               child: IconButton(
                 icon: const Icon(Icons.open_in_new),
@@ -406,11 +406,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   final Uri url = Uri.parse('https://bijbelquiz.app/privacy.html');
                   if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
                     if (mounted) {
-                      showTopSnackBar(context, 'Kon privacybeleid niet openen', style: TopSnackBarStyle.error);
+                      showTopSnackBar(context, strings.AppStrings.couldNotOpenPrivacyPolicy, style: TopSnackBarStyle.error);
                     }
                   }
                 },
-                tooltip: 'Open privacybeleid',
+                tooltip: strings.AppStrings.openPrivacyPolicyTooltip,
               ),
             ),
           ],
@@ -422,7 +422,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           colorScheme,
           isSmallScreen,
           isDesktop,
-          title: 'Privacy & Analytics',
+          title: strings.AppStrings.privacyAndAnalytics,
           children: [
             _buildSettingItem(
               context,
@@ -430,8 +430,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
-              title: 'Analytics',
-              subtitle: 'Help ons de app te verbeteren door anonieme gebruiksgegevens te verzenden',
+              title: strings.AppStrings.analytics,
+              subtitle: strings.AppStrings.analyticsDescription,
               icon: Icons.analytics,
               child: Switch(
                 value: settings.analyticsEnabled,
@@ -638,7 +638,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Provider.of<AnalyticsService>(context, listen: false).capture(context, 'show_social_media_dialog');
                 _showSocialMediaDialog(context);
               },
-              label: 'Volg op social media',
+              label: strings.AppStrings.followOnSocialMedia,
               icon: Icons.share,
             ),
           ],
@@ -1281,13 +1281,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Volg ons op social media'),
+          title: Text(strings.AppStrings.followUsOnSocialMedia),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildSocialMediaButton(
                 context,
-                'Mastodon',
+                strings.AppStrings.mastodon,
                 Icons.alternate_email,
                 AppUrls.mastodonUrl,
                 colorScheme,
@@ -1295,7 +1295,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 12),
               _buildSocialMediaButton(
                 context,
-                'Pixelfed',
+                strings.AppStrings.pixelfed,
                 Icons.camera_alt,
                 AppUrls.pixelfedUrl,
                 colorScheme,
@@ -1303,7 +1303,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 12),
               _buildSocialMediaButton(
                 context,
-                'Kwebler',
+                strings.AppStrings.kwebler,
                 Icons.public,
                 AppUrls.kweblerUrl,
                 colorScheme,
@@ -1311,7 +1311,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 12),
               _buildSocialMediaButton(
                 context,
-                'Discord',
+                strings.AppStrings.discord,
                 Icons.forum,
                 AppUrls.discordUrl,
                 colorScheme,
@@ -1319,7 +1319,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 12),
               _buildSocialMediaButton(
                 context,
-                'Signal',
+                strings.AppStrings.signal,
                 Icons.message,
                 AppUrls.signalUrl,
                 colorScheme,
@@ -1360,7 +1360,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (context.mounted) {
-                  showTopSnackBar(context, 'Kon $platform niet openen', style: TopSnackBarStyle.error);
+                  showTopSnackBar(context, strings.AppStrings.couldNotOpenPlatform.replaceAll('{platform}', platform), style: TopSnackBarStyle.error);
                 }
               });
             }
