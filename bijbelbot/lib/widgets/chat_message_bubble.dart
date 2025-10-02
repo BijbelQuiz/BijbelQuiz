@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../models/bible_chat_message.dart';
+import '../providers/bible_chat_provider.dart';
 
 /// Widget for displaying a chat message bubble
 class ChatMessageBubble extends StatelessWidget {
   final BibleChatMessage message;
   final bool isError;
-  final Function(String)? onBibleReferenceTap;
 
   const ChatMessageBubble({
     super.key,
     required this.message,
     this.isError = false,
-    this.onBibleReferenceTap,
   });
 
   @override
@@ -184,7 +184,7 @@ class ChatMessageBubble extends StatelessWidget {
           ],
           if (message.bibleReferences != null && message.bibleReferences!.isNotEmpty) ...[
             const SizedBox(height: 12),
-            _buildBibleReferences(colorScheme),
+            _buildBibleReferences(colorScheme, context),
           ],
         ],
       ),
@@ -193,13 +193,17 @@ class ChatMessageBubble extends StatelessWidget {
    );
  }
 
-  Widget _buildBibleReferences(ColorScheme colorScheme) {
+  Widget _buildBibleReferences(ColorScheme colorScheme, BuildContext context) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: message.bibleReferences!.map((reference) {
         return InkWell(
-          onTap: () => onBibleReferenceTap?.call(reference),
+          onTap: () {
+            // Get the provider from context and show the biblical reference dialog
+            final provider = Provider.of<BibleChatProvider>(context, listen: false);
+            provider.showBiblicalReference(context, reference);
+          },
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

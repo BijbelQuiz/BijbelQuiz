@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../models/bible_chat_message.dart';
 import '../models/bible_chat_conversation.dart';
 import '../services/logger.dart';
+import '../widgets/biblical_reference_dialog.dart';
 
 /// Provider for managing Bible chat conversations and messages
 class BibleChatProvider extends ChangeNotifier {
@@ -396,6 +397,23 @@ class BibleChatProvider extends ChangeNotifier {
     } catch (e) {
       AppLogger.error('Failed to save messages: $e');
       throw Exception('Failed to save messages');
+    }
+  }
+
+  /// Shows the biblical reference dialog for a given reference
+  /// This method requires a BuildContext to show the dialog
+  void showBiblicalReference(BuildContext context, String reference) {
+    try {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return BiblicalReferenceDialog(reference: reference);
+        },
+      );
+      AppLogger.info('Showing biblical reference dialog for: $reference');
+    } catch (e) {
+      AppLogger.error('Failed to show biblical reference dialog: $e');
+      // Could show a snackbar or toast here to inform the user
     }
   }
 }

@@ -419,12 +419,104 @@ Explanation: [Additional context if needed]
   List<BibleReference> _extractBibleReferences(String text) {
     List<BibleReference> references = [];
 
-    // Common Bible reference patterns
+    // Dutch Bible book name mappings for common abbreviations
+    final Map<String, String> bookAbbreviations = {
+      // Old Testament abbreviations
+      'Gen': 'Genesis',
+      'Ex': 'Exodus',
+      'Exo': 'Exodus',
+      'Lev': 'Leviticus',
+      'Num': 'Numeri',
+      'Deut': 'Deuteronomium',
+      'Joz': 'Jozua',
+      'Josh': 'Jozua',
+      'Rech': 'Richteren',
+      'Ruth': 'Ruth',
+      '1 Sam': '1 Samuel',
+      '2 Sam': '2 Samuel',
+      '1 Kon': '1 Koningen',
+      '2 Kon': '2 Koningen',
+      '1 Kron': '1 Kronieken',
+      '2 Kron': '2 Kronieken',
+      'Ezr': 'Ezra',
+      'Neh': 'Nehemia',
+      'Est': 'Ester',
+      'Job': 'Job',
+      'Ps': 'Psalmen',
+      'Spr': 'Spreuken',
+      'Pred': 'Prediker',
+      'Ecc': 'Prediker',
+      'Hoogl': 'Hooglied',
+      'Jes': 'Jesaja',
+      'Jer': 'Jeremia',
+      'Klaagl': 'Klaagliederen',
+      'Ezech': 'Ezechiel',
+      'Eze': 'Ezechiel',
+      'Dan': 'Daniel',
+      'Hos': 'Hosea',
+      'Joel': 'Joël',
+      'Joël': 'Joël',
+      'Am': 'Amos',
+      'Ob': 'Obadja',
+      'Jon': 'Jona',
+      'Mic': 'Micha',
+      'Nah': 'Nahum',
+      'Hab': 'Habakuk',
+      'Zef': 'Zefanja',
+      'Hag': 'Haggai',
+      'Zach': 'Zacharia',
+      'Mal': 'Maleachi',
+
+      // New Testament abbreviations
+      'Matt': 'Matteus',
+      'Mt': 'Matteus',
+      'Mark': 'Marcus',
+      'Mk': 'Marcus',
+      'Luk': 'Lukas',
+      'Lk': 'Lukas',
+      'Joh': 'Johannes',
+      'Jn': 'Johannes',
+      'Hand': 'Handelingen',
+      'Acts': 'Handelingen',
+      'Rom': 'Romeinen',
+      '1 Kor': '1 Korintiers',
+      '2 Kor': '2 Korintiers',
+      'Gal': 'Galaten',
+      'Ef': 'Efeziers',
+      'Eph': 'Efeziers',
+      'Fil': 'Filippenzen',
+      'Phil': 'Filippenzen',
+      'Kol': 'Kolossenzen',
+      'Col': 'Kolossenzen',
+      '1 Tess': '1 Tessalonicenzen',
+      '2 Tess': '2 Tessalonicenzen',
+      '1 Tim': '1 Timoteus',
+      '2 Tim': '2 Timoteus',
+      'Tit': 'Titus',
+      'Film': 'Filemon',
+      'Phlm': 'Filemon',
+      'Hebr': 'Hebreeen',
+      'Heb': 'Hebreeen',
+      'Jak': 'Jakobus',
+      'Jas': 'Jakobus',
+      '1 Petr': '1 Petrus',
+      '2 Petr': '2 Petrus',
+      '1 Joh': '1 Johannes',
+      '2 Joh': '2 Johannes',
+      '3 Joh': '3 Johannes',
+      'Jud': 'Judas',
+      'Openb': 'Openbaring',
+      'Rev': 'Openbaring',
+    };
+
+    // Common Bible reference patterns - improved to handle more cases
     final patterns = [
-      // Genesis 1:1, Genesis 1:1-3
-      RegExp(r'(\w+)\s+(\d+):(\d+)(?:-(\d+))?'),
-      // Gen 1:1, Gen 1:1-3
-      RegExp(r'(\w{3})\s+(\d+):(\d+)(?:-(\d+))?'),
+      // Genesis 1:1, Genesis 1:1-3 (full names and longer abbreviations)
+      RegExp(r'([A-Za-z]+)\s+(\d+):(\d+)(?:-(\d+))?'),
+      // Gen 1:1, Mic 1:1-3 (shorter abbreviations)
+      RegExp(r'([A-Za-z]{2,10})\s+(\d+):(\d+)(?:-(\d+))?'),
+      // Handle cases with periods like Gen. 1:1
+      RegExp(r'([A-Za-z]+)\.?\s+(\d+):(\d+)(?:-(\d+))?'),
     ];
 
     for (final pattern in patterns) {
@@ -432,24 +524,57 @@ Explanation: [Additional context if needed]
 
       for (final match in matches) {
         if (match.groupCount >= 3) {
-          final book = match.group(1) ?? '';
+          String book = match.group(1) ?? '';
           final chapter = int.tryParse(match.group(2) ?? '0') ?? 0;
           final verse = int.tryParse(match.group(3) ?? '0') ?? 0;
           final endVerse = match.group(4) != null ? int.tryParse(match.group(4)!) : null;
 
           if (book.isNotEmpty && chapter > 0 && verse > 0) {
-            references.add(BibleReference(
-              book: book,
-              chapter: chapter,
-              verse: verse,
-              endVerse: endVerse,
-            ));
+            // Convert abbreviation to full book name if needed
+            String fullBookName = book;
+            if (bookAbbreviations.containsKey(book)) {
+              fullBookName = bookAbbreviations[book]!;
+            } else {
+              // Try case-insensitive matching
+              for (final entry in bookAbbreviations.entries) {
+                if (entry.key.toLowerCase() == book.toLowerCase()) {
+                  fullBookName = entry.value;
+                  break;
+                }
+              }
+            }
+
+            // Additional validation - ensure we have a valid book name
+            if (fullBookName.length >= 2 && !_isNumeric(fullBookName)) {
+              references.add(BibleReference(
+                book: fullBookName,
+                chapter: chapter,
+                verse: verse,
+                endVerse: endVerse,
+              ));
+            }
           }
         }
       }
     }
 
-    return references;
+    // Remove duplicates by creating a set of reference strings and converting back
+    final uniqueReferences = <String>{};
+    final filteredReferences = <BibleReference>[];
+
+    for (final ref in references) {
+      final refString = ref.toString();
+      if (uniqueReferences.add(refString)) {
+        filteredReferences.add(ref);
+      }
+    }
+
+    return filteredReferences;
+  }
+
+  /// Helper method to check if a string is numeric
+  bool _isNumeric(String str) {
+    return double.tryParse(str) != null;
   }
 
   /// Makes a streaming HTTP request to the AI API

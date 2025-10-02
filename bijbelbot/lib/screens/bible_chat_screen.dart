@@ -534,10 +534,6 @@ class _BibleChatScreenState extends State<BibleChatScreen>
             message: message,
             isError: message.type == MessageType.text &&
                      message.content.contains('Sorry, I encountered an error'),
-            onBibleReferenceTap: (reference) {
-              // Handle Bible reference tap - could navigate to Bible view
-              AppLogger.info('Bible reference tapped: $reference');
-            },
           ),
         );
       },
