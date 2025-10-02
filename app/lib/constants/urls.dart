@@ -10,21 +10,10 @@ class AppUrls {
 
   // API endpoints
   static final String emergencyApi = '$baseDomainAPI/emergency.ts';
-  static final String scripturaApiBase = 'https://scriptura.bijbelquiz.app/api';
+  static final String bibleApiBase = 'https://www.online-bijbel.nl/api.php';
 
-  // Scriptura API Endpoints
-  static final String scripturaRandomApi = '$scripturaApiBase/random';
-  static final String scripturaBooksApi = '$scripturaApiBase/books';
-  static final String scripturaChaptersBaseApi = '$scripturaApiBase/chapters';
-  static final String scripturaVersesBaseApi = '$scripturaApiBase/verses';
-  static final String scripturaSearchBaseApi = '$scripturaApiBase/search';
-  static final String scripturaDaytextBaseApi = '$scripturaApiBase/daytext';
-  static final String scripturaSecureDataApi = '$scripturaApiBase/secure-data';
-  static final String scripturaParseReferencePostApi = '$scripturaApiBase/parse/reference';
-  static final String scripturaParseReferenceGetBaseApi = '$scripturaApiBase/parse/reference';
-  static final String scripturaParseReferencesPostApi = '$scripturaApiBase/parse/references';
-  static final String scripturaVersionsApi = '$scripturaApiBase/versions';
-  static final String scripturaCommentaryBaseApi = '$scripturaApiBase/commentary';
+  // Bible API Endpoints
+  static final String bibleBooksListApi = '$bibleApiBase?p=boekenlijst';
 
   // Other API Endpoints
   static final String stripeWebhookApi = '$baseDomainAPI/stripe/webhook';

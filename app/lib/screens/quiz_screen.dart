@@ -918,8 +918,9 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     Provider.of<AnalyticsService>(context, listen: false).capture(context, 'skip_question');
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
+    final isDev = kDebugMode;
 
-    final success = await gameStats.spendStars(35);
+    final success = isDev ? true : await gameStats.spendStars(35);
     if (success) {
       _timerManager.timeAnimationController.stop();
       setState(() {
@@ -957,6 +958,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     Provider.of<AnalyticsService>(context, listen: false).capture(context, 'unlock_biblical_reference');
     final localContext = context;
     final gameStats = Provider.of<GameStatsProvider>(localContext, listen: false);
+    final isDev = kDebugMode;
 
     // First check if the reference can be parsed
     final parsed = _parseBiblicalReference(_quizState.question.biblicalReference!);
@@ -967,8 +969,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       return;
     }
 
-    // Spend 10 stars for unlocking the biblical reference
-    final success = await gameStats.spendStars(10);
+    // Spend 10 stars for unlocking the biblical reference (free in debug mode)
+    final success = isDev ? true : await gameStats.spendStars(10);
     if (success) {
       // Pause the timer
       if (mounted) {

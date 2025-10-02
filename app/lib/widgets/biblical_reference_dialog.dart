@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
+import 'package:xml/xml.dart' as xml;
 import '../l10n/strings_nl.dart' as strings;
 import '../constants/urls.dart';
+import '../utils/bible_book_mapper.dart';
 
 class BiblicalReferenceDialog extends StatefulWidget {
   final String reference;
@@ -40,7 +41,7 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
       // Parse the reference to extract book, chapter, and verse
       final parsed = _parseReference(widget.reference);
       if (parsed == null) {
-        throw Exception('Ongeldige bijbelverwijzing');
+        throw Exception('Ongeldige bijbelverwijzing: "${widget.reference}"');
       }
 
       final book = parsed['book'];
@@ -48,26 +49,29 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
       final startVerse = parsed['startVerse'];
       final endVerse = parsed['endVerse'];
 
-      // Validate book name to prevent injection attacks
-      if (!_isValidBookName(book)) {
-        throw Exception('Ongeldig boeknaam');
+      // Convert book name to book number for the new API
+      final bookNumber = BibleBookMapper.getBookNumber(book);
+      if (bookNumber == null) {
+        // Debug: show what book name was received and what valid names are available
+        final validBooks = BibleBookMapper.getAllBookNames();
+        throw Exception('Ongeldig boeknaam: "$book". Geldige boeken: ${validBooks.take(10).join(", ")}...');
       }
 
       String url;
       if (startVerse != null && endVerse != null) {
-        // Multiple verses
-        url = '${AppUrls.scripturaApiBase}/passage?book=$book&chapter=$chapter&start=$startVerse&end=$endVerse&version=statenvertaling';
+        // Multiple verses - format as "startVerse-endVerse"
+        url = '${AppUrls.bibleApiBase}?b=$bookNumber&h=$chapter&v=$startVerse-$endVerse';
       } else if (startVerse != null) {
         // Single verse
-        url = '${AppUrls.scripturaApiBase}/verse?book=$book&chapter=$chapter&verse=$startVerse&version=statenvertaling';
+        url = '${AppUrls.bibleApiBase}?b=$bookNumber&h=$chapter&v=$startVerse';
       } else {
-        // Entire chapter
-        url = '${AppUrls.scripturaApiBase}/chapter?book=$book&chapter=$chapter&version=statenvertaling';
+        // Entire chapter - request a reasonable sample (first 10 verses)
+        url = '${AppUrls.bibleApiBase}?b=$bookNumber&h=$chapter&v=1-10';
       }
 
       // Validate URL to ensure it's from our trusted domain
       final uri = Uri.parse(url);
-      if (uri.host != Uri.parse(AppUrls.scripturaApiBase).host) {
+      if (uri.host != Uri.parse(AppUrls.bibleApiBase).host) {
         throw Exception('Ongeldige API URL');
       }
 
@@ -80,43 +84,81 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
       );
       
       if (response.statusCode == 200) {
-        // Validate content type
+        // Validate content type - be more flexible
         final contentType = response.headers['content-type'];
-        if (contentType == null || !contentType.startsWith('application/json')) {
-          throw Exception('Ongeldig antwoord van de server');
+        if (contentType == null || (!contentType.contains('xml') && !contentType.contains('text'))) {
+          throw Exception('Ongeldig antwoord van de server. Content-Type: $contentType. Response: ${response.body.substring(0, 300)}...');
         }
-        
-        // Parse and validate JSON response
-        final dynamic data = json.decode(response.body);
+
+        // Parse XML response
         String content = '';
-        
-        if (data is List) {
-          // Multiple verses
-          for (final verse in data) {
-            if (verse is Map<String, dynamic> && 
-                verse.containsKey('verse') && 
-                verse.containsKey('text')) {
+        try {
+          // Clean the response body first (remove BOM or other artifacts)
+          String cleanBody = response.body.trim();
+          if (cleanBody.startsWith('\uFEFF')) {
+            cleanBody = cleanBody.substring(1);
+          }
+
+          final document = xml.XmlDocument.parse(cleanBody);
+
+          // Find all verse elements in the XML structure: bijbel > bijbelboek > hoofdstuk > vers
+          final verses = document.findAllElements('vers');
+
+          for (final verse in verses) {
+            final verseNumber = verse.getAttribute('name');
+            final verseText = verse.innerText.trim();
+
+            if (verseNumber != null && verseText.isNotEmpty) {
               // Sanitize text to prevent XSS
-              final sanitizedText = _sanitizeText(verse['text'].toString());
-              content += '${verse['verse']}. $sanitizedText\n';
+              final sanitizedText = _sanitizeText(verseText);
+              content += '$verseNumber. $sanitizedText\n';
             }
           }
-        } else if (data is Map<String, dynamic>) {
-          if (data.containsKey('text')) {
-            // Single verse
-            final sanitizedText = _sanitizeText(data['text'].toString());
-            content = '${data['verse']}. $sanitizedText';
-          } else if (data.containsKey('verses') && data['verses'] is List) {
-            // Chapter with verses array
-            for (final verse in data['verses']) {
-              if (verse is Map<String, dynamic> && 
-                  verse.containsKey('verse') && 
-                  verse.containsKey('text')) {
-                // Sanitize text to prevent XSS
-                final sanitizedText = _sanitizeText(verse['text'].toString());
-                content += '${verse['verse']}. $sanitizedText\n';
+
+          // If no verses found with 'vers' elements, try alternative element names
+          if (content.isEmpty) {
+            final alternativeVerseElements = document.findAllElements('verse');
+            for (final verse in alternativeVerseElements) {
+              final verseNumber = verse.getAttribute('name') ?? verse.getAttribute('number');
+              final verseText = verse.innerText.trim();
+
+              if (verseNumber != null && verseText.isNotEmpty) {
+                final sanitizedText = _sanitizeText(verseText);
+                content += '$verseNumber. $sanitizedText\n';
               }
             }
+          }
+
+          // If still no content, try to extract any meaningful text
+          if (content.isEmpty) {
+            final allElements = <xml.XmlElement>[];
+            _collectAllElements(document.rootElement, allElements);
+
+            for (final element in allElements) {
+              final elementText = element.innerText.trim();
+              // Look for elements that contain actual Bible text (not just markup)
+              if (elementText.isNotEmpty &&
+                  elementText.length > 10 &&
+                  !elementText.contains('<') &&
+                  !elementText.contains('xml') &&
+                  !elementText.contains('bijbel')) {
+                final sanitizedText = _sanitizeText(elementText);
+                content += '$sanitizedText\n';
+              }
+            }
+          }
+
+          // If still no content, show debug info
+          if (content.isEmpty) {
+            throw Exception('Geen tekst gevonden in XML na parsing. XML length: ${response.body.length}, First 300 chars: ${response.body.substring(0, 300)}');
+          }
+        } catch (e) {
+          // If XML parsing fails, try to extract text directly from response
+          String extractedText = _extractTextFromResponse(response.body);
+          if (extractedText.isNotEmpty) {
+            content = _sanitizeText(extractedText);
+          } else {
+            throw Exception('XML parsing mislukt en geen tekst gevonden: $e');
           }
         }
         
@@ -164,30 +206,6 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
     }
   }
   
-  // Validate book name to prevent injection attacks
-  bool _isValidBookName(String book) {
-    final validBooks = {
-      // Old Testament
-      'Genesis', 'Exodus', 'Leviticus', 'Numeri', 'Deuteronomium',
-      'Jozua', 'Richteren', 'Ruth', '1 Samuel', '2 Samuel',
-      '1 Koningen', '2 Koningen', '1 Kronieken', '2 Kronieken',
-      'Ezra', 'Nehemia', 'Ester', 'Job', 'Psalmen', 'Spreuken',
-      'Prediker', 'Hooglied', 'Jesaja', 'Jeremia', 'Klaagliederen',
-      'Ezechiël', 'Daniël', 'Hosea', 'Joël', 'Amos', 'Obadja',
-      'Jona', 'Micha', 'Nahum', 'Habakuk', 'Zefanja', 'Haggai',
-      'Zacharia', 'Maleachi',
-      
-      // New Testament
-      'Matteüs', 'Marcus', 'Lukas', 'Johannes', 'Handelingen',
-      'Romeinen', '1 Korintiërs', '2 Korintiërs', 'Galaten',
-      'Efeziërs', 'Filippenzen', 'Kolossenzen', '1 Tessalonicenzen',
-      '2 Tessalonicenzen', '1 Timoteüs', '2 Timoteüs', 'Titus',
-      'Filemon', 'Hebreeën', 'Jakobus', '1 Petrus', '2 Petrus',
-      '1 Johannes', '2 Johannes', '3 Johannes', 'Judas', 'Openbaring'
-    };
-    
-    return validBooks.contains(book);
-  }
   
   // Simple text sanitization to prevent XSS
   String _sanitizeText(String text) {
@@ -212,34 +230,107 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
     });
   }
 
+  void _collectAllElements(xml.XmlElement element, List<xml.XmlElement> collection) {
+    collection.add(element);
+    for (final child in element.childElements) {
+      _collectAllElements(child, collection);
+    }
+  }
+
+  String _extractTextFromResponse(String responseBody) {
+    // Try to extract meaningful text from various response formats
+    try {
+      // If it's XML, try to parse and extract text content
+      if (responseBody.contains('<') && responseBody.contains('>')) {
+        final document = xml.XmlDocument.parse(responseBody);
+        final allElements = <xml.XmlElement>[];
+        _collectAllElements(document.rootElement, allElements);
+
+        for (final element in allElements) {
+          final text = element.innerText.trim();
+          if (text.isNotEmpty && text.length > 10) {
+            return text;
+          }
+        }
+      }
+
+      // If not XML or no text found, return the whole body (it might be plain text)
+      return responseBody.trim();
+    } catch (e) {
+      // If all parsing fails, return the original body
+      return responseBody.trim();
+    }
+  }
+
   Map<String, dynamic>? _parseReference(String reference) {
     try {
       // Handle different reference formats:
       // "Genesis 1:1" -> book: Genesis, chapter: 1, startVerse: 1
       // "Genesis 1:1-3" -> book: Genesis, chapter: 1, startVerse: 1, endVerse: 3
       // "Genesis 1" -> book: Genesis, chapter: 1
-      
-      // Remove extra spaces and split by space
+      // "Genesis 2 en 3" -> book: Genesis, chapter: 2, startVerse: 3 (special case)
+      // "Psalmen" -> book: Psalmen, chapter: 1 (whole book)
+
       reference = reference.trim();
+
+      // Special case for "book chapter en chapter" format
+      if (reference.contains(' en ')) {
+        final parts = reference.split(' en ');
+        if (parts.length == 2) {
+          final firstPart = parts[0].trim();
+          final secondPart = parts[1].trim();
+
+          // Parse first reference
+          final firstMatch = RegExp(r'(\w+)\s+(\d+)').firstMatch(firstPart);
+          if (firstMatch != null) {
+            final book = firstMatch.group(1)!;
+            final chapter = int.tryParse(firstMatch.group(2)!);
+
+            // Parse second reference
+            final secondMatch = RegExp(r'(\d+)').firstMatch(secondPart);
+            if (secondMatch != null) {
+              // For "book chapter en chapter" format, we treat it as a single chapter reference
+              return {
+                'book': book,
+                'chapter': chapter,
+                'startVerse': null,
+                'endVerse': null,
+              };
+            }
+          }
+        }
+      }
+
+      // Standard parsing for "Book chapter:verse" format
       final parts = reference.split(' ');
-      
-      if (parts.length < 2) return null;
-      
+      if (parts.length < 2) {
+        // Handle single word references like "Psalmen"
+        if (BibleBookMapper.isValidBookName(reference)) {
+          return {
+            'book': reference,
+            'chapter': 1,
+            'startVerse': null,
+            'endVerse': null,
+          };
+        }
+        return null;
+      }
+
       // Extract book name (everything except the last part)
       final book = parts.sublist(0, parts.length - 1).join(' ');
       final chapterAndVerses = parts.last;
-      
+
       // Split chapter and verses by colon
       final chapterVerseParts = chapterAndVerses.split(':');
-      
+
       if (chapterVerseParts.isEmpty) return null;
-      
+
       final chapter = int.tryParse(chapterVerseParts[0]);
       if (chapter == null) return null;
-      
+
       int? startVerse;
       int? endVerse;
-      
+
       if (chapterVerseParts.length > 1) {
         // Has verse information
         final versePart = chapterVerseParts[1];
@@ -253,7 +344,7 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
           startVerse = int.tryParse(versePart);
         }
       }
-      
+
       return {
         'book': book,
         'chapter': chapter,
