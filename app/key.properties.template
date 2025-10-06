@@ -1,4 +1,0 @@
-storeFile=/path/to/your/keystore.jks
-storePassword=YOUR_STORE_PASSWORD_HERE
-keyAlias=YOUR_KEY_ALIAS_HERE
-keyPassword=YOUR_KEY_PASSWORD_HERE 
