@@ -24,6 +24,7 @@ class _BibleLocation {
   const _BibleLocation({
     required this.bookId,
     required this.chapter,
+    this.verse,
   });
 
   @override
