@@ -431,10 +431,13 @@ class _BibleChatScreenState extends State<BibleChatScreen>
       body: Container(
         color: colorScheme.surface,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Chat berichten gebied
             Expanded(
-              child: _isInitialized ? _buildChatMessages() : _buildLoadingView(),
+              child: Container(
+                child: _isInitialized ? _buildChatMessages() : _buildLoadingView(),
+              ),
             ),
 
             // Foutmelding indien aanwezig
@@ -442,6 +445,9 @@ class _BibleChatScreenState extends State<BibleChatScreen>
               Container(
                 padding: const EdgeInsets.all(16),
                 color: colorScheme.errorContainer,
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.3, // Limit error container height
+                ),
                 child: Row(
                   children: [
                     Icon(
@@ -539,46 +545,53 @@ class _BibleChatScreenState extends State<BibleChatScreen>
   }
 
   Widget _buildEmptyChat() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.chat_bubble_outline,
-            size: 80,
-            color: Theme.of(context).colorScheme.outline.withAlpha((0.5 * 255).round()),
+    return SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height - 200, // Ensure minimum height
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.chat_bubble_outline,
+                size: 80,
+                color: Theme.of(context).colorScheme.outline.withAlpha((0.5 * 255).round()),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Start een gesprek',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withAlpha((0.7 * 255).round()),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Stel me een vraag over de Bijbel',
+                style: TextStyle(
+                  color: Color(0x99000000), // 0.6 alpha for onSurface
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              // Sample questions
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Column(
+                  children: [
+                    _buildSampleQuestion('Wat zegt de Bijbel over vergeving?'),
+                    const SizedBox(height: 12),
+                    _buildSampleQuestion('Leg de gelijkenis van de verloren zoon uit'),
+                    const SizedBox(height: 12),
+                    _buildSampleQuestion('Wat is de betekenis van Johannes 3:16?'),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 24),
-          Text(
-            'Start een gesprek',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withAlpha((0.7 * 255).round()),
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Stel me een vraag over de Bijbel',
-            style: TextStyle(
-              color: Color(0x99000000), // 0.6 alpha for onSurface
-              fontSize: 16,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          // Sample questions
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Column(
-              children: [
-                _buildSampleQuestion('Wat zegt de Bijbel over vergeving?'),
-                const SizedBox(height: 12),
-                _buildSampleQuestion('Leg de gelijkenis van de verloren zoon uit'),
-                const SizedBox(height: 12),
-                _buildSampleQuestion('Wat is de betekenis van Johannes 3:16?'),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

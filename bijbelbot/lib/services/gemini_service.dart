@@ -9,7 +9,7 @@ typedef StreamCallback = void Function(String chunk);
 
 /// Configuration for AI API service
 class AiConfig {
-  static const String baseUrl = 'https://openrouter.ai/api/v1';
+  static const String baseUrl = 'https://ollama.com'; // Ollama cloud API
   static const Duration requestTimeout = Duration(seconds: 30);
   static const int maxRetries = 3;
   static const Duration retryDelay = Duration(seconds: 1);
@@ -97,21 +97,21 @@ class AiService {
   /// Initializes the AI service by loading the API key from environment variables
   Future<void> initialize() async {
     try {
-      AppLogger.info('Initializing AI API service for BijbelBot...');
+      AppLogger.info('Initializing Ollama AI API service for BijbelBot...');
 
       // Try to get API key from already loaded dotenv
-      String? apiKey = dotenv.env['AI_API_KEY'];
+      String? apiKey = dotenv.env['OLLAMA_API_KEY'];
 
       // If .env didn't work, try system environment variables
       if (apiKey == null || apiKey.isEmpty) {
-        apiKey = const String.fromEnvironment('AI_API_KEY');
+        apiKey = const String.fromEnvironment('OLLAMA_API_KEY');
       }
 
       // If still no API key, try to load .env file directly
       if (apiKey.isEmpty) {
         try {
           await dotenv.load(fileName: '.env');
-          apiKey = dotenv.env['AI_API_KEY'];
+          apiKey = dotenv.env['OLLAMA_API_KEY'];
         } catch (e) {
           AppLogger.warning('Could not load .env file in AI service: $e');
         }
@@ -119,20 +119,20 @@ class AiService {
 
       if (apiKey == null || apiKey.isEmpty) {
         throw const AiError(
-          message: 'AI_API_KEY not found. Please add AI_API_KEY=your_api_key_here to the .env file in the bijbelbot directory.',
+          message: 'OLLAMA_API_KEY is required for cloud models. Please add your API key to the .env file. Get your key from https://ollama.com/settings/keys',
         );
       }
 
-      // Validate API key format (basic check)
+      // Validate API key format for cloud API
       if (apiKey.length < 20) {
-        AppLogger.warning('AI_API_KEY appears to be too short - please verify it is correct');
+        AppLogger.warning('OLLAMA_API_KEY appears to be too short - please verify it is correct');
       }
 
       _apiKey = apiKey;
       _initialized = true;
-      AppLogger.info('AI API service initialized successfully for BijbelBot');
+      AppLogger.info('Ollama AI API service initialized successfully for BijbelBot');
     } catch (e) {
-      AppLogger.error('Failed to initialize AI API service', e);
+      AppLogger.error('Failed to initialize Ollama AI API service', e);
       _initialized = false;
       rethrow;
     }
@@ -156,7 +156,7 @@ class AiService {
 
     if (!_initialized || _apiKey.isEmpty) {
       throw const AiError(
-        message: 'AI API service is not properly configured. Please check your AI_API_KEY in the .env file.',
+        message: 'Ollama AI API service is not properly configured. Please check your OLLAMA_API_KEY in the .env file.',
       );
     }
 
@@ -176,6 +176,22 @@ class AiService {
       }
     } catch (e) {
       AppLogger.error('Failed to get Bible answer', e);
+
+      // Provide helpful error messages for common cloud API issues
+      if (e.toString().contains('401') || e.toString().contains('Unauthorized')) {
+        throw AiError(
+          message: 'Ongeldige API key. Controleer je OLLAMA_API_KEY in het .env bestand. Verkrijg een nieuwe key van https://ollama.com/settings/keys',
+        );
+      } else if (e.toString().contains('404') || e.toString().contains('Not Found')) {
+        throw AiError(
+          message: 'Model "gpt-oss:120b" niet gevonden. Controleer of dit model beschikbaar is op https://ollama.com',
+        );
+      } else if (e.toString().contains('Connection refused') || e.toString().contains('SocketException')) {
+        throw AiError(
+          message: 'Kan geen verbinding maken met Ollama cloud API. Controleer je internetverbinding.',
+        );
+      }
+
       rethrow;
     }
   }
@@ -191,7 +207,7 @@ class AiService {
 
     if (!_initialized || _apiKey.isEmpty) {
       throw const AiError(
-        message: 'AI API service is not properly configured. Please check your AI_API_KEY in the .env file.',
+        message: 'Ollama AI API service is not properly configured. Please check your OLLAMA_API_KEY in the .env file.',
       );
     }
 
@@ -227,13 +243,13 @@ class AiService {
     _lastRequestTime = DateTime.now();
   }
 
-  /// Makes the HTTP request to the OpenRouter API
+  /// Makes the HTTP request to the Ollama API
   Future<http.Response> _makeApiRequest(String question) async {
-    final url = Uri.parse('${AiConfig.baseUrl}/chat/completions');
+    final url = Uri.parse('${AiConfig.baseUrl}/api/chat');
 
     final prompt = _buildBiblePrompt(question);
     final requestBody = json.encode({
-      'model': 'x-ai/grok-4-fast:free',
+      'model': 'gpt-oss:120b', // Use the cloud model as specified in the API key
       'messages': [
         {
           'role': 'user',
@@ -242,17 +258,23 @@ class AiService {
       ]
     });
 
-    AppLogger.info('Making request to AI API');
+    AppLogger.info('Making request to Ollama API');
 
     for (int attempt = 1; attempt <= AiConfig.maxRetries; attempt++) {
       try {
+        final headers = {
+          'Content-Type': 'application/json',
+        };
+
+        // Only add Authorization header if we have an API key
+        if (_apiKey.isNotEmpty) {
+          headers['Authorization'] = 'Bearer $_apiKey';
+        }
+
         final response = await _httpClient
             .post(
               url,
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer $_apiKey'
-              },
+              headers: headers,
               body: requestBody,
             )
             .timeout(AiConfig.requestTimeout);
@@ -282,31 +304,80 @@ class AiService {
     throw const AiError(message: 'All retry attempts exhausted');
   }
 
-  /// Parses the OpenRouter API response to extract Bible answer and references
+  /// Parses the Ollama API response to extract Bible answer and references
   Future<BibleQAResponse> _parseApiResponse(String responseBody) async {
     try {
-      final Map<String, dynamic> response = json.decode(responseBody);
+      AppLogger.info('Parsing API response...');
 
-      // Extract the generated text from AI API's response
-      final choices = response['choices'] as List<dynamic>?;
-      if (choices == null || choices.isEmpty) {
-        throw const AiError(message: 'No response choices received');
+      // Handle streaming response format - split by newlines and parse each JSON object
+      final lines = responseBody.split('\n').where((line) => line.trim().isNotEmpty);
+
+      String fullContent = '';
+      bool isDone = false;
+
+      for (final line in lines) {
+        try {
+          final Map<String, dynamic> response = json.decode(line);
+
+          // Check if this is the final chunk
+          if (response['done'] == true) {
+            isDone = true;
+            break;
+          }
+
+          // Extract content from this chunk
+          final message = response['message'] as Map<String, dynamic>?;
+          final content = message?['content'] as String?;
+
+          if (content != null && content.isNotEmpty) {
+            fullContent += content;
+          }
+        } catch (e) {
+          AppLogger.warning('Failed to parse line as JSON: $line, Error: $e');
+          // Continue with next line
+        }
       }
 
-      final message = choices[0]['message'] as Map<String, dynamic>?;
-      final generatedText = message?['content'] as String?;
-      if (generatedText == null || generatedText.trim().isEmpty) {
+      if (fullContent.trim().isEmpty) {
         throw const AiError(message: 'Empty response text');
       }
 
-      final bibleResponse = _parseBibleResponse(generatedText);
+      final bibleResponse = _parseBibleResponse(fullContent);
+      AppLogger.info('Successfully parsed Bible response');
       return bibleResponse;
     } catch (e) {
       if (e is AiError) rethrow;
 
-      AppLogger.error('Failed to parse API response, using raw response: $e');
+      AppLogger.error('Failed to parse API response: $e');
+      AppLogger.error('Response body: $responseBody');
+
+      // As a last resort, try to extract any readable text from the response
+      try {
+        final responseStr = responseBody.toString();
+        if (responseStr.contains('"content"')) {
+          // Extract all content fields using regex
+          final contentMatches = RegExp(r'"content"\s*:\s*"([^"]*)"').allMatches(responseStr);
+          String fallbackText = '';
+          for (final match in contentMatches) {
+            if (match.groupCount >= 1) {
+              fallbackText += match.group(1)!;
+            }
+          }
+
+          if (fallbackText.isNotEmpty) {
+            AppLogger.info('Using fallback text extraction');
+            return BibleQAResponse(
+              answer: fallbackText,
+              references: _extractBibleReferences(fallbackText),
+            );
+          }
+        }
+      } catch (fallbackError) {
+        AppLogger.error('Fallback parsing also failed: $fallbackError');
+      }
+
       return BibleQAResponse(
-        answer: responseBody,
+        answer: 'Er is een fout opgetreden bij het verwerken van het antwoord. Probeer het opnieuw.',
         references: [],
       );
     }
@@ -577,13 +648,13 @@ Explanation: [Additional context if needed]
     return double.tryParse(str) != null;
   }
 
-  /// Makes a streaming HTTP request to the AI API
+  /// Makes a streaming HTTP request to the Ollama API
   Future<Stream<String>> _makeStreamingApiRequestStream(String question) async {
-    final url = Uri.parse('${AiConfig.baseUrl}/chat/completions');
+    final url = Uri.parse('${AiConfig.baseUrl}/api/chat');
 
     final prompt = _buildBiblePrompt(question);
     final requestBody = json.encode({
-      'model': 'x-ai/grok-4-fast:free',
+      'model': 'gpt-oss:120b', // Use the cloud model as specified in the API key
       'messages': [
         {
           'role': 'user',
@@ -593,14 +664,20 @@ Explanation: [Additional context if needed]
       'stream': true
     });
 
-    AppLogger.info('Making streaming request to AI API');
+    AppLogger.info('Making streaming request to Ollama API');
+
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+
+    // Only add Authorization header if we have an API key
+    if (_apiKey.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $_apiKey';
+    }
 
     final request = await _httpClient.post(
       url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $_apiKey'
-      },
+      headers: headers,
       body: requestBody,
     );
 
@@ -608,13 +685,15 @@ Explanation: [Additional context if needed]
       request.body
           .toString()
           .split('\n')
-          .where((line) => line.trim().isNotEmpty && line.startsWith('data: '))
-          .map((line) => line.substring(6)) // Remove 'data: ' prefix
+          .where((line) => line.trim().isNotEmpty)
           .where((data) => data != '[DONE]')
           .map((data) {
         try {
           final jsonData = json.decode(data);
-          return jsonData['choices']?[0]['delta']?['content'] as String? ?? '';
+          // Handle Ollama API response format
+          final message = jsonData['message'] as Map<String, dynamic>?;
+          final content = message?['content'] as String?;
+          return content ?? '';
         } catch (e) {
           return '';
         }

@@ -12,15 +12,15 @@ void main() async {
     print('Successfully loaded .env from assets');
 
     // Verify the API key was loaded
-    final apiKey = dotenv.env['AI_API_KEY'];
+    final apiKey = dotenv.env['OLLAMA_API_KEY'];
     if (apiKey != null && apiKey.isNotEmpty) {
-      print('AI_API_KEY loaded successfully');
+      print('OLLAMA_API_KEY loaded successfully');
     } else {
-      print('Warning: AI_API_KEY not found in .env file');
+      print('Warning: OLLAMA_API_KEY not found in .env file');
     }
   } catch (e) {
     print('Could not load .env file: $e');
-    print('Please ensure .env file is added to pubspec.yaml assets and contains AI_API_KEY');
+    print('Please ensure .env file is added to pubspec.yaml assets and contains OLLAMA_API_KEY');
   }
 
   runApp(const BijbelBotApp());
