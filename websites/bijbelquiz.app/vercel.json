@@ -25,6 +25,10 @@
       "destination": "https://toot.community/@BijbelQuiz"
     },
     {
+      "source": "/bluesky",
+      "destination": "https://bsky.app/profile/bijbelquiz-app.bsky.social"
+    },
+    {
       "source": "/pixelfed",
       "destination": "https://pixelfed.social/@bijbelquiz"
     },

@@ -23,4 +23,5 @@ class AppConfig {
   static const String discordUrl = 'https://discord.gg/ADbhWr4UnK';
   static const String signalUrl = 'https://signal.group/#CjQKILlX0njMt_UqlaFrlk_ePLdUkNel9p4w_CHvgkKbAoHYEhCZIoaUq_8G36p1w-Xpq1xq';
   static const String pixelfedUrl = 'https://pixelfed.social/@bijbelquiz';
+  static const String blueskyUrl = 'https://bsky.app/profile/bijbelquiz-app.bsky.social';
 }

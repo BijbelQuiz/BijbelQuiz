@@ -229,17 +229,19 @@ class AppStrings {
 
   // Popups
   static const String followUs = 'Volg ons';
-  static const String followUsMessage = 'Volg ons op Mastodon, Pixelfed, Kwebler, Signal en Discord voor updates en community!';
+  static const String followUsMessage = 'Volg ons op Mastodon, Pixelfed, Kwebler, Signal, Discord en Bluesky voor updates en community!';
   static const String followMastodon = 'Volg Mastodon';
   static const String followPixelfed = 'Volg Pixelfed';
   static const String followKwebler = 'Volg Kwebler';
   static const String followSignal = 'Volg Signal';
   static const String followDiscord = 'Volg Discord';
+  static const String followBluesky = 'Volg Bluesky';
   static final String mastodonUrl = AppUrls.mastodonUrl;
   static final String pixelfedUrl = AppUrls.pixelfedUrl;
   static final String kweblerUrl = AppUrls.kweblerUrl;
   static final String signalUrl = AppUrls.signalUrl;
   static final String discordUrl = AppUrls.discordUrl;
+  static final String blueskyUrl = AppUrls.blueskyUrl;
   
   // Satisfaction Survey
   static const String satisfactionSurvey = 'Help ons te verbeteren';
@@ -321,6 +323,7 @@ class AppStrings {
   static const String kwebler = 'Kwebler';
   static const String discord = 'Discord';
   static const String signal = 'Signal';
+  static const String bluesky = 'Bluesky';
   static const String couldNotOpenPlatform = 'Kon {platform} niet openen';
 
   // Settings Provider Errors

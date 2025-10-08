@@ -24,6 +24,7 @@ class AppUrls {
   static String get signalUrl => '$baseDomain/signal-group';
   static String get signalContactUrl => '$baseDomain/signal-contact';
   static String get pixelfedUrl => '$baseDomain/pixelfed';
+  static String get blueskyUrl => '$baseDomain/bluesky';
 
   // Contact
   static String get contactEmail => AppConfig.contactEmail;

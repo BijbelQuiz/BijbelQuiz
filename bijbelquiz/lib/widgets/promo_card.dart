@@ -216,6 +216,11 @@ class PromoCard extends StatelessWidget {
                   icon: Icons.discord,
                   onPressed: () => onAction(strings.AppStrings.discordUrl),
                 ),
+                _SocialButton(
+                  label: strings.AppStrings.followBluesky,
+                  icon: Icons.cloud,
+                  onPressed: () => onAction(strings.AppStrings.blueskyUrl),
+                ),
               ],
             ),
           ],
