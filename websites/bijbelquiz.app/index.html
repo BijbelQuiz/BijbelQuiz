@@ -3,29 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BijbelQuiz</title>
+    <title>BijbelQuiz - Test je bijbelkennis</title>
+    <meta name="description" content="Test je bijbelkennis met uitdagende vragen over personen, gebeurtenissen en geschiedenissen in de Bijbel. Speel alleen of met vrienden!">
     <link rel="stylesheet" href="theme.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <a rel="me" href="https://toot.community/@BijbelQuiz" style="display: none;">Mastodon</a>
 </head>
 <body class="center-screen fade-in">
     <div class="container card">
-        <i class="material-icons icon-large">church</i>
-        <h1>BijbelQuiz</h1>
-        <p>Test je bijbelkennis met uitdagende vragen over personen, gebeurtenissen en geschiedenissen in de Bijbel.</p>
+        <!-- Header Section -->
+        <div class="hero-section">
+            <i class="material-icons icon-large">church</i>
+            <h1>BijbelQuiz</h1>
+            <p class="hero-description">Test je bijbelkennis met uitdagende vragen over personen, gebeurtenissen en geschiedenissen in de Bijbel. Speel alleen, met familie of vrienden!</p>
 
-        <!-- Main waitlist signup button -->
-        <a href="https://app.formbricks.com/s/cmdwy2s6adbojvr01nk4j3lvb" class="btn primary btn-large" id="waitlistBtn">
-            Meld je aan voor de wachtlijst
-        </a>
+            <!-- Call to Action Section - Moved to top -->
+            <div class="cta-section-hero">
+                <h2>Klaar om te beginnen?</h2>
+                <p>Join duizenden anderen die hun bijbelkennis verbeteren met BijbelQuiz!</p>
 
-        <!-- Secondary play on web button -->
-        <a href="https://play.bijbelquiz.app" class="btn secondary btn-large" id="playWebBtn" target="_blank" rel="noopener">
-            Speel direct op het web
-        </a>
+                <div class="cta-buttons">
+                    <!-- Main waitlist signup button -->
+                    <a href="https://app.formbricks.com/s/cmdwy2s6adbojvr01nk4j3lvb" class="btn primary btn-large" id="waitlistBtn">
+                        <i class="material-icons">mail</i>
+                        Meld je aan voor de wachtlijst
+                    </a>
+
+                    <!-- Secondary play on web button -->
+                    <a href="https://play.bijbelquiz.app" class="btn secondary btn-large" id="playWebBtn" target="_blank" rel="noopener">
+                        <i class="material-icons">play_arrow</i>
+                        Speel direct op het web
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features-section">
+            <h2>Waarom BijbelQuiz?</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="material-icons feature-icon">school</i>
+                    <h3>Leer spelenderwijs</h3>
+                    <p>Verbeter je bijbelkennis terwijl je plezier hebt met uitdagende vragen.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="material-icons feature-icon">group</i>
+                    <h3>Speel met anderen</h3>
+                    <p>Daag vrienden en familie uit voor een gezellige quizavond.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="material-icons feature-icon">timeline</i>
+                    <h3>Verschillende niveaus</h3>
+                    <p>Van beginner tot expert - voor iedereen het juiste niveau.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="material-icons feature-icon">emoji_events</i>
+                    <h3>Scoringsysteem</h3>
+                    <p>Houd je voortgang bij en verbeter je scores elke keer.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testimonials Section -->
+        <div class="testimonials-section">
+            <h2>Wat anderen zeggen</h2>
+            <div class="testimonial">
+                <div class="testimonial-content">
+                    <p>"Ik gebruik de app bijna iedere dag, het zijn goede vragen!"</p>
+                </div>
+                <div class="testimonial-author">
+                    <strong>Een van onze vroege testers</strong>
+                    <!-- <span>Bijbelleraar</span> -->
+                </div>
+            </div>
+            <div class="testimonial">
+                <div class="testimonial-content">
+                    <p>"Door het mooie ontwerp van de app kan ik spelenderwijs leren!"</p>
+                </div>
+                <div class="testimonial-author">
+                    <strong>Een van onze vroege testers</strong>
+                    <!-- <span>Vader van drie kinderen</span> -->
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <div class="stat-item">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">Bijbelvragen</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">20+</div>
+                <div class="stat-label">Vroege testers</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">50+</div>
+                <div class="stat-label">Bijbelboeken</div>
+            </div>
+        </div>
 
         <footer>
-            <a href="blog/" class="footer-link">Blog</a> | &copy; 2025 BijbelQuiz
+            <p>&copy; 2025 BijbelQuiz</p>
         </footer>
     </div>
 </body>
