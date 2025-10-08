@@ -11,35 +11,141 @@
     <div class="container card">
         <i class="material-icons icon-large">privacy_tip</i>
         <h1>Privacybeleid</h1>
-        <p>Laatst bijgewerkt: 15 september 2025</p>
+        <p>Laatst bijgewerkt: 8 oktober 2025</p>
 
         <div class="privacy-content">
+            <div style="background: #f8fafc; border: 1px solid #64748b; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; color: #1e293b;" class="summary-box">
+                <h3 style="margin-top: 0; color: #2563eb;">📋 Beknopte samenvatting</h3>
+                <p style="margin-bottom: 0.5rem;"><strong>Wat we verzamelen:</strong></p>
+                <ul style="margin: 0.5rem 0;">
+                    <li>Gebruiksgegevens voor app-verbetering (alleen als analytics aanstaat)</li>
+                    <li>Apparaatinformatie (model, OS versie) voor technische analyse</li>
+                    <li>Tekstbeschrijvingen voor AI-kleurthema's (alleen naar Google AI verzonden)</li>
+                    <li>Quizvoortgang en instellingen (alleen lokaal opgeslagen)</li>
+                </ul>
+                <p style="margin-bottom: 0.5rem;"><strong>Wat we NIET verzamelen:</strong></p>
+                <ul style="margin: 0.5rem 0;">
+                    <li>Persoonlijke informatie (naam, e-mail, locatie)</li>
+                    <li>Contactgegevens of identificeerbare data</li>
+                    <li>Betalingsinformatie</li>
+                </ul>
+                <p style="margin-bottom: 0;"><strong>Uw controle:</strong> U kunt analytics volledig uitschakelen in de instellingen. AI-functies zijn optioneel.</p>
+            </div>
+
             <h2>1. Inleiding</h2>
-            <p>Dit privacybeleid beschrijft hoe BijbelQuiz ("we", "ons" of "onze") informatie verzamelt, gebruikt en deelt wanneer u onze mobiele applicatie ("app") gebruikt.</p>
+            <p>Dit privacybeleid beschrijft hoe BijbelQuiz ("we", "ons" of "onze") informatie verzamelt, gebruikt en deelt wanneer u onze mobiele applicatie ("app") gebruikt. Wij respecteren uw privacy en streven ernaar transparant te zijn over onze gegevensverwerkingspraktijken.</p>
 
             <h2>2. Welke gegevens verzamelen we?</h2>
             <p>We verzamelen de volgende soorten informatie:</p>
+
+            <h3>2.1 Analytische gegevens</h3>
+            <p>We gebruiken PostHog om uitgebreide gebruiksgegevens te verzamelen voor het verbeteren van de app. Dit omvat:</p>
             <ul>
-                <li><strong>Analytische gegevens:</strong> We gebruiken PostHog om geanonimiseerde gebruiksgegevens te verzamelen. Dit omvat evenementen zoals het starten van een quiz, het beantwoorden van een vraag, en het navigeren door de app. We verzamelen geen persoonlijk identificeerbare informatie (PII).</li>
-                <li><strong>Voortgangsgegevens:</strong> Uw quizvoortgang, scores en ontgrendelde items worden lokaal op uw apparaat opgeslagen. Deze gegevens worden niet naar onze servers verzonden, tenzij u de export/import-functie gebruikt.</li>
+                <li><strong>App-gebruik:</strong> App-lanceringen, schermweergaven, functiegebruik, en navigatiepatronen</li>
+                <li><strong>Quiz-interacties:</strong> Quiz-start, vraagbeantwoording, scores, voortgang, en spelgedrag</li>
+                <li><strong>Prestaties:</strong> Laadtijden, crashes, fouten, en technische evenementen</li>
+                <li><strong>Gebruikersbetrokkenheid:</strong> Tijd besteed in app, functieontdekking, en gebruikersstromen</li>
+                <li><strong>Inhoud-interacties:</strong> Zoekopdrachten, leeractiviteiten, prestaties, en feedback</li>
+                <li><strong>Technische gegevens:</strong> Verbindingsstatus, caching-gebeurtenissen, en apparaatinformatie</li>
+            </ul>
+
+            <h3>2.2 Apparaatinformatie</h3>
+            <p>Voor analytische doeleinden verzamelen we automatisch bepaalde apparaatinformatie:</p>
+            <ul>
+                <li>Apparaatmodel en fabrikant</li>
+                <li>Besturingssysteem en versie</li>
+                <li>App-versie en build-nummer</li>
+                <li>Schermresolutie en apparaattype</li>
+                <li>Taalinstellingen</li>
+            </ul>
+
+            <h3>2.3 AI-functionaliteit</h3>
+            <p>Wanneer u gebruik maakt van de AI-kleurthema-generator:</p>
+            <ul>
+                <li><strong>Tekstbeschrijvingen:</strong> De door u ingevoerde beschrijvingen voor kleurenthema's worden verzonden naar Google's Gemini AI voor verwerking</li>
+                <li><strong>API-sleutels:</strong> Voor authenticatie met de Gemini API</li>
+            </ul>
+
+            <h3>2.4 Lokale opslag</h3>
+            <p>De volgende gegevens worden lokaal op uw apparaat opgeslagen:</p>
+            <ul>
+                <li><strong>Quizvoortgang:</strong> Scores, voltooiingsstatus, ontgrendelde items en prestaties</li>
+                <li><strong>Gebruikersvoorkeuren:</strong> Thema-instellingen, geluidsinstellingen, meldingsvoorkeuren</li>
+                <li><strong>Aangepaste thema's:</strong> Door gebruikers aangemaakte AI-gegenereerde kleurenthema's</li>
+                <li><strong>App-instellingen:</strong> Taal, moeilijkheidsgraad, en persoonlijke voorkeuren</li>
+                <li><strong>Cache-gegevens:</strong> Vraagcache en tijdelijke bestanden voor offline gebruik</li>
+            </ul>
+
+            <h3>2.5 Functievlaggen</h3>
+            <p>We gebruiken PostHog voor het beheer van functievlaggen om:</p>
+            <ul>
+                <li>Nieuwe functies gefaseerd uit te rollen</li>
+                <li>A/B-tests uit te voeren</li>
+                <li>Functies op afstand in/uit te schakelen</li>
             </ul>
 
             <h2>3. Hoe gebruiken we uw gegevens?</h2>
-            <p>De geanonimiseerde gegevens die we verzamelen, worden gebruikt om:</p>
+            <p>De verzamelde gegevens worden gebruikt om:</p>
             <ul>
-                <li>De app te verbeteren en te optimaliseren.</li>
-                <li>Te begrijpen hoe gebruikers met de app omgaan.</li>
-                <li>Populaire functies te identificeren en de gebruikerservaring te verbeteren.</li>
+                <li><strong>App-verbetering:</strong> De app te optimaliseren, bugs te identificeren en prestaties te verbeteren</li>
+                <li><strong>Gebruikerservaring:</strong> Te begrijpen hoe gebruikers met de app omgaan en populaire functies te identificeren</li>
+                <li><strong>Personalisatie:</strong> Functies aan te passen op basis van gebruikspatronen</li>
+                <li><strong>Technische ondersteuning:</strong> Problemen op te lossen en de stabiliteit te verbeteren</li>
+                <li><strong>AI-functionaliteit:</strong> Aangepaste kleurenthema's te genereren op basis van gebruikersbeschrijvingen</li>
+                <li><strong>Functiebeheer:</strong> Nieuwe functies veilig uit te rollen en te testen</li>
             </ul>
 
-            <h2>4. Gegevens delen</h2>
-            <p>We delen uw gegevens niet met derden, behalve zoals beschreven in dit beleid. De geanonimiseerde gegevens worden alleen gedeeld met PostHog voor analytische doeleinden.</p>
+            <h2>4. Gegevens delen en derden</h2>
+            <p>We delen uw gegevens alleen zoals beschreven in dit beleid:</p>
+            <ul>
+                <li><strong>PostHog:</strong> Geanonimiseerde analytische gegevens worden gedeeld met PostHog voor verwerkingsdoeleinden. PostHog verwerkt deze gegevens in de Verenigde Staten. Hoewel PostHog privacybescherming biedt, kan de verwerking plaatsvinden buiten de EU/EER.</li>
+                <li><strong>Google Gemini AI:</strong> Tekstbeschrijvingen voor kleurenthema-generatie worden verzonden naar Google's Gemini AI API. Deze gegevens worden verwerkt volgens Google's privacybeleid en kunnen worden opgeslagen op Google's servers wereldwijd.</li>
+                <li><strong>Geen andere derden:</strong> We delen geen persoonlijke gegevens met andere derde partijen voor commerciële doeleinden.</li>
+            </ul>
 
-            <h2>5. Uw keuzes</h2>
-            <p>U kunt zich afmelden voor het verzamelen van analytische gegevens in de instellingen van de app. Als u zich afmeldt, worden er geen gebruiksgegevens meer naar PostHog verzonden.</p>
+            <h2>5. Gegevensbeveiliging</h2>
+            <p>We nemen de volgende maatregelen om uw gegevens te beschermen:</p>
+            <ul>
+                <li><strong>Lokale opslag:</strong> Persoonlijke gegevens worden lokaal op uw apparaat opgeslagen en niet naar externe servers verzonden</li>
+                <li><strong>API-beveiliging:</strong> Alle externe API-communicatie gebruikt beveiligde verbindingen (HTTPS)</li>
+                <li><strong>Gegevensminimalisatie:</strong> We verzamelen alleen noodzakelijke gegevens voor de beschreven doeleinden</li>
+                <li><strong>Anonimisering:</strong> Analytische gegevens worden geanonimiseerd voordat ze worden verzonden</li>
+            </ul>
 
-            <h2>6. Contact</h2>
-            <p>Als u vragen heeft over dit privacybeleid, kunt u contact met ons opnemen via <a href="mailto:thomasnowprod@proton.me">thomasnowprod@proton.me</a>.</p>
+            <h2>6. Uw keuzes en rechten</h2>
+            <p>U heeft de volgende controle over uw gegevens:</p>
+            <ul>
+                <li><strong>Analytics uitschakelen:</strong> U kunt zich afmelden voor het verzamelen van analytische gegevens in de app-instellingen. Als u zich afmeldt, worden er geen gebruiksgegevens meer naar PostHog verzonden. Dit is een volledige uitschakeling - geen data wordt verzameld of verzonden wanneer deze instelling uitstaat.</li>
+                <li><strong>AI-functies:</strong> U kunt ervoor kiezen om geen gebruik te maken van de AI-kleurthema-generator. Als u deze functie niet gebruikt, worden geen gegevens naar Google verzonden.</li>
+                <li><strong>Meldingen:</strong> U kunt meldingsrechten intrekken via de apparaatinstellingen</li>
+                <li><strong>Gegevenswissing:</strong> U kunt de app verwijderen om alle lokaal opgeslagen gegevens te wissen</li>
+                <li><strong>Export/Import:</strong> Uw quizgegevens kunnen worden geëxporteerd of geïmporteerd voor back-up doeleinden</li>
+            </ul>
+
+            <h2>7. Bewaartermijnen</h2>
+            <p>We bewaren gegevens voor de volgende periodes:</p>
+            <ul>
+                <li><strong>Lokale gegevens:</strong> Blijven op uw apparaat totdat u de app verwijdert of de gegevens wist</li>
+                <li><strong>Analytische gegevens:</strong> Worden door PostHog bewaard volgens hun standaard bewaarbeleid. PostHog bewaart gebeurtenisgegevens standaard voor 7 jaar, maar dit kan worden aangepast op verzoek.</li>
+                <li><strong>AI-gegevens:</strong> Google's Gemini AI verwerkt en bewaart gegevens volgens hun eigen privacybeleid. Wij hebben geen controle over hoe lang Google deze gegevens bewaart.</li>
+            </ul>
+
+            <h2>8. Kinderen en privacy</h2>
+            <p>Onze app is geschikt voor alle leeftijden, maar we raden aan dat kinderen onder de 13 jaar de app alleen gebruiken onder toezicht van een ouder of voogd. We verzamelen niet bewust persoonlijke informatie van kinderen jonger dan 13 jaar.</p>
+
+            <h2>9. Wijzigingen in dit beleid</h2>
+            <p>We kunnen dit privacybeleid van tijd tot tijd bijwerken. Wijzigingen worden gepubliceerd op deze pagina met de bijgewerkte "Laatst bijgewerkt" datum. Bij significante wijzigingen zullen we gebruikers informeren via de app of e-mail.</p>
+
+            <h2>10. Contact</h2>
+            <p>Als u vragen heeft over dit privacybeleid of onze gegevensverwerkingspraktijken, kunt u contact met ons opnemen:</p>
+            <ul>
+                <li><strong>E-mail:</strong> <a href="mailto:thomasnowprod@proton.me">thomasnowprod@proton.me</a></li>
+                <li><strong>Onderwerp:</strong> Vermeld "Privacybeleid" in het onderwerp</li>
+                <li><strong>Reactietijd:</strong> We streven ernaar binnen 30 dagen te reageren</li>
+            </ul>
+
+            <h2>11. Toepasselijk recht</h2>
+            <p>Dit privacybeleid valt onder Nederlands recht. Eventuele geschillen worden voorgelegd aan de bevoegde rechter in Nederland.</p>
         </div>
 
         <a href="index.html" class="btn secondary">
@@ -62,9 +168,38 @@
             margin-top: 1.5rem;
             margin-bottom: 0.5rem;
         }
+        .privacy-content h3 {
+            font-size: 1.1rem;
+            margin-top: 1.2rem;
+            margin-bottom: 0.4rem;
+            color: #666;
+        }
         .privacy-content ul {
             margin-left: 1.5rem;
             margin-bottom: 1rem;
+        }
+        .privacy-content li {
+            margin-bottom: 0.3rem;
+        }
+
+        /* Summary box styling for both light and dark modes */
+        .summary-box {
+            background: #f8fafc !important;
+            border: 1px solid #64748b !important;
+            color: #1e293b !important;
+        }
+
+        /* Dark mode styling */
+        @media (prefers-color-scheme: dark) {
+            .summary-box {
+                background: #1e293b !important;
+                border: 1px solid #475569 !important;
+                color: #f1f5f9 !important;
+                padding: 1.5rem !important;
+            }
+            .summary-box h3 {
+                color: #60a5fa !important;
+            }
         }
     </style>
 </body>
