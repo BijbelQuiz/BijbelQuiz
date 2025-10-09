@@ -25,7 +25,7 @@ class AppUrls {
   static final String satisfactionSurveyUrl = '$baseDomain/tevredenheidsrapport';
   static final String privacyUrl = '$baseDomain/privacy';
   static final String termsUrl = '$baseDomain/algemene-voorwaarden';
-  static final String statusPageUrl = 'https://oneuptime.com/status-page/df067f1b-2beb-42d2-9ddd-719e9ce51238';
+  static final String statusPageUrl = '$baseDomain/status';
 
   // ===== SOCIAL MEDIA URLs (redirect through our own domain) =====
   static String get mastodonUrl => '$baseDomain/mastodon';

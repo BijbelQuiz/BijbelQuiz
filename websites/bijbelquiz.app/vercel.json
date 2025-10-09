@@ -59,6 +59,10 @@
     {
       "source": "/algemene-voorwaarden",
       "destination": "https://bijbelquiz.app/algemene-voorwaarden.html"
+    },
+    {
+      "source": "/status",
+      "destination": "https://bijbelquiz.instatus.com/"
     }
   ],
   "headers": [
