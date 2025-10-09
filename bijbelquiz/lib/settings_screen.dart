@@ -47,7 +47,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _openStatusPage() async {
     Provider.of<AnalyticsService>(context, listen: false).capture(context, 'open_status_page');
-    final Uri url = Uri.parse('https://oneuptime.com/status-page/df067f1b-2beb-42d2-9ddd-719e9ce51238');
+    final Uri url = Uri.parse(AppUrls.statusPageUrl);
     if (!await launchUrl(url)) {
       if (mounted) {
         showTopSnackBar(context, strings.AppStrings.couldNotOpenStatusPage, style: TopSnackBarStyle.error);
@@ -427,7 +427,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: IconButton(
                 icon: const Icon(Icons.open_in_new),
                 onPressed: () async {
-                  final Uri url = Uri.parse('https://bijbelquiz.app/privacy.html');
+                  final Uri url = Uri.parse(AppUrls.privacyUrl);
                   if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
                     if (mounted) {
                       showTopSnackBar(context, strings.AppStrings.couldNotOpenPrivacyPolicy, style: TopSnackBarStyle.error);

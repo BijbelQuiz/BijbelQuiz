@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io' show Platform;
 import '../providers/settings_provider.dart';
+import '../constants/urls.dart';
 import 'logger.dart';
 
 /// A service that provides an interface to the PostHog analytics service.
@@ -20,7 +21,7 @@ class AnalyticsService {
       final config = PostHogConfig(
         'phc_WWdBwDKbzwCJ2iRbnWFI8m6lgnVFQCmMouRIaNBV2WF',
       );
-      config.host = 'https://us.i.posthog.com';
+      config.host = AppUrls.posthogHost;
       await Posthog().setup(config);
       AppLogger.info('PostHog analytics SDK initialized successfully');
     } catch (e) {
