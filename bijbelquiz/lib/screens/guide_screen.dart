@@ -360,7 +360,7 @@ class _GuidePageViewState extends State<GuidePageView> {
                 baseline: TextBaseline.alphabetic,
                 child: GestureDetector(
                   onTap: () async {
-                    const url = 'https://bijbelquiz.app/algemene-voorwaarden.html';
+                    final url = AppUrls.termsUrl;
                     if (await canLaunchUrl(Uri.parse(url))) {
                       await launchUrl(
                         Uri.parse(url),
@@ -383,7 +383,7 @@ class _GuidePageViewState extends State<GuidePageView> {
                 baseline: TextBaseline.alphabetic,
                 child: GestureDetector(
                   onTap: () async {
-                    const url = 'https://bijbelquiz.app/privacy.html';
+                    final url = AppUrls.privacyUrl;
                     if (await canLaunchUrl(Uri.parse(url))) {
                       await launchUrl(
                         Uri.parse(url),
