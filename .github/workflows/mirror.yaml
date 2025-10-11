@@ -23,7 +23,7 @@ jobs:
 
       - name: Mirror push to GitLab
         env:
-          GITLAB_REPO: https://${{ secrets.GITLAB_TOKEN }}@gitlab.com/ThomasNow/bijbelquiz.git
+          GITLAB_REPO: https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/ThomasNow/bijbelquiz.git
         run: |
           git remote add gitlab $GITLAB_REPO || true
           git push --mirror gitlab || echo "GitLab push failed, but continuing workflow"
