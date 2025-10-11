@@ -55,6 +55,7 @@ analysis_benchmark.json
 .pub-preload-cache/
 .pub/
 build/
+builds/
 flutter_*.png
 linked_*.ds
 unlinked.ds
@@ -135,6 +136,7 @@ key.properties
 **/linux/flutter/generated_plugin_registrant.cc
 **/linux/flutter/generated_plugin_registrant.h
 **/linux/flutter/generated_plugins.cmake
+**/linux/flutter/ephemeral/
 
 # Coverage
 coverage/
