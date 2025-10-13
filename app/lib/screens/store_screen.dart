@@ -32,7 +32,11 @@ class _StoreScreenState extends State<StoreScreen> {
   void initState() {
     super.initState();
     AppLogger.info('StoreScreen initialized');
-    Provider.of<AnalyticsService>(context, listen: false).screen(context, 'StoreScreen');
+    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    analyticsService.screen(context, 'StoreScreen');
+
+    // Track store access
+    analyticsService.trackFeatureStart(context, AnalyticsService.FEATURE_THEME_PURCHASES);
   }
 
   @override
@@ -386,7 +390,13 @@ class _StoreScreenState extends State<StoreScreen> {
 
             AppLogger.info('Power-up purchase attempted: $title, cost: $cost');
 
-            Provider.of<AnalyticsService>(context, listen: false).capture(context, 'purchase_powerup', properties: {'title': title, 'cost': cost});
+            final analytics = Provider.of<AnalyticsService>(context, listen: false);
+            analytics.capture(context, 'purchase_powerup', properties: {'title': title, 'cost': cost});
+            analytics.trackFeaturePurchase(context, AnalyticsService.FEATURE_POWER_UPS, additionalProperties: {
+              'powerup_type': title,
+              'cost': cost,
+              'current_score': gameStats.score,
+            });
             final localContext = context;
             final localGameStats = gameStats;
             final canAfford = isDev || localGameStats.score >= cost;
@@ -568,7 +578,14 @@ class _StoreScreenState extends State<StoreScreen> {
           borderRadius: BorderRadius.circular(16),
           onTap: () async {
             AppLogger.info('Theme purchase attempted: $title, theme: $themeKey, cost: $cost');
-            Provider.of<AnalyticsService>(context, listen: false).capture(context, 'purchase_theme', properties: {'theme': themeKey, 'cost': cost});
+            final analytics = Provider.of<AnalyticsService>(context, listen: false);
+            analytics.capture(context, 'purchase_theme', properties: {'theme': themeKey, 'cost': cost});
+            analytics.trackFeaturePurchase(context, AnalyticsService.FEATURE_THEME_PURCHASES, additionalProperties: {
+              'theme_key': themeKey,
+              'theme_name': title,
+              'cost': cost,
+              'current_score': gameStats.score,
+            });
             final localContext = context;
             final localGameStats = gameStats;
             final localSettings = settings;
@@ -718,7 +735,12 @@ class _StoreScreenState extends State<StoreScreen> {
           borderRadius: BorderRadius.circular(16),
           onTap: () async {
             AppLogger.info('AI Theme Generator tapped, cost: $cost');
-            Provider.of<AnalyticsService>(context, listen: false).capture(context, 'ai_theme_generator_tapped', properties: {'cost': cost});
+            final analytics = Provider.of<AnalyticsService>(context, listen: false);
+            analytics.capture(context, 'ai_theme_generator_tapped', properties: {'cost': cost});
+            analytics.trackFeatureAttempt(context, AnalyticsService.FEATURE_AI_THEME_GENERATOR, additionalProperties: {
+              'cost': cost,
+              'current_score': gameStats.score,
+            });
             final localContext = context;
             final localGameStats = gameStats;
             final canAfford = isDev || localGameStats.score >= cost;

@@ -53,7 +53,7 @@ class _GuideScreenState extends State<GuideScreen> {
     analyticsService.screen(context, 'GuideScreen');
 
     // Track guide screen access and feature usage
-    analyticsService.trackFeatureUsage(context, 'onboarding', 'guide_opened');
+    analyticsService.trackFeatureStart(context, AnalyticsService.FEATURE_ONBOARDING);
 
     AppLogger.info('GuideScreen loaded');
   }
@@ -158,7 +158,7 @@ class _GuideScreenState extends State<GuideScreen> {
     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
 
     // Track guide completion feature usage
-    analyticsService.trackFeatureUsage(context, 'onboarding', 'guide_finished');
+    analyticsService.trackFeatureCompletion(context, AnalyticsService.FEATURE_ONBOARDING);
 
     Provider.of<AnalyticsService>(context, listen: false).capture(context, 'guide_completed');
     final localContext = context;

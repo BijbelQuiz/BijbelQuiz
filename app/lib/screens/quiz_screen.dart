@@ -102,6 +102,13 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     // Track screen view
     analyticsService.screen(context, 'QuizScreen');
 
+    // Track quiz gameplay feature access
+    analyticsService.trackFeatureStart(context, AnalyticsService.FEATURE_QUIZ_GAMEPLAY, additionalProperties: {
+      'lesson_mode': _lessonMode,
+      'lesson_id': widget.lesson?.id ?? 'free_play',
+      'session_limit': widget.sessionLimit ?? 0,
+    });
+
     WidgetsBinding.instance.addObserver(this);
     AppLogger.info('QuizScreen loaded');
 
@@ -359,7 +366,13 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
             Builder(
               builder: (ctx) => TextButton(
                 onPressed: hasEnoughPoints ? () {
-                  Provider.of<AnalyticsService>(context, listen: false).capture(context, 'retry_with_points');
+                  final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+                  analyticsService.capture(context, 'retry_with_points');
+                  analyticsService.trackFeatureAttempt(context, AnalyticsService.FEATURE_RETRY_WITH_POINTS, additionalProperties: {
+                    'time_remaining': 0, // Time is up
+                    'current_streak': gameStats.currentStreak,
+                    'current_score': gameStats.score,
+                  });
                   gameStats.spendPointsForRetry().then((success) {
                     if (!dialogContext.mounted) return;
                     if (success) {
@@ -475,7 +488,12 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     
     // Reset question pool if language changed
     if (_lastLanguage != null && _lastLanguage != language) {
-      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'language_changed', properties: {'from': _lastLanguage!, 'to': language});
+      final analytics = Provider.of<AnalyticsService>(context, listen: false);
+      analytics.capture(context, 'language_changed', properties: {'from': _lastLanguage!, 'to': language});
+      analytics.trackFeatureSuccess(context, AnalyticsService.FEATURE_LANGUAGE_SETTINGS, additionalProperties: {
+        'from_language': _lastLanguage!,
+        'to_language': language,
+      });
       AppLogger.info('Language changed from $_lastLanguage to $language, resetting question pool');
       _resetQuestionPool();
     }
@@ -541,14 +559,31 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       }
 
       // Initialize quiz state with PQU (Progressive Question Up-selection)
+      final isSlowMode = settings.slowMode;
       final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
-        Duration(seconds: settings.slowMode ? 35 : 20)
+        Duration(seconds: isSlowMode ? 35 : 20)
       );
+
+      // Track slow mode usage
+      if (isSlowMode) {
+        analyticsService.trackFeatureUsage(context, AnalyticsService.FEATURE_SETTINGS, AnalyticsService.ACTION_USED, additionalProperties: {
+          'setting': 'slow_mode',
+          'enabled': true,
+        });
+      }
 
       if (!mounted) return;
       // Select the first question; the selector ensures no duplicates and handles
       // exhaustion by widening scope and then resetting when necessary.
       final QuizQuestion firstQuestion = _questionSelector.pickNextQuestion(0.0, context);
+
+      // Track question category usage
+      if (firstQuestion.category.isNotEmpty) {
+        analyticsService.trackFeatureUsage(context, AnalyticsService.FEATURE_QUESTION_CATEGORIES, AnalyticsService.ACTION_USED, additionalProperties: {
+          'category': firstQuestion.category,
+          'difficulty': firstQuestion.difficulty,
+        });
+      }
       _quizState = QuizState(
         question: firstQuestion,
         timeRemaining: optimalTimerDuration.inSeconds,
@@ -576,6 +611,13 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
         _error = '${strings.AppStrings.errorLoadQuestions}: ${e.toString()}';
       });
 
+      // Track quiz loading errors
+      final analytics = Provider.of<AnalyticsService>(context, listen: false);
+      analytics.capture(context, 'quiz_loading_error', properties: {
+        'error_type': e.runtimeType.toString(),
+        'error_message': e.toString(),
+        'lesson_mode': _lessonMode,
+      });
 
       AppLogger.error('Failed to load questions in QuizScreen', e);
     } finally {
@@ -654,6 +696,17 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
 
     // If in lesson mode and session reached limit, show completion screen
     if (_lessonMode && _sessionAnswered >= (widget.sessionLimit ?? 0)) {
+      // Track lesson completion
+      final analytics = Provider.of<AnalyticsService>(context, listen: false);
+      analytics.trackFeatureCompletion(context, AnalyticsService.FEATURE_LESSON_SYSTEM, additionalProperties: {
+        'lesson_id': widget.lesson?.id ?? 'unknown',
+        'lesson_category': widget.lesson?.category ?? 'unknown',
+        'questions_answered': _sessionAnswered,
+        'questions_correct': _sessionCorrect,
+        'accuracy_rate': _sessionAnswered > 0 ? (_sessionCorrect / _sessionAnswered) : 0,
+        'best_streak': _sessionBestStreak,
+      });
+
       await _completeLessonSession();
       return;
     }
@@ -676,6 +729,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     AppLogger.info('Transitioning to next question');
     // Record the answer result so the question selector knows if the previous question was answered correctly
     _questionSelector.recordAnswerResult(_quizState.question.question, isCorrect);
+
     // Calculate new difficulty
     final calculatedNewDifficulty = _questionSelector.calculateNextDifficulty(
       currentDifficulty: _quizState.currentDifficulty,
@@ -687,6 +741,17 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       incorrectAnswers: gameStats.incorrectAnswers,
       context: context,
     );
+
+    // Track progressive difficulty adjustments
+    if (calculatedNewDifficulty != _quizState.currentDifficulty) {
+      final analytics = Provider.of<AnalyticsService>(context, listen: false);
+      analytics.trackFeatureUsage(context, AnalyticsService.FEATURE_PROGRESSIVE_DIFFICULTY, isCorrect ? 'increased' : 'decreased', additionalProperties: {
+        'previous_difficulty': _quizState.currentDifficulty,
+        'new_difficulty': calculatedNewDifficulty,
+        'current_streak': gameStats.currentStreak,
+        'question_category': _quizState.question.category,
+      });
+    }
     // Compute next question; selector enforces uniqueness and auto-resets as needed
     final QuizQuestion nextQuestion = _questionSelector.pickNextQuestion(calculatedNewDifficulty, context);
     setState(() {
@@ -961,6 +1026,12 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
     final question = _quizState.question;
 
+    // Track skip feature usage
+    analyticsService.trackFeatureAttempt(context, AnalyticsService.FEATURE_SKIP_QUESTION, additionalProperties: {
+      'question_category': question.category,
+      'question_difficulty': question.difficulty,
+      'time_remaining': _quizState.timeRemaining,
+    });
 
     Provider.of<AnalyticsService>(context, listen: false).capture(context, 'skip_question');
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
@@ -1006,10 +1077,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     final question = _quizState.question;
 
     // Track biblical reference unlock attempt
-    analyticsService.trackFeatureUsage(context, 'biblical_reference', 'unlock_attempted', additionalProperties: {
+    analyticsService.trackFeatureAttempt(context, AnalyticsService.FEATURE_BIBLICAL_REFERENCES, additionalProperties: {
       'question_category': question.category,
       'question_difficulty': question.difficulty,
       'biblical_reference': question.biblicalReference ?? 'none',
+      'time_remaining': _quizState.timeRemaining,
     });
 
     Provider.of<AnalyticsService>(context, listen: false).capture(context, 'unlock_biblical_reference');

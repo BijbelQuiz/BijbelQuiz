@@ -52,6 +52,9 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
     // Track screen view
     analyticsService.screen(context, 'LessonSelectScreen');
 
+    // Track lesson system access
+    analyticsService.trackFeatureStart(context, AnalyticsService.FEATURE_LESSON_SYSTEM);
+
     _loadLessons();
     _loadStreakData();
 
@@ -422,7 +425,11 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                                   isSatisfaction: _isSatisfactionPromo,
                                   isDifficulty: _isDifficultyPromo,
                                   onDismiss: () {
-                                    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'dismiss_promo_card');
+                                    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+                                    analyticsService.capture(context, 'dismiss_promo_card');
+                                    analyticsService.trackFeatureDismissal(context, AnalyticsService.FEATURE_PROMO_CARDS, additionalProperties: {
+                                      'promo_type': _isDonationPromo ? 'donation' : (_isSatisfactionPromo ? 'satisfaction' : 'difficulty'),
+                                    });
                                     setState(() {
                                       _showPromoCard = false;
                                     });
@@ -431,18 +438,24 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                                     final settings = Provider.of<SettingsProvider>(context, listen: false);
                                     
                                     if (_isDonationPromo) {
-                                      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_donation_promo');
+                                      final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+                                      analyticsService.capture(context, 'tap_donation_promo');
+                                      analyticsService.trackFeatureSuccess(context, AnalyticsService.FEATURE_DONATION_SYSTEM);
                                       await settings.markDonationLinkAsClicked();
                                       await settings.updateLastDonationPopup();
                                       _openDonationPage();
                                     } else if (_isSatisfactionPromo) {
-                                      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_satisfaction_promo');
+                                      final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+                                      analyticsService.capture(context, 'tap_satisfaction_promo');
+                                      analyticsService.trackFeatureSuccess(context, AnalyticsService.FEATURE_SATISFACTION_SURVEYS);
                                       await settings.markSatisfactionLinkAsClicked();
                                       await settings.updateLastSatisfactionPopup();
                                       _launchUrl(AppUrls.satisfactionSurveyUrl);
                                     } else if (_isDifficultyPromo) {
                                       // Handle difficulty feedback
-                                      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_difficulty_feedback', properties: {'feedback': url});
+                                      final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+                                      analyticsService.capture(context, 'tap_difficulty_feedback', properties: {'feedback': url});
+                                      analyticsService.trackFeatureSuccess(context, AnalyticsService.FEATURE_DIFFICULTY_FEEDBACK, additionalProperties: {'feedback_type': url});
                                       await settings.markDifficultyLinkAsClicked();
                                       await settings.updateLastDifficultyPopup();
                                       
@@ -541,6 +554,20 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
 
                                             // Track lesson selection
                                             final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+
+                                            // Track lesson system usage
+                                            analyticsService.trackFeatureSuccess(context, AnalyticsService.FEATURE_LESSON_SYSTEM, additionalProperties: {
+                                              'lesson_id': lesson.id,
+                                              'lesson_category': lesson.category,
+                                              'lesson_unlocked': unlocked,
+                                            });
+
+                                            // Track streak feature if this contributes to streak
+                                            if (_streakDays > 0) {
+                                              analyticsService.trackFeatureUsage(context, AnalyticsService.FEATURE_STREAK_TRACKING, AnalyticsService.ACTION_USED, additionalProperties: {
+                                                'current_streak': _streakDays,
+                                              });
+                                            }
 
                                             Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_lesson', properties: {'lesson_id': lesson.id});
                                             await Navigator.of(context).push(

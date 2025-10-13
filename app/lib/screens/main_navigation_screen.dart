@@ -31,12 +31,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     setState(() {
       _currentIndex = index;
 
-      // Track screen view in analytics
-      final screenNames = ['LessonSelectScreen', 'StoreScreen', 'SocialScreen', 'SettingsScreen'];
-      Provider.of<AnalyticsService>(context, listen: false)
-          .screen(context, screenNames[index]);
-    });
-  }
+       // Track screen view in analytics
+       final screenNames = ['LessonSelectScreen', 'StoreScreen', 'SocialScreen', 'SettingsScreen'];
+       final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+       analyticsService.screen(context, screenNames[index]);
+
+       // Track feature usage for main navigation
+       final featureNames = [
+         AnalyticsService.FEATURE_LESSON_SYSTEM,
+         AnalyticsService.FEATURE_THEME_PURCHASES,
+         AnalyticsService.FEATURE_SOCIAL_FEATURES,
+         AnalyticsService.FEATURE_SETTINGS
+       ];
+       analyticsService.trackFeatureStart(context, featureNames[index]);
+     });
+   }
 
   @override
   Widget build(BuildContext context) {

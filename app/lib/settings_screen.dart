@@ -35,7 +35,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     AppLogger.info('SettingsScreen initialized');
-    Provider.of<AnalyticsService>(context, listen: false).screen(context, 'SettingsScreen');
+    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    analyticsService.screen(context, 'SettingsScreen');
+
+    // Track settings access
+    analyticsService.trackFeatureStart(context, AnalyticsService.FEATURE_SETTINGS);
     // Attach error handler for notification service
     NotificationService.onError = (message) {
       AppLogger.error('Notification service error: $message');
@@ -254,7 +258,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
                       final previousTheme = _getThemeDropdownValue(settings);
   
-                      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'change_theme', properties: {'theme': value});
+                      final analytics = Provider.of<AnalyticsService>(context, listen: false);
+                      analytics.capture(context, 'change_theme', properties: {'theme': value});
+                      analytics.trackFeatureSuccess(context, AnalyticsService.FEATURE_THEME_SELECTION, additionalProperties: {
+                        'theme': value,
+                        'previous_theme': previousTheme,
+                      });
                       if (value == ThemeMode.light.name) {
                         settings.setCustomTheme(null);
                         settings.setThemeMode(ThemeMode.light);
@@ -326,7 +335,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   if (value != null) {
                     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
 
-                    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'change_game_speed', properties: {'speed': value});
+                    final analytics = Provider.of<AnalyticsService>(context, listen: false);
+                    analytics.capture(context, 'change_game_speed', properties: {'speed': value});
+                    analytics.trackFeatureSuccess(context, AnalyticsService.FEATURE_SETTINGS, additionalProperties: {
+                      'setting': 'game_speed',
+                      'value': value,
+                    });
                     settings.setGameSpeed(value);
                   }
                 },
@@ -351,7 +365,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (bool value) {
                   final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
 
-                  Provider.of<AnalyticsService>(context, listen: false).capture(context, 'toggle_mute', properties: {'muted': value});
+                  final analytics = Provider.of<AnalyticsService>(context, listen: false);
+                  analytics.capture(context, 'toggle_mute', properties: {'muted': value});
+                  analytics.trackFeatureSuccess(context, AnalyticsService.FEATURE_SETTINGS, additionalProperties: {
+                    'setting': 'mute',
+                    'value': value,
+                  });
                   settings.setMute(value);
                 },
                 activeThumbColor: colorScheme.primary,
@@ -443,12 +462,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Switch(
                 value: settings.analyticsEnabled,
                 onChanged: (bool value) {
-                  // Note: We don't track this event since it's about toggling analytics
+                  // Track analytics setting change
+                  final analytics = Provider.of<AnalyticsService>(context, listen: false);
+                  analytics.trackFeatureSuccess(context, AnalyticsService.FEATURE_ANALYTICS_SETTINGS, additionalProperties: {
+                    'enabled': value,
+                  });
                   settings.setAnalyticsEnabled(value);
                 },
                 activeThumbColor: colorScheme.primary,
               ),
             ),
+            // Add feature usage analytics display
+            if (settings.analyticsEnabled) ...[
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest.withAlpha((0.3 * 255).round()),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colorScheme.outline.withAlpha((0.2 * 255).round()),
+                  ),
+                ),
+                child: Provider.of<AnalyticsService>(context).buildFeatureUsageWidget(context),
+              ),
+            ],
           ],
         ),
         const SizedBox(height: 24),
@@ -476,7 +515,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onChanged: (bool value) async {
                     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
 
-                    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'toggle_notifications', properties: {'enabled': value});
+                    final analytics = Provider.of<AnalyticsService>(context, listen: false);
+                    analytics.capture(context, 'toggle_notifications', properties: {'enabled': value});
+                    analytics.trackFeatureSuccess(context, AnalyticsService.FEATURE_SETTINGS, additionalProperties: {
+                      'setting': 'notifications',
+                      'value': value,
+                    });
                     await settings.setNotificationEnabled(value);
                     if (value) {
                       final granted = await NotificationService.requestNotificationPermission();
@@ -511,7 +555,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
 
                 // Track donation attempt
-                analyticsService.trackFeatureUsage(context, 'donation', 'button_clicked');
+                final analytics = Provider.of<AnalyticsService>(context, listen: false);
+                analytics.trackFeatureSuccess(context, AnalyticsService.FEATURE_DONATION_SYSTEM);
 
                 Provider.of<AnalyticsService>(context, listen: false).capture(context, 'donate');
                 final Uri url = Uri.parse(AppUrls.donateUrl);
