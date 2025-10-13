@@ -5,17 +5,17 @@ void main() {
   group('QuizQuestion', () {
     test('should create QuizQuestion with required parameters', () {
       final question = QuizQuestion(
-        question: 'Test question?',
-        correctAnswer: 'Correct',
-        incorrectAnswers: ['Wrong1', 'Wrong2'],
-        difficulty: '1',
+        question: 'What is the first book of the Bible?',
+        correctAnswer: 'Genesis',
+        incorrectAnswers: ['Exodus', 'Leviticus', 'Numbers'],
+        difficulty: 'easy',
         type: QuestionType.mc,
       );
 
-      expect(question.question, 'Test question?');
-      expect(question.correctAnswer, 'Correct');
-      expect(question.incorrectAnswers, ['Wrong1', 'Wrong2']);
-      expect(question.difficulty, '1');
+      expect(question.question, 'What is the first book of the Bible?');
+      expect(question.correctAnswer, 'Genesis');
+      expect(question.incorrectAnswers, ['Exodus', 'Leviticus', 'Numbers']);
+      expect(question.difficulty, 'easy');
       expect(question.type, QuestionType.mc);
       expect(question.categories, isEmpty);
       expect(question.biblicalReference, isNull);
@@ -23,39 +23,39 @@ void main() {
 
     test('should create QuizQuestion with optional parameters', () {
       final question = QuizQuestion(
-        question: 'Test question?',
-        correctAnswer: 'Correct',
-        incorrectAnswers: ['Wrong1'],
-        difficulty: '2',
-        type: QuestionType.fitb,
-        categories: ['Old Testament'],
-        biblicalReference: 'Genesis 1:1',
+        question: 'In which city was Jesus born?',
+        correctAnswer: 'Bethlehem',
+        incorrectAnswers: ['Nazareth', 'Jerusalem'],
+        difficulty: 'medium',
+        type: QuestionType.mc,
+        categories: ['New Testament', 'Christmas'],
+        biblicalReference: 'Matthew 2:1',
       );
 
-      expect(question.categories, ['Old Testament']);
-      expect(question.biblicalReference, 'Genesis 1:1');
+      expect(question.categories, ['New Testament', 'Christmas']);
+      expect(question.biblicalReference, 'Matthew 2:1');
     });
 
     test('should parse from JSON - multiple choice', () {
       final json = {
         'vraag': 'What is 2+2?',
         'juisteAntwoord': '4',
-        'fouteAntwoorden': ['3', '5'],
-        'moeilijkheidsgraad': '1',
+        'fouteAntwoorden': ['3', '5', '6'],
+        'moeilijkheidsgraad': 'easy',
         'type': 'mc',
-        'categories': ['Math'],
-        'biblicalReference': 'Proverbs 1:1',
+        'categories': ['Math', 'Basic'],
+        'biblicalReference': 'Genesis 1:1',
       };
 
       final question = QuizQuestion.fromJson(json);
 
       expect(question.question, 'What is 2+2?');
       expect(question.correctAnswer, '4');
-      expect(question.incorrectAnswers, ['3', '5']);
-      expect(question.difficulty, '1');
+      expect(question.incorrectAnswers, ['3', '5', '6']);
+      expect(question.difficulty, 'easy');
       expect(question.type, QuestionType.mc);
-      expect(question.categories, ['Math']);
-      expect(question.biblicalReference, 'Proverbs 1:1');
+      expect(question.categories, ['Math', 'Basic']);
+      expect(question.biblicalReference, 'Genesis 1:1');
     });
 
     test('should parse from JSON - fill in the blank', () {
@@ -63,13 +63,14 @@ void main() {
         'vraag': 'Complete the verse: "In the beginning ___"',
         'juisteAntwoord': 'God created',
         'fouteAntwoorden': ['was the word', 'there was light'],
-        'moeilijkheidsgraad': '2',
+        'moeilijkheidsgraad': 'medium',
         'type': 'fitb',
       };
 
       final question = QuizQuestion.fromJson(json);
 
       expect(question.type, QuestionType.fitb);
+      expect(question.correctAnswer, 'God created');
     });
 
     test('should parse from JSON - true/false with provided incorrect answers', () {
@@ -77,7 +78,7 @@ void main() {
         'vraag': 'Is God real?',
         'juisteAntwoord': 'Waar',
         'fouteAntwoorden': ['Niet waar'],
-        'moeilijkheidsgraad': '1',
+        'moeilijkheidsgraad': 'easy',
         'type': 'tf',
       };
 
@@ -91,7 +92,7 @@ void main() {
       final json = {
         'vraag': 'Is Jesus the Son of God?',
         'juisteAntwoord': 'Waar',
-        'moeilijkheidsgraad': '1',
+        'moeilijkheidsgraad': 'easy',
         'type': 'tf',
       };
 
@@ -104,7 +105,7 @@ void main() {
       final json = {
         'vraag': 'Is the Bible fiction?',
         'juisteAntwoord': 'Niet waar',
-        'moeilijkheidsgraad': '1',
+        'moeilijkheidsgraad': 'easy',
         'type': 'tf',
       };
 
@@ -117,7 +118,7 @@ void main() {
       final json = {
         'vraag': 'God exists?',
         'juisteAntwoord': 'True',
-        'moeilijkheidsgraad': '1',
+        'moeilijkheidsgraad': 'easy',
         'type': 'tf',
       };
 
@@ -130,7 +131,7 @@ void main() {
       final json = {
         'vraag': 'Is sin good?',
         'juisteAntwoord': 'False',
-        'moeilijkheidsgraad': '1',
+        'moeilijkheidsgraad': 'easy',
         'type': 'tf',
       };
 
@@ -153,64 +154,64 @@ void main() {
 
     test('should serialize to JSON', () {
       final question = QuizQuestion(
-        question: 'Test?',
+        question: 'Test question?',
         correctAnswer: 'Yes',
-        incorrectAnswers: ['No'],
-        difficulty: '1',
+        incorrectAnswers: ['No', 'Maybe'],
+        difficulty: 'easy',
         type: QuestionType.mc,
-        categories: ['Test'],
+        categories: ['Test Category'],
         biblicalReference: 'Test 1:1',
       );
 
       final json = question.toJson();
 
-      expect(json['vraag'], 'Test?');
+      expect(json['vraag'], 'Test question?');
       expect(json['juisteAntwoord'], 'Yes');
-      expect(json['fouteAntwoorden'], ['No']);
-      expect(json['moeilijkheidsgraad'], '1');
+      expect(json['fouteAntwoorden'], ['No', 'Maybe']);
+      expect(json['moeilijkheidsgraad'], 'easy');
       expect(json['type'], 'mc');
-      expect(json['categories'], ['Test']);
+      expect(json['categories'], ['Test Category']);
       expect(json['biblicalReference'], 'Test 1:1');
     });
 
     test('should shuffle answer options', () {
       final question = QuizQuestion(
-        question: 'Test?',
-        correctAnswer: 'Correct',
-        incorrectAnswers: ['Wrong1', 'Wrong2', 'Wrong3'],
-        difficulty: '1',
+        question: 'What is the capital of France?',
+        correctAnswer: 'Paris',
+        incorrectAnswers: ['London', 'Berlin', 'Madrid'],
+        difficulty: 'easy',
         type: QuestionType.mc,
       );
 
       final options = question.allOptions;
       expect(options.length, 4);
-      expect(options.contains('Correct'), isTrue);
-      expect(options.contains('Wrong1'), isTrue);
-      expect(options.contains('Wrong2'), isTrue);
-      expect(options.contains('Wrong3'), isTrue);
+      expect(options.contains('Paris'), isTrue);
+      expect(options.contains('London'), isTrue);
+      expect(options.contains('Berlin'), isTrue);
+      expect(options.contains('Madrid'), isTrue);
     });
 
     test('should return correct answer index', () {
       final question = QuizQuestion(
-        question: 'Test?',
-        correctAnswer: 'Correct',
-        incorrectAnswers: ['Wrong1', 'Wrong2'],
-        difficulty: '1',
+        question: 'What is 5 * 5?',
+        correctAnswer: '25',
+        incorrectAnswers: ['15', '20', '30'],
+        difficulty: 'easy',
         type: QuestionType.mc,
       );
 
       final index = question.correctAnswerIndex;
-      expect(question.allOptions[index], 'Correct');
+      expect(question.allOptions[index], '25');
     });
 
     test('should return primary category', () {
       final question = QuizQuestion(
-        question: 'Test?',
-        correctAnswer: 'Correct',
-        incorrectAnswers: ['Wrong'],
-        difficulty: '1',
+        question: 'Bible question',
+        correctAnswer: 'Answer',
+        incorrectAnswers: ['Wrong1', 'Wrong2'],
+        difficulty: 'easy',
         type: QuestionType.mc,
-        categories: ['Old Testament', 'Genesis'],
+        categories: ['Old Testament', 'Genesis', 'Creation'],
       );
 
       expect(question.category, 'Old Testament');
@@ -218,14 +219,28 @@ void main() {
 
     test('should return empty string when no categories', () {
       final question = QuizQuestion(
-        question: 'Test?',
-        correctAnswer: 'Correct',
-        incorrectAnswers: ['Wrong'],
-        difficulty: '1',
+        question: 'Bible question',
+        correctAnswer: 'Answer',
+        incorrectAnswers: ['Wrong1', 'Wrong2'],
+        difficulty: 'easy',
         type: QuestionType.mc,
       );
 
       expect(question.category, '');
+    });
+
+    test('should handle single incorrect answer for true/false', () {
+      final question = QuizQuestion(
+        question: 'Is water wet?',
+        correctAnswer: 'Waar',
+        incorrectAnswers: ['Niet waar'],
+        difficulty: 'easy',
+        type: QuestionType.tf,
+      );
+
+      expect(question.allOptions.length, 2);
+      expect(question.allOptions.contains('Waar'), isTrue);
+      expect(question.allOptions.contains('Niet waar'), isTrue);
     });
   });
 
@@ -264,11 +279,11 @@ void main() {
   group('Incorrect answers parsing', () {
     test('should parse list of incorrect answers from JSON', () {
       final json = {
-        'fouteAntwoorden': ['Wrong1', 'Wrong2'],
+        'fouteAntwoorden': ['Wrong1', 'Wrong2', 'Wrong3'],
         'type': 'mc'
       };
       final question = QuizQuestion.fromJson(json);
-      expect(question.incorrectAnswers, ['Wrong1', 'Wrong2']);
+      expect(question.incorrectAnswers, ['Wrong1', 'Wrong2', 'Wrong3']);
     });
 
     test('should handle empty incorrect answers list', () {
@@ -338,10 +353,10 @@ void main() {
   group('Categories parsing', () {
     test('should parse list of categories from JSON', () {
       final json = {
-        'categories': ['Old Testament', 'Genesis']
+        'categories': ['Old Testament', 'Genesis', 'Creation']
       };
       final question = QuizQuestion.fromJson(json);
-      expect(question.categories, ['Old Testament', 'Genesis']);
+      expect(question.categories, ['Old Testament', 'Genesis', 'Creation']);
     });
 
     test('should handle empty categories list', () {

@@ -28,11 +28,11 @@ void main() {
         category: 'exodus',
         maxQuestions: 15,
         index: 1,
-        description: 'The story of Moses',
+        description: 'The story of Moses and the Israelites',
         iconHint: '📖',
       );
 
-      expect(lesson.description, 'The story of Moses');
+      expect(lesson.description, 'The story of Moses and the Israelites');
       expect(lesson.iconHint, '📖');
     });
 
@@ -75,7 +75,7 @@ void main() {
     });
 
     test('should use default maxQuestions when not specified', () {
-      final lesson = Lesson.fromCategory(category: 'test', index: 4);
+      final lesson = Lesson.fromCategory(category: 'test_category', index: 4);
       expect(lesson.maxQuestions, 10);
     });
 
@@ -154,7 +154,7 @@ void main() {
         'category': 'exodus',
         'maxQuestions': 15,
         'index': 1,
-        'description': 'The exodus story',
+        'description': 'The exodus story from Egypt',
         'iconHint': '🏜️',
       };
 
@@ -165,7 +165,7 @@ void main() {
       expect(lesson.category, 'exodus');
       expect(lesson.maxQuestions, 15);
       expect(lesson.index, 1);
-      expect(lesson.description, 'The exodus story');
+      expect(lesson.description, 'The exodus story from Egypt');
       expect(lesson.iconHint, '🏜️');
     });
 
@@ -271,6 +271,26 @@ void main() {
       expect(jsonString, isNotEmpty);
       expect(jsonString.contains('lesson_0001'), isTrue);
       expect(jsonString.contains('Genesis'), isTrue);
+    });
+
+    test('should handle complex category names correctly', () {
+      final lesson = Lesson.fromCategory(category: 'new_testament_gospels_matthew', index: 10);
+      expect(lesson.title, 'New Testament Gospels Matthew');
+    });
+
+    test('should handle category with numbers', () {
+      final lesson = Lesson.fromCategory(category: 'psalms_119', index: 18);
+      expect(lesson.title, 'Psalms 119');
+    });
+
+    test('should handle mixed case category', () {
+      final lesson = Lesson.fromCategory(category: 'NeW_tEsTaMeNt', index: 26);
+      expect(lesson.title, 'New Testament');
+    });
+
+    test('should handle category with special characters', () {
+      final lesson = Lesson.fromCategory(category: 'song-of-solomon', index: 21);
+      expect(lesson.title, 'Song Of Solomon');
     });
   });
 }

@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bijbelquiz/providers/settings_provider.dart';
-
-// Generate mocks
-@GenerateMocks([SharedPreferences])
 
 void main() {
   late SettingsProvider provider;
@@ -351,6 +347,184 @@ void main() {
 
       expect(provider.gameSpeed, 'slow');
       expect(provider.slowMode, true);
+    });
+
+    test('should handle theme mode changes correctly', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      provider = SettingsProvider();
+      await Future.delayed(Duration.zero);
+
+      // Test all theme modes
+      await provider.setThemeMode(ThemeMode.light);
+      expect(provider.themeMode, ThemeMode.light);
+
+      await provider.setThemeMode(ThemeMode.dark);
+      expect(provider.themeMode, ThemeMode.dark);
+
+      await provider.setThemeMode(ThemeMode.system);
+      expect(provider.themeMode, ThemeMode.system);
+    });
+
+    test('should handle game speed changes correctly', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      provider = SettingsProvider();
+      await Future.delayed(Duration.zero);
+
+      // Test all valid game speeds
+      await provider.setGameSpeed('slow');
+      expect(provider.gameSpeed, 'slow');
+      expect(provider.slowMode, true);
+
+      await provider.setGameSpeed('medium');
+      expect(provider.gameSpeed, 'medium');
+      expect(provider.slowMode, false);
+
+      await provider.setGameSpeed('fast');
+      expect(provider.gameSpeed, 'fast');
+      expect(provider.slowMode, false);
+    });
+
+    test('should handle theme unlocking correctly', () async {
+      SharedPreferences.setMockInitialValues({
+        'unlocked_themes': ['theme1'],
+      });
+
+      provider = SettingsProvider();
+      await Future.delayed(Duration.zero);
+
+      // Initially only theme1 is unlocked
+      expect(provider.isThemeUnlocked('theme1'), true);
+      expect(provider.isThemeUnlocked('theme2'), false);
+
+      // Unlock theme2
+      await provider.unlockTheme('theme2');
+      expect(provider.isThemeUnlocked('theme2'), true);
+
+      // Try to unlock theme1 again (should not cause issues)
+      await provider.unlockTheme('theme1');
+      expect(provider.isThemeUnlocked('theme1'), true);
+    });
+
+    test('should handle notification settings correctly', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      provider = SettingsProvider();
+      await Future.delayed(Duration.zero);
+
+      // Test enabling notifications
+      await provider.setNotificationEnabled(true);
+      expect(provider.notificationEnabled, true);
+
+      // Test disabling notifications
+      await provider.setNotificationEnabled(false);
+      expect(provider.notificationEnabled, false);
+    });
+
+    test('should handle donation status correctly', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      provider = SettingsProvider();
+      await Future.delayed(Duration.zero);
+
+      // Initially not donated
+      expect(provider.hasDonated, false);
+
+      // Mark as donated
+      await provider.markAsDonated();
+      expect(provider.hasDonated, true);
+
+      // Should remain donated (can't undo donation)
+      expect(provider.hasDonated, true);
+    });
+
+    test('should handle guide status correctly', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      provider = SettingsProvider();
+      await Future.delayed(Duration.zero);
+
+      // Initially hasn't seen guide
+      expect(provider.hasSeenGuide, false);
+
+      // Mark guide as seen
+      await provider.markGuideAsSeen();
+      expect(provider.hasSeenGuide, true);
+
+      // Reset guide status
+      await provider.resetGuideStatus();
+      expect(provider.hasSeenGuide, false);
+    });
+
+    test('should handle update check status correctly', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      provider = SettingsProvider();
+      await Future.delayed(Duration.zero);
+
+      // Initially hasn't checked for update
+      expect(provider.hasCheckedForUpdate, false);
+
+      // Mark as checked
+      await provider.setHasCheckedForUpdate(true);
+      expect(provider.hasCheckedForUpdate, true);
+
+      // Reset check status
+      await provider.resetCheckForUpdateStatus();
+      expect(provider.hasCheckedForUpdate, false);
+    });
+
+    test('should handle custom theme selection correctly', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      provider = SettingsProvider();
+      await Future.delayed(Duration.zero);
+
+      // Initially no custom theme selected
+      expect(provider.selectedCustomThemeKey, null);
+
+      // Set custom theme
+      provider.setCustomTheme('dark_theme');
+      expect(provider.selectedCustomThemeKey, 'dark_theme');
+
+      // Change custom theme
+      provider.setCustomTheme('light_theme');
+      expect(provider.selectedCustomThemeKey, 'light_theme');
+
+      // Clear custom theme
+      provider.setCustomTheme(null);
+      expect(provider.selectedCustomThemeKey, null);
+    });
+
+    test('should handle loading states correctly', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      provider = SettingsProvider();
+
+      // Should be loading initially
+      expect(provider.isLoading, true);
+
+      // Wait for loading to complete
+      await Future.delayed(Duration.zero);
+
+      // Should not be loading anymore
+      expect(provider.isLoading, false);
+    });
+
+    test('should handle error states correctly', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      provider = SettingsProvider();
+
+      // Initially no error
+      expect(provider.error, null);
+
+      // Wait for initialization
+      await Future.delayed(Duration.zero);
+
+      // Should still have no error
+      expect(provider.error, null);
     });
   });
 }
