@@ -16,7 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/lesson_select_screen.dart';
 import 'widgets/quiz_skeleton.dart';
 import 'constants/urls.dart';
-import 'l10n/strings_nl.dart' as strings;
+import 'l10n/app_localizations.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'services/logger.dart';
@@ -31,6 +31,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  // Helper method to get localized strings
+  dynamic get strings => AppLocalizations.of(context).strings;
+  
   @override
   void initState() {
     super.initState();
@@ -293,6 +296,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   dropdownColor: colorScheme.surfaceContainerHighest,
                 );
               })(),
+            ),
+            _buildSettingItem(
+              context,
+              settings,
+              colorScheme,
+              isSmallScreen,
+              isDesktop,
+              title: strings.language,
+              subtitle: strings.languageDescription,
+              icon: Icons.language,
+              child: DropdownButton<String>(
+                value: settings.language,
+                items: [
+                  DropdownMenuItem(
+                    value: 'auto',
+                    child: Text(strings.auto),
+                  ),
+                  DropdownMenuItem(
+                    value: 'nl',
+                    child: Text(strings.dutch),
+                  ),
+                  DropdownMenuItem(
+                    value: 'en',
+                    child: Text(strings.english),
+                  ),
+                ],
+                onChanged: (String? value) {
+                  if (value != null) {
+                    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+                    analytics.capture(context, 'change_language', properties: {'language': value});
+                    analytics.trackFeatureSuccess(context, AnalyticsService.FEATURE_SETTINGS, additionalProperties: {
+                      'setting': 'language',
+                      'value': value,
+                    });
+                    settings.setLanguage(value);
+                  }
+                },
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: isSmallScreen ? 12 : 14,
+                ),
+                dropdownColor: colorScheme.surfaceContainerHighest,
+              ),
             ),
 
           ],

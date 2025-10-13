@@ -1,0 +1,144 @@
+[
+    {
+        "vraag": "How many books does the New Testament have?",
+        "juisteAntwoord": "27",
+        "fouteAntwoorden": [
+            "26",
+            "66",
+            "39"
+        ],
+        "moeilijkheidsgraad": 3,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": null
+    },
+    {
+        "vraag": "What did Hannah name her child?",
+        "juisteAntwoord": "Samuel",
+        "fouteAntwoorden": [
+            "Saul",
+            "Samson",
+            "Gideon"
+        ],
+        "moeilijkheidsgraad": 1,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "1 Samuel 1:20"
+    },
+    {
+        "vraag": "Who was responsible for the massacre of children in Bethlehem, shortly after Jesus' birth?",
+        "juisteAntwoord": "Herod",
+        "fouteAntwoorden": [
+            "Pilate",
+            "The High Priest",
+            "Quirinius"
+        ],
+        "moeilijkheidsgraad": 1,
+        "type": "mc",
+        "categories": [
+            "Matthew"
+        ],
+        "biblicalReference": "Matthew 1"
+    },
+    {
+        "vraag": "Jesus healed Peter's mother-in-law. What was wrong with her?",
+        "juisteAntwoord": "Fever",
+        "fouteAntwoorden": [
+            "Paralysis",
+            "Blind in one eye",
+            "Bleeding"
+        ],
+        "moeilijkheidsgraad": 4,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Mark 1"
+    },
+    {
+        "vraag": "What promise do the meek receive from the Lord Jesus in the Beatitudes?",
+        "juisteAntwoord": "They will inherit the earth",
+        "fouteAntwoorden": [
+            "Theirs is the kingdom of heaven",
+            "They will be called children of God",
+            "They will see God"
+        ],
+        "moeilijkheidsgraad": 3,
+        "type": "mc",
+        "categories": [
+            "Matthew"
+        ],
+        "biblicalReference": "Matthew 5:5"
+    },
+    {
+        "vraag": "What promise comes after the Beatitude 'blessed are the pure in heart'?",
+        "juisteAntwoord": "they will see God",
+        "fouteAntwoorden": [
+            "Theirs is the kingdom of heaven",
+            "They will be called children of God",
+            "They will inherit the earth"
+        ],
+        "moeilijkheidsgraad": 3,
+        "type": "mc",
+        "categories": [],
+        "biblicalReference": "Matthew 5:8"
+    },
+    {
+        "vraag": "Which prophet was not allowed to marry by the Lord?",
+        "juisteAntwoord": "Jeremiah",
+        "fouteAntwoorden": [
+            "Isaiah",
+            "Ezekiel",
+            "Hosea"
+        ],
+        "moeilijkheidsgraad": 5,
+        "type": "mc",
+        "categories": [
+            "Jeremiah"
+        ],
+        "biblicalReference": "Jeremiah 16:2"
+    },
+    {
+        "vraag": "Which prophet had to marry by command of the Lord?",
+        "juisteAntwoord": "Hosea",
+        "fouteAntwoorden": [
+            "Isaiah",
+            "Ezekiel",
+            "Jeremiah"
+        ],
+        "moeilijkheidsgraad": 4,
+        "type": "mc",
+        "categories": [
+            "Hosea"
+        ],
+        "biblicalReference": "Hosea 1:2"
+    },
+    {
+        "vraag": "What was the name of the mountain where Moses received the Ten Commandments?",
+        "juisteAntwoord": "Mount Sinai",
+        "fouteAntwoorden": [
+            "Mount Horeb",
+            "Mount Carmel",
+            "Mount Zion"
+        ],
+        "moeilijkheidsgraad": 2,
+        "type": "mc",
+        "categories": [
+            "Exodus"
+        ],
+        "biblicalReference": "Exodus 19:20"
+    },
+    {
+        "vraag": "How many days and nights did it rain during the flood?",
+        "juisteAntwoord": "40",
+        "fouteAntwoorden": [
+            "30",
+            "50",
+            "7"
+        ],
+        "moeilijkheidsgraad": 2,
+        "type": "mc",
+        "categories": [
+            "Genesis"
+        ],
+        "biblicalReference": "Genesis 7:12"
+    }
+]

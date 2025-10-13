@@ -25,9 +25,10 @@ class SettingsProvider extends ChangeNotifier {
   static const String _difficultyPreferenceKey = 'difficulty_preference';
   static const String _analyticsEnabledKey = 'analytics_enabled';
   static const String _aiThemesKey = 'ai_themes';
+  static const String _languageKey = 'language';
 
   SharedPreferences? _prefs;
-  String _language = 'nl';
+  String _language = 'auto';
   ThemeMode _themeMode = ThemeMode.system;
   String _gameSpeed = 'medium'; // 'slow', 'medium', 'fast'
   bool _hasSeenGuide = false;
@@ -58,8 +59,18 @@ class SettingsProvider extends ChangeNotifier {
     _loadSettings();
   }
 
-  /// De huidige taalinstelling (altijd 'nl')
+  /// The current language setting ('nl', 'en', or 'auto')
   String get language => _language;
+  
+  /// Get the effective language (resolves 'auto' to system language)
+  String get effectiveLanguage {
+    if (_language == 'auto') {
+      // Get system locale and return 'en' if English, otherwise 'nl'
+      final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
+      return systemLocale.languageCode == 'en' ? 'en' : 'nl';
+    }
+    return _language;
+  }
   
   /// The current theme mode setting
   ThemeMode get themeMode => _themeMode;
@@ -274,8 +285,9 @@ class SettingsProvider extends ChangeNotifier {
 
       _prefs = await SharedPreferences.getInstance();
       AppLogger.info('SharedPreferences instance obtained');
-      // Altijd Nederlands forceren
-      _language = 'nl';
+      
+      // Load language setting
+      _language = _prefs?.getString(_languageKey) ?? 'auto';
       final themeModeIndex = _prefs?.getInt(_themeModeKey) ?? 0;
       _themeMode = ThemeMode.values[themeModeIndex];
       // Load old boolean slow mode setting for backward compatibility
@@ -340,13 +352,20 @@ class SettingsProvider extends ChangeNotifier {
     }
   }
 
-  /// Update de taalinstelling (alleen 'nl' toegestaan)
+  /// Update the language setting ('nl', 'en', or 'auto')
   Future<void> setLanguage(String language) async {
-    if (language != 'nl') {
-      throw ArgumentError('Taal moet "nl" zijn (alleen Nederlands toegestaan)');
+    if (!['nl', 'en', 'auto'].contains(language)) {
+      throw ArgumentError('Language must be "nl", "en", or "auto"');
     }
-    // Geen effect, altijd Nederlands
-    notifyListeners();
+    
+    await _saveSetting(
+      action: () async {
+        _language = language;
+        await _prefs?.setString(_languageKey, language);
+        AppLogger.info('Language setting saved successfully: $language');
+      },
+      errorMessage: 'Failed to save language setting',
+    );
   }
 
   /// Updates the theme mode setting
