@@ -254,13 +254,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
                       final previousTheme = _getThemeDropdownValue(settings);
   
-                      // Track theme change with comprehensive data
-                      analyticsService.trackPreferenceChange(context, 'theme', value, additionalProperties: {
-                        'previous_theme': previousTheme,
-                        'is_custom_theme': value != ThemeMode.light.name && value != ThemeMode.dark.name && value != ThemeMode.system.name,
-                        'is_ai_theme': settings.hasAITheme(value),
-                      });
-  
                       Provider.of<AnalyticsService>(context, listen: false).capture(context, 'change_theme', properties: {'theme': value});
                       if (value == ThemeMode.light.name) {
                         settings.setCustomTheme(null);
@@ -333,11 +326,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   if (value != null) {
                     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
 
-                    // Track game speed change
-                    analyticsService.trackPreferenceChange(context, 'game_speed', value, additionalProperties: {
-                      'previous_speed': settings.gameSpeed,
-                    });
-
                     Provider.of<AnalyticsService>(context, listen: false).capture(context, 'change_game_speed', properties: {'speed': value});
                     settings.setGameSpeed(value);
                   }
@@ -362,11 +350,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 value: settings.mute,
                 onChanged: (bool value) {
                   final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
-
-                  // Track mute toggle
-                  analyticsService.trackPreferenceChange(context, 'sound_muted', value.toString(), additionalProperties: {
-                    'previous_state': (!value).toString(),
-                  });
 
                   Provider.of<AnalyticsService>(context, listen: false).capture(context, 'toggle_mute', properties: {'muted': value});
                   settings.setMute(value);
@@ -493,12 +476,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onChanged: (bool value) async {
                     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
 
-                    // Track notification preference change
-                    analyticsService.trackPreferenceChange(context, 'notifications_enabled', value.toString(), additionalProperties: {
-                      'previous_state': (!value).toString(),
-                      'platform': kIsWeb ? 'web' : Platform.operatingSystem.toLowerCase(),
-                    });
-
                     Provider.of<AnalyticsService>(context, listen: false).capture(context, 'toggle_notifications', properties: {'enabled': value});
                     await settings.setNotificationEnabled(value);
                     if (value) {
@@ -535,10 +512,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 // Track donation attempt
                 analyticsService.trackFeatureUsage(context, 'donation', 'button_clicked');
-                analyticsService.trackBusinessMetric(context, 'donation_conversion', 0, additionalProperties: {
-                  'step': 'button_clicked',
-                  'user_has_donated_before': settings.hasDonated,
-                });
 
                 Provider.of<AnalyticsService>(context, listen: false).capture(context, 'donate');
                 final Uri url = Uri.parse(AppUrls.donateUrl);
@@ -1405,12 +1378,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: InkWell(
           onTap: () async {
             final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
-
-            // Track social media engagement
-            analyticsService.trackSocialEvent(context, 'social_media_clicked', additionalProperties: {
-              'platform': platform,
-              'url': url,
-            });
 
             Provider.of<AnalyticsService>(context, listen: false).capture(context, 'follow_social_media', properties: {'platform': platform});
             final Uri uri = Uri.parse(url);

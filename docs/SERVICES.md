@@ -173,21 +173,13 @@ selector.resetForNewGame();
 
 **Location:** `bijbelquiz/lib/services/analytics_service.dart`
 
-**Purpose:** Comprehensive analytics and telemetry service with 15+ specialized tracking methods.
+**Purpose:** Focused feature usage analytics service for understanding user engagement with app features.
 
 **Key Features:**
 
 - **Core Methods**: `init()`, `getObserver()`, `screen()`, `capture()` with user consent management
-- **App Lifecycle Tracking**: `trackAppLaunch()`, `trackSessionEvent()` with device/platform info
-- **User Engagement**: `trackUserEngagement()`, `trackUserFlow()`, `trackConversionFunnel()`
-- **Performance Monitoring**: `trackPerformance()`, `trackTimeBasedEvent()` with timing metrics
-- **Quiz Analytics**: `trackQuizEvent()`, `trackQuestionInteraction()`, `trackLearningProgress()`
-- **Achievement System**: `trackAchievement()`, `trackScoringEvent()` with point tracking
-- **Behavioral Analysis**: `trackUserBehavior()`, `trackContentInteraction()`, `trackSearchEvent()`
-- **Technical Tracking**: `trackTechnicalEvent()`, `trackError()` with comprehensive context
-- **Business Metrics**: `trackBusinessMetric()` for KPIs and conversion tracking
-- **Accessibility**: `trackAccessibilityEvent()` for inclusive design analytics
-- **Feedback System**: `trackFeedback()`, `trackPreferenceChange()` for user insights
+- **Feature Usage Tracking**: `trackFeatureUsage()` for monitoring which features users interact with
+- **Privacy-Focused**: Only tracks feature usage, not detailed user behavior or technical events
 - **PostHog Integration**: Full analytics platform integration with user preference management
 
 ### FeatureFlagsService

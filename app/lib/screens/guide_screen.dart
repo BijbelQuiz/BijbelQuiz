@@ -52,8 +52,7 @@ class _GuideScreenState extends State<GuideScreen> {
 
     analyticsService.screen(context, 'GuideScreen');
 
-    // Track guide screen access and user flow
-    analyticsService.trackUserFlow(context, 'onboarding', 'guide_started');
+    // Track guide screen access and feature usage
     analyticsService.trackFeatureUsage(context, 'onboarding', 'guide_opened');
 
     AppLogger.info('GuideScreen loaded');
@@ -158,10 +157,8 @@ class _GuideScreenState extends State<GuideScreen> {
   Future<void> _handleGuideCompletion(BuildContext context) async {
     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
 
-    // Track guide completion with comprehensive data
-    analyticsService.trackUserFlow(context, 'onboarding', 'guide_completed');
+    // Track guide completion feature usage
     analyticsService.trackFeatureUsage(context, 'onboarding', 'guide_finished');
-    analyticsService.trackConversionFunnel(context, 'user_onboarding', 'guide_completed', true);
 
     Provider.of<AnalyticsService>(context, listen: false).capture(context, 'guide_completed');
     final localContext = context;

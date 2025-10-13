@@ -99,13 +99,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     final initStartTime = DateTime.now();
     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
 
-    // Track screen view and quiz session start
+    // Track screen view
     analyticsService.screen(context, 'QuizScreen');
-    analyticsService.trackQuizEvent(context, 'quiz_session_started', additionalProperties: {
-      'lesson_id': widget.lesson?.id ?? 'none',
-      'session_limit': widget.sessionLimit ?? 0,
-      'lesson_mode': _lessonMode,
-    });
 
     WidgetsBinding.instance.addObserver(this);
     AppLogger.info('QuizScreen loaded');
@@ -117,12 +112,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
         final metrics = performanceService.getPerformanceMetrics();
         AppLogger.info('QuizScreen performance metrics: $metrics');
 
-        // Track performance metrics
-        analyticsService.trackPerformance(context, 'quiz_session_performance', const Duration(seconds: 30), additionalProperties: {
-          'average_frame_rate': metrics['averageFrameRate'] ?? 0,
-          'memory_usage_mb': metrics['memoryUsageMB'] ?? 0,
-          'questions_answered': _sessionAnswered,
-        });
       }
     });
     
@@ -520,11 +509,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       final settings = Provider.of<SettingsProvider>(context, listen: false);
       final language = settings.language;
 
-      // Track quiz initialization start
-      analyticsService.trackQuizEvent(context, 'quiz_initialization_started', additionalProperties: {
-        'language': language,
-        'lesson_mode': _lessonMode,
-      });
 
       // Load questions - if in lesson mode with a specific category, load category questions
       // Otherwise load questions in batches for better performance
@@ -584,21 +568,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       _timerManager.startTimer(context: context, reset: true);
       _animationController.triggerTimeAnimation();
 
-      // Track successful quiz initialization
-      final initDuration = DateTime.now().difference(initStartTime);
-      analyticsService.trackPerformance(context, 'quiz_initialization', initDuration, additionalProperties: {
-        'questions_loaded': _questionSelector.allQuestions.length,
-        'lesson_mode': _lessonMode,
-        'first_question_type': firstQuestion.type,
-        'first_question_difficulty': _quizState.currentDifficulty,
-      });
-
-      analyticsService.trackQuizEvent(context, 'quiz_ready', additionalProperties: {
-        'questions_available': _questionSelector.allQuestions.length,
-        'first_question_category': firstQuestion.category,
-        'first_question_type': firstQuestion.type.toString(),
-        'first_question_difficulty': firstQuestion.difficulty,
-      });
+      // Quiz initialization completed successfully
 
     } catch (e) {
       if (!mounted) return;
@@ -606,10 +576,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
         _error = '${strings.AppStrings.errorLoadQuestions}: ${e.toString()}';
       });
 
-      // Track quiz initialization error
-      analyticsService.trackError(context, 'quiz_initialization_failed', e.toString(), additionalProperties: {
-        'error_location': 'question_loading',
-      });
 
       AppLogger.error('Failed to load questions in QuizScreen', e);
     } finally {
@@ -648,15 +614,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
     final question = _quizState.question;
 
-    // Track answer selection
-    analyticsService.trackQuestionInteraction(context, 'answer_selected', question.type.toString(), additionalProperties: {
-      'question_category': question.category,
-      'question_difficulty': question.difficulty,
-      'selected_answer_index': selectedIndex,
-      'correct_answer_index': question.correctAnswerIndex,
-      'time_remaining': _quizState.timeRemaining,
-      'is_correct': selectedIndex == question.correctAnswerIndex,
-    });
 
     _answerHandler.handleAnswer(
       selectedIndex: selectedIndex,
@@ -677,15 +634,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     final question = _quizState.question;
 
-    // Track question completion
-    analyticsService.trackQuestionInteraction(context, 'question_completed', question.type.toString(), additionalProperties: {
-      'is_correct': isCorrect,
-      'question_category': question.category,
-      'question_difficulty': question.difficulty,
-      'time_remaining': _quizState.timeRemaining,
-      'new_difficulty': newDifficulty,
-      'current_streak': gameStats.currentStreak,
-    });
 
     // Update game stats first
     await gameStats.updateStats(isCorrect: isCorrect);
@@ -968,21 +916,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     // Mark today's streak as active since lesson was completed
     await _markStreakActive();
 
-    // Track lesson completion with comprehensive data
-    analyticsService.trackQuizEvent(context, 'lesson_completed', additionalProperties: {
-      'lesson_id': widget.lesson?.id ?? 'none',
-      'session_answered': _sessionAnswered,
-      'session_correct': _sessionCorrect,
-      'session_best_streak': _sessionBestStreak,
-      'accuracy_rate': _sessionAnswered > 0 ? (_sessionCorrect / _sessionAnswered * 100).round() : 0,
-    });
-
-    // Track business metrics for lesson completion
-    analyticsService.trackBusinessMetric(context, 'lesson_completion_rate', _sessionAnswered > 0 ? (_sessionCorrect / _sessionAnswered) : 0, additionalProperties: {
-      'lesson_id': widget.lesson?.id ?? 'none',
-      'total_questions': _sessionAnswered,
-      'correct_answers': _sessionCorrect,
-    });
+    // Lesson completion tracking completed
     // Stop any timers
     _timerManager.timeAnimationController.stop();
 
@@ -1027,13 +961,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
     final question = _quizState.question;
 
-    // Track skip action
-    analyticsService.trackQuestionInteraction(context, 'question_skipped', question.type.toString(), additionalProperties: {
-      'question_category': question.category,
-      'question_difficulty': question.difficulty,
-      'time_remaining': _quizState.timeRemaining,
-      'current_streak': Provider.of<GameStatsProvider>(context, listen: false).currentStreak,
-    });
 
     Provider.of<AnalyticsService>(context, listen: false).capture(context, 'skip_question');
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);

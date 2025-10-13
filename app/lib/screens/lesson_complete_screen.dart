@@ -43,15 +43,6 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
 
     analyticsService.screen(context, 'LessonCompleteScreen');
 
-    // Track lesson completion screen view with comprehensive data
-    analyticsService.trackLearningProgress(context, 'lesson_completed', 'screen_viewed', additionalProperties: {
-      'lesson_id': widget.lesson.id,
-      'stars_earned': widget.stars,
-      'correct_answers': widget.correct,
-      'total_questions': widget.total,
-      'accuracy_percentage': widget.total > 0 ? (widget.correct / widget.total * 100).round() : 0,
-      'best_streak': widget.bestStreak,
-    });
 
     final cs = Theme.of(context).colorScheme;
     final pctValue = widget.total > 0 ? (widget.correct / widget.total * 100.0) : 0.0;
@@ -203,12 +194,6 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                                   onPressed: () {
                                     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
 
-                                    // Track lesson retry from completion screen
-                                    analyticsService.trackLearningProgress(context, 'lesson_retry', 'from_complete_screen', additionalProperties: {
-                                      'lesson_id': widget.lesson.id,
-                                      'stars_earned': widget.stars,
-                                      'previous_accuracy': widget.total > 0 ? (widget.correct / widget.total * 100).round() : 0,
-                                    });
 
                                     Provider.of<AnalyticsService>(context, listen: false).capture(context, 'retry_lesson_from_complete');
                                     widget.onRetry();
@@ -232,12 +217,6 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                                   onPressed: widget.stars > 0 ? () {
                                     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
 
-                                    // Track progression to next lesson
-                                    analyticsService.trackLearningProgress(context, 'lesson_progression', 'next_lesson_started', additionalProperties: {
-                                      'current_lesson_id': widget.lesson.id,
-                                      'stars_earned': widget.stars,
-                                      'next_lesson_index': widget.lesson.index + 1,
-                                    });
 
                                     Provider.of<AnalyticsService>(context, listen: false).capture(context, 'start_next_lesson_from_complete');
                                     _startNextQuiz();

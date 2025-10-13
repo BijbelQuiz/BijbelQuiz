@@ -166,16 +166,6 @@ class ConnectionService {
     _onConnectionStatusChanged = callback;
   }
 
-  /// Track connection status change with analytics service
-  void trackConnectionStatus(BuildContext context) {
-    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
-
-    analyticsService.trackTechnicalEvent(context, 'connection_status_changed', _isConnected ? 'connected' : 'disconnected', additionalProperties: {
-      'connection_type': _connectionType.toString(),
-      'is_slow_connection': _isSlowConnection,
-      'platform': kIsWeb ? 'web' : Platform.operatingSystem.toLowerCase(),
-    });
-  }
 
   /// Execute a network request with connection-aware retry logic
   Future<T> executeWithRetry<T>(
