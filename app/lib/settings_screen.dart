@@ -325,8 +325,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (String? value) {
                   if (value != null) {
                     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
-                    analytics.capture(context, 'change_language', properties: {'language': value});
-                    analytics.trackFeatureSuccess(context, AnalyticsService.FEATURE_SETTINGS, additionalProperties: {
+                    analyticsService.capture(context, 'change_language', properties: {'language': value});
+                    analyticsService.trackFeatureSuccess(context, AnalyticsService.FEATURE_SETTINGS, additionalProperties: {
                       'setting': 'language',
                       'value': value,
                     });
