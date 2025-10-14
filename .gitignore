@@ -137,6 +137,7 @@ key.properties
 **/linux/flutter/generated_plugin_registrant.h
 **/linux/flutter/generated_plugins.cmake
 **/linux/flutter/ephemeral/
+generated_config.cmake
 
 # Coverage
 coverage/
