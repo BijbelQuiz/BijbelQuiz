@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../models/lesson.dart';
 import '../providers/lesson_progress_provider.dart';
@@ -196,7 +197,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
       final int visibleCount = desired < minVisible ? minVisible : desired;
 
       final lessons = await _lessonService.generateLessons(
-        settings.language,
+        settings.language ?? Localizations.localeOf(context).languageCode,
         maxLessons: visibleCount,
         maxQuestionsPerLesson: 10,
       );

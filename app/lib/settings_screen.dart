@@ -10,7 +10,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'services/notification_service.dart';
 import 'widgets/top_snackbar.dart';
-import 'package:package_info_plus/package_info.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'services/question_cache_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/lesson_select_screen.dart';
