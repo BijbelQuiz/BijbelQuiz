@@ -66,6 +66,8 @@ dependencies:
   audio_session: ^0.2.2
   posthog_flutter: ^5.0.0
   flutter_dotenv: ^5.1.0
+  clerk_flutter: ^0.0.8-beta
+  supabase_flutter: ^2.5.3
 
 dev_dependencies:
   flutter_test:

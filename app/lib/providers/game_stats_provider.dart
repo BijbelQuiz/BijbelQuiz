@@ -1,3 +1,5 @@
+import 'package:bijbelquiz/services/database_service.dart';
+import 'package:clerk_flutter/clerk_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
@@ -21,6 +23,7 @@ class GameStatsProvider extends ChangeNotifier {
   String? _error;
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   void Function(String message)? onError;
+  DatabaseService? _dbService;
 
   Powerup? _activePowerup;
   DateTime? _powerupActivatedAt;
@@ -77,7 +80,8 @@ class GameStatsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  GameStatsProvider() {
+  GameStatsProvider({DatabaseService? dbService}) {
+    _dbService = dbService;
     _loadStats();
   }
 
@@ -107,10 +111,26 @@ class GameStatsProvider extends ChangeNotifier {
       notifyListeners();
 
       _prefs = await SharedPreferences.getInstance();
-      _score = _prefs?.getInt(_scoreKey) ?? 0;
-      _currentStreak = _prefs?.getInt(_currentStreakKey) ?? 0;
-      _longestStreak = _prefs?.getInt(_longestStreakKey) ?? 0;
-      _incorrectAnswers = _prefs?.getInt(_incorrectAnswersKey) ?? 0;
+      final clerkId = Clerk.instance.currentUser?.id;
+
+      if (_dbService != null && clerkId != null) {
+        final stats = await _dbService!.getUserStats(clerkId);
+        if (stats != null) {
+          _score = stats['score'] ?? 0;
+          _currentStreak = stats['current_streak'] ?? 0;
+          _longestStreak = stats['longest_streak'] ?? 0;
+          _incorrectAnswers = stats['incorrect_answers'] ?? 0;
+        } else {
+          // No stats in DB, so sync local stats
+          await _syncStats();
+        }
+      } else {
+        _score = _prefs?.getInt(_scoreKey) ?? 0;
+        _currentStreak = _prefs?.getInt(_currentStreakKey) ?? 0;
+        _longestStreak = _prefs?.getInt(_longestStreakKey) ?? 0;
+        _incorrectAnswers = _prefs?.getInt(_incorrectAnswersKey) ?? 0;
+      }
+
       AppLogger.info('Game stats loaded: score=$_score, streak=$_currentStreak, longest=$_longestStreak, incorrect=$_incorrectAnswers');
     } catch (e) {
       _error = 'Failed to load game stats: ${e.toString()}';
@@ -165,6 +185,7 @@ class GameStatsProvider extends ChangeNotifier {
       }
       await _prefs?.setInt(_scoreKey, _score);
       await _prefs?.setInt(_currentStreakKey, _currentStreak);
+      await _syncStats();
       notifyListeners();
     } catch (e) {
       _error = 'Failed to save game stats: ${e.toString()}';
@@ -186,6 +207,7 @@ class GameStatsProvider extends ChangeNotifier {
       await _prefs?.setInt(_currentStreakKey, _currentStreak);
       await _prefs?.setInt(_longestStreakKey, _longestStreak);
       await _prefs?.setInt(_incorrectAnswersKey, _incorrectAnswers);
+      await _syncStats();
       notifyListeners();
       AppLogger.info('Game stats reset');
     } catch (e) {
@@ -194,6 +216,18 @@ class GameStatsProvider extends ChangeNotifier {
       notifyListeners();
       AppLogger.error(_error!, e);
       rethrow;
+    }
+  }
+
+  Future<void> _syncStats() async {
+    final clerkId = Clerk.instance.currentUser?.id;
+    if (_dbService != null && clerkId != null) {
+      await _dbService!.updateUserStats(clerkId, {
+        'score': _score,
+        'current_streak': _currentStreak,
+        'longest_streak': _longestStreak,
+        'incorrect_answers': _incorrectAnswers,
+      });
     }
   }
 

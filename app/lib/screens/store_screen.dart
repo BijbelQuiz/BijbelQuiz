@@ -1,4 +1,6 @@
 import 'package:bijbelquiz/services/analytics_service.dart';
+import 'package:bijbelquiz/services/database_service.dart';
+import 'package:clerk_flutter/clerk_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -34,9 +36,22 @@ class _StoreScreenState extends State<StoreScreen> {
     AppLogger.info('StoreScreen initialized');
     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
     analyticsService.screen(context, 'StoreScreen');
+    _loadPurchasedItems();
 
     // Track store access
     analyticsService.trackFeatureStart(context, AnalyticsService.FEATURE_THEME_PURCHASES);
+  }
+
+  Future<void> _loadPurchasedItems() async {
+    final dbService = Provider.of<DatabaseService>(context, listen: false);
+    final clerkId = Clerk.instance.currentUser?.id;
+    if (clerkId == null) return;
+
+    final items = await dbService.getPurchasedItems(clerkId);
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    for (var item in items) {
+      await settings.unlockTheme(item['item_sku']);
+    }
   }
 
   @override
@@ -404,7 +419,11 @@ class _StoreScreenState extends State<StoreScreen> {
               AppLogger.info('Sufficient stars available for power-up: $title');
               final success = isDev ? true : await localGameStats.spendStars(cost);
               if (success) {
-
+                  final dbService = Provider.of<DatabaseService>(context, listen: false);
+                  final clerkId = Clerk.instance.currentUser?.id;
+                  if (clerkId != null) {
+                    await dbService.addPurchasedItem(clerkId, title);
+                  }
                 final message = onPurchase();
                 if (!localContext.mounted) return;
                 
@@ -598,6 +617,11 @@ class _StoreScreenState extends State<StoreScreen> {
               AppLogger.info('Sufficient stars available for theme: $themeKey');
               final success = isDev ? true : await localGameStats.spendStars(cost);
               if (success) {
+                final dbService = Provider.of<DatabaseService>(context, listen: false);
+                final clerkId = Clerk.instance.currentUser?.id;
+                if (clerkId != null) {
+                  await dbService.addPurchasedItem(clerkId, themeKey);
+                }
                 await localSettings.unlockTheme(themeKey);
                 if (!localContext.mounted) return;
                 final message = '$title ontgrendeld!';

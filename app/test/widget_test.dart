@@ -5,6 +5,7 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:bijbelquiz/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +14,9 @@ import 'package:bijbelquiz/providers/game_stats_provider.dart';
 import 'package:bijbelquiz/services/connection_service.dart';
 import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:bijbelquiz/screens/quiz_screen.dart';
+import 'package:mockito/mockito.dart';
+
+class MockDatabaseService extends Mock implements DatabaseService {}
 
 void main() {
   setUpAll(() {
@@ -29,8 +33,9 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => SettingsProvider()),
-          ChangeNotifierProvider(create: (_) => GameStatsProvider()),
+          ChangeNotifierProvider(create: (_) => GameStatsProvider(dbService: MockDatabaseService())),
           Provider(create: (_) => AnalyticsService()),
+          Provider<DatabaseService>(create: (_) => MockDatabaseService()),
         ],
         child: const MaterialApp(
           home: Scaffold(
@@ -95,7 +100,7 @@ void main() {
   testWidgets('Game stats provider integration test', (WidgetTester tester) async {
     await tester.pumpWidget(
       ChangeNotifierProvider<GameStatsProvider>(
-        create: (_) => GameStatsProvider(),
+        create: (_) => GameStatsProvider(dbService: MockDatabaseService()),
         child: MaterialApp(
           home: Builder(
             builder: (context) {
@@ -126,7 +131,7 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider<SettingsProvider>(create: (_) => SettingsProvider()),
-          ChangeNotifierProvider<GameStatsProvider>(create: (_) => GameStatsProvider()),
+          ChangeNotifierProvider<GameStatsProvider>(create: (_) => GameStatsProvider(dbService: MockDatabaseService())),
         ],
         child: MaterialApp(
           home: Builder(

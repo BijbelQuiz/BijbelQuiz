@@ -1,58 +1,73 @@
-import 'package:bijbelquiz/services/analytics_service.dart';
-import 'package:bijbelquiz/services/feature_flags_service.dart';
+import 'package:clerk_flutter/clerk_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../l10n/strings_nl.dart' as strings;
+import '../services/database_service.dart';
 
 class SocialScreen extends StatefulWidget {
   const SocialScreen({super.key});
 
   @override
-  State<SocialScreen> createState() => _SocialScreenState();
+  _SocialScreenState createState() => _SocialScreenState();
 }
 
 class _SocialScreenState extends State<SocialScreen> {
-  bool _socialFeaturesEnabled = false;
+  List<Map<String, dynamic>> _searchResults = [];
+  bool _userExists = false;
+  Set<String> _followingIds = {};
 
   @override
   void initState() {
     super.initState();
-    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
-
-    analyticsService.screen(context, 'SocialScreen');
-
-    // Track social screen access and feature availability
-    analyticsService.trackFeatureUsage(context, 'social_features', 'screen_accessed');
-
-    _checkSocialFeaturesEnabled();
+    _checkUserExists();
+    _loadFollowingIds();
   }
 
-  Future<void> _checkSocialFeaturesEnabled() async {
-    FeatureFlagsService? featureFlags;
-    try {
-      featureFlags = Provider.of<FeatureFlagsService>(context, listen: false);
-    } catch (e) {
-      // Feature flags service not available in provider yet, create new instance
-      featureFlags = FeatureFlagsService();
-    }
-    final enabled = await featureFlags.areSocialFeaturesEnabled();
-    setState(() {
-      _socialFeaturesEnabled = enabled;
-    });
+  Future<void> _loadFollowingIds() async {
+    final dbService = Provider.of<DatabaseService>(context, listen: false);
+    final clerkId = Clerk.instance.currentUser?.id;
+    if (clerkId == null) return;
 
-    // Track social features availability
-    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.trackFeatureUsage(context, 'social_features', enabled ? 'available' : 'unavailable');
+    final user = await dbService.getUser(clerkId);
+    if (user == null) return;
+
+    final following = await dbService.getFollowing(user['id']);
+    setState(() {
+      _followingIds = following.map((e) => e['id'] as String).toSet();
+    });
+  }
+
+  Future<void> _checkUserExists() async {
+    final dbService = Provider.of<DatabaseService>(context, listen: false);
+    final clerkId = Clerk.instance.currentUser?.id;
+    if (clerkId == null) return;
+
+    final user = await dbService.getUser(clerkId);
+    if (user == null) {
+      // User does not exist, so create them
+      final username = Clerk.instance.currentUser?.username ?? 'user${Clerk.instance.currentUser?.id}';
+      await dbService.createUser(clerkId, username);
+      setState(() => _userExists = true);
+    } else {
+      setState(() => _userExists = true);
+    }
+  }
+
+  void _searchUsers(String query) async {
+    if (query.isEmpty) {
+      setState(() => _searchResults = []);
+      return;
+    }
+    final dbService = Provider.of<DatabaseService>(context, listen: false);
+    final results = await dbService.searchUsers(query);
+    setState(() => _searchResults = results);
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
-    // Responsive design
-    final size = MediaQuery.of(context).size;
-    final isDesktop = size.width > 800;
-    final isTablet = size.width > 600 && size.width <= 800;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -88,96 +103,215 @@ class _SocialScreenState extends State<SocialScreen> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: isDesktop ? 800 : (isTablet ? 600 : double.infinity),
-            ),
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.symmetric(
-                horizontal: isDesktop ? 32 : (isTablet ? 24 : 16),
-                vertical: 24,
-              ),
-              child: _socialFeaturesEnabled
-                ? _buildSocialFeaturesContent(colorScheme, isDesktop, isTablet)
-                : _buildComingSoonContent(colorScheme, isDesktop, isTablet),
-            ),
-          ),
+        child: ClerkAuthBuilder(
+          signedInBuilder: (context, authState) {
+            return _buildLoggedInUI(context);
+          },
+          signedOutBuilder: (context, authState) {
+            return const Center(child: ClerkAuthentication());
+          },
         ),
       ),
     );
   }
 
-  Widget _buildSocialFeaturesContent(ColorScheme colorScheme, bool isDesktop, bool isTablet) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildLoggedInUI(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
       children: [
-        Icon(
-          Icons.groups_rounded,
-          size: isDesktop ? 120 : (isTablet ? 100 : 80),
-          color: colorScheme.primary,
-        ),
-        SizedBox(height: isDesktop ? 32 : 24),
-        Text(
-          'Social Features',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: colorScheme.onSurface,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: isDesktop ? 16 : 12),
-        Text(
-          'Connect with other Bible Quiz users, share achievements, and compete on leaderboards!',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: colorScheme.onSurface.withAlpha((0.7 * 255).round()),
-            fontWeight: FontWeight.w500,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: isDesktop ? 32 : 24),
-        // Placeholder for actual social features
-        Text(
-          'Social features coming soon...',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: colorScheme.onSurface.withAlpha((0.5 * 255).round()),
-            fontStyle: FontStyle.italic,
-          ),
-          textAlign: TextAlign.center,
-        ),
+        _buildSettingsCard(context),
+        const SizedBox(height: 24),
+        _buildSearchBar(),
+        const SizedBox(height: 24),
+        _searchResults.isNotEmpty
+            ? _buildSearchResults()
+            : _buildFollowersSection(),
       ],
     );
   }
 
-  Widget _buildComingSoonContent(ColorScheme colorScheme, bool isDesktop, bool isTablet) {
+  Widget _buildSettingsCard(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Settings',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Edit Username'),
+              onTap: () => _showEditUsernameDialog(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.email),
+              title: const Text('Edit Email'),
+              onTap: () => _showEditEmailDialog(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.lock),
+              title: const Text('Change Password'),
+              onTap: () => _launchClerkAccountPage(),
+            ),
+            ListTile(
+              leading: const Icon(Icons.security),
+              title: const Text('Manage 2FA'),
+              onTap: () => _launchClerkAccountPage(),
+            ),
+            const SizedBox(height: 16),
+            const Center(child: ClerkUserButton()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return TextField(
+      onChanged: _searchUsers,
+      decoration: InputDecoration(
+        hintText: 'Search for users...',
+        prefixIcon: const Icon(Icons.search),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFollowersSection() {
+    final dbService = Provider.of<DatabaseService>(context, listen: false);
+    final clerkId = Clerk.instance.currentUser?.id;
+    if (clerkId == null) return const Center(child: Text('Not logged in.'));
+
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: dbService.getMutualFollowersStream(clerkId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        final mutuals = snapshot.data ?? [];
+        if (mutuals.isEmpty) {
+          return const Center(
+            child: Text('You have no mutual followers yet.'),
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Mutual Followers',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const Divider(),
+            ...mutuals.map((user) => ListTile(
+                  title: Text(user['username']),
+                  trailing: Text('${user['stars'] ?? 0} stars'),
+                )),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSearchResults() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          Icons.groups_rounded,
-          size: isDesktop ? 120 : (isTablet ? 100 : 80),
-          color: colorScheme.primary.withAlpha((0.5 * 255).round()),
-        ),
-        SizedBox(height: isDesktop ? 32 : 24),
         Text(
-          strings.AppStrings.comingSoon,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: colorScheme.onSurface.withAlpha((0.7 * 255).round()),
-          ),
-          textAlign: TextAlign.center,
+          'Search Results',
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
-        SizedBox(height: isDesktop ? 16 : 12),
-        Text(
-          strings.AppStrings.socialComingSoonMessage,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: colorScheme.onSurface.withAlpha((0.5 * 255).round()),
-            fontWeight: FontWeight.w500,
-          ),
-          textAlign: TextAlign.center,
-        ),
+        const Divider(),
+        ..._searchResults.map((user) {
+          final isFollowing = _followingIds.contains(user['id']);
+          return ListTile(
+            title: Text(user['username']),
+            trailing: ElevatedButton(
+              onPressed: () async {
+                final dbService = Provider.of<DatabaseService>(context, listen: false);
+                final clerkId = Clerk.instance.currentUser?.id;
+                if (clerkId == null) return;
+
+                final currentUser = await dbService.getUser(clerkId);
+                if (currentUser == null) return;
+
+                if (isFollowing) {
+                  await dbService.unfollowUser(currentUser['id'], user['id']);
+                } else {
+                  await dbService.followUser(currentUser['id'], user['id']);
+                }
+                _loadFollowingIds();
+              },
+              child: Text(isFollowing ? 'Unfollow' : 'Follow'),
+            ),
+          );
+        }),
       ],
     );
+  }
+
+  void _launchClerkAccountPage() {
+    // This will redirect to the Clerk hosted account page.
+    // IMPORTANT: You need to configure the Frontend API URL in your Clerk dashboard
+    // and set it in your .env file.
+    final clerkFrontendApi = dotenv.env['CLERK_FRONTEND_API'];
+    if (clerkFrontendApi != null) {
+      launchUrl(Uri.parse('$clerkFrontendApi/.clerk/user'));
+    }
+  }
+
+  void _showEditUsernameDialog(BuildContext context) {
+    final dbService = Provider.of<DatabaseService>(context, listen: false);
+    final clerkId = Clerk.instance.currentUser?.id;
+    if (clerkId == null) return;
+
+    final TextEditingController usernameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Username'),
+          content: TextField(
+            controller: usernameController,
+            decoration: const InputDecoration(hintText: 'New username'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  await dbService.updateUsername(clerkId, usernameController.text);
+                  Navigator.of(context).pop();
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEditEmailDialog(BuildContext context) {
+    _launchClerkAccountPage();
   }
 }

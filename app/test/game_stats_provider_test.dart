@@ -1,11 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bijbelquiz/providers/game_stats_provider.dart';
+import 'package:bijbelquiz/services/database_service.dart';
+
+class MockDatabaseService extends Mock implements DatabaseService {}
 
 void main() {
   late GameStatsProvider provider;
+  late MockDatabaseService mockDatabaseService;
 
   setUp(() {
+    mockDatabaseService = MockDatabaseService();
     SharedPreferences.setMockInitialValues({});
   });
 
@@ -17,7 +23,7 @@ void main() {
     test('should initialize with default values', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
 
       // Wait for initialization
       await Future.delayed(Duration.zero);
@@ -38,7 +44,7 @@ void main() {
         'game_incorrect_answers': 3,
       });
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
 
       // Wait for initialization
       await Future.delayed(Duration.zero);
@@ -52,7 +58,7 @@ void main() {
     test('should update stats for correct answer', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       await provider.updateStats(isCorrect: true);
@@ -66,7 +72,7 @@ void main() {
     test('should update stats for incorrect answer', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       await provider.updateStats(isCorrect: false);
@@ -80,7 +86,7 @@ void main() {
     test('should handle streak correctly', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       // Build up a streak
@@ -103,7 +109,7 @@ void main() {
     test('should handle longest streak correctly', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       // Build first streak
@@ -132,7 +138,7 @@ void main() {
         'game_incorrect_answers': 3,
       });
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       // Verify initial values
@@ -155,7 +161,7 @@ void main() {
         'game_score': 100,
       });
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       expect(provider.score, 100);
@@ -171,7 +177,7 @@ void main() {
         'game_score': 30,
       });
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       expect(provider.score, 30);
@@ -187,7 +193,7 @@ void main() {
         'game_score': 100,
       });
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       expect(provider.score, 100);
@@ -203,7 +209,7 @@ void main() {
         'game_score': 30,
       });
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       expect(provider.score, 30);
@@ -219,7 +225,7 @@ void main() {
         'game_score': 50,
       });
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       expect(provider.score, 50);
@@ -238,7 +244,7 @@ void main() {
         'game_incorrect_answers': 3,
       });
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       final data = provider.getExportData();
@@ -252,7 +258,7 @@ void main() {
     test('should load import data correctly', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       final importData = {
@@ -273,7 +279,7 @@ void main() {
     test('should handle powerup activation correctly', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       // Initially no powerup
@@ -293,7 +299,7 @@ void main() {
     test('should handle powerup deactivation correctly', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       // Activate powerup
@@ -311,7 +317,7 @@ void main() {
     test('should handle time-based powerup correctly', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       // Activate time-based powerup
@@ -329,7 +335,7 @@ void main() {
     test('should clear powerup correctly', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       // Activate powerup
@@ -345,7 +351,7 @@ void main() {
     test('should handle multiple correct answers with powerup', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       // Activate powerup for 3 questions
@@ -364,7 +370,7 @@ void main() {
     test('should handle mixed correct and incorrect answers', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       // Answer some correctly
@@ -392,7 +398,7 @@ void main() {
     test('should handle loading states correctly', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
 
       // Should be loading initially
       expect(provider.isLoading, true);
@@ -407,7 +413,7 @@ void main() {
     test('should handle error states correctly', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
 
       // Initially no error
       expect(provider.error, null);
@@ -422,7 +428,7 @@ void main() {
     test('should handle edge case of zero scores', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       // Try to spend points when score is 0
@@ -441,7 +447,7 @@ void main() {
         'game_score': 999999,
       });
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       expect(provider.score, 999999);
@@ -459,7 +465,7 @@ void main() {
     test('should handle import data with missing fields', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       // Import data with missing fields
@@ -479,7 +485,7 @@ void main() {
     test('should handle import data with null values', () async {
       SharedPreferences.setMockInitialValues({});
 
-      provider = GameStatsProvider();
+      provider = GameStatsProvider(dbService: mockDatabaseService);
       await Future.delayed(Duration.zero);
 
       // Import data with null values

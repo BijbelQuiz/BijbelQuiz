@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:bijbelquiz/services/database_service.dart';
+import 'package:clerk_flutter/clerk_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,6 +17,7 @@ class LessonProgressProvider extends ChangeNotifier {
   SharedPreferences? _prefs;
   bool _isLoading = true;
   String? _error;
+  DatabaseService? _dbService;
 
   /// Number of lessons unlocked from the start (sequential from index 0)
   int _unlockedCount = 1;
@@ -26,7 +29,8 @@ class LessonProgressProvider extends ChangeNotifier {
   String? get error => _error;
   int get unlockedCount => _unlockedCount;
 
-  LessonProgressProvider() {
+  LessonProgressProvider({DatabaseService? dbService}) {
+    _dbService = dbService;
     _load();
   }
 
@@ -37,16 +41,29 @@ class LessonProgressProvider extends ChangeNotifier {
       notifyListeners();
 
       _prefs = await SharedPreferences.getInstance();
+      final clerkId = Clerk.instance.currentUser?.id;
 
-      _unlockedCount = _prefs?.getInt(_unlockedCountKey) ?? 1;
-      final raw = _prefs?.getString(_storageKey);
-      if (raw != null && raw.isNotEmpty) {
-        final Map data = json.decode(raw) as Map;
-        _bestStarsByLesson.clear();
-        data.forEach((k, v) {
-          final stars = (v is int) ? v : int.tryParse(v.toString()) ?? 0;
-          _bestStarsByLesson[k.toString()] = stars.clamp(0, 3);
-        });
+      if (_dbService != null && clerkId != null) {
+        final progress = await _dbService!.getUserProgress(clerkId);
+        if (progress.isNotEmpty) {
+          _bestStarsByLesson.clear();
+          for (var item in progress) {
+            _bestStarsByLesson[item['lesson_id']] = item['stars'] ?? 0;
+          }
+        } else {
+          await _syncAllProgress();
+        }
+      } else {
+        _unlockedCount = _prefs?.getInt(_unlockedCountKey) ?? 1;
+        final raw = _prefs?.getString(_storageKey);
+        if (raw != null && raw.isNotEmpty) {
+          final Map data = json.decode(raw) as Map;
+          _bestStarsByLesson.clear();
+          data.forEach((k, v) {
+            final stars = (v is int) ? v : int.tryParse(v.toString()) ?? 0;
+            _bestStarsByLesson[k.toString()] = stars.clamp(0, 3);
+          });
+        }
       }
     } catch (e) {
       _error = 'Failed to load lesson progress: $e';
@@ -91,6 +108,7 @@ class LessonProgressProvider extends ChangeNotifier {
     }
 
     await _persist();
+    await _syncProgress(lesson.id, stars);
     notifyListeners();
   }
 
@@ -109,6 +127,22 @@ class LessonProgressProvider extends ChangeNotifier {
     _bestStarsByLesson.clear();
     await _persist();
     notifyListeners();
+  }
+
+  Future<void> _syncProgress(String lessonId, int stars) async {
+    final clerkId = Clerk.instance.currentUser?.id;
+    if (_dbService != null && clerkId != null) {
+      await _dbService!.updateUserProgress(clerkId, lessonId, stars / 3);
+    }
+  }
+
+  Future<void> _syncAllProgress() async {
+    final clerkId = Clerk.instance.currentUser?.id;
+    if (_dbService != null && clerkId != null) {
+      for (var entry in _bestStarsByLesson.entries) {
+        await _dbService!.updateUserProgress(clerkId, entry.key, entry.value / 3);
+      }
+    }
   }
 
   /// Stars rubric

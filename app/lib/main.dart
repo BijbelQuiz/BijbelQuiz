@@ -1,4 +1,8 @@
+import 'package:clerk_flutter/clerk_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bijbelquiz/services/analytics_service.dart';
+import 'package:bijbelquiz/services/database_service.dart';
+import 'package:bijbelquiz/services/supabase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -37,6 +41,16 @@ void main() async {
   AppLogger.init(level: Level.ALL);
   AppLogger.info('Logger initialized successfully');
 
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+  );
+  AppLogger.info('Supabase initialized successfully');
+
   // Initialize analytics
   AppLogger.info('Initializing analytics service...');
   await analyticsService.init();
@@ -50,7 +64,8 @@ void main() async {
     ]);
   }
   
-  final gameStatsProvider = GameStatsProvider();
+  final dbService = SupabaseService();
+  final gameStatsProvider = GameStatsProvider(dbService: dbService);
   AppLogger.info('Game stats provider initialized');
 
   AppLogger.info('Starting Flutter app with providers...');
@@ -60,8 +75,9 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider.value(value: gameStatsProvider),
-        ChangeNotifierProvider(create: (_) => LessonProgressProvider()),
+        ChangeNotifierProvider(create: (_) => LessonProgressProvider(dbService: dbService)),
         Provider.value(value: analyticsService),
+        Provider<DatabaseService>(create: (_) => dbService),
       ],
       child: BijbelQuizApp(),
     ),
@@ -193,9 +209,13 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
 
   /// Builds the MaterialApp with theme configuration
   Widget _buildMaterialApp(SettingsProvider settings) {
-    return MaterialApp(
-      navigatorObservers: [analyticsService.getObserver()],
-      title: strings.AppStrings.appName,
+    return ClerkAuth(
+      config: ClerkAuthConfig(
+        publishableKey: dotenv.env['CLERK_PUBLISHABLE_KEY']!,
+      ),
+      child: MaterialApp(
+        navigatorObservers: [analyticsService.getObserver()],
+        title: strings.AppStrings.appName,
       debugShowCheckedModeBanner: false,
       theme: ThemeUtils.getLightTheme(settings),
       darkTheme: ThemeUtils.getDarkTheme(settings),
@@ -214,7 +234,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
         '/settings': (context) => const SettingsScreen(),
       },
       home: const MainNavigationScreen(),
-    );
+    ));
   }
 
   /// Gets deferred providers that are ready
