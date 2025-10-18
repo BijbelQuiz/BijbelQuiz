@@ -472,22 +472,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 activeThumbColor: colorScheme.primary,
               ),
             ),
-            // Add feature usage analytics display
-            if (settings.analyticsEnabled) ...[
-              const SizedBox(height: 16),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withAlpha((0.3 * 255).round()),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: colorScheme.outline.withAlpha((0.2 * 255).round()),
-                  ),
-                ),
-                child: Provider.of<AnalyticsService>(context).buildFeatureUsageWidget(context),
-              ),
-            ],
           ],
         ),
         const SizedBox(height: 24),
