@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../config/app_config.dart';
+
 import '../utils/responsive_utils.dart';
 
 // Re-export responsive utilities for backward compatibility
@@ -11,12 +11,12 @@ EdgeInsets getResponsivePadding(BuildContext context, EdgeInsets basePadding) =>
 
 final ThemeData appLightTheme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
-    seedColor: Color(AppConfig.primaryColorValue),
+    seedColor: const Color(0xFF2563EB),
     brightness: Brightness.light,
   ).copyWith(
-    primary: Color(AppConfig.primaryColorValue),
-    secondary: Color(AppConfig.secondaryColorValue),
-    tertiary: Color(AppConfig.tertiaryColorValue),
+    primary: const Color(0xFF2563EB),
+    secondary: const Color(0xFF7C3AED),
+    tertiary: const Color(0xFFDC2626),
     surface: const Color(0xFFFAFAFA),
     surfaceContainerHighest: const Color(0xFFF8FAFC),
     onSurface: const Color(0xFF0F172A),
@@ -92,7 +92,7 @@ final ThemeData appLightTheme = ThemeData(
         borderRadius: BorderRadius.circular(16),
       ),
       elevation: 2,
-      backgroundColor: Color(AppConfig.primaryColorValue),
+      backgroundColor: const Color(0xFF2563EB),
       foregroundColor: Colors.white,
       textStyle: const TextStyle(
         fontSize: 16,
@@ -135,12 +135,12 @@ final ThemeData appLightTheme = ThemeData(
 
 final ThemeData appDarkTheme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
-    seedColor: Color(AppConfig.primaryColorValue),
+    seedColor: const Color(0xFF2563EB),
     brightness: Brightness.dark,
   ).copyWith(
-    primary: Color(AppConfig.primaryColorValue),
-    secondary: Color(AppConfig.secondaryColorValue),
-    tertiary: Color(AppConfig.tertiaryColorValue),
+    primary: const Color(0xFF2563EB),
+    secondary: const Color(0xFF7C3AED),
+    tertiary: const Color(0xFFDC2626),
     surface: const Color(0xFF0F172A),
     surfaceContainerHighest: const Color(0xFF1E293B),
     onSurface: const Color(0xFFF8FAFC),
@@ -216,7 +216,7 @@ final ThemeData appDarkTheme = ThemeData(
         borderRadius: BorderRadius.circular(16),
       ),
       elevation: 2,
-      backgroundColor: Color(AppConfig.primaryColorValue),
+      backgroundColor: const Color(0xFF2563EB),
       foregroundColor: Colors.white,
       textStyle: const TextStyle(
         fontSize: 16,
