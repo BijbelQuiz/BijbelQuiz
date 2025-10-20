@@ -9,8 +9,10 @@ import 'screens/guide_screen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'services/notification_service.dart';
+import 'services/api_service.dart';
 import 'widgets/top_snackbar.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter/services.dart';
 import 'services/question_cache_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/lesson_select_screen.dart';
@@ -439,6 +441,157 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 tooltip: strings.AppStrings.openPrivacyPolicyTooltip,
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        _buildSettingsGroup(
+          context,
+          settings,
+          colorScheme,
+          isSmallScreen,
+          isDesktop,
+          title: 'Local API',
+          children: [
+            _buildSettingItem(
+              context,
+              settings,
+              colorScheme,
+              isSmallScreen,
+              isDesktop,
+              title: 'Enable Local API',
+              subtitle: 'Allow external apps to access quiz data',
+              icon: Icons.api,
+              child: Switch(
+                value: settings.apiEnabled,
+                onChanged: (bool value) {
+                  settings.setApiEnabled(value);
+                },
+                activeThumbColor: colorScheme.primary,
+              ),
+            ),
+            if (settings.apiEnabled) ...[
+              _buildSettingItem(
+                context,
+                settings,
+                colorScheme,
+                isSmallScreen,
+                isDesktop,
+                title: 'API Key',
+                subtitle: settings.apiKey.isEmpty ? 'Generate a key for API access' : _formatApiKey(settings.apiKey),
+                icon: Icons.key,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (settings.apiKey.isNotEmpty) ...[
+                      IconButton(
+                        onPressed: () => _copyApiKeyToClipboard(context, settings.apiKey),
+                        icon: Icon(Icons.copy, size: 20),
+                        tooltip: 'Copy API Key',
+                        style: IconButton.styleFrom(
+                          backgroundColor: colorScheme.primary.withAlpha((0.1 * 255).round()),
+                          foregroundColor: colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Flexible(
+                      child: TextButton(
+                        onPressed: () async {
+                          if (settings.apiKey.isEmpty) {
+                            await settings.generateNewApiKey();
+                          } else {
+                            // Show dialog to regenerate key
+                            _showApiKeyDialog(context, settings);
+                          }
+                        },
+                        child: Text(settings.apiKey.isEmpty ? 'Generate Key' : 'Regenerate'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _buildSettingItem(
+                context,
+                settings,
+                colorScheme,
+                isSmallScreen,
+                isDesktop,
+                title: 'API Port',
+                subtitle: 'Port for local API server (${settings.apiPort})',
+                icon: Icons.settings_ethernet,
+                child: SizedBox(
+                  width: 100,
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                    ),
+                    controller: TextEditingController(text: settings.apiPort.toString()),
+                    onSubmitted: (value) {
+                      final port = int.tryParse(value);
+                      if (port != null && port >= 1024 && port <= 65535) {
+                        settings.setApiPort(port);
+                      }
+                    },
+                  ),
+                ),
+              ),
+              _buildSettingItem(
+                context,
+                settings,
+                colorScheme,
+                isSmallScreen,
+                isDesktop,
+                title: 'API Status',
+                subtitle: _getApiStatusText(),
+                icon: _getApiStatusIcon(),
+                child: Consumer<ApiService?>(
+                  builder: (context, apiService, child) {
+                    // Also check if API is enabled in settings
+                    final settings = Provider.of<SettingsProvider>(context);
+                    final isApiEnabled = settings.apiEnabled;
+                    final isRunning = apiService?.isRunning ?? false;
+
+                    // Show different states based on API enabled status and server running status
+                    Color statusColor;
+                    String statusText;
+                    if (!isApiEnabled) {
+                      statusColor = Colors.grey;
+                      statusText = 'Disabled';
+                    } else if (isRunning) {
+                      statusColor = Colors.green;
+                      statusText = 'Running';
+                    } else {
+                      statusColor = Colors.orange;
+                      statusText = 'Starting...';
+                    }
+
+                    return Row(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: statusColor,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          statusText,
+                          style: TextStyle(
+                            color: statusColor,
+                            fontSize: isSmallScreen ? 12 : 14,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
           ],
         ),
         const SizedBox(height: 24),
@@ -1394,6 +1547,73 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       },
     );
+  }
+
+  void _showApiKeyDialog(BuildContext context, SettingsProvider settings) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Regenerate API Key'),
+          content: Text('This will generate a new API key and invalidate the current one. Continue?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await settings.generateNewApiKey();
+                Navigator.of(context).pop();
+                if (context.mounted) {
+                  showTopSnackBar(context, 'New API key generated', style: TopSnackBarStyle.success);
+                }
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: Text('Regenerate'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _getApiStatusText() {
+    return 'Shows if the API server is running';
+  }
+
+  IconData _getApiStatusIcon() {
+    return Icons.info_outline;
+  }
+
+  /// Format API key for display (show first 6 and last 4 characters)
+  String _formatApiKey(String apiKey) {
+    if (apiKey.length <= 10) return apiKey;
+    return '${apiKey.substring(0, 6)}...${apiKey.substring(apiKey.length - 4)}';
+  }
+
+  /// Copy API key to clipboard and show feedback
+  Future<void> _copyApiKeyToClipboard(BuildContext context, String apiKey) async {
+    try {
+      await Clipboard.setData(ClipboardData(text: apiKey));
+      if (context.mounted) {
+        showTopSnackBar(
+          context,
+          'API key copied to clipboard',
+          style: TopSnackBarStyle.success,
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showTopSnackBar(
+          context,
+          'Failed to copy API key',
+          style: TopSnackBarStyle.error,
+        );
+      }
+    }
   }
 
   Widget _buildSocialMediaButton(BuildContext context, String platform, IconData icon, String url, ColorScheme colorScheme) {

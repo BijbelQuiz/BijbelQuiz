@@ -19,6 +19,7 @@ import 'services/connection_service.dart';
 import 'services/question_cache_service.dart';
 import 'services/gemini_service.dart';
 import 'services/feature_flags_service.dart';
+import 'services/api_service.dart';
 import 'screens/store_screen.dart';
 import 'providers/lesson_progress_provider.dart';
 import 'screens/main_navigation_screen.dart';
@@ -93,6 +94,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
   QuestionCacheService? _questionCacheService;
   GeminiService? _geminiService;
   FeatureFlagsService? _featureFlagsService;
+  ApiService? _apiService;
 
   // Add mounted getter for older Flutter versions
   @override
@@ -114,6 +116,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
       final connectionService = ConnectionService();
       final questionCacheService = QuestionCacheService();
       final featureFlagsService = FeatureFlagsService();
+      final apiService = ApiService();
 
       // Initialize Gemini service (with error handling for missing API key)
       AppLogger.info('Initializing Gemini service...');
@@ -156,6 +159,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
         _questionCacheService = questionCacheService;
         _geminiService = geminiService;
         _featureFlagsService = featureFlagsService;
+        _apiService = apiService;
       });
 
       // Continue with any post-init work when ready
@@ -225,6 +229,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
       if (_questionCacheService != null) Provider.value(value: _questionCacheService!),
       if (_geminiService != null) Provider.value(value: _geminiService!),
       if (_featureFlagsService != null) Provider.value(value: _featureFlagsService!),
+      if (_apiService != null) Provider.value(value: _apiService!),
     ];
   }
 
@@ -232,6 +237,9 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
+        // Handle API server lifecycle based on settings
+        _handleApiServerLifecycle(context, settings);
+
         final app = _buildMaterialApp(settings);
         final deferredProviders = _getDeferredProviders();
 
@@ -240,6 +248,41 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
             : app;
       },
     );
+  }
+
+  /// Handle API server lifecycle based on settings changes
+  void _handleApiServerLifecycle(BuildContext context, SettingsProvider settings) {
+    if (_apiService == null || _questionCacheService == null) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        if (settings.apiEnabled && settings.apiKey.isNotEmpty) {
+          // Start API server if not already running
+          if (!_apiService!.isRunning) {
+            final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+            final lessonProgressProvider = Provider.of<LessonProgressProvider>(context, listen: false);
+
+            await _apiService!.startServer(
+              port: settings.apiPort,
+              apiKey: settings.apiKey,
+              settingsProvider: settings,
+              gameStatsProvider: gameStatsProvider,
+              lessonProgressProvider: lessonProgressProvider,
+              questionCacheService: _questionCacheService!,
+            );
+            AppLogger.info('API server started via settings change');
+          }
+        } else {
+          // Stop API server if running
+          if (_apiService!.isRunning) {
+            await _apiService!.stopServer();
+            AppLogger.info('API server stopped via settings change');
+          }
+        }
+      } catch (e) {
+        AppLogger.error('Error managing API server lifecycle: $e');
+      }
+    });
   }
 
   /// Track app lifecycle events for session management
@@ -251,6 +294,14 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
   void dispose() {
     AppLogger.info('BijbelQuizApp disposing...');
     _mounted = false;
+
+    // Stop API server if running
+    _apiService?.stopServer().then((_) {
+      AppLogger.info('API server stopped during app disposal');
+    }).catchError((e) {
+      AppLogger.error('Error stopping API server during disposal: $e');
+    });
+
     _questionCacheService?.dispose();
     _connectionService?.dispose();
     AppLogger.info('BijbelQuizApp disposed successfully');
