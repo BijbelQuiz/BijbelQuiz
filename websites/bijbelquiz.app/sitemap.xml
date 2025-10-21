@@ -48,4 +48,11 @@
     <priority>0.5</priority>
   </url>
 
-</urlset>
+  <url>
+    <loc>https://bijbelquiz.app/score.html</loc>
+    <lastmod>2025-10-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+ </urlset>

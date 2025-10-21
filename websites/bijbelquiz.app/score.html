@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Mijn BijbelQuiz Statistieken</title>
+    <meta name="description" content="Bekijk mijn BijbelQuiz statistieken - scores, voortgang en prestaties in de bijbelkennis quiz app.">
+    <meta name="keywords" content="bijbelquiz, statistieken, scores, bijbelkennis, quiz resultaten">
+    <meta name="author" content="BijbelQuiz">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#4CAF50">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://bijbelquiz.app/score.html">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bijbelquiz.app/score.html">
+    <meta property="og:title" content="Mijn BijbelQuiz Statistieken">
+    <meta property="og:description" content="Bekijk mijn BijbelQuiz statistieken - scores, voortgang en prestaties in de bijbelkennis quiz app.">
+    <meta property="og:site_name" content="BijbelQuiz">
+    <meta property="og:locale" content="nl_NL">
+
+    <!-- Additional SEO -->
+    <meta name="format-detection" content="telephone=no">
+
+    <link rel="stylesheet" href="theme.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "BijbelQuiz Statistieken",
+      "description": "Bekijk BijbelQuiz statistieken - scores, voortgang en prestaties in de bijbelkennis quiz app.",
+      "url": "https://bijbelquiz.app/score.html",
+      "inLanguage": "nl",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "BijbelQuiz",
+        "url": "https://bijbelquiz.app/"
+      }
+    }
+    </script>
+</head>
+<body class="center-screen fade-in">
+    <div class="container card">
+        <i class="material-icons icon-large">bar_chart</i>
+        <h1>Dit zijn mijn BijbelQuiz statistieken</h1>
+        <p>Kan je mij verslaan?</p>
+
+        <!-- Stats Display -->
+        <div class="stats-display" id="statsContainer">
+            <div class="stats-loading">
+                <p>Statistieken laden...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Default stats if no parameters provided
+        const defaultStats = {
+            score: 0,
+            currentStreak: 0,
+            longestStreak: 0,
+            incorrectAnswers: 0,
+            totalQuestions: 0,
+            correctPercentage: 0
+        };
+
+        // Get stats from URL parameters or use defaults
+        const stats = {
+            score: parseInt(urlParams.get('score')) || defaultStats.score,
+            currentStreak: parseInt(urlParams.get('currentStreak')) || defaultStats.currentStreak,
+            longestStreak: parseInt(urlParams.get('longestStreak')) || defaultStats.longestStreak,
+            incorrectAnswers: parseInt(urlParams.get('incorrectAnswers')) || defaultStats.incorrectAnswers,
+            totalQuestions: parseInt(urlParams.get('totalQuestions')) || defaultStats.totalQuestions,
+            correctPercentage: parseInt(urlParams.get('correctPercentage')) || defaultStats.correctPercentage
+        };
+
+        // Display stats
+        function displayStats() {
+            const container = document.getElementById('statsContainer');
+
+            if (stats.totalQuestions === 0 && stats.score === 0) {
+                container.innerHTML = `
+                    <div class="no-stats">
+                        <i class="material-icons" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem;">info</i>
+                        <h3>Geen statistieken beschikbaar</h3>
+                        <p>Speel eerst een paar quizzen om je statistieken te bekijken!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const totalQuestions = stats.totalQuestions || (stats.score + stats.incorrectAnswers);
+            const correctPercentage = stats.correctPercentage || (totalQuestions > 0 ? Math.round((stats.score / totalQuestions) * 100) : 0);
+
+            container.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card primary">
+                        <div class="stat-icon">
+                            <i class="material-icons">emoji_events</i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">${stats.score.toLocaleString()}</div>
+                            <div class="stat-label">Totaal Score</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card success">
+                        <div class="stat-icon">
+                            <i class="material-icons">local_fire_department</i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">${stats.longestStreak}</div>
+                            <div class="stat-label">Langste Reeks</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card info">
+                        <div class="stat-icon">
+                            <i class="material-icons">timeline</i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">${stats.currentStreak}</div>
+                            <div class="stat-label">Huidige Reeks</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card warning">
+                        <div class="stat-icon">
+                            <i class="material-icons">trending_up</i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">${correctPercentage}%</div>
+                            <div class="stat-label">Juist Percentage</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Display stats when page loads
+        document.addEventListener('DOMContentLoaded', displayStats);
+    </script>
+
+    <style>
+        .stats-display {
+            width: 100%;
+            margin: 2rem 0;
+        }
+
+        .stats-loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .no-stats {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .no-stats h3 {
+            margin-bottom: 1rem;
+            color: var(--on-surface);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin: 2rem 0;
+            width: 100%;
+        }
+
+        @media (min-width: 400px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 1.25rem;
+            }
+        }
+
+        @media (min-width: 600px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+        }
+
+        @media (min-width: 800px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .stats-grid {
+                gap: 2rem;
+            }
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-align: center;
+            border: 2px solid var(--outline);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            min-height: 140px;
+            width: 100%;
+        }
+
+        @media (min-width: 400px) {
+            .stat-card {
+                padding: 1.5rem;
+                min-height: 150px;
+            }
+        }
+
+        @media (min-width: 600px) {
+            .stat-card {
+                padding: 1.75rem;
+                min-height: 160px;
+            }
+        }
+
+        @media (min-width: 800px) {
+            .stat-card {
+                padding: 2rem;
+                min-height: 180px;
+            }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.primary {
+            border-color: var(--primary);
+        }
+
+        .stat-card.success {
+            border-color: var(--success);
+        }
+
+        .stat-card.info {
+            border-color: #3b82f6;
+        }
+
+        .stat-card.warning {
+            border-color: #f59e0b;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 400px) {
+            .stat-icon {
+                width: 52px;
+                height: 52px;
+            }
+        }
+
+        @media (min-width: 600px) {
+            .stat-icon {
+                width: 56px;
+                height: 56px;
+                margin-bottom: 0.75rem;
+            }
+        }
+
+        @media (min-width: 800px) {
+            .stat-icon {
+                width: 64px;
+                height: 64px;
+            }
+        }
+
+        .stat-card.primary .stat-icon {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .stat-card.success .stat-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .stat-card.info .stat-icon {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .stat-card.warning .stat-icon {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .stat-content {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--on-surface);
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        @media (min-width: 400px) {
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+
+        @media (min-width: 600px) {
+            .stat-number {
+                font-size: 2.25rem;
+            }
+        }
+
+        @media (min-width: 800px) {
+            .stat-number {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .stat-number {
+                font-size: 2.75rem;
+            }
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1.2;
+        }
+
+        @media (min-width: 400px) {
+            .stat-label {
+                font-size: 0.875rem;
+            }
+        }
+
+        @media (min-width: 600px) {
+            .stat-label {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (min-width: 800px) {
+            .stat-label {
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Enhanced responsive design */
+        @media (max-width: 399px) {
+            .stats-display {
+                margin: 1.25rem 0;
+            }
+
+            .stat-card {
+                padding: 1rem;
+                min-height: 130px;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (min-width: 400px) and (max-width: 599px) {
+            .stats-display {
+                margin: 1.5rem 0;
+            }
+        }
+
+        @media (min-width: 600px) and (max-width: 799px) {
+            .stats-display {
+                margin: 1.75rem 0;
+            }
+        }
+
+        @media (min-width: 800px) {
+            .stats-display {
+                margin: 2rem 0;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .stats-display {
+                margin: 2.5rem 0;
+            }
+        }
+
+        /* Landscape phone optimization */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .stats-display {
+                margin: 1rem 0;
+            }
+
+            .stat-card {
+                min-height: 120px;
+                padding: 1rem;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        /* Very large screens */
+        @media (min-width: 1600px) {
+            .stats-grid {
+                max-width: 1400px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+    </style>
+</body>
+</html>
