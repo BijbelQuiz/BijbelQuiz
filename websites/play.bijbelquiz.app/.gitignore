@@ -1,7 +1,10 @@
-# Flutter
+# Flutter - ignore build files except in websites/
 /build/
+!/websites/**/build/
 /android/app/build/
+!/websites/**/android/app/build/
 /ios/Flutter/.last_build_id
+!/websites/**/ios/Flutter/.last_build_id
 .flutter-plugins
 .flutter-plugins-dependencies
 .metadata
