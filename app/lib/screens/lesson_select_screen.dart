@@ -11,6 +11,7 @@ import '../providers/settings_provider.dart';
 import '../services/lesson_service.dart';
 import '../screens/quiz_screen.dart';
 import '../screens/guide_screen.dart';
+import '../screens/multiplayer_game_setup_screen.dart';
 import '../widgets/top_snackbar.dart';
 import '../l10n/strings_nl.dart' as strings;
 import '../constants/urls.dart';
@@ -382,7 +383,21 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                 ),
           ),
         ),
-        actions: [],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.people),
+            tooltip: 'Multiplayer Quiz',
+            onPressed: () {
+              final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+              analyticsService.capture(context, 'multiplayer_button_tapped');
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const MultiplayerGameSetupScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: _loading
           ? const LessonGridSkeleton()

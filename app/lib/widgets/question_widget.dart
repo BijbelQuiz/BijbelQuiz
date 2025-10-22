@@ -12,6 +12,7 @@ class QuestionWidget extends StatelessWidget {
   final Function(int) onAnswerSelected;
   final String language;
   final PerformanceService? performanceService;
+  final bool isCompact; // New parameter for compact multiplayer layout
 
   const QuestionWidget({
     super.key,
@@ -22,6 +23,7 @@ class QuestionWidget extends StatelessWidget {
     required this.onAnswerSelected,
     required this.language,
     this.performanceService,
+    this.isCompact = false,
   });
 
   @override
@@ -34,6 +36,7 @@ class QuestionWidget extends StatelessWidget {
       onAnswerSelected: onAnswerSelected,
       language: language,
       performanceService: performanceService,
+      isCompact: isCompact,
     );
   }
 }

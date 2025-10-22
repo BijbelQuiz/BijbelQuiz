@@ -100,6 +100,7 @@ class AnalyticsService {
   static const String FEATURE_DONATION_SYSTEM = 'donation_system';
   static const String FEATURE_SATISFACTION_SURVEYS = 'satisfaction_surveys';
   static const String FEATURE_DIFFICULTY_FEEDBACK = 'difficulty_feedback';
+  static const String FEATURE_MULTIPLAYER_GAME = 'multiplayer_game';
 
   /// Standardized action names for consistent tracking
   static const String ACTION_ACCESSED = 'accessed';

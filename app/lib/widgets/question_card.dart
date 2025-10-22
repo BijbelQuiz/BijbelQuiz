@@ -85,6 +85,7 @@ class QuestionCard extends StatefulWidget {
   final Function(int) onAnswerSelected;
   final String language;
   final PerformanceService? performanceService;
+  final bool isCompact; // New parameter for compact multiplayer layout
 
   const QuestionCard({
     super.key,
@@ -95,6 +96,7 @@ class QuestionCard extends StatefulWidget {
     required this.onAnswerSelected,
     required this.language,
     this.performanceService,
+    this.isCompact = false,
   });
 
   @override
@@ -257,6 +259,7 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                                     colorScheme: colorScheme,
                                     letter: String.fromCharCode(65 + index),
                                     isDisabled: widget.isAnswering || widget.selectedAnswerIndex != null,
+                                    isCompact: widget.isCompact,
                                     externalScaleAnimation: _animationController.answerButtonScaleAnimation,
                                   ),
                                 );
@@ -359,6 +362,7 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                                     colorScheme: colorScheme,
                                     letter: String.fromCharCode(65 + index),
                                     isDisabled: widget.isAnswering || widget.selectedAnswerIndex != null,
+                                    isCompact: widget.isCompact,
                                     externalScaleAnimation: _animationController.answerButtonScaleAnimation,
                                   ),
                                 );
@@ -468,6 +472,7 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                                     letter: String.fromCharCode(65 + index),
                                     isLarge: true,
                                     isDisabled: widget.isAnswering || widget.selectedAnswerIndex != null,
+                                    isCompact: widget.isCompact,
                                     externalScaleAnimation: _animationController.answerButtonScaleAnimation,
                                   ),
                                 ),

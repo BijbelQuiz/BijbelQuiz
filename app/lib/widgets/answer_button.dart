@@ -12,6 +12,7 @@ class AnswerButton extends StatefulWidget {
   final String? letter;
   final bool isLarge;
   final bool isDisabled;
+  final bool isCompact; // New parameter for compact multiplayer layout
   final Animation<double>? externalScaleAnimation; // Optional external animation controller
 
   const AnswerButton({
@@ -23,6 +24,7 @@ class AnswerButton extends StatefulWidget {
     this.letter,
     this.isLarge = false,
     this.isDisabled = false,
+    this.isCompact = false,
     this.externalScaleAnimation,
   });
 
@@ -138,16 +140,26 @@ class _AnswerButtonState extends State<AnswerButton>
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isDesktop = size.width > 800;
-    final double verticalPadding =
-        widget.isLarge ? (isDesktop ? 36 : 28) : (isDesktop ? 18 : 16);
-    final double fontSize = widget.isLarge
-        ? (isDesktop ? 32 : 24)
-        : getResponsiveFontSize(context, 16);
-    final double iconSize = widget.isLarge
-        ? (isDesktop ? 48 : 36)
-        : getResponsiveFontSize(context, 16);
-    final double indicatorSize =
-        widget.isLarge ? (isDesktop ? 56 : 48) : (isDesktop ? 40 : 36);
+    final double verticalPadding = widget.isCompact
+        ? 8 // Compact vertical padding for multiplayer
+        : widget.isLarge
+            ? (isDesktop ? 36 : 28)
+            : (isDesktop ? 18 : 16);
+    final double fontSize = widget.isCompact
+        ? 12 // Compact font size for multiplayer
+        : widget.isLarge
+            ? (isDesktop ? 32 : 24)
+            : getResponsiveFontSize(context, 16);
+    final double iconSize = widget.isCompact
+        ? 14 // Compact icon size for multiplayer
+        : widget.isLarge
+            ? (isDesktop ? 48 : 36)
+            : getResponsiveFontSize(context, 16);
+    final double indicatorSize = widget.isCompact
+        ? 24 // Compact indicator size for multiplayer
+        : widget.isLarge
+            ? (isDesktop ? 56 : 48)
+            : (isDesktop ? 40 : 36);
 
     // Build semantic label based on feedback state
     String semanticLabel = widget.label;
@@ -216,7 +228,7 @@ class _AnswerButtonState extends State<AnswerButton>
                   child: Container(
                     width: double.infinity,
                     padding: EdgeInsets.symmetric(
-                      horizontal: isDesktop ? 24 : 20,
+                      horizontal: widget.isCompact ? 8 : (isDesktop ? 24 : 20),
                       vertical: verticalPadding,
                     ),
                     decoration: BoxDecoration(
@@ -263,7 +275,7 @@ class _AnswerButtonState extends State<AnswerButton>
                             ),
                           ),
                         if (widget.letter != null)
-                          SizedBox(width: isDesktop ? 18 : 16),
+                          SizedBox(width: widget.isCompact ? 8 : (isDesktop ? 18 : 16)),
                         Expanded(
                           child: Text(
                             widget.label,
