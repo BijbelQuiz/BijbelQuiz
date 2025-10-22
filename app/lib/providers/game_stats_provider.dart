@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:provider/provider.dart';
 import './settings_provider.dart';
 import '../services/logger.dart';
+import '../services/star_transaction_service.dart';
 
 /// Manages the app's game statistics including score and streaks
 class GameStatsProvider extends ChangeNotifier {
@@ -321,6 +322,66 @@ class GameStatsProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// Enhanced method that uses the StarTransactionService if available
+  /// Falls back to direct manipulation if service is not available
+  Future<bool> addStarsWithTransaction({
+    required int amount,
+    required String reason,
+    String? lessonId,
+    Map<String, dynamic>? metadata,
+  }) async {
+    try {
+      // Try to use the new StarTransactionService if available
+      // This provides enhanced logging and API integration
+      // Import would be needed: import '../services/star_transaction_service.dart';
+      final starService = StarTransactionService.instance;
+      if (starService.currentBalance == _score) {
+        // Service is initialized and in sync, use it
+        return await starService.addStars(
+          amount: amount,
+          reason: reason,
+          lessonId: lessonId,
+          metadata: metadata,
+        );
+      }
+    } catch (e) {
+      // Service not available or not initialized, fall back to direct method
+      AppLogger.debug('StarTransactionService not available, using fallback method: $e');
+    }
+
+    // Fallback to original method
+    return await addStars(amount);
+  }
+
+  /// Enhanced method that uses the StarTransactionService if available
+  /// Falls back to direct manipulation if service is not available
+  Future<bool> spendStarsWithTransaction({
+    required int amount,
+    required String reason,
+    String? lessonId,
+    Map<String, dynamic>? metadata,
+  }) async {
+    try {
+      // Try to use the new StarTransactionService if available
+      final starService = StarTransactionService.instance;
+      if (starService.currentBalance == _score) {
+        // Service is initialized and in sync, use it
+        return await starService.spendStars(
+          amount: amount,
+          reason: reason,
+          lessonId: lessonId,
+          metadata: metadata,
+        );
+      }
+    } catch (e) {
+      // Service not available or not initialized, fall back to direct method
+      AppLogger.debug('StarTransactionService not available, using fallback method: $e');
+    }
+
+    // Fallback to original method
+    return await spendStars(amount);
   }
 
   /// Gets all game stats data for export

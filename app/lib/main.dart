@@ -20,6 +20,7 @@ import 'services/question_cache_service.dart';
 import 'services/gemini_service.dart';
 import 'services/feature_flags_service.dart';
 import 'services/api_service.dart';
+import 'services/star_transaction_service.dart';
 import 'screens/store_screen.dart';
 import 'providers/lesson_progress_provider.dart';
 import 'screens/main_navigation_screen.dart';
@@ -95,6 +96,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
   GeminiService? _geminiService;
   FeatureFlagsService? _featureFlagsService;
   ApiService? _apiService;
+  StarTransactionService? _starTransactionService;
 
   // Add mounted getter for older Flutter versions
   @override
@@ -117,6 +119,10 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
       final questionCacheService = QuestionCacheService();
       final featureFlagsService = FeatureFlagsService();
       final apiService = ApiService();
+
+      // Initialize StarTransactionService with required providers
+      AppLogger.info('Initializing star transaction service...');
+      final starTransactionService = StarTransactionService.instance;
 
       // Initialize Gemini service (with error handling for missing API key)
       AppLogger.info('Initializing Gemini service...');
@@ -141,6 +147,19 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
         AppLogger.info('Connection status changed: ${isConnected ? 'connected' : 'disconnected'} ($connectionType)');
       });
 
+      // Initialize StarTransactionService after providers are available
+      AppLogger.info('Initializing star transaction service...');
+      final starTransactionInitFuture = Future(() async {
+        // Wait a bit for providers to be ready
+        await Future.delayed(Duration(milliseconds: 100));
+        final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+        final lessonProgressProvider = Provider.of<LessonProgressProvider>(context, listen: false);
+        await starTransactionService.initialize(
+          gameStatsProvider: gameStatsProvider,
+          lessonProgressProvider: lessonProgressProvider,
+        );
+      });
+
       // Kick off initialization in background
       AppLogger.info('Starting parallel service initialization...');
       final initFuture = Future.wait([
@@ -149,6 +168,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
         questionCacheService.initialize(),
         featureFlagsInitFuture,
         geminiInitFuture,
+        starTransactionInitFuture,
       ]);
 
       // Expose services immediately so UI can build without waiting
@@ -160,6 +180,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
         _geminiService = geminiService;
         _featureFlagsService = featureFlagsService;
         _apiService = apiService;
+        _starTransactionService = starTransactionService;
       });
 
       // Continue with any post-init work when ready
@@ -230,6 +251,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
       if (_geminiService != null) Provider.value(value: _geminiService!),
       if (_featureFlagsService != null) Provider.value(value: _featureFlagsService!),
       if (_apiService != null) Provider.value(value: _apiService!),
+      if (_starTransactionService != null) Provider.value(value: _starTransactionService!),
     ];
   }
 

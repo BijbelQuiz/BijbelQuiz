@@ -10,6 +10,7 @@ import '../providers/game_stats_provider.dart';
 import '../providers/lesson_progress_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/question_cache_service.dart';
+import '../services/star_transaction_service.dart';
 
 /// Service for running a local HTTP API server
 class ApiService {
@@ -81,7 +82,12 @@ class ApiService {
         ..get('/$_apiVersion/questions/<category>', _handleGetQuestionsByCategory(questionCacheService))
         ..get('/$_apiVersion/progress', _handleGetProgress(lessonProgressProvider))
         ..get('/$_apiVersion/stats', _handleGetStats(gameStatsProvider))
-        ..get('/$_apiVersion/settings', _handleGetSettings(settingsProvider));
+        ..get('/$_apiVersion/settings', _handleGetSettings(settingsProvider))
+        ..get('/$_apiVersion/stars/balance', _handleGetStarBalance())
+        ..post('/$_apiVersion/stars/add', _handleAddStars())
+        ..post('/$_apiVersion/stars/spend', _handleSpendStars())
+        ..get('/$_apiVersion/stars/transactions', _handleGetStarTransactions())
+        ..get('/$_apiVersion/stars/stats', _handleGetStarStats());
 
       final handler = const Pipeline()
           .addMiddleware(_createSecurityHeadersMiddleware())
@@ -581,6 +587,260 @@ class ApiService {
         return Response.internalServerError(body: json.encode({
           'error': 'Failed to get settings data',
           'message': 'An internal error occurred while retrieving settings',
+          'timestamp': DateTime.now().toIso8601String(),
+          'processing_time_ms': duration.inMilliseconds,
+        }), headers: {'Content-Type': 'application/json'});
+      }
+    };
+  }
+
+  /// Get current star balance endpoint
+  Future<Response> Function(Request) _handleGetStarBalance() {
+    return (Request request) async {
+      final startTime = DateTime.now();
+
+      try {
+        final starService = StarTransactionService.instance;
+        final balance = starService.currentBalance;
+
+        final response = {
+          'balance': balance,
+          'timestamp': DateTime.now().toIso8601String(),
+          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+        };
+
+        AppLogger.info('Star balance endpoint: Retrieved balance $balance in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(response), headers: {'Content-Type': 'application/json'});
+      } catch (e) {
+        final duration = DateTime.now().difference(startTime);
+        AppLogger.error('Error in star balance endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(body: json.encode({
+          'error': 'Failed to get star balance',
+          'message': 'An internal error occurred while retrieving star balance',
+          'timestamp': DateTime.now().toIso8601String(),
+          'processing_time_ms': duration.inMilliseconds,
+        }), headers: {'Content-Type': 'application/json'});
+      }
+    };
+  }
+
+  /// Add stars endpoint
+  Future<Response> Function(Request) _handleAddStars() {
+    return (Request request) async {
+      final startTime = DateTime.now();
+
+      try {
+        final payload = json.decode(await request.readAsString()) as Map<String, dynamic>;
+        final amount = payload['amount'] as int?;
+        final reason = payload['reason'] as String?;
+        final lessonId = payload['lessonId'] as String?;
+
+        // Validate required fields
+        if (amount == null || amount <= 0) {
+          return Response.badRequest(body: json.encode({
+            'error': 'Invalid amount',
+            'message': 'Amount must be a positive integer',
+            'timestamp': DateTime.now().toIso8601String(),
+          }), headers: {'Content-Type': 'application/json'});
+        }
+
+        if (reason == null || reason.isEmpty) {
+          return Response.badRequest(body: json.encode({
+            'error': 'Invalid reason',
+            'message': 'Reason is required and cannot be empty',
+            'timestamp': DateTime.now().toIso8601String(),
+          }), headers: {'Content-Type': 'application/json'});
+        }
+
+        final starService = StarTransactionService.instance;
+        final success = await starService.addStars(
+          amount: amount,
+          reason: reason,
+          lessonId: lessonId,
+        );
+
+        if (!success) {
+          return Response.badRequest(body: json.encode({
+            'error': 'Failed to add stars',
+            'message': 'Could not add stars to balance',
+            'timestamp': DateTime.now().toIso8601String(),
+          }), headers: {'Content-Type': 'application/json'});
+        }
+
+        final response = {
+          'success': true,
+          'balance': starService.currentBalance,
+          'amount_added': amount,
+          'reason': reason,
+          'timestamp': DateTime.now().toIso8601String(),
+          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+        };
+
+        AppLogger.info('Add stars endpoint: Added $amount stars in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(response), headers: {'Content-Type': 'application/json'});
+      } catch (e) {
+        final duration = DateTime.now().difference(startTime);
+        AppLogger.error('Error in add stars endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(body: json.encode({
+          'error': 'Failed to add stars',
+          'message': 'An internal error occurred while adding stars',
+          'timestamp': DateTime.now().toIso8601String(),
+          'processing_time_ms': duration.inMilliseconds,
+        }), headers: {'Content-Type': 'application/json'});
+      }
+    };
+  }
+
+  /// Spend stars endpoint
+  Future<Response> Function(Request) _handleSpendStars() {
+    return (Request request) async {
+      final startTime = DateTime.now();
+
+      try {
+        final payload = json.decode(await request.readAsString()) as Map<String, dynamic>;
+        final amount = payload['amount'] as int?;
+        final reason = payload['reason'] as String?;
+        final lessonId = payload['lessonId'] as String?;
+
+        // Validate required fields
+        if (amount == null || amount <= 0) {
+          return Response.badRequest(body: json.encode({
+            'error': 'Invalid amount',
+            'message': 'Amount must be a positive integer',
+            'timestamp': DateTime.now().toIso8601String(),
+          }), headers: {'Content-Type': 'application/json'});
+        }
+
+        if (reason == null || reason.isEmpty) {
+          return Response.badRequest(body: json.encode({
+            'error': 'Invalid reason',
+            'message': 'Reason is required and cannot be empty',
+            'timestamp': DateTime.now().toIso8601String(),
+          }), headers: {'Content-Type': 'application/json'});
+        }
+
+        final starService = StarTransactionService.instance;
+        final success = await starService.spendStars(
+          amount: amount,
+          reason: reason,
+          lessonId: lessonId,
+        );
+
+        if (!success) {
+          return Response.badRequest(body: json.encode({
+            'error': 'Insufficient stars',
+            'message': 'Not enough stars in balance for this transaction',
+            'current_balance': starService.currentBalance,
+            'requested_amount': amount,
+            'timestamp': DateTime.now().toIso8601String(),
+          }), headers: {'Content-Type': 'application/json'});
+        }
+
+        final response = {
+          'success': true,
+          'balance': starService.currentBalance,
+          'amount_spent': amount,
+          'reason': reason,
+          'timestamp': DateTime.now().toIso8601String(),
+          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+        };
+
+        AppLogger.info('Spend stars endpoint: Spent $amount stars in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(response), headers: {'Content-Type': 'application/json'});
+      } catch (e) {
+        final duration = DateTime.now().difference(startTime);
+        AppLogger.error('Error in spend stars endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(body: json.encode({
+          'error': 'Failed to spend stars',
+          'message': 'An internal error occurred while spending stars',
+          'timestamp': DateTime.now().toIso8601String(),
+          'processing_time_ms': duration.inMilliseconds,
+        }), headers: {'Content-Type': 'application/json'});
+      }
+    };
+  }
+
+  /// Get star transactions endpoint
+  Future<Response> Function(Request) _handleGetStarTransactions() {
+    return (Request request) async {
+      final startTime = DateTime.now();
+
+      try {
+        final limitParam = request.url.queryParameters['limit'] ?? '50';
+        final type = request.url.queryParameters['type'];
+        final lessonId = request.url.queryParameters['lessonId'];
+
+        // Validate and parse limit parameter
+        final limit = int.tryParse(limitParam);
+        if (limit == null || limit < 1 || limit > 1000) {
+          return Response.badRequest(body: json.encode({
+            'error': 'Invalid limit parameter',
+            'message': 'Limit must be a number between 1 and 1000',
+            'timestamp': DateTime.now().toIso8601String(),
+            'valid_range': '1-1000',
+          }), headers: {'Content-Type': 'application/json'});
+        }
+
+        final starService = StarTransactionService.instance;
+        List<StarTransaction> transactions;
+
+        if (type != null && type.isNotEmpty) {
+          transactions = starService.getTransactionsByType(type).take(limit).toList();
+        } else if (lessonId != null && lessonId.isNotEmpty) {
+          transactions = starService.getTransactionsForLesson(lessonId).take(limit).toList();
+        } else {
+          transactions = starService.getRecentTransactions(count: limit);
+        }
+
+        final transactionsData = transactions.map((t) => t.toJson()).toList();
+
+        final response = {
+          'transactions': transactionsData,
+          'count': transactions.length,
+          'type_filter': type,
+          'lesson_filter': lessonId,
+          'timestamp': DateTime.now().toIso8601String(),
+          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+        };
+
+        AppLogger.info('Star transactions endpoint: Retrieved ${transactions.length} transactions in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(response), headers: {'Content-Type': 'application/json'});
+      } catch (e) {
+        final duration = DateTime.now().difference(startTime);
+        AppLogger.error('Error in star transactions endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(body: json.encode({
+          'error': 'Failed to get star transactions',
+          'message': 'An internal error occurred while retrieving star transactions',
+          'timestamp': DateTime.now().toIso8601String(),
+          'processing_time_ms': duration.inMilliseconds,
+        }), headers: {'Content-Type': 'application/json'});
+      }
+    };
+  }
+
+  /// Get star statistics endpoint
+  Future<Response> Function(Request) _handleGetStarStats() {
+    return (Request request) async {
+      final startTime = DateTime.now();
+
+      try {
+        final starService = StarTransactionService.instance;
+        final stats = starService.getTransactionStats();
+
+        final response = {
+          'stats': stats,
+          'timestamp': DateTime.now().toIso8601String(),
+          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+        };
+
+        AppLogger.info('Star stats endpoint: Retrieved stats in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(response), headers: {'Content-Type': 'application/json'});
+      } catch (e) {
+        final duration = DateTime.now().difference(startTime);
+        AppLogger.error('Error in star stats endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(body: json.encode({
+          'error': 'Failed to get star statistics',
+          'message': 'An internal error occurred while retrieving star statistics',
           'timestamp': DateTime.now().toIso8601String(),
           'processing_time_ms': duration.inMilliseconds,
         }), headers: {'Content-Type': 'application/json'});

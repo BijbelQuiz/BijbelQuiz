@@ -247,6 +247,193 @@ curl -H "X-API-Key: your-api-key" \
      http://localhost:7777/v1/settings
 ```
 
+### 7. Get Star Balance
+**GET** `/v1/stars/balance`
+
+Retrieve the current star balance for the user.
+
+**Response:**
+```json
+{
+  "balance": 1250,
+  "timestamp": "2025-10-20T16:45:49.539Z",
+  "processing_time_ms": 8
+}
+```
+
+**Usage:**
+```bash
+curl -H "X-API-Key: your-api-key" \
+     http://localhost:7777/v1/stars/balance
+```
+
+### 8. Add Stars
+**POST** `/v1/stars/add`
+
+Add stars to the user's balance with transaction logging.
+
+**Request Body:**
+```json
+{
+  "amount": 10,
+  "reason": "Quiz completed",
+  "lessonId": "lesson_1"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "balance": 1260,
+  "amount_added": 10,
+  "reason": "Quiz completed",
+  "timestamp": "2025-10-20T16:45:49.539Z",
+  "processing_time_ms": 15
+}
+```
+
+**Usage:**
+```bash
+curl -X POST \
+     -H "Content-Type: application/json" \
+     -H "X-API-Key: your-api-key" \
+     -d '{"amount": 10, "reason": "Quiz completed", "lessonId": "lesson_1"}' \
+     http://localhost:7777/v1/stars/add
+```
+
+### 9. Spend Stars
+**POST** `/v1/stars/spend`
+
+Spend stars from the user's balance with validation for sufficient funds.
+
+**Request Body:**
+```json
+{
+  "amount": 5,
+  "reason": "Skip question",
+  "lessonId": "lesson_1"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "balance": 1255,
+  "amount_spent": 5,
+  "reason": "Skip question",
+  "timestamp": "2025-10-20T16:45:49.539Z",
+  "processing_time_ms": 12
+}
+```
+
+**Error Response (Insufficient Balance):**
+```json
+{
+  "error": "Insufficient stars",
+  "message": "Not enough stars in balance for this transaction",
+  "current_balance": 3,
+  "requested_amount": 10,
+  "timestamp": "2025-10-20T16:45:49.539Z"
+}
+```
+
+**Usage:**
+```bash
+curl -X POST \
+     -H "Content-Type: application/json" \
+     -H "X-API-Key: your-api-key" \
+     -d '{"amount": 5, "reason": "Skip question"}' \
+     http://localhost:7777/v1/stars/spend
+```
+
+### 10. Get Star Transactions
+**GET** `/v1/stars/transactions`
+
+Retrieve star transaction history with optional filtering.
+
+**Query Parameters:**
+- `limit` (optional): Number of transactions to return (default: 50, max: 1000)
+- `type` (optional): Filter by transaction type (`earned`, `spent`, `lesson_reward`, `refund`)
+- `lessonId` (optional): Filter by lesson ID
+
+**Response:**
+```json
+{
+  "transactions": [
+    {
+      "id": "1634748549539",
+      "timestamp": "2025-10-20T16:45:49.539Z",
+      "type": "earned",
+      "amount": 10,
+      "reason": "Quiz completed",
+      "lessonId": "lesson_1",
+      "metadata": null
+    },
+    {
+      "id": "1634748548547",
+      "timestamp": "2025-10-20T16:45:48.547Z",
+      "type": "spent",
+      "amount": -5,
+      "reason": "Skip question",
+      "lessonId": "lesson_1",
+      "metadata": null
+    }
+  ],
+  "count": 2,
+  "type_filter": null,
+  "lesson_filter": null,
+  "timestamp": "2025-10-20T16:45:49.539Z",
+  "processing_time_ms": 25
+}
+```
+
+**Examples:**
+```bash
+# Get last 20 transactions
+curl -H "X-API-Key: your-api-key" \
+     http://localhost:7777/v1/stars/transactions?limit=20
+
+# Get only earned stars transactions
+curl -H "X-API-Key: your-api-key" \
+     http://localhost:7777/v1/stars/transactions?type=earned&limit=50
+
+# Get transactions for specific lesson
+curl -H "X-API-Key: your-api-key" \
+     http://localhost:7777/v1/stars/transactions?lessonId=lesson_1
+```
+
+### 11. Get Star Statistics
+**GET** `/v1/stars/stats`
+
+Retrieve comprehensive star statistics and analytics.
+
+**Response:**
+```json
+{
+  "stats": {
+    "totalTransactions": 156,
+    "currentBalance": 1250,
+    "totalEarned": 1450,
+    "totalSpent": 200,
+    "netTotal": 1250,
+    "transactionsLast24h": 12,
+    "transactionsLast7d": 45,
+    "transactionsLast30d": 156,
+    "averageTransactionAmount": 8.97
+  },
+  "timestamp": "2025-10-20T16:45:49.539Z",
+  "processing_time_ms": 18
+}
+```
+
+**Usage:**
+```bash
+curl -H "X-API-Key: your-api-key" \
+     http://localhost:7777/v1/stars/stats
+```
+
 ## Response Formats
 
 ### Success Responses
@@ -544,7 +731,14 @@ For API-related issues:
 
 ## Changelog
 
-### Version 1.1.0 (Latest)
+### Version 1.2.0 (Latest)
+- **Star Transaction System**: Complete star transaction management with history tracking
+- **New Star Endpoints**: Added `/v1/stars/*` endpoints for balance, transactions, and statistics
+- **Transaction Logging**: All star operations are logged with detailed metadata
+- **Enhanced Analytics**: Comprehensive star statistics and transaction analytics
+- **Improved Integration**: Better API integration with enhanced error handling
+
+### Version 1.1.0
 - **API Versioning**: All endpoints now use `/v1/` prefix for future compatibility
 - **Rate Limiting**: Implemented 100 requests/minute per IP with automatic cleanup
 - **Enhanced Security**: Added security headers, request size limiting, and input validation
