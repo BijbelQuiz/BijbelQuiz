@@ -63,7 +63,7 @@ class SettingsProvider extends ChangeNotifier {
 
   SettingsProvider() {
     AppLogger.info('SettingsProvider initializing...');
-    _loadSettings();
+    // Settings will be loaded later
   }
 
   /// De huidige taalinstelling (altijd 'nl')
@@ -474,6 +474,11 @@ class SettingsProvider extends ChangeNotifier {
   }
 
 
+
+  /// Loads settings from persistent storage
+  Future<void> loadSettings() async {
+    await _loadSettings();
+  }
 
   /// Reloads settings from persistent storage
   Future<void> reloadSettings() async {

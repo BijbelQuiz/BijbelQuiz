@@ -54,7 +54,12 @@ class QuestionCacheService {
     try {
       _prefs = await SharedPreferences.getInstance();
       _isInitialized = true;
-      await _clearCacheOnAppUpdate();
+      // Defer version check to not block initialization
+      _clearCacheOnAppUpdate().then((_) {
+        AppLogger.info('Cache cleared on app update if needed');
+      }).catchError((e) {
+        AppLogger.error('Error in deferred cache clear', e);
+      });
       final initDuration = DateTime.now().difference(initStartTime);
       AppLogger.info('QuestionCacheService initialized in ${initDuration.inMilliseconds}ms');
 

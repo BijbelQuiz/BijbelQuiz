@@ -55,12 +55,16 @@ void main() async {
   final gameStatsProvider = GameStatsProvider();
   AppLogger.info('Game stats provider initialized');
 
+  // Initialize settings provider and wait for it
+  final settingsProvider = SettingsProvider();
+  await settingsProvider.loadSettings();
+
   AppLogger.info('Starting Flutter app with providers...');
   final appStartTime = DateTime.now();
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider.value(value: settingsProvider),
         ChangeNotifierProvider.value(value: gameStatsProvider),
         ChangeNotifierProvider(create: (_) => LessonProgressProvider()),
         Provider.value(value: analyticsService),
@@ -127,7 +131,8 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
       // Initialize Gemini service (with error handling for missing API key)
       AppLogger.info('Initializing Gemini service...');
       final geminiService = GeminiService.instance;
-      final geminiInitFuture = geminiService.initialize().catchError((e) {
+      // Defer Gemini initialization to not block startup
+      geminiService.initialize().catchError((e) {
         AppLogger.warning('Gemini service initialization failed (API key may be missing): $e');
         // Don't fail the entire app if Gemini API key is missing
         return null;
@@ -167,7 +172,6 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
         connectionService.initialize(),
         questionCacheService.initialize(),
         featureFlagsInitFuture,
-        geminiInitFuture,
         starTransactionInitFuture,
       ]);
 
