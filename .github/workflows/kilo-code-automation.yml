@@ -25,7 +25,7 @@ jobs:
         node-version: '18'
 
     - name: Install Kilo Code CLI
-      run: npm install -g @kilocode/cli
+      run: sudo npm install -g @kilocode/cli
 
     - name: Configure Kilo Code
       run: |
