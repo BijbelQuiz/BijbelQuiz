@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Mijn BijbelQuiz Statistieken</title>
     <meta name="description" content="Bekijk mijn BijbelQuiz statistieken - scores, voortgang en prestaties in de bijbelkennis quiz app.">
-    <meta name="keywords" content="bijbelquiz, statistieken, scores, bijbelkennis, quiz resultaten">
+    <meta name="keywords" content="bijbelquiz, statistieken, scores, bijbelkennis, quiz resultaten, bijbelquiz scores, bijbel quiz statistieken">
     <meta name="author" content="BijbelQuiz">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#4CAF50">
@@ -43,6 +43,28 @@
       }
     }
     </script>
+
+    <style>
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .footer-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+        .footer-separator {
+            margin: 0 0.5rem;
+            color: var(--text-secondary);
+        }
+    </style>
 </head>
 <body class="center-screen fade-in">
     <div class="container card">
@@ -56,6 +78,15 @@
                 <p>Statistieken laden...</p>
             </div>
         </div>
+
+        <footer>
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">Home</a>
+                <span class="footer-separator">•</span>
+                <a href="links.html" class="footer-link">Social Media</a>
+            </div>
+            &copy; 2025 BijbelQuiz
+        </footer>
     </div>
 
     <script>

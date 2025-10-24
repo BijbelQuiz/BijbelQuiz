@@ -6,53 +6,52 @@
 
   <!-- Homepage -->
   <url>
-    <loc>https://bijbelquiz.app/</loc>
-    <lastmod>2025-10-10</lastmod>
+    <loc>https://bijbelquiz.app/index.html</loc>
+    <lastmod>2025-10-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- Main pages -->
-  <url>
-    <loc>https://bijbelquiz.app/index.html</loc>
-    <lastmod>2025-10-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
   <url>
     <loc>https://bijbelquiz.app/privacy.html</loc>
-    <lastmod>2025-10-10</lastmod>
+    <lastmod>2025-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
     <loc>https://bijbelquiz.app/algemene-voorwaarden.html</loc>
-    <lastmod>2025-10-10</lastmod>
+    <lastmod>2025-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
     <loc>https://bijbelquiz.app/404.html</loc>
-    <lastmod>2025-10-10</lastmod>
+    <lastmod>2025-10-24</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <url>
     <loc>https://bijbelquiz.app/invite.html</loc>
-    <lastmod>2025-10-21</lastmod>
+    <lastmod>2025-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
     <loc>https://bijbelquiz.app/score.html</loc>
-    <lastmod>2025-10-21</lastmod>
+    <lastmod>2025-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://bijbelquiz.app/links.html</loc>
+    <lastmod>2025-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
 
  </urlset>

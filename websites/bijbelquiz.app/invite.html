@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Uitnodiging - BijbelQuiz</title>
     <meta name="description" content="Iemand heeft je uitgenodigd voor BijbelQuiz. Meld je aan voor de wachtlijst om updates te ontvangen.">
-    <meta name="keywords" content="uitnodiging, BijbelQuiz, wachtlijst, bijbelkennis, quiz">
+    <meta name="keywords" content="uitnodiging, BijbelQuiz, wachtlijst, bijbelkennis, quiz, bijbelquiz uitnodiging, wachtlijst bijbel quiz">
     <meta name="author" content="BijbelQuiz">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#4CAF50">
@@ -40,6 +40,28 @@
       }
     }
     </script>
+
+    <style>
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .footer-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+        .footer-separator {
+            margin: 0 0.5rem;
+            color: var(--text-secondary);
+        }
+    </style>
 </head>
 <body class="center-screen fade-in">
     <div class="container card">
@@ -55,6 +77,11 @@
         </div>
 
         <footer>
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">Home</a>
+                <span class="footer-separator">•</span>
+                <a href="links.html" class="footer-link">Social Media</a>
+            </div>
             &copy; 2025 BijbelQuiz
         </footer>
     </div>

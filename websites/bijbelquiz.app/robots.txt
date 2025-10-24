@@ -12,6 +12,9 @@ Allow: /privacy.html
 Allow: /algemene-voorwaarden.html
 Allow: /download.html
 Allow: /404.html
+Allow: /links.html
+Allow: /invite.html
+Allow: /score.html
 
 # Sitemap location
 Sitemap: https://bijbelquiz.app/sitemap.xml

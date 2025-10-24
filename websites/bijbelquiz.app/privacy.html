@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacybeleid - BijbelQuiz</title>
     <meta name="description" content="Privacybeleid van BijbelQuiz - Lees hoe wij uw gegevens beschermen, welke informatie wordt verzameld en uw rechten onder GDPR.">
-    <meta name="keywords" content="privacybeleid, gegevensbescherming, GDPR, BijbelQuiz privacy, persoonlijke gegevens">
+    <meta name="keywords" content="privacybeleid, gegevensbescherming, GDPR, BijbelQuiz privacy, persoonlijke gegevens, bijbelquiz privacy, privacy bijbel quiz app, gdpr bijbelquiz">
     <meta name="author" content="BijbelQuiz">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#4CAF50">
@@ -221,11 +221,35 @@
         </a>
 
         <footer>
+            <div class="footer-links">
+                <a href="algemene-voorwaarden.html" class="footer-link">Algemene voorwaarden</a>
+                <span class="footer-separator">•</span>
+                <a href="links.html" class="footer-link">Social Media</a>
+            </div>
             &copy; 2025 BijbelQuiz
         </footer>
     </div>
 
     <style>
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .footer-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+        .footer-separator {
+            margin: 0 0.5rem;
+            color: var(--text-secondary);
+        }
         .privacy-content {
             text-align: left;
             margin-bottom: 2rem;
