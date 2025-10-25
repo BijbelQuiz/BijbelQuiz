@@ -281,29 +281,8 @@ class NotificationService {
       // Log the scheduling attempt
       AppLogger.info('Scheduling notification for ${scheduledDate.toString()}');
       
-      // For Android 12+, we need to check for exact alarm permission
-      AndroidScheduleMode scheduleMode = AndroidScheduleMode.exactAllowWhileIdle;
-      if (await _isAndroid12OrHigher()) {
-        try {
-          // Check if we can schedule exact alarms
-          final androidImplementation = flutterLocalNotificationsPlugin
-              .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-          
-          if (androidImplementation != null) {
-            final canScheduleExactAlarms = await androidImplementation.canScheduleExactNotifications();
-            AppLogger.info('Can schedule exact alarms: $canScheduleExactAlarms');
-            
-            // If we can't schedule exact alarms, use inexact scheduling
-            if (canScheduleExactAlarms == false) {
-              scheduleMode = AndroidScheduleMode.inexact;
-            }
-          }
-        } catch (e) {
-          AppLogger.error('Error checking exact alarm permission: $e');
-          // Fall back to inexact scheduling if we can't check
-          scheduleMode = AndroidScheduleMode.inexact;
-        }
-      }
+      // Use inexact scheduling to avoid exact alarm restrictions
+      AndroidScheduleMode scheduleMode = AndroidScheduleMode.inexact;
       
       // Schedule the notification with updated parameters for Android 12+
       await flutterLocalNotificationsPlugin.zonedSchedule(
@@ -366,22 +345,6 @@ class NotificationService {
       if (Platform.isAndroid) {
         final androidImplementation = plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
         if (androidImplementation != null) {
-          // For Android 12+, we also need to check exact alarm permissions
-          final service = NotificationService();
-          if (await service._isAndroid12OrHigher()) {
-            try {
-              final canScheduleExact = await androidImplementation.canScheduleExactNotifications();
-              AppLogger.info('Can schedule exact notifications: $canScheduleExact');
-              if (canScheduleExact == false) {
-                AppLogger.info('App may need exact notification permission for reliable notifications on Android 12+');
-                // Note: On Android 12+, users may need to manually enable this in settings
-                // We can't automatically request this permission, but we can inform the user
-              }
-            } catch (e) {
-              AppLogger.error('Error checking exact notification permission: $e');
-            }
-          }
-          
           final granted = await androidImplementation.requestNotificationsPermission();
           return granted ?? true;
         }
