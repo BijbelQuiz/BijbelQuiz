@@ -119,98 +119,40 @@
     </script>
 </head>
 <body class="center-screen fade-in">
-    <div class="container card">
-        <!-- Header Section -->
-        <div class="hero-section">
-            <i class="material-icons icon-large">church</i>
-            <h1>BijbelQuiz</h1>
-            <p class="hero-description">Test je bijbelkennis met uitdagende vragen over personen, gebeurtenissen en geschiedenissen in de Bijbel. Speel alleen, met familie of vrienden!</p>
+    <div class="container hero-container">
+        <div class="hero-layout">
+            <!-- Left Column: Content -->
+            <div class="hero-content">
+                <div class="hero-text">
+                    <i class="material-icons icon-large">church</i>
+                    <h1>BijbelQuiz</h1>
+                    <p class="hero-description">Test je bijbelkennis met uitdagende vragen over personen, gebeurtenissen en geschiedenissen in de Bijbel. Speel alleen, met familie of vrienden! Klaar om te beginnen? Sluit je aan bij onze vroege testers, om de app in een vroeg stadium te helpen verbeteren!</p>
 
-            <!-- Call to Action Section - Moved to top -->
-            <div class="cta-section-hero">
-                <h2>Klaar om te beginnen?</h2>
-                <p>Sluit je aan bij onze vroege testers, om de app in een vroeg stadium te helpen verbeteren!</p>
+                    <div class="cta-buttons">
+                        <!-- Main waitlist signup button -->
+                        <a href="https://bijbelquiz.app/wachtlijst" class="btn primary btn-large" id="waitlistBtn">
+                            <i class="material-icons">mail</i>
+                            Meld je aan voor de wachtlijst
+                        </a>
 
-                <div class="cta-buttons">
-                    <!-- Main waitlist signup button -->
-                    <a href="https://bijbelquiz.app/wachtlijst" class="btn primary btn-large" id="waitlistBtn">
-                        <i class="material-icons">mail</i>
-                        Meld je aan voor de wachtlijst
-                    </a>
-
-                    <!-- Secondary play on web button -->
-                    <a href="https://play.bijbelquiz.app" class="btn secondary btn-large" id="playWebBtn" target="_blank" rel="noopener">
-                        <i class="material-icons">play_arrow</i>
-                        Speel direct op het web
-                    </a>
+                        <!-- Secondary play on web button -->
+                        <a href="https://play.bijbelquiz.app" class="btn secondary btn-large" id="playWebBtn" target="_blank" rel="noopener">
+                            <i class="material-icons">play_arrow</i>
+                            Speel direct op het web
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Features Section -->
-        <div class="features-section">
-            <h2>Waarom BijbelQuiz?</h2>
-            <div class="features-grid">
-                <div class="feature-item">
-                    <i class="material-icons feature-icon">school</i>
-                    <h3>Leer spelenderwijs</h3>
-                    <p>Verbeter je bijbelkennis terwijl je plezier hebt met uitdagende vragen.</p>
+            <!-- Right Column: Phone Screenshot -->
+            <div class="hero-image">
+                <div class="phone-mockup">
+                    <div class="phone-frame">
+                        <div class="phone-screen">
+                            <img src="screenshot.png" alt="BijbelQuiz App Screenshot" class="app-screenshot">
+                        </div>
+                    </div>
                 </div>
-                <div class="feature-item">
-                    <i class="material-icons feature-icon">group</i>
-                    <h3>Speel met anderen</h3>
-                    <p>Daag vrienden en familie uit voor een gezellige quizavond.</p>
-                </div>
-                <div class="feature-item">
-                    <i class="material-icons feature-icon">timeline</i>
-                    <h3>Verschillende niveaus</h3>
-                    <p>Van beginner tot expert - voor iedereen het juiste niveau.</p>
-                </div>
-                <div class="feature-item">
-                    <i class="material-icons feature-icon">emoji_events</i>
-                    <h3>Scoringsysteem</h3>
-                    <p>Houd je voortgang bij en verbeter je scores elke keer.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Testimonials Section -->
-        <div class="testimonials-section">
-            <h2>Wat anderen zeggen</h2>
-            <div class="testimonial">
-                <div class="testimonial-content">
-                    <p>"Ik gebruik de app bijna iedere dag, het zijn goede vragen!"</p>
-                </div>
-                <div class="testimonial-author">
-                    <strong>Een van onze vroege testers</strong>
-                    <!-- <span>Bijbelleraar</span> -->
-                </div>
-            </div>
-            <div class="testimonial">
-                <div class="testimonial-content">
-                    <p>"Door het mooie ontwerp van de app kan ik spelenderwijs leren!"</p>
-                </div>
-                <div class="testimonial-author">
-                    <strong>Een van onze vroege testers</strong>
-                    <!-- <span>Vader van drie kinderen</span> -->
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Stats Section -->
-        <div class="stats-section">
-            <div class="stat-item">
-                <div class="stat-number">500+</div>
-                <div class="stat-label">Bijbelvragen</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">20+</div>
-                <div class="stat-label">Vroege testers</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">50+</div>
-                <div class="stat-label">Bijbelboeken</div>
             </div>
         </div>
 
@@ -225,5 +167,196 @@
             <p>&copy; 2025 BijbelQuiz</p>
         </footer>
     </div>
+
+    <!-- Additional sections revealed on scroll -->
+    <section class="scroll-section fade-in" id="features">
+        <div class="container">
+            <h2>Ontdek de Functies</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="material-icons">question_answer</i>
+                    <h3>500+ Vragen</h3>
+                    <p>Uitdagende vragen over personen, gebeurtenissen en verhalen uit de Bijbel, van beginner tot expert.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="material-icons">group</i>
+                    <h3>Multiplayer Modus</h3>
+                    <p>Speel samen met familie of vrienden voor een gezellige en competitieve ervaring.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="material-icons">offline_bolt</i>
+                    <h3>Offline Beschikbaar</h3>
+                    <p>Geniet van de quiz zonder internetverbinding, perfect voor onderweg of in de kerk.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="material-icons">trending_up</i>
+                    <h3>Progressie Tracking</h3>
+                    <p>Volg je scores en verbeteringen om je bijbelkennis te zien groeien.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="scroll-section fade-in" id="how-it-works">
+        <div class="container">
+            <h2>Hoe Het Werkt</h2>
+            <div class="steps-grid">
+                <div class="step-item">
+                    <span class="step-number">1</span>
+                    <h3>Kies een Categorie</h3>
+                    <p>Selecteer onderwerpen zoals Oude Testament, Nieuwe Testament of specifieke boeken.</p>
+                </div>
+                <div class="step-item">
+                    <span class="step-number">2</span>
+                    <h3>Beantwoord Vragen</h3>
+                    <p>Test je kennis met meerkeuzevragen en krijg directe feedback.</p>
+                </div>
+                <div class="step-item">
+                    <span class="step-number">3</span>
+                    <h3>Verbeter en Deel</h3>
+                    <p>Zie je resultaten, leer van uitleg en deel je scores met anderen.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="scroll-section fade-in" id="testimonials">
+        <div class="container">
+            <h2>Wat Gebruikers Zeggen</h2>
+            <div class="testimonials-grid">
+                <blockquote class="testimonial-item">
+                    <p>"Een geweldige manier om mijn bijbelkennis op te frissen! De vragen zijn uitdagend en leerzaam."</p>
+                    <cite>- Jan, Bijbelstudiegroep</cite>
+                </blockquote>
+                <blockquote class="testimonial-item">
+                    <p>"Perfect voor familieavonden. We spelen het elke week en leren allemaal iets nieuws."</p>
+                    <cite>- Maria, Moeder van drie</cite>
+                </blockquote>
+            </div>
+        </div>
+    </section>
+
+    <!-- JavaScript for scroll reveal -->
+    <script>
+        // Intersection Observer for scroll-triggered animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all scroll sections
+        document.querySelectorAll('.scroll-section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Smooth scrolling for anchor links (if any)
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+
+    <!-- Additional CSS for scroll sections (inline for simplicity) -->
+    <style>
+        .scroll-section {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            padding: 60px 20px;
+            background: #f9f9f9;
+            margin: 20px 0;
+        }
+
+        .scroll-section:nth-child(even) {
+            background: #fff;
+        }
+
+        .scroll-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .features-grid, .steps-grid, .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .feature-item, .step-item {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .step-number {
+            background: #4CAF50;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .testimonial-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-style: italic;
+        }
+
+        .testimonial-item cite {
+            display: block;
+            margin-top: 10px;
+            font-style: normal;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        h3 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .features-grid, .steps-grid, .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </body>
 </html>
