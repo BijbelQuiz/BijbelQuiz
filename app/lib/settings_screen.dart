@@ -1354,41 +1354,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       final exportString = base64.encode(utf8.encode(json.encode(exportData)));
 
-      // Show dialog with export string
+      // Navigate to full-screen export screen
       if (context.mounted) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(strings.AppStrings.exportStatsTitle),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(strings.AppStrings.exportStatsMessage),
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: SelectableText(
-                        exportString,
-                        style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(strings.AppStrings.close),
-                ),
-              ],
-            );
-          },
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ExportStatsScreen(exportString: exportString),
+          ),
         );
       }
     } catch (e) {
@@ -1399,124 +1370,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _importStats(BuildContext context) async {
-    final controller = TextEditingController();
-
     if (context.mounted) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(strings.AppStrings.importStatsTitle),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(strings.AppStrings.importStatsMessage),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: controller,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    hintText: strings.AppStrings.importStatsHint,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(strings.AppStrings.cancel),
-              ),
-              TextButton(
-                onPressed: () async {
-                  final importString = controller.text.trim();
-                  if (importString.isEmpty) {
-                    showTopSnackBar(context, strings.AppStrings.pleaseEnterValidString, style: TopSnackBarStyle.error);
-                    return;
-                  }
-
-                  // Store context reference before async operations
-                  final safeContext = context;
-                  
-                  try {
-                    
-                    // Decode and verify
-                    final decoded = utf8.decode(base64.decode(importString));
-                    final importData = json.decode(decoded) as Map<String, dynamic>;
-
-                    final hash = importData['hash'] as String;
-                    final dataString = importData['data'] as String;
-                    String jsonString;
-
-                    // Detect format based on hash length: SHA-1 (40 chars) for new, SHA-256 (64 chars) for old
-                    if (hash.length == 40) {
-                      // New compressed format with SHA-1
-                      try {
-                        final compressedData = base64Url.decode(dataString);
-                        jsonString = utf8.decode(GZipDecoder().decodeBytes(compressedData));
-                        // Verify with SHA-1
-                        final computedHash = sha1.convert(utf8.encode(jsonString)).toString();
-                        if (computedHash != hash) {
-                          if (!safeContext.mounted) return;
-                          showTopSnackBar(safeContext, strings.AppStrings.invalidOrTamperedData, style: TopSnackBarStyle.error);
-                          return;
-                        }
-                      } catch (e) {
-                        if (!safeContext.mounted) return;
-                        showTopSnackBar(safeContext, strings.AppStrings.invalidOrTamperedData, style: TopSnackBarStyle.error);
-                        return;
-                      }
-                    } else {
-                      // Old uncompressed format with SHA-256
-                      jsonString = dataString;
-                      // Verify with SHA-256
-                      final computedHash = sha256.convert(utf8.encode(jsonString)).toString();
-                      if (computedHash != hash) {
-                        if (!safeContext.mounted) return;
-                        showTopSnackBar(safeContext, strings.AppStrings.invalidOrTamperedData, style: TopSnackBarStyle.error);
-                        return;
-                      }
-                    }
-
-                    // Parse data
-                    final data = json.decode(jsonString) as Map<String, dynamic>;
-
-                    // Load data into providers
-                    final gameStats = Provider.of<GameStatsProvider>(safeContext, listen: false);
-                    final lessonProgress = Provider.of<LessonProgressProvider>(safeContext, listen: false);
-                    final settings = Provider.of<SettingsProvider>(safeContext, listen: false);
-
-                    // Load game stats
-                    final gameStatsData = data['gameStats'] as Map<String, dynamic>;
-                    await gameStats.loadImportData(gameStatsData);
-
-                    // Load lesson progress
-                    final lessonData = data['lessonProgress'] as Map<String, dynamic>;
-                    await lessonProgress.loadImportData(lessonData);
-
-                    // Load settings
-                    final settingsData = data['settings'] as Map<String, dynamic>;
-                    await settings.loadImportData(settingsData);
-
-                    // Use a global key or other mechanism to avoid context issues
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (safeContext.mounted) {
-                        Navigator.of(safeContext).pop();
-                        if (safeContext.mounted) {
-                          showTopSnackBar(safeContext, strings.AppStrings.statsImportedSuccessfully, style: TopSnackBarStyle.success);
-                        }
-                      }
-                    });
-                  } catch (e) {
-                    if (!mounted) return;
-                    showTopSnackBar(safeContext, '${strings.AppStrings.failedToImportStats} $e', style: TopSnackBarStyle.error);
-                  }
-                },
-                child: Text(strings.AppStrings.importButton),
-              ),
-            ],
-          );
-        },
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const ImportStatsScreen(),
+        ),
       );
     }
   }
@@ -1823,4 +1681,198 @@ String _getThemeDropdownValue(SettingsProvider settings) {
   }
   // fallback to light if something is wrong
   return ThemeMode.light.name;
+}
+
+/// Full-screen screen for exporting stats
+class ExportStatsScreen extends StatelessWidget {
+  final String exportString;
+
+  const ExportStatsScreen({super.key, required this.exportString});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(strings.AppStrings.exportStatsTitle),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text(strings.AppStrings.exportStatsMessage),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SingleChildScrollView(
+                  child: SelectableText(
+                    exportString,
+                    style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(strings.AppStrings.close),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Full-screen screen for importing stats
+class ImportStatsScreen extends StatefulWidget {
+  const ImportStatsScreen({super.key});
+
+  @override
+  State<ImportStatsScreen> createState() => _ImportStatsScreenState();
+}
+
+class _ImportStatsScreenState extends State<ImportStatsScreen> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(strings.AppStrings.importStatsTitle),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(strings.AppStrings.importStatsMessage),
+            const SizedBox(height: 16),
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                maxLines: null,
+                expands: true,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  hintText: strings.AppStrings.importStatsHint,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(strings.AppStrings.cancel),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final importString = _controller.text.trim();
+                      if (importString.isEmpty) {
+                        showTopSnackBar(context, strings.AppStrings.pleaseEnterValidString, style: TopSnackBarStyle.error);
+                        return;
+                      }
+
+                      final safeContext = context;
+                      
+                      try {
+                        // Decode and verify
+                        final decoded = utf8.decode(base64.decode(importString));
+                        final importData = json.decode(decoded) as Map<String, dynamic>;
+
+                        final hash = importData['hash'] as String;
+                        final dataString = importData['data'] as String;
+                        String jsonString;
+
+                        // Detect format based on hash length: SHA-1 (40 chars) for new, SHA-256 (64 chars) for old
+                        if (hash.length == 40) {
+                          // New compressed format with SHA-1
+                          try {
+                            final compressedData = base64Url.decode(dataString);
+                            jsonString = utf8.decode(GZipDecoder().decodeBytes(compressedData));
+                            // Verify with SHA-1
+                            final computedHash = sha1.convert(utf8.encode(jsonString)).toString();
+                            if (computedHash != hash) {
+                              if (!safeContext.mounted) return;
+                              showTopSnackBar(safeContext, strings.AppStrings.invalidOrTamperedData, style: TopSnackBarStyle.error);
+                              return;
+                            }
+                          } catch (e) {
+                            if (!safeContext.mounted) return;
+                            showTopSnackBar(safeContext, strings.AppStrings.invalidOrTamperedData, style: TopSnackBarStyle.error);
+                            return;
+                          }
+                        } else {
+                          // Old uncompressed format with SHA-256
+                          jsonString = dataString;
+                          // Verify with SHA-256
+                          final computedHash = sha256.convert(utf8.encode(jsonString)).toString();
+                          if (computedHash != hash) {
+                            if (!safeContext.mounted) return;
+                            showTopSnackBar(safeContext, strings.AppStrings.invalidOrTamperedData, style: TopSnackBarStyle.error);
+                            return;
+                          }
+                        }
+
+                        // Parse data
+                        final data = json.decode(jsonString) as Map<String, dynamic>;
+
+                        // Load data into providers
+                        final gameStats = Provider.of<GameStatsProvider>(safeContext, listen: false);
+                        final lessonProgress = Provider.of<LessonProgressProvider>(safeContext, listen: false);
+                        final settings = Provider.of<SettingsProvider>(safeContext, listen: false);
+
+                        // Load game stats
+                        final gameStatsData = data['gameStats'] as Map<String, dynamic>;
+                        await gameStats.loadImportData(gameStatsData);
+
+                        // Load lesson progress
+                        final lessonData = data['lessonProgress'] as Map<String, dynamic>;
+                        await lessonProgress.loadImportData(lessonData);
+
+                        // Load settings
+                        final settingsData = data['settings'] as Map<String, dynamic>;
+                        await settings.loadImportData(settingsData);
+
+                        // Use a global key or other mechanism to avoid context issues
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (safeContext.mounted) {
+                            Navigator.of(safeContext).pop();
+                            if (safeContext.mounted) {
+                              showTopSnackBar(safeContext, strings.AppStrings.statsImportedSuccessfully, style: TopSnackBarStyle.success);
+                            }
+                          }
+                        });
+                      } catch (e) {
+                        if (!mounted) return;
+                        showTopSnackBar(safeContext, '${strings.AppStrings.failedToImportStats} $e', style: TopSnackBarStyle.error);
+                      }
+                    },
+                    child: Text(strings.AppStrings.importButton),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
