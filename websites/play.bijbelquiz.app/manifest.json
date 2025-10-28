@@ -4,11 +4,15 @@
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",
-    "theme_color": "#007AFF",
+    "theme_color": "#ffffff",
     "description": "Test je bijbelkennis. Alleen beschikbaar in het Nederlands.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
-    "categories": ["educatie", "entertainment", "lifestyle"],
+    "categories": [
+        "educatie",
+        "entertainment",
+        "lifestyle"
+    ],
     "lang": "nl",
     "icons": [
         {

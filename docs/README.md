@@ -1,6 +1,6 @@
 # BijbelQuiz
 
-**Version 1.2.1+3**
+**Version 1.1.2+3**
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?logo=flutter)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)

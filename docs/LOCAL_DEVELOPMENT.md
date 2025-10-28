@@ -147,7 +147,7 @@ Install platform-specific dependencies:
 
 ## Version Management
 
-- **Current Version**: 1.2.1+3
+- **Current Version**: 1.1.2+3
 - **Flutter SDK Range**: >=3.2.3 <4.0.0
 - **Dart SDK Range**: >=2.19 <4.0.0
 

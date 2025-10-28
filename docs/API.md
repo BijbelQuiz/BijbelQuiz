@@ -731,7 +731,7 @@ For API-related issues:
 
 ## Changelog
 
-### Version 1.2.1 (Latest)
+### Version 1.1.2 (Latest)
 - **Star Transaction System**: Complete star transaction management with history tracking
 - **New Star Endpoints**: Added `/v1/stars/*` endpoints for balance, transactions, and statistics
 - **Transaction Logging**: All star operations are logged with detailed metadata
