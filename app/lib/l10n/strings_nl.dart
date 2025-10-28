@@ -394,5 +394,7 @@ class AppStrings {
   static const String failedToImportStats = 'Kon statistieken niet importeren:';
   static const String invalidOrTamperedData = 'Ongeldige of gemanipuleerde gegevens';
   static const String pleaseEnterValidString = 'Voer een geldige tekst in';
-
+  static const String copyCode = 'Code kopiëren';
+  static const String codeCopied = 'Code gekopieerd naar klembord';
+  
 }

@@ -1742,9 +1742,23 @@ class ExportStatsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(strings.AppStrings.close),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: exportString));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(strings.AppStrings.codeCopied)),
+                    );
+                  },
+                  child: Text(strings.AppStrings.copyCode),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(strings.AppStrings.close),
+                ),
+              ],
             ),
           ],
         ),
