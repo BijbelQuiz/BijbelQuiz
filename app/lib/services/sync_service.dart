@@ -197,8 +197,35 @@ class SyncService {
   /// Checks if currently in a room
   bool get isInRoom => _currentRoomId != null;
 
+  String? _currentDeviceId;
+
   /// Gets the current room ID
   String? get currentRoomId => _currentRoomId;
+
+  /// Gets the current device ID
+  Future<String> getCurrentDeviceId() async {
+    if (_currentDeviceId == null) {
+      _currentDeviceId = await _getOrCreateDeviceId();
+    }
+    return _currentDeviceId!;
+  }
+
+  /// Gets the list of devices in the current room
+  Future<List<String>?> getDevicesInRoom() async {
+    if (_currentRoomId == null) return null;
+
+    try {
+      final response = await _client
+          .from(_tableName)
+          .select('devices')
+          .eq('room_id', _currentRoomId!)
+          .single();
+      return List<String>.from(response['devices'] as List<dynamic> ?? []);
+    } catch (e) {
+      AppLogger.error('Failed to get devices in room', e);
+      return null;
+    }
+  }
 
   /// Loads the saved room ID from SharedPreferences and rejoins the room
   Future<void> _loadSavedRoomId() async {

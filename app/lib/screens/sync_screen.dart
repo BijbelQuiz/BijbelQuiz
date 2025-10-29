@@ -19,11 +19,16 @@ class _SyncScreenState extends State<SyncScreen> {
   bool _isLoading = false;
   String? _error;
   String? _currentCode;
+  List<String>? _devicesInRoom;
+  bool _isLoadingDevices = false;
+  String? _currentDeviceId;
 
   @override
   void initState() {
     super.initState();
     _setupSyncListeners();
+    _getCurrentDeviceId();
+    _loadDevicesInRoom();
   }
 
   void _setupSyncListeners() {
@@ -32,6 +37,52 @@ class _SyncScreenState extends State<SyncScreen> {
     final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
 
     gameStatsProvider.setupSyncListener();
+  }
+
+  Future<void> _getCurrentDeviceId() async {
+    try {
+      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final deviceId = await gameStatsProvider.getCurrentDeviceId();
+      setState(() {
+        _currentDeviceId = deviceId;
+      });
+    } catch (e) {
+      AppLogger.error('Error getting current device ID', e);
+    }
+  }
+
+  Future<void> _loadDevicesInRoom() async {
+    if (!Provider.of<GameStatsProvider>(context, listen: false).syncService.isInRoom) {
+      setState(() {
+        _devicesInRoom = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoadingDevices = true;
+    });
+
+    try {
+      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final devices = await gameStatsProvider.getDevicesInRoom();
+      setState(() {
+        _devicesInRoom = devices;
+      });
+    } catch (e) {
+      AppLogger.error('Error loading devices in room', e);
+    } finally {
+      setState(() {
+        _isLoadingDevices = false;
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reload devices when the screen is rebuilt
+    _loadDevicesInRoom();
   }
 
   Future<void> _joinRoom() async {
@@ -457,6 +508,93 @@ class _SyncScreenState extends State<SyncScreen> {
                                 color: colorScheme.onSurface.withOpacity(0.7),
                               ),
                             ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Devices in room section
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceVariant,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.devices_other_rounded,
+                                  size: 24,
+                                  color: colorScheme.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  AppStrings.connectedDevices,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            _isLoadingDevices
+                                ? const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  )
+                                : _devicesInRoom != null && _devicesInRoom!.isNotEmpty
+                                    ? ListView.separated(
+                                        shrinkWrap: true,
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        itemCount: _devicesInRoom!.length,
+                                        separatorBuilder: (context, index) => const Divider(height: 1),
+                                        itemBuilder: (context, index) {
+                                          final device = _devicesInRoom![index];
+                                          final isCurrentDevice = _currentDeviceId != null && device == _currentDeviceId;
+                                          
+                                          return ListTile(
+                                            leading: Icon(
+                                              Icons.phone_android,
+                                              color: isCurrentDevice 
+                                                  ? colorScheme.primary 
+                                                  : colorScheme.onSurfaceVariant,
+                                            ),
+                                            title: Text(
+                                              isCurrentDevice 
+                                                  ? '${AppStrings.thisDevice} ($device)' 
+                                                  : device,
+                                              style: TextStyle(
+                                                fontWeight: isCurrentDevice 
+                                                    ? FontWeight.bold 
+                                                    : FontWeight.normal,
+                                              ),
+                                            ),
+                                            trailing: isCurrentDevice
+                                                ? Icon(
+                                                    Icons.check_circle,
+                                                    color: colorScheme.primary,
+                                                  )
+                                                : null,
+                                          );
+                                        },
+                                      )
+                                    : Container(
+                                        padding: const EdgeInsets.all(12),
+                                        child: Text(
+                                          AppStrings.noDevicesConnected,
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
                           ],
                         ),
                       ),

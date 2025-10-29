@@ -431,4 +431,9 @@ class AppStrings {
   static const String createSyncRoom = 'Maak een nieuwe sync-ruimte';
   static const String createSyncDescription = 'Start een nieuwe sync-ruimte en deel de code met anderen om verbinding te maken.';
   
+  // Sync Screen Device List Strings
+  static const String connectedDevices = 'Verbonden Apparaten';
+  static const String thisDevice = 'Dit Apparaat';
+  static const String noDevicesConnected = 'Geen apparaten verbonden';
+  
 }

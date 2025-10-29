@@ -437,6 +437,12 @@ class GameStatsProvider extends ChangeNotifier {
       loadImportData(data);
     });
   }
+
+  /// Gets the list of devices in the current room
+  Future<List<String>?> getDevicesInRoom() => syncService.getDevicesInRoom();
+
+  /// Gets the current device ID
+  Future<String> getCurrentDeviceId() => syncService.getCurrentDeviceId();
 }
 
 // Powerup model
