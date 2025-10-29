@@ -214,11 +214,17 @@ class _ProgressHeaderState extends State<ProgressHeader>
                                               color: cs.onPrimary,
                                             )
                                           : widget.dayWindow[i].state == DayState.fail
-                                              ? Icon(
-                                                  Icons.close,
-                                                  size: 18,
-                                                  color: cs.onErrorContainer,
-                                                )
+                                              ? _isCurrentDayNotCompleted(widget.dayWindow[i])
+                                                  ? Icon(
+                                                      Icons.pending_actions, // Using a more squiggle-like icon
+                                                      size: 18,
+                                                      color: cs.onSecondaryContainer, // Use appropriate color for orange background
+                                                    )
+                                                  : Icon(
+                                                      Icons.close,
+                                                      size: 18,
+                                                      color: cs.onErrorContainer,
+                                                    )
                                               : null,
                                 ),
                               ],
@@ -341,6 +347,12 @@ class _ProgressHeaderState extends State<ProgressHeader>
   }
 }
 
+bool _isCurrentDayNotCompleted(DayIndicator indicator) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  return indicator.date.isAtSameMomentAs(today);
+}
+
 String _getDayAbbreviation(DateTime date) {
   // Get the day of the week as an abbreviation
   switch (date.weekday) {
@@ -368,6 +380,13 @@ Color _getDayTextColor(BuildContext context, DayIndicator indicator) {
   if (indicator.state == DayState.future) {
     return cs.onSurfaceVariant;
   } else if (indicator.state == DayState.fail) {
+    // Check if this is the current day (index 2 in a 5-day window)
+    // For current day not completed yet, use orange/tangelo color instead of error
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    if (indicator.date.isAtSameMomentAs(today)) {
+      return cs.primary; // Use primary color to match the orange background intention
+    }
     return cs.error;
   } else {
     return cs.primary;
@@ -380,6 +399,12 @@ Color _getDayBackgroundColor(BuildContext context, DayIndicator indicator) {
     case DayState.success:
       return cs.primary;
     case DayState.fail:
+      // For the current day not completed yet, use orange instead of red
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      if (indicator.date.isAtSameMomentAs(today)) {
+        return cs.secondaryContainer; // Use orange-like color
+      }
       return cs.errorContainer;
     case DayState.freeze:
       return cs.surfaceContainerHighest;
@@ -394,6 +419,12 @@ Color _getDayBorderColor(BuildContext context, DayIndicator indicator) {
     case DayState.success:
       return cs.primary;
     case DayState.fail:
+      // For the current day not completed yet, use orange border instead of red
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      if (indicator.date.isAtSameMomentAs(today)) {
+        return cs.secondaryContainer; // Use orange-like color
+      }
       return cs.errorContainer;
     case DayState.freeze:
       return cs.outline;

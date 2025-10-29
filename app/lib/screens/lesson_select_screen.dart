@@ -171,7 +171,14 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
       } else if (_activeDays.contains(dayStr)) {
         state = DayState.success;
       } else {
-        state = DayState.fail;
+        // For the current day, show fail state only after the day is completely over
+        if (day.isAtSameMomentAs(today)) {
+          // Current day not done yet, use fail state for now (this will be handled in the UI with orange)
+          state = DayState.fail;
+        } else {
+          // Past day without activity
+          state = DayState.fail;
+        }
       }
       out.add(DayIndicator(date: day, state: state));
     }
