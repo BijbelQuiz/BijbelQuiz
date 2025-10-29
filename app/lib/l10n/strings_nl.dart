@@ -462,5 +462,7 @@ class AppStrings {
   static const String userIdDescriptionSetting = 'Maak of verbind met een BQID om je voortgang te synchroniseren';
   static const String createUserIdButton = 'Maak een BQID';
   static const String of = 'Of';
+  static const String tapToCopyUserId = 'Tik om BQID te kopiëren';
+  static const String userIdCopiedToClipboard = 'BQID gekopieerd naar klembord';
   
 }

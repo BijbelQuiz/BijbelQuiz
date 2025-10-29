@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'dart:math';
 import '../providers/game_stats_provider.dart';
@@ -535,50 +536,45 @@ class _SyncScreenState extends State<SyncScreen> {
                   child: Column(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(12),
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.link_rounded,
-                              size: 48,
-                              color: colorScheme.primary,
-                            ),
-                            const SizedBox(height: 16),
                             Text(
                               strings.AppStrings.yourUserId,
-                              style: theme.textTheme.titleMedium?.copyWith(
+                              style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
+                                color: colorScheme.primary,
                               ),
+                              textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 16),
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                               decoration: BoxDecoration(
-                                color: colorScheme.background,
-                                borderRadius: BorderRadius.circular(8),
+                                color: colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
                                 gameStatsProvider.syncService.currentRoomId ?? strings.AppStrings.unknownError,
-                                style: theme.textTheme.headlineSmall?.copyWith(
+                                style: theme.textTheme.headlineMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  letterSpacing: 2,
                                   color: colorScheme.primary,
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              strings.AppStrings.shareUserId,
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurface.withOpacity(0.7),
+                                textAlign: TextAlign.center,
                               ),
                             ),
                           ],
