@@ -30,6 +30,7 @@ class SettingsProvider extends ChangeNotifier {
   static const String _apiKeyKey = 'api_key';
   static const String _apiPortKey = 'api_port';
   static const String _showNavigationLabelsKey = 'show_navigation_labels';
+  static const String _layoutTypeKey = 'layout_type';
 
   SharedPreferences? _prefs;
   String _language = 'nl';
@@ -66,7 +67,12 @@ class SettingsProvider extends ChangeNotifier {
   
   late SyncService syncService;
 
+  // Layout type enum
+  static const String layoutGrid = 'grid';
+  static const String layoutList = 'list';
+  static const String layoutCompactGrid = 'compact_grid';
 
+  String _layoutType = layoutGrid; // default to grid
 
   SettingsProvider() {
     syncService = SyncService();
@@ -131,6 +137,9 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Whether to show labels in the navigation bar
   bool get showNavigationLabels => _showNavigationLabels;
+
+  /// The current lesson layout type
+  String get layoutType => _layoutType;
 
   String? get selectedCustomThemeKey => _selectedCustomThemeKey;
   Set<String> get unlockedThemes => _unlockedThemes;
@@ -362,6 +371,9 @@ class SettingsProvider extends ChangeNotifier {
 
       // Load navigation settings
       _showNavigationLabels = _getBoolSetting(_showNavigationLabelsKey, defaultValue: true);
+
+      // Load layout type setting
+      _layoutType = _prefs?.getString(_layoutTypeKey) ?? layoutGrid;
 
       final unlocked = _prefs?.getStringList(_unlockedThemesKey);
       if (unlocked != null) {
@@ -700,6 +712,24 @@ class SettingsProvider extends ChangeNotifier {
     );
   }
 
+  /// Updates the lesson layout type setting
+  Future<void> setLayoutType(String layoutType) async {
+    if (layoutType != layoutGrid && layoutType != layoutList && layoutType != layoutCompactGrid) {
+      AppLogger.warning('Invalid layout type setting attempted: $layoutType');
+      throw ArgumentError('Layout type must be "grid", "list", or "compact_grid"');
+    }
+
+    AppLogger.info('Changing lesson layout type from $_layoutType to $layoutType');
+    await _saveSetting(
+      action: () async {
+        _layoutType = layoutType;
+        await _prefs?.setString(_layoutTypeKey, layoutType);
+        AppLogger.info('Layout type saved successfully: $layoutType');
+      },
+      errorMessage: 'Failed to save layout type setting',
+    );
+  }
+
 
   // Helper method to safely get a boolean setting with type checking
   bool _getBoolSetting(String key, {required bool defaultValue}) {
@@ -747,6 +777,7 @@ class SettingsProvider extends ChangeNotifier {
       'apiKey': _apiKey,
       'apiPort': _apiPort,
       'showNavigationLabels': _showNavigationLabels,
+      'layoutType': _layoutType,
       'aiThemes': _aiThemes.map((key, value) => MapEntry(key, value.toJson())),
     };
   }
@@ -787,6 +818,9 @@ class SettingsProvider extends ChangeNotifier {
 
     // Load navigation settings
     _showNavigationLabels = data['showNavigationLabels'] ?? true;
+
+    // Load layout type
+    _layoutType = data['layoutType'] ?? layoutGrid;
 
     final lastDifficultyPopupMs = data['lastDifficultyPopup'];
     _lastDifficultyPopup = lastDifficultyPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastDifficultyPopupMs) : null;
@@ -850,6 +884,9 @@ class SettingsProvider extends ChangeNotifier {
 
     // Save navigation settings
     await _prefs?.setBool(_showNavigationLabelsKey, _showNavigationLabels);
+
+    // Save layout type
+    await _prefs?.setString(_layoutTypeKey, _layoutType);
 
     // Save difficulty popup tracking data
     if (_lastDifficultyPopup != null) {

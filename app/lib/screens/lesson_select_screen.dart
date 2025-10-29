@@ -334,6 +334,252 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
       properties: {'feedback': feedback});
   }
 
+  /// Builds the lesson layout based on the selected layout type
+  Widget _buildLessonLayout(String layoutType, List<int> filteredIndices, LessonProgressProvider progress, int totalLessons, int continueIdx, double tileMaxExtent, double gridAspect) {
+    switch (layoutType) {
+      case SettingsProvider.layoutList:
+        // List view layout
+        return SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final realIndex = filteredIndices[index];
+                final lesson = _lessons[realIndex];
+                final unlocked = progress.isLessonUnlocked(realIndex);
+                final stars = progress.bestStarsFor(lesson.id);
+                final recommended = totalLessons > 0 && realIndex == continueIdx;
+
+                final playable = unlocked && realIndex == continueIdx;
+
+                return Container(
+                  height: 120, // Fixed height for list items
+                  margin: const EdgeInsets.only(bottom: 8.0),
+                  child: LessonTile(
+                    lesson: lesson,
+                    index: realIndex,
+                    unlocked: unlocked,
+                    playable: playable,
+                    stars: stars,
+                    recommended: unlocked && recommended,
+                    onTap: () async {
+                      if (!unlocked) {
+                        Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_locked_lesson', properties: {'lesson_id': lesson.id});
+                        showTopSnackBar(context, 'Les is nog vergrendeld', style: TopSnackBarStyle.warning);
+                        return;
+                      }
+                      if (!playable) {
+                        Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_unplayable_lesson', properties: {'lesson_id': lesson.id});
+                        showTopSnackBar(context, 'Je kunt alleen de meest recente ontgrendelde les spelen', style: TopSnackBarStyle.info);
+                        return;
+                      }
+
+                      // Track lesson selection
+                      final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+
+                      // Track lesson system usage
+                      analyticsService.trackFeatureSuccess(context, AnalyticsService.FEATURE_LESSON_SYSTEM, additionalProperties: {
+                        'lesson_id': lesson.id,
+                        'lesson_category': lesson.category,
+                        'lesson_unlocked': unlocked,
+                      });
+
+                      // Track streak feature if this contributes to streak
+                      if (_streakDays > 0) {
+                        analyticsService.trackFeatureUsage(context, AnalyticsService.FEATURE_STREAK_TRACKING, AnalyticsService.ACTION_USED, additionalProperties: {
+                          'current_streak': _streakDays,
+                        });
+                      }
+
+                      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_lesson', properties: {'lesson_id': lesson.id});
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => QuizScreen(lesson: lesson, sessionLimit: lesson.maxQuestions),
+                        ),
+                      );
+                      // After returning from the quiz, refresh streak data and reload lessons if needed.
+                      if (!mounted) return;
+                      await _refreshStreakData();
+                      await _loadLessons();
+                    },
+                  ),
+                );
+              },
+              childCount: filteredIndices.length,
+            ),
+          ),
+        );
+      case SettingsProvider.layoutCompactGrid:
+        // Compact grid layout with smaller tiles
+        return SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          sliver: SliverGrid(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: tileMaxExtent * 0.8, // 80% of normal size
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: gridAspect * 0.9, // Slightly more square
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final realIndex = filteredIndices[index];
+                final lesson = _lessons[realIndex];
+                final unlocked = progress.isLessonUnlocked(realIndex);
+                final stars = progress.bestStarsFor(lesson.id);
+                final recommended = totalLessons > 0 && realIndex == continueIdx;
+
+                final playable = unlocked && realIndex == continueIdx;
+
+                return LessonTile(
+                  lesson: lesson,
+                  index: realIndex,
+                  unlocked: unlocked,
+                  playable: playable,
+                  stars: stars,
+                  recommended: unlocked && recommended,
+                  onTap: () async {
+                    if (!unlocked) {
+                      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_locked_lesson', properties: {'lesson_id': lesson.id});
+                      showTopSnackBar(context, 'Les is nog vergrendeld', style: TopSnackBarStyle.warning);
+                      return;
+                    }
+                    if (!playable) {
+                      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_unplayable_lesson', properties: {'lesson_id': lesson.id});
+                      showTopSnackBar(context, 'Je kunt alleen de meest recente ontgrendelde les spelen', style: TopSnackBarStyle.info);
+                      return;
+                    }
+
+                    // Track lesson selection
+                    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+
+                    // Track lesson system usage
+                    analyticsService.trackFeatureSuccess(context, AnalyticsService.FEATURE_LESSON_SYSTEM, additionalProperties: {
+                      'lesson_id': lesson.id,
+                      'lesson_category': lesson.category,
+                      'lesson_unlocked': unlocked,
+                    });
+
+                    // Track streak feature if this contributes to streak
+                    if (_streakDays > 0) {
+                      analyticsService.trackFeatureUsage(context, AnalyticsService.FEATURE_STREAK_TRACKING, AnalyticsService.ACTION_USED, additionalProperties: {
+                        'current_streak': _streakDays,
+                      });
+                    }
+
+                    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_lesson', properties: {'lesson_id': lesson.id});
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => QuizScreen(lesson: lesson, sessionLimit: lesson.maxQuestions),
+                      ),
+                    );
+                    // After returning from the quiz, refresh streak data and reload lessons if needed.
+                    if (!mounted) return;
+                    await _refreshStreakData();
+                    await _loadLessons();
+                  },
+                );
+              },
+              childCount: filteredIndices.length,
+              // Performance: disable keep-alives and semantic indexes for grid items.
+              // The grid lazily builds children and does not need to keep offscreen items alive.
+              addAutomaticKeepAlives: false,
+              addSemanticIndexes: false,
+              addRepaintBoundaries: true,
+            ),
+          ),
+        );
+      case SettingsProvider.layoutGrid:
+      default:
+        // Original grid layout
+        return SliverLayoutBuilder(
+          builder: (context, constraints) {
+            final cross = constraints.crossAxisExtent;
+            // Guard against transient zero-width cross axis which makes SliverGrid assert.
+            if (!cross.isFinite || cross <= 0) {
+              return const SliverToBoxAdapter(child: SizedBox.shrink());
+            }
+            return SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              sliver: SliverGrid(
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: tileMaxExtent,
+                  mainAxisSpacing: 14,
+                  crossAxisSpacing: 14,
+                  childAspectRatio: gridAspect,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final realIndex = filteredIndices[index];
+                    final lesson = _lessons[realIndex];
+                    final unlocked = progress.isLessonUnlocked(realIndex);
+                    final stars = progress.bestStarsFor(lesson.id);
+                    final recommended = totalLessons > 0 && realIndex == continueIdx;
+
+                    final playable = unlocked && realIndex == continueIdx;
+
+                    return LessonTile(
+                      lesson: lesson,
+                      index: realIndex,
+                      unlocked: unlocked,
+                      playable: playable,
+                      stars: stars,
+                      recommended: unlocked && recommended,
+                      onTap: () async {
+                        if (!unlocked) {
+                          Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_locked_lesson', properties: {'lesson_id': lesson.id});
+                          showTopSnackBar(context, 'Les is nog vergrendeld', style: TopSnackBarStyle.warning);
+                          return;
+                        }
+                        if (!playable) {
+                          Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_unplayable_lesson', properties: {'lesson_id': lesson.id});
+                          showTopSnackBar(context, 'Je kunt alleen de meest recente ontgrendelde les spelen', style: TopSnackBarStyle.info);
+                          return;
+                        }
+
+                        // Track lesson selection
+                        final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+
+                        // Track lesson system usage
+                        analyticsService.trackFeatureSuccess(context, AnalyticsService.FEATURE_LESSON_SYSTEM, additionalProperties: {
+                          'lesson_id': lesson.id,
+                          'lesson_category': lesson.category,
+                          'lesson_unlocked': unlocked,
+                        });
+
+                        // Track streak feature if this contributes to streak
+                        if (_streakDays > 0) {
+                          analyticsService.trackFeatureUsage(context, AnalyticsService.FEATURE_STREAK_TRACKING, AnalyticsService.ACTION_USED, additionalProperties: {
+                            'current_streak': _streakDays,
+                          });
+                        }
+
+                        Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_lesson', properties: {'lesson_id': lesson.id});
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => QuizScreen(lesson: lesson, sessionLimit: lesson.maxQuestions),
+                          ),
+                        );
+                        // After returning from the quiz, refresh streak data and reload lessons if needed.
+                        if (!mounted) return;
+                        await _refreshStreakData();
+                        await _loadLessons();
+                      },
+                    );
+                  },
+                  childCount: filteredIndices.length,
+                  // Performance: disable keep-alives and semantic indexes for grid items.
+                  // The grid lazily builds children and does not need to keep offscreen items alive.
+                  addAutomaticKeepAlives: false,
+                  addSemanticIndexes: false,
+                  addRepaintBoundaries: true,
+                ),
+              ),
+            );
+          },
+        );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -362,6 +608,10 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
             : screenWidth >= 360
                 ? 0.98
                 : 0.92;
+
+    // Get the selected layout type from settings
+    final settings = Provider.of<SettingsProvider>(context);
+    final layoutType = settings.layoutType;
 
     // Simplified: show all lessons without search/filters
     final filteredIndices = List.generate(_lessons.length, (i) => i);
@@ -524,92 +774,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                           ),
 
                           if (filteredIndices.isNotEmpty)
-                            SliverLayoutBuilder(
-                              builder: (context, constraints) {
-                                final cross = constraints.crossAxisExtent;
-                                // Guard against transient zero-width cross axis which makes SliverGrid assert.
-                                if (!cross.isFinite || cross <= 0) {
-                                  return const SliverToBoxAdapter(child: SizedBox.shrink());
-                                }
-                                return SliverPadding(
-                                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                                  sliver: SliverGrid(
-                                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                                      maxCrossAxisExtent: tileMaxExtent,
-                                      mainAxisSpacing: 14,
-                                      crossAxisSpacing: 14,
-                                      childAspectRatio: gridAspect,
-                                    ),
-                                    delegate: SliverChildBuilderDelegate(
-                                      (context, index) {
-                                        final realIndex = filteredIndices[index];
-                                        final lesson = _lessons[realIndex];
-                                        final unlocked = progress.isLessonUnlocked(realIndex);
-                                        final stars = progress.bestStarsFor(lesson.id);
-                                        final recommended = totalLessons > 0 && realIndex == continueIdx;
-
-                                        final playable = unlocked && realIndex == continueIdx;
-
-                                        return LessonTile(
-                                          lesson: lesson,
-                                          index: realIndex,
-                                          unlocked: unlocked,
-                                          playable: playable,
-                                          stars: stars,
-                                          recommended: unlocked && recommended,
-                                          onTap: () async {
-                                            if (!unlocked) {
-                                              Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_locked_lesson', properties: {'lesson_id': lesson.id});
-                                              showTopSnackBar(context, 'Les is nog vergrendeld', style: TopSnackBarStyle.warning);
-                                              return;
-                                            }
-                                            if (!playable) {
-                                              Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_unplayable_lesson', properties: {'lesson_id': lesson.id});
-                                              showTopSnackBar(context, 'Je kunt alleen de meest recente ontgrendelde les spelen', style: TopSnackBarStyle.info);
-                                              return;
-                                            }
-
-                                            // Track lesson selection
-                                            final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
-
-                                            // Track lesson system usage
-                                            analyticsService.trackFeatureSuccess(context, AnalyticsService.FEATURE_LESSON_SYSTEM, additionalProperties: {
-                                              'lesson_id': lesson.id,
-                                              'lesson_category': lesson.category,
-                                              'lesson_unlocked': unlocked,
-                                            });
-
-                                            // Track streak feature if this contributes to streak
-                                            if (_streakDays > 0) {
-                                              analyticsService.trackFeatureUsage(context, AnalyticsService.FEATURE_STREAK_TRACKING, AnalyticsService.ACTION_USED, additionalProperties: {
-                                                'current_streak': _streakDays,
-                                              });
-                                            }
-
-                                            Provider.of<AnalyticsService>(context, listen: false).capture(context, 'tap_lesson', properties: {'lesson_id': lesson.id});
-                                            await Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (_) => QuizScreen(lesson: lesson, sessionLimit: lesson.maxQuestions),
-                                              ),
-                                            );
-                                            // After returning from the quiz, refresh streak data and reload lessons if needed.
-                                            if (!mounted) return;
-                                            await _refreshStreakData();
-                                            await _loadLessons();
-                                          },
-                                        );
-                                      },
-                                      childCount: filteredIndices.length,
-                                      // Performance: disable keep-alives and semantic indexes for grid items.
-                                      // The grid lazily builds children and does not need to keep offscreen items alive.
-                                      addAutomaticKeepAlives: false,
-                                      addSemanticIndexes: false,
-                                      addRepaintBoundaries: true,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
+                            _buildLessonLayout(layoutType, filteredIndices, progress, totalLessons, continueIdx, tileMaxExtent, gridAspect),
                         ],
                       ),
                     );

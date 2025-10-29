@@ -323,6 +323,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 activeThumbColor: colorScheme.primary,
               ),
             ),
+            _buildSettingItem(
+              context,
+              settings,
+              colorScheme,
+              isSmallScreen,
+              isDesktop,
+              title: 'Leslay-out',
+              subtitle: 'Kies hoe lessen worden weergegeven',
+              icon: Icons.view_module,
+              child: DropdownButton<String>(
+                value: settings.layoutType,
+                items: [
+                  DropdownMenuItem(
+                    value: SettingsProvider.layoutGrid,
+                    child: Text('Grid'),
+                  ),
+                  DropdownMenuItem(
+                    value: SettingsProvider.layoutList,
+                    child: Text('Lijst'),
+                  ),
+                  DropdownMenuItem(
+                    value: SettingsProvider.layoutCompactGrid,
+                    child: Text('Compacte grid'),
+                  ),
+                ],
+                onChanged: (String? value) {
+                  if (value != null) {
+                    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+
+                    final analytics = Provider.of<AnalyticsService>(context, listen: false);
+                    analytics.capture(context, 'change_layout_type', properties: {'layout': value});
+                    analytics.trackFeatureSuccess(context, AnalyticsService.FEATURE_SETTINGS, additionalProperties: {
+                      'setting': 'layout_type',
+                      'value': value,
+                    });
+                    settings.setLayoutType(value);
+                  }
+                },
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: isSmallScreen ? 12 : 14,
+                ),
+                dropdownColor: colorScheme.surfaceContainerHighest,
+              ),
+            ),
           ],
         ),
 
