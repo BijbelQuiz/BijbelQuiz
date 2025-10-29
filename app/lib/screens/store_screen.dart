@@ -9,6 +9,7 @@ import '../widgets/top_snackbar.dart';
 import '../l10n/strings_nl.dart' as strings;
 import '../screens/quiz_screen.dart';
 import '../screens/ai_theme_designer_screen.dart';
+import '../screens/sync_screen.dart';
 import '../services/logger.dart';
 import '../services/gemini_service.dart';
 import '../models/ai_theme.dart';
@@ -306,9 +307,106 @@ class _StoreScreenState extends State<StoreScreen> {
                     isDesktop: isDesktop,
                   ),
 
+                  SizedBox(height: isDesktop ? 16 : 12),
+
+                  _buildBqidCard(
+                    context,
+                    title: strings.AppStrings.manageYourBqid,
+                    description: strings.AppStrings.manageYourBqidSubtitle,
+                    icon: Icons.person_add,
+                    iconColor: colorScheme.primary,
+                    isDesktop: isDesktop,
+                  ),
+
                   SizedBox(height: isDesktop ? 32 : 24),
                 ],
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBqidCard(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required IconData icon,
+    required Color iconColor,
+    required bool isDesktop,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: colorScheme.secondaryContainer, // Using secondaryContainer for a different background
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withAlpha((0.04 * 255).round()),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const SyncScreen(),
+              ),
+            );
+          },
+          child: Padding(
+            padding: EdgeInsets.all(isDesktop ? 20 : 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(isDesktop ? 16 : 12),
+                  decoration: BoxDecoration(
+                    color: iconColor.withAlpha((0.1 * 255).round()),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: iconColor,
+                    size: getResponsiveFontSize(context, 24),
+                  ),
+                ),
+                SizedBox(width: isDesktop ? 16 : 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSecondaryContainer, // Using onSecondaryContainer for text
+                        ),
+                      ),
+                      SizedBox(height: isDesktop ? 4 : 2),
+                      Text(
+                        description,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSecondaryContainer.withAlpha((0.8 * 255).round()), // Using onSecondaryContainer with some transparency
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: isDesktop ? 16 : 12),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: colorScheme.onSecondaryContainer.withAlpha((0.7 * 255).round()),
+                ),
+              ],
             ),
           ),
         ),
