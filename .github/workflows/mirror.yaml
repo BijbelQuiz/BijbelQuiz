@@ -14,16 +14,24 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all history for all branches and tags
 
-      - name: Mirror push to Codeberg
+      - name: Push branches and tags to Codeberg
         env:
           CODEBERG_REPO: https://ThomasNowProductions:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/BijbelQuiz/BijbelQuiz.git
         run: |
           git remote add codeberg $CODEBERG_REPO || true
-          git push --mirror codeberg
+          # Push all branches
+          git push --prune codeberg 'refs/remotes/origin/*:refs/heads/*' || true
+          # Push all tags
+          git push --prune --tags codeberg || true
+          # Push main branch specifically
+          git push codeberg main || true
 
-      - name: Mirror push to GitLab
+      - name: Push branches and tags to GitLab
         env:
           GITLAB_REPO: https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/ThomasNow/bijbelquiz.git
         run: |
           git remote add gitlab $GITLAB_REPO || true
+          # Push main branch
           git push gitlab main || echo "GitLab push failed, but continuing workflow"
+          # Push all tags
+          git push --tags gitlab || echo "GitLab tag push failed, but continuing workflow"
