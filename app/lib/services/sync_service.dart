@@ -6,7 +6,7 @@ import 'logger.dart';
 
 class SyncService {
   static const String _tableName = 'sync_rooms';
-  static const String _usernameKey = 'username';
+  static const String _usernamesKey = 'usernames';
   static const String _followingKey = 'following';
   static const String _followersKey = 'followers';
   late final SupabaseClient _client;
@@ -278,20 +278,14 @@ class SyncService {
     try {
       final deviceId = await _getOrCreateDeviceId();
       
-      // Get the user's current username to see if they're just updating the same one
-      final currentUsername = await getUsername(deviceId);
-      
-      // Only check for duplicates if the username is actually changing
-      if (currentUsername != username) {
-        // Check if the new username is already taken globally by a different device
-        final existingUsernameData = await _getUsernameRecord(username);
-        if (existingUsernameData != null) {
-          // Check if it's taken by a different device
-          final existingDeviceId = existingUsernameData['device_id'] as String?;
-          if (existingDeviceId != null && existingDeviceId != deviceId) {
-            AppLogger.warning('Username "$username" is already taken by device: $existingDeviceId');
-            return false;
-          }
+      // Check if the new username is already taken globally by a different device
+      final existingUsernameData = await _getUsernameRecord(username);
+      if (existingUsernameData != null) {
+        // Check if it's taken by a different device
+        final existingDeviceId = existingUsernameData['device_id'] as String?;
+        if (existingDeviceId != null && existingDeviceId != deviceId) {
+          AppLogger.warning('Username "$username" is already taken by device: $existingDeviceId');
+          return false;
         }
       }
 
@@ -304,12 +298,17 @@ class SyncService {
       
       final currentData = Map<String, dynamic>.from(roomResponse['data'] as Map<String, dynamic>? ?? {});
       
-      // Update the username data
-      currentData[_usernameKey] = {
+      // Get current usernames mapping or create new one
+      final usernamesData = Map<String, dynamic>.from(currentData[_usernamesKey] as Map<String, dynamic>? ?? {});
+      
+      // Update the username for this device
+      usernamesData[deviceId] = {
         'value': username,
-        'device_id': deviceId,
         'timestamp': DateTime.now().toIso8601String(),
       };
+
+      // Update the usernames data
+      currentData[_usernamesKey] = usernamesData;
 
       await _client
           .from(_tableName)
@@ -327,7 +326,7 @@ class SyncService {
   /// Helper method to find if a username exists anywhere and return its record
   Future<Map<String, dynamic>?> _getUsernameRecord(String username) async {
     try {
-      // Get all rooms that have username data
+      // Get all rooms that have usernames data
       final response = await _client
           .from(_tableName)
           .select('data')
@@ -336,11 +335,22 @@ class SyncService {
       for (final row in response) {
         final data = row['data'] as Map<String, dynamic>?;
         if (data != null) {
-          final usernameData = data[_usernameKey] as Map<String, dynamic>?;
-          if (usernameData != null) {
-            final storedUsername = usernameData['value'] as String?;
-            if (storedUsername != null && storedUsername.toLowerCase() == username.toLowerCase()) {
-              return usernameData; // Return the full username data record
+          final usernamesData = data[_usernamesKey] as Map<String, dynamic>?;
+          if (usernamesData != null) {
+            // Check each device's username
+            for (final entry in usernamesData.entries) {
+              final deviceId = entry.key;
+              final usernameInfo = entry.value as Map<String, dynamic>?;
+              if (usernameInfo != null) {
+                final storedUsername = usernameInfo['value'] as String?;
+                if (storedUsername != null && storedUsername.toLowerCase() == username.toLowerCase()) {
+                  return {
+                    'value': storedUsername,
+                    'device_id': deviceId,
+                    'timestamp': usernameInfo['timestamp'],
+                  }; // Return the full username data record
+                }
+              }
             }
           }
         }
@@ -360,24 +370,20 @@ class SyncService {
       final roomData = await getRoomData();
       if (roomData == null) return null;
 
-      final usernameData = roomData[_usernameKey] as Map<String, dynamic>?;
-      if (usernameData == null) return null;
+      final usernamesData = roomData[_usernamesKey] as Map<String, dynamic>?;
+      if (usernamesData == null) return null;
 
-      // If no specific device ID requested, get current device's username
-      if (deviceId == null) {
-        final currentDeviceId = await _getOrCreateDeviceId();
-        final storedDeviceId = usernameData['device_id'] as String?;
-        if (storedDeviceId == currentDeviceId) {
-          return usernameData['value'] as String?;
-        }
-      } else {
-        final storedDeviceId = usernameData['device_id'] as String?;
-        if (storedDeviceId == deviceId) {
-          return usernameData['value'] as String?;
-        }
+      String? targetDeviceId = deviceId;
+      if (targetDeviceId == null) {
+        targetDeviceId = await _getOrCreateDeviceId();
       }
 
-      return usernameData['value'] as String?;
+      final usernameInfo = usernamesData[targetDeviceId] as Map<String, dynamic>?;
+      if (usernameInfo != null) {
+        return usernameInfo['value'] as String?;
+      }
+
+      return null;
     } catch (e) {
       AppLogger.error('Failed to get username', e);
       return null;
@@ -392,12 +398,12 @@ class SyncService {
       final roomData = await getRoomData();
       if (roomData == null) return null;
 
-      final usernameData = roomData[_usernameKey] as Map<String, dynamic>?;
-      if (usernameData == null) return null;
+      final usernamesData = roomData[_usernamesKey] as Map<String, dynamic>?;
+      if (usernamesData == null) return null;
 
-      final storedDeviceId = usernameData['device_id'] as String?;
-      if (storedDeviceId == deviceId) {
-        return usernameData['value'] as String?;
+      final usernameInfo = usernamesData[deviceId] as Map<String, dynamic>?;
+      if (usernameInfo != null) {
+        return usernameInfo['value'] as String?;
       }
 
       return null;
@@ -415,16 +421,21 @@ class SyncService {
       final roomData = await getRoomData();
       if (roomData == null) return null;
 
-      // For now, we store username per device, so we have one entry
-      final usernameData = roomData[_usernameKey] as Map<String, dynamic>?;
-      if (usernameData == null) return null;
+      final usernamesData = roomData[_usernamesKey] as Map<String, dynamic>?;
+      if (usernamesData == null) return null;
 
       final deviceUsername = <String, String>{};
-      final deviceId = usernameData['device_id'] as String?;
-      final username = usernameData['value'] as String?;
-
-      if (deviceId != null && username != null) {
-        deviceUsername[deviceId] = username;
+      
+      // Iterate through all device IDs and their usernames
+      for (final entry in usernamesData.entries) {
+        final deviceId = entry.key;
+        final usernameInfo = entry.value as Map<String, dynamic>?;
+        if (usernameInfo != null) {
+          final username = usernameInfo['value'] as String?;
+          if (username != null) {
+            deviceUsername[deviceId] = username;
+          }
+        }
       }
 
       return deviceUsername;
@@ -450,12 +461,17 @@ class SyncService {
       
       final currentData = Map<String, dynamic>.from(roomResponse['data'] as Map<String, dynamic>? ?? {});
       
-      // Update the username data
-      currentData[_usernameKey] = {
+      // Get current usernames mapping or create new one
+      final usernamesData = Map<String, dynamic>.from(currentData[_usernamesKey] as Map<String, dynamic>? ?? {});
+      
+      // Update the username for this device
+      usernamesData[deviceId] = {
         'value': username,
-        'device_id': deviceId,
         'timestamp': DateTime.now().toIso8601String(),
       };
+
+      // Update the usernames data
+      currentData[_usernamesKey] = usernamesData;
 
       await _client
           .from(_tableName)
@@ -466,17 +482,28 @@ class SyncService {
     }
   }
 
-  /// Adds a username listener
+  /// Adds a username listener for the current device
   void addUsernameListener(Function(String?) callback) {
-    addListener(_usernameKey, (data) {
-      callback(data['value'] as String?);
+    addListener(_usernamesKey, (data) async {
+      // Get current device ID to return its specific username
+      final currentDeviceId = await _getOrCreateDeviceId();
+      if (data is Map<String, dynamic>) {
+        final usernameInfo = data[currentDeviceId] as Map<String, dynamic>?;
+        if (usernameInfo != null) {
+          callback(usernameInfo['value'] as String?);
+        } else {
+          callback(null);
+        }
+      } else {
+        callback(null);
+      }
     });
   }
 
   /// Checks if a username already exists across all rooms
   Future<bool> isUsernameTaken(String username) async {
     try {
-      // Get all rooms that have username data
+      // Get all rooms that have usernames data
       final response = await _client
           .from(_tableName)
           .select('data')
@@ -485,11 +512,17 @@ class SyncService {
       for (final row in response) {
         final data = row['data'] as Map<String, dynamic>?;
         if (data != null) {
-          final usernameData = data[_usernameKey] as Map<String, dynamic>?;
-          if (usernameData != null) {
-            final storedUsername = usernameData['value'] as String?;
-            if (storedUsername != null && storedUsername.toLowerCase() == username.toLowerCase()) {
-              return true; // Username is already taken
+          final usernamesData = data[_usernamesKey] as Map<String, dynamic>?;
+          if (usernamesData != null) {
+            // Check each device's username
+            for (final entry in usernamesData.entries) {
+              final usernameInfo = entry.value as Map<String, dynamic>?;
+              if (usernameInfo != null) {
+                final storedUsername = usernameInfo['value'] as String?;
+                if (storedUsername != null && storedUsername.toLowerCase() == username.toLowerCase()) {
+                  return true; // Username is already taken
+                }
+              }
             }
           }
         }
@@ -514,12 +547,18 @@ class SyncService {
       for (final row in response) {
         final data = row['data'] as Map<String, dynamic>?;
         if (data != null) {
-          final usernameData = data[_usernameKey] as Map<String, dynamic>?;
-          if (usernameData != null) {
-            final storedUsername = usernameData['value'] as String?;
-            final deviceId = usernameData['device_id'] as String?;
-            if (storedUsername != null && deviceId != null) {
-              globalUsernames[deviceId] = storedUsername;
+          final usernamesData = data[_usernamesKey] as Map<String, dynamic>?;
+          if (usernamesData != null) {
+            // Iterate through all device IDs and their usernames
+            for (final entry in usernamesData.entries) {
+              final deviceId = entry.key;
+              final usernameInfo = entry.value as Map<String, dynamic>?;
+              if (usernameInfo != null) {
+                final storedUsername = usernameInfo['value'] as String?;
+                if (storedUsername != null) {
+                  globalUsernames[deviceId] = storedUsername;
+                }
+              }
             }
           }
         }
@@ -578,7 +617,7 @@ class SyncService {
   /// Searches for users by username (globally across all rooms)
   Future<List<Map<String, dynamic>>?> searchUsers(String query) async {
     try {
-      // Get all rooms that have username data
+      // Get all rooms that have usernames data
       final response = await _client
           .from(_tableName)
           .select('data, room_id')
@@ -589,28 +628,34 @@ class SyncService {
       for (final row in response) {
         final data = row['data'] as Map<String, dynamic>?;
         if (data != null) {
-          final usernameData = data[_usernameKey] as Map<String, dynamic>?;
-          if (usernameData != null) {
-            final username = usernameData['value'] as String?;
-            final deviceId = usernameData['device_id'] as String?;
-            if (username != null && 
-                deviceId != null && 
-                username.toLowerCase().contains(query.toLowerCase())) {
-              // Only add if not already in the list (to avoid duplicates)
-              bool alreadyAdded = false;
-              for (final existingUser in matchingUsers) {
-                if ((existingUser['device_id'] as String?) == deviceId) {
-                  alreadyAdded = true;
-                  break;
+          final usernamesData = data[_usernamesKey] as Map<String, dynamic>?;
+          if (usernamesData != null) {
+            // Check each device's username
+            for (final entry in usernamesData.entries) {
+              final deviceId = entry.key;
+              final usernameInfo = entry.value as Map<String, dynamic>?;
+              if (usernameInfo != null) {
+                final username = usernameInfo['value'] as String?;
+                if (username != null && 
+                    deviceId != null && 
+                    username.toLowerCase().contains(query.toLowerCase())) {
+                  // Only add if not already in the list (to avoid duplicates)
+                  bool alreadyAdded = false;
+                  for (final existingUser in matchingUsers) {
+                    if ((existingUser['device_id'] as String?) == deviceId) {
+                      alreadyAdded = true;
+                      break;
+                    }
+                  }
+                  
+                  if (!alreadyAdded) {
+                    matchingUsers.add({
+                      'username': username,
+                      'device_id': deviceId,
+                      'timestamp': usernameInfo['timestamp'],
+                    });
+                  }
                 }
-              }
-              
-              if (!alreadyAdded) {
-                matchingUsers.add({
-                  'username': username,
-                  'device_id': deviceId,
-                  'timestamp': usernameData['timestamp'],
-                });
               }
             }
           }
@@ -764,7 +809,7 @@ class SyncService {
   /// Gets the username for a specific device ID globally
   Future<String?> getUsernameByDeviceId(String deviceId) async {
     try {
-      // Get all rooms that have username data
+      // Get all rooms that have usernames data
       final response = await _client
           .from(_tableName)
           .select('data')
@@ -773,12 +818,15 @@ class SyncService {
       for (final row in response) {
         final data = row['data'] as Map<String, dynamic>?;
         if (data != null) {
-          final usernameData = data[_usernameKey] as Map<String, dynamic>?;
-          if (usernameData != null) {
-            final storedUsername = usernameData['value'] as String?;
-            final storedDeviceId = usernameData['device_id'] as String?;
-            if (storedDeviceId != null && storedDeviceId == deviceId && storedUsername != null) {
-              return storedUsername;
+          final usernamesData = data[_usernamesKey] as Map<String, dynamic>?;
+          if (usernamesData != null) {
+            // Check if the target device ID exists in this room's usernames
+            final usernameInfo = usernamesData[deviceId] as Map<String, dynamic>?;
+            if (usernameInfo != null) {
+              final storedUsername = usernameInfo['value'] as String?;
+              if (storedUsername != null) {
+                return storedUsername;
+              }
             }
           }
         }
