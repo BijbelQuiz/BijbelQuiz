@@ -72,100 +72,108 @@ class _SocialScreenState extends State<SocialScreen> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: isDesktop ? 800 : (isTablet ? 600 : double.infinity),
-            ),
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.symmetric(
-                horizontal: isDesktop ? 32 : (isTablet ? 24 : 16),
-                vertical: 0,
-              ),
-              child: Column(
-                children: [
-                  // BQID Management Card at the top of the page
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: colorScheme.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colorScheme.shadow.withValues(alpha: 0.04),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          Provider.of<AnalyticsService>(context, listen: false).capture(context, 'open_sync_screen');
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const SyncScreen(),
-                            ),
-                          );
-                        },
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.only(
+            left: isDesktop ? 32 : (isTablet ? 24 : 16),
+            right: isDesktop ? 32 : (isTablet ? 24 : 16),
+            top: 0,
+            bottom: 0,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isDesktop ? 800 : (isTablet ? 600 : double.infinity),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // BQID Management Card at the top of the page with minimum margin
+                    Container(
+                      width: double.infinity,
+                      margin: EdgeInsets.zero, // Ensure zero margin at the top
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
                         borderRadius: BorderRadius.circular(16),
-                        child: Padding(
-                          padding: EdgeInsets.all(isDesktop ? 16 : 12),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.primary.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(
-                                  Icons.person_add,
-                                  size: 20,
-                                  color: colorScheme.primary,
-                                ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.shadow.withValues(alpha: 0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            Provider.of<AnalyticsService>(context, listen: false).capture(context, 'open_sync_screen');
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const SyncScreen(),
                               ),
-                              SizedBox(width: isDesktop ? 12 : 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      strings.AppStrings.manageYourBqid,
-                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: colorScheme.onSurface,
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Padding(
+                            padding: EdgeInsets.all(isDesktop ? 16 : 12),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primary.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    Icons.person_add,
+                                    size: 20,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                                SizedBox(width: isDesktop ? 12 : 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        strings.AppStrings.manageYourBqid,
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: colorScheme.onSurface,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      strings.AppStrings.manageYourBqidSubtitle,
-                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        color: colorScheme.onSurface.withValues(alpha: 0.7),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        strings.AppStrings.manageYourBqidSubtitle,
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: colorScheme.onSurface.withValues(alpha: 0.7),
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                size: 16,
-                                color: colorScheme.onSurface.withValues(alpha: 0.5),
-                              ),
-                            ],
+                                Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  size: 16,
+                                  color: colorScheme.onSurface.withValues(alpha: 0.5),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  _socialFeaturesEnabled
-                    ? _buildSocialFeaturesContent(colorScheme, isDesktop, isTablet)
-                    : _buildComingSoonContent(colorScheme, isDesktop, isTablet),
-                ],
+                    const SizedBox(height: 24), // Add some spacing below the BQID card
+                    _socialFeaturesEnabled
+                      ? _buildSocialFeaturesContent(colorScheme, isDesktop, isTablet)
+                      : _buildComingSoonContent(colorScheme, isDesktop, isTablet),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -174,7 +182,7 @@ class _SocialScreenState extends State<SocialScreen> {
 
   Widget _buildSocialFeaturesContent(ColorScheme colorScheme, bool isDesktop, bool isTablet) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Icon(
           Icons.groups_rounded,
@@ -205,7 +213,7 @@ class _SocialScreenState extends State<SocialScreen> {
 
   Widget _buildComingSoonContent(ColorScheme colorScheme, bool isDesktop, bool isTablet) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Icon(
           Icons.groups_rounded,
