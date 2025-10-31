@@ -7,6 +7,100 @@ import '../utils/bijbelquiz_gen_utils.dart';
 import '../l10n/strings_nl.dart' as strings;
 import '../constants/urls.dart';
 
+class AnimatedCounter extends StatefulWidget {
+  final num endNumber;
+  final Duration duration;
+  final TextStyle? style;
+  final String prefix;
+  final String suffix;
+  final int decimalPlaces;
+
+  const AnimatedCounter({
+    super.key,
+    required this.endNumber,
+    this.duration = const Duration(milliseconds: 1000),
+    this.style,
+    this.prefix = '',
+    this.suffix = '',
+    this.decimalPlaces = 0,
+  });
+
+  @override
+  State<AnimatedCounter> createState() => _AnimatedCounterState();
+}
+
+class _AnimatedCounterState extends State<AnimatedCounter>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  double _currentValue = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: widget.duration, vsync: this);
+    _animation = Tween<double>(
+      begin: 0,
+      end: widget.endNumber.toDouble(),
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    _animation.addListener(() {
+      setState(() {
+        _currentValue = _animation.value;
+      });
+    });
+
+    // Start animation after a short delay to ensure widget is visible
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller.forward();
+    });
+  }
+
+  @override
+  void didUpdateWidget(AnimatedCounter oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.endNumber != widget.endNumber) {
+      // Reset and animate to new value
+      _currentValue = oldWidget.endNumber.toDouble();
+      _controller.reset();
+      _animation = Tween<double>(
+        begin: _currentValue,
+        end: widget.endNumber.toDouble(),
+      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+      
+      _animation.addListener(() {
+        setState(() {
+          _currentValue = _animation.value;
+        });
+      });
+      
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String displayValue;
+    if (widget.decimalPlaces == 0) {
+      displayValue = '${widget.prefix}${_currentValue.toInt()}${widget.suffix}';
+    } else {
+      displayValue = '${widget.prefix}${_currentValue.toStringAsFixed(widget.decimalPlaces)}${widget.suffix}';
+    }
+
+    return Text(
+      displayValue,
+      style: widget.style,
+      textAlign: TextAlign.center,
+    );
+  }
+}
+
 class BijbelQuizGenScreen extends StatefulWidget {
   const BijbelQuizGenScreen({super.key});
 
@@ -239,13 +333,13 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
-          Text(
-            '$totalQuestions',
+          AnimatedCounter(
+            endNumber: totalQuestions,
+            duration: const Duration(milliseconds: 1500),
             style: Theme.of(context).textTheme.displayLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -281,13 +375,13 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
-          Text(
-            '${gameStats.incorrectAnswers}',
+          AnimatedCounter(
+            endNumber: gameStats.incorrectAnswers,
+            duration: const Duration(milliseconds: 1500),
             style: Theme.of(context).textTheme.displayLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -333,12 +427,14 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          Text(
-            '${timeTracking.getTotalTimeSpentInHours().toStringAsFixed(1)} ${strings.AppStrings.hours}',
+          AnimatedCounter(
+            endNumber: timeTracking.getTotalTimeSpentInHours(),
+            decimalPlaces: 1,
+            suffix: ' ${strings.AppStrings.hours}',
+            duration: const Duration(milliseconds: 1500),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: Colors.black,
                 ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -375,13 +471,13 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
-          Text(
-            '${gameStats.longestStreak}',
+          AnimatedCounter(
+            endNumber: gameStats.longestStreak,
+            duration: const Duration(milliseconds: 1500),
             style: Theme.of(context).textTheme.displayLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -436,20 +532,60 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
             ),
             child: Column(
               children: [
-                _buildStatRow(context, gameStats.score.toString(),
-                    strings.AppStrings.correctAnswers, Colors.black),
+                _buildStatRow(context, 
+                  AnimatedCounter(
+                    endNumber: gameStats.score,
+                    duration: const Duration(milliseconds: 1500),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  strings.AppStrings.correctAnswers, 
+                  Colors.black
+                ),
                 const Divider(height: 16, thickness: 1),
-                _buildStatRow(context, '${correctPercentage.toString()}%',
-                    strings.AppStrings.accuracy, Colors.black),
+                _buildStatRow(context, 
+                  AnimatedCounter(
+                    endNumber: correctPercentage,
+                    duration: const Duration(milliseconds: 1500),
+                    suffix: '%',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  strings.AppStrings.accuracy, 
+                  Colors.black
+                ),
                 const Divider(height: 16, thickness: 1),
                 _buildStatRow(
                     context,
-                    timeTracking.getTotalTimeSpentInHours().toStringAsFixed(1),
+                    AnimatedCounter(
+                      endNumber: timeTracking.getTotalTimeSpentInHours(),
+                      duration: const Duration(milliseconds: 1500),
+                      decimalPlaces: 1,
+                      suffix: ' ${strings.AppStrings.hours}',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
                     strings.AppStrings.hours,
                     Colors.black),
                 const Divider(height: 16, thickness: 1),
-                _buildStatRow(context, gameStats.currentStreak.toString(),
-                    strings.AppStrings.currentStreak, Colors.black),
+                _buildStatRow(context,
+                  AnimatedCounter(
+                    endNumber: gameStats.currentStreak,
+                    duration: const Duration(milliseconds: 1500),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  strings.AppStrings.currentStreak, 
+                  Colors.black
+                ),
               ],
             ),
           ),
@@ -459,7 +595,7 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
   }
 
   Widget _buildStatRow(
-      BuildContext context, String value, String label, Color color) {
+      BuildContext context, Widget valueWidget, String label, Color color) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -471,13 +607,7 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
                   color: Colors.black,
                 ),
           ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-          ),
+          valueWidget,
         ],
       ),
     );
