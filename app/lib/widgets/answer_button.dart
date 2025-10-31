@@ -239,101 +239,222 @@ class _AnswerButtonState extends State<AnswerButton>
                         width: 1.5,
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        if (widget.letter != null)
-                          Container(
-                            width: indicatorSize,
-                            height: indicatorSize,
-                            decoration: BoxDecoration(
-                              color: widget.feedback == AnswerFeedback.none
-                                  ? widget.colorScheme.primary
-                                      .withAlpha((0.1 * 255).round())
-                                  : Colors.white.withAlpha((0.2 * 255).round()),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: widget.feedback == AnswerFeedback.none
-                                    ? widget.colorScheme.primary
-                                        .withAlpha((0.2 * 255).round())
-                                    : Colors.white.withAlpha((0.3 * 255).round()),
-                                width: 1,
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                widget.letter!,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        // If available width is too small, stack the elements vertically
+                        bool useVerticalLayout = constraints.maxWidth < 100;
+
+                        if (useVerticalLayout) {
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (widget.letter != null) ...[
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: Container(
+                                    width: indicatorSize,
+                                    height: indicatorSize,
+                                    decoration: BoxDecoration(
+                                      color: widget.feedback == AnswerFeedback.none
+                                          ? widget.colorScheme.primary
+                                              .withAlpha((0.1 * 255).round())
+                                          : Colors.white.withAlpha((0.2 * 255).round()),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: widget.feedback == AnswerFeedback.none
+                                            ? widget.colorScheme.primary
+                                                .withAlpha((0.2 * 255).round())
+                                            : Colors.white.withAlpha((0.3 * 255).round()),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        widget.letter!,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                              color: _iconColor,
+                                              fontSize:
+                                                  getResponsiveFontSize(context, 16),
+                                            ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                              ],
+                              Text(
+                                widget.label,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleMedium
                                     ?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: _iconColor,
-                                      fontSize:
-                                          getResponsiveFontSize(context, 16),
+                                      fontWeight: FontWeight.w500,
+                                      color: _textColor,
+                                      height: 1.4,
+                                      letterSpacing: 0.1,
+                                      fontSize: fontSize,
                                     ),
+                                textAlign: TextAlign.center,
                               ),
-                            ),
-                          ),
-                        if (widget.letter != null)
-                          SizedBox(width: widget.isCompact ? (isDesktop ? 12 : 8) : (isDesktop ? 18 : 16)),
-                        Expanded(
-                          child: Text(
-                            widget.label,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  color: _textColor,
-                                  height: 1.4,
-                                  letterSpacing: 0.1,
-                                  fontSize: fontSize,
+                              if (widget.feedback == AnswerFeedback.correct ||
+                                  widget.feedback == AnswerFeedback.revealedCorrect) ...[
+                                const SizedBox(height: 4),
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: widget.feedback == AnswerFeedback.correct
+                                          ? Colors.white.withAlpha((0.2 * 255).round())
+                                          : widget.colorScheme.primary
+                                              .withAlpha((0.1 * 255).round()),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: widget.feedback ==
+                                              AnswerFeedback.revealedCorrect
+                                          ? Border.all(
+                                              color: widget.colorScheme.primary
+                                                  .withAlpha((0.3 * 255).round()),
+                                              width: 1,
+                                            )
+                                          : null,
+                                    ),
+                                    child: Icon(
+                                      Icons.check_rounded,
+                                      color: widget.feedback == AnswerFeedback.correct
+                                          ? Colors.white
+                                          : widget.colorScheme.primary,
+                                      size: iconSize / 1.5, // Smaller icons for vertical layout
+                                      semanticLabel: 'Correct answer indicator',
+                                    ),
+                                  ),
                                 ),
-                          ),
-                        ),
-                        if (widget.feedback == AnswerFeedback.correct ||
-                            widget.feedback == AnswerFeedback.revealedCorrect)
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: widget.feedback == AnswerFeedback.correct
-                                  ? Colors.white.withAlpha((0.2 * 255).round())
-                                  : widget.colorScheme.primary
-                                      .withAlpha((0.1 * 255).round()),
-                              borderRadius: BorderRadius.circular(8),
-                              border: widget.feedback ==
-                                      AnswerFeedback.revealedCorrect
-                                  ? Border.all(
-                                      color: widget.colorScheme.primary
-                                          .withAlpha((0.3 * 255).round()),
+                              ],
+                              if (widget.feedback == AnswerFeedback.incorrect) ...[
+                                const SizedBox(height: 4),
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withAlpha((0.2 * 255).round()),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      Icons.close_rounded,
+                                      color: Colors.white,
+                                      size: iconSize / 1.5, // Smaller icons for vertical layout
+                                      semanticLabel: 'Incorrect answer indicator',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          );
+                        } else {
+                          // Original horizontal layout
+                          return Row(
+                            children: [
+                              if (widget.letter != null)
+                                Container(
+                                  width: indicatorSize,
+                                  height: indicatorSize,
+                                  decoration: BoxDecoration(
+                                    color: widget.feedback == AnswerFeedback.none
+                                        ? widget.colorScheme.primary
+                                            .withAlpha((0.1 * 255).round())
+                                        : Colors.white.withAlpha((0.2 * 255).round()),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: widget.feedback == AnswerFeedback.none
+                                          ? widget.colorScheme.primary
+                                              .withAlpha((0.2 * 255).round())
+                                          : Colors.white.withAlpha((0.3 * 255).round()),
                                       width: 1,
-                                    )
-                                  : null,
-                            ),
-                            child: Icon(
-                              Icons.check_rounded,
-                              color: widget.feedback == AnswerFeedback.correct
-                                  ? Colors.white
-                                  : widget.colorScheme.primary,
-                              size: iconSize,
-                              semanticLabel: 'Correct answer indicator',
-                            ),
-                          ),
-                        if (widget.feedback == AnswerFeedback.incorrect)
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withAlpha((0.2 * 255).round()),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              Icons.close_rounded,
-                              color: Colors.white,
-                              size: iconSize,
-                              semanticLabel: 'Incorrect answer indicator',
-                            ),
-                          ),
-                      ],
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      widget.letter!,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color: _iconColor,
+                                            fontSize:
+                                                getResponsiveFontSize(context, 16),
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              if (widget.letter != null)
+                                SizedBox(width: widget.isCompact ? (isDesktop ? 12 : 8) : (isDesktop ? 18 : 16)),
+                              Expanded(
+                                child: Text(
+                                  widget.label,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        color: _textColor,
+                                        height: 1.4,
+                                        letterSpacing: 0.1,
+                                        fontSize: fontSize,
+                                      ),
+                                ),
+                              ),
+                              if (widget.feedback == AnswerFeedback.correct ||
+                                  widget.feedback == AnswerFeedback.revealedCorrect)
+                                Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: widget.feedback == AnswerFeedback.correct
+                                        ? Colors.white.withAlpha((0.2 * 255).round())
+                                        : widget.colorScheme.primary
+                                            .withAlpha((0.1 * 255).round()),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: widget.feedback ==
+                                            AnswerFeedback.revealedCorrect
+                                        ? Border.all(
+                                            color: widget.colorScheme.primary
+                                                .withAlpha((0.3 * 255).round()),
+                                            width: 1,
+                                          )
+                                        : null,
+                                  ),
+                                  child: Icon(
+                                    Icons.check_rounded,
+                                    color: widget.feedback == AnswerFeedback.correct
+                                        ? Colors.white
+                                        : widget.colorScheme.primary,
+                                    size: iconSize,
+                                    semanticLabel: 'Correct answer indicator',
+                                  ),
+                                ),
+                              if (widget.feedback == AnswerFeedback.incorrect)
+                                Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withAlpha((0.2 * 255).round()),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.close_rounded,
+                                    color: Colors.white,
+                                    size: iconSize,
+                                    semanticLabel: 'Incorrect answer indicator',
+                                  ),
+                                ),
+                            ],
+                          );
+                        }
+                      },
                     ),
                   ),
                 ),
