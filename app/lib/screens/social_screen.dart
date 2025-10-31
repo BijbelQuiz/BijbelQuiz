@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../l10n/strings_nl.dart' as strings;
 import 'sync_screen.dart';
+import 'user_search_screen.dart';
+import 'following_list_screen.dart';
+import 'followers_list_screen.dart';
+import '../providers/game_stats_provider.dart';
+import '../services/logger.dart';
 
 /// Screen displaying social features of the app.
 class SocialScreen extends StatefulWidget {
@@ -261,7 +266,7 @@ class _SocialScreenState extends State<SocialScreen> {
     );
   }
 
-  /// Builds the social features content section, which can be either active or coming soon.
+  /// Builds the social features content section, which now includes active features.
   Widget _buildSocialFeaturesContent(
     ColorScheme colorScheme, 
     _DeviceType deviceType, 
@@ -301,7 +306,7 @@ class _SocialScreenState extends State<SocialScreen> {
           deviceType,
         )),
         Text(
-          strings.AppStrings.moreSocialFeaturesComingSoon,
+          strings.AppStrings.socialFeatures,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.w700,
             color: titleColor,
@@ -322,7 +327,252 @@ class _SocialScreenState extends State<SocialScreen> {
           ),
           textAlign: TextAlign.center,
         ),
+        // Add social feature buttons
+        SizedBox(height: _getResponsiveSize(
+          _SpacingConstants.desktopSmallSpacing,
+          _SpacingConstants.desktopSmallSpacing,
+          _SpacingConstants.mobileSmallSpacing,
+          deviceType,
+        )),
+        _buildSocialFeatureButtons(colorScheme, deviceType),
+        // Add followed users scores section
+        _buildFollowedUsersScores(colorScheme, deviceType),
       ],
+    );
+  }
+
+  /// Builds buttons for social features
+  Widget _buildSocialFeatureButtons(ColorScheme colorScheme, _DeviceType deviceType) {
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      alignment: WrapAlignment.center,
+      children: [
+        _buildFeatureButton(
+          colorScheme: colorScheme,
+          icon: Icons.search,
+          label: strings.AppStrings.search,
+          onPressed: () => _navigateToUserSearchScreen(),
+          deviceType: deviceType,
+        ),
+        _buildFeatureButton(
+          colorScheme: colorScheme,
+          icon: Icons.people_alt_rounded,
+          label: strings.AppStrings.myFollowing,
+          onPressed: () => _navigateToFollowingList(),
+          deviceType: deviceType,
+        ),
+        _buildFeatureButton(
+          colorScheme: colorScheme,
+          icon: Icons.person_add_rounded,
+          label: strings.AppStrings.myFollowers,
+          onPressed: () => _navigateToFollowersList(),
+          deviceType: deviceType,
+        ),
+      ],
+    );
+  }
+
+  /// Builds the followed users scores section
+  Widget _buildFollowedUsersScores(ColorScheme colorScheme, _DeviceType deviceType) {
+    // This would typically fetch and display scores from followed users
+    // For now, I'll implement a placeholder structure
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _getFollowedUsersScores(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+        
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return Container(); // Hide section if no followed users or error
+        }
+        
+        final followedUsers = snapshot.data!;
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                'Scores van Gevolgde Gebruikers',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ),
+            ...followedUsers.map((user) => 
+              Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: colorScheme.outlineVariant,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user['username'] ?? 'Unknown User',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Laatste score: ${user['score'] ?? 'N/A'}',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurface.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${user['streak'] ?? 0} reeks',
+                        style: TextStyle(
+                          color: colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ).toList(),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Gets followed users and their scores
+  Future<List<Map<String, dynamic>>> _getFollowedUsersScores() async {
+    try {
+      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final syncService = gameStatsProvider.syncService;
+      
+      // Get list of followed users
+      final followingList = await syncService.getFollowingList();
+      if (followingList == null || followingList.isEmpty) {
+        return []; // Return empty list if no one is followed
+      }
+      
+      final usersWithScores = <Map<String, dynamic>>[];
+      
+      // For each followed user, get their username and scores
+      for (final deviceId in followingList) {
+        final username = await syncService.getUsernameByDeviceId(deviceId);
+        if (username != null) {
+          // For now, we'll add placeholder data as we don't have the full score structure
+          // In a real implementation, you would fetch actual scores from the sync system
+          usersWithScores.add({
+            'username': username,
+            'deviceId': deviceId,
+            'score': 'N/A', // Placeholder - would fetch actual score
+            'streak': 0,    // Placeholder - would fetch actual streak
+          });
+        }
+      }
+      
+      return usersWithScores;
+    } catch (e) {
+      AppLogger.error('Error getting followed users scores', e);
+      return [];
+    }
+  }
+
+  /// Builds a single feature button
+  Widget _buildFeatureButton({
+    required ColorScheme colorScheme,
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    required _DeviceType deviceType,
+  }) {
+    final buttonSize = _getResponsiveSize(120.0, 110.0, 100.0, deviceType);
+    
+    return SizedBox(
+      width: buttonSize,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.all(16),
+          side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.3)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: colorScheme.primary,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Navigate to user search screen
+  void _navigateToUserSearchScreen() {
+    _analyticsService.capture(context, 'user_search_screen_opened');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const UserSearchScreen(),
+      ),
+    );
+  }
+
+  /// Navigate to following list screen
+  void _navigateToFollowingList() {
+    _analyticsService.capture(context, 'following_list_opened');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const FollowingListScreen(),
+      ),
+    );
+  }
+
+  /// Navigate to followers list screen
+  void _navigateToFollowersList() {
+    _analyticsService.capture(context, 'followers_list_opened');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const FollowersListScreen(),
+      ),
     );
   }
 }

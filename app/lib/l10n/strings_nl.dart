@@ -239,7 +239,18 @@ class AppStrings {
   static const String manageYourBqid = 'Beheer je BQID';
   static const String manageYourBqidSubtitle = 'Beheer je BQID, geregistreerde apparaten en meer';
   static const String moreSocialFeaturesComingSoon = 'Meer sociale functies binnenkort beschikbaar';
+  static const String socialFeatures = 'Sociale Functies';
   static const String connectWithOtherUsers = 'Verbind met andere BijbelQuiz-gebruikers, deel prestaties en strijd op de scoreborden!';
+  static const String search = 'Zoeken';
+  static const String myFollowing = 'Mijn Volgers';
+  static const String myFollowers = 'Mijn Gevolgden';
+  static const String searchUsers = 'Zoek Gebruikers';
+  static const String searchByUsername = 'Zoek op gebruikersnaam';
+  static const String enterUsernameToSearch = 'Voer gebruikersnaam in om te zoeken...';
+  static const String noUsersFound = 'Geen gebruikers gevonden';
+  static const String follow = 'Volgen';
+  static const String unfollow = 'Ontvolgen';
+  static const String yourself = 'Zelf';
 
   // Bible Bot
   static const String bibleBot = 'Bijbel Bot';

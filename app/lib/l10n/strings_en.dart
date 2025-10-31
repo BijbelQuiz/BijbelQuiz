@@ -244,7 +244,18 @@ class AppStrings {
   static const String manageYourBqid = 'Manage Your BQID';
   static const String manageYourBqidSubtitle = 'Manage your BQID, registered devices and more';
   static const String moreSocialFeaturesComingSoon = 'More social features coming soon';
+  static const String socialFeatures = 'Social Features';
   static const String connectWithOtherUsers = 'Connect with other BibleQuiz users, share achievements and compete on the leaderboards!';
+  static const String search = 'Search';
+  static const String myFollowing = 'My Following';
+  static const String myFollowers = 'My Followers';
+  static const String searchUsers = 'Search Users';
+  static const String searchByUsername = 'Search by username';
+  static const String enterUsernameToSearch = 'Enter username to search...';
+  static const String noUsersFound = 'No users found';
+  static const String follow = 'Follow';
+  static const String unfollow = 'Unfollow';
+  static const String yourself = 'Yourself';
 
   // Bible Bot
   static const String bibleBot = 'Bible Bot';

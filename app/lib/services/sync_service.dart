@@ -7,6 +7,8 @@ import 'logger.dart';
 class SyncService {
   static const String _tableName = 'sync_rooms';
   static const String _usernameKey = 'username';
+  static const String _followingKey = 'following';
+  static const String _followersKey = 'followers';
   late final SupabaseClient _client;
   String? _currentRoomId;
   RealtimeChannel? _channel;
@@ -571,5 +573,236 @@ class SyncService {
     } catch (e) {
       AppLogger.error('Failed to load saved device ID', e);
     }
+  }
+
+  /// Searches for users by username (globally across all rooms)
+  Future<List<Map<String, dynamic>>?> searchUsers(String query) async {
+    try {
+      // Get all rooms that have username data
+      final response = await _client
+          .from(_tableName)
+          .select('data, room_id')
+          .not('data', 'is', null);
+
+      final matchingUsers = <Map<String, dynamic>>[];
+
+      for (final row in response) {
+        final data = row['data'] as Map<String, dynamic>?;
+        if (data != null) {
+          final usernameData = data[_usernameKey] as Map<String, dynamic>?;
+          if (usernameData != null) {
+            final username = usernameData['value'] as String?;
+            final deviceId = usernameData['device_id'] as String?;
+            if (username != null && 
+                deviceId != null && 
+                username.toLowerCase().contains(query.toLowerCase())) {
+              // Only add if not already in the list (to avoid duplicates)
+              bool alreadyAdded = false;
+              for (final existingUser in matchingUsers) {
+                if ((existingUser['device_id'] as String?) == deviceId) {
+                  alreadyAdded = true;
+                  break;
+                }
+              }
+              
+              if (!alreadyAdded) {
+                matchingUsers.add({
+                  'username': username,
+                  'device_id': deviceId,
+                  'timestamp': usernameData['timestamp'],
+                });
+              }
+            }
+          }
+        }
+      }
+      return matchingUsers;
+    } catch (e) {
+      AppLogger.error('Failed to search users', e);
+      return null;
+    }
+  }
+
+  /// Follows a user by their device ID
+  Future<bool> followUser(String targetDeviceId) async {
+    if (_currentRoomId == null) return false;
+
+    try {
+      final currentDeviceId = await _getOrCreateDeviceId();
+      
+      // Don't allow following yourself
+      if (currentDeviceId == targetDeviceId) {
+        AppLogger.warning('Cannot follow yourself');
+        return false;
+      }
+
+      // Get current room data
+      final roomResponse = await _client
+          .from(_tableName)
+          .select('data')
+          .eq('room_id', _currentRoomId!)
+          .single();
+      
+      final currentData = Map<String, dynamic>.from(roomResponse['data'] as Map<String, dynamic>? ?? {});
+
+      // Update following list
+      final following = List<String>.from(currentData[_followingKey] as List<dynamic>? ?? []);
+      if (!following.contains(targetDeviceId)) {
+        following.add(targetDeviceId);
+      }
+      
+      // Update followers list for the target user
+      final targetUserFollowers = List<String>.from(currentData[_followersKey] as List<dynamic>? ?? []);
+      if (!targetUserFollowers.contains(currentDeviceId)) {
+        targetUserFollowers.add(currentDeviceId);
+      }
+
+      // Update the data in the room
+      currentData[_followingKey] = following;
+      currentData[_followersKey] = targetUserFollowers;
+
+      await _client
+          .from(_tableName)
+          .update({'data': currentData})
+          .eq('room_id', _currentRoomId!);
+      
+      AppLogger.debug('Followed user: $targetDeviceId');
+      return true;
+    } catch (e) {
+      AppLogger.error('Failed to follow user', e);
+      return false;
+    }
+  }
+
+  /// Unfollows a user by their device ID
+  Future<bool> unfollowUser(String targetDeviceId) async {
+    if (_currentRoomId == null) return false;
+
+    try {
+      final currentDeviceId = await _getOrCreateDeviceId();
+
+      // Get current room data
+      final roomResponse = await _client
+          .from(_tableName)
+          .select('data')
+          .eq('room_id', _currentRoomId!)
+          .single();
+      
+      final currentData = Map<String, dynamic>.from(roomResponse['data'] as Map<String, dynamic>? ?? {});
+
+      // Update following list
+      final following = List<String>.from(currentData[_followingKey] as List<dynamic>? ?? []);
+      following.remove(targetDeviceId);
+      
+      // Update followers list for the target user
+      final targetUserFollowers = List<String>.from(currentData[_followersKey] as List<dynamic>? ?? []);
+      targetUserFollowers.remove(currentDeviceId);
+
+      // Update the data in the room
+      currentData[_followingKey] = following;
+      currentData[_followersKey] = targetUserFollowers;
+
+      await _client
+          .from(_tableName)
+          .update({'data': currentData})
+          .eq('room_id', _currentRoomId!);
+      
+      AppLogger.debug('Unfollowed user: $targetDeviceId');
+      return true;
+    } catch (e) {
+      AppLogger.error('Failed to unfollow user', e);
+      return false;
+    }
+  }
+
+  /// Checks if a user is being followed
+  Future<bool> isFollowingUser(String targetDeviceId) async {
+    if (_currentRoomId == null) return false;
+
+    try {
+      final roomData = await getRoomData();
+      if (roomData == null) return false;
+
+      final following = List<String>.from(roomData[_followingKey] as List<dynamic>? ?? []);
+      return following.contains(targetDeviceId);
+    } catch (e) {
+      AppLogger.error('Failed to check if following user', e);
+      return false;
+    }
+  }
+
+  /// Gets the list of users that the current user is following
+  Future<List<String>?> getFollowingList() async {
+    if (_currentRoomId == null) return null;
+
+    try {
+      final roomData = await getRoomData();
+      if (roomData == null) return null;
+
+      return List<String>.from(roomData[_followingKey] as List<dynamic>? ?? []);
+    } catch (e) {
+      AppLogger.error('Failed to get following list', e);
+      return null;
+    }
+  }
+
+  /// Gets the list of users following the current user
+  Future<List<String>?> getFollowersList() async {
+    if (_currentRoomId == null) return null;
+
+    try {
+      final roomData = await getRoomData();
+      if (roomData == null) return null;
+
+      return List<String>.from(roomData[_followersKey] as List<dynamic>? ?? []);
+    } catch (e) {
+      AppLogger.error('Failed to get followers list', e);
+      return null;
+    }
+  }
+
+  /// Gets the username for a specific device ID globally
+  Future<String?> getUsernameByDeviceId(String deviceId) async {
+    try {
+      // Get all rooms that have username data
+      final response = await _client
+          .from(_tableName)
+          .select('data')
+          .not('data', 'is', null);
+
+      for (final row in response) {
+        final data = row['data'] as Map<String, dynamic>?;
+        if (data != null) {
+          final usernameData = data[_usernameKey] as Map<String, dynamic>?;
+          if (usernameData != null) {
+            final storedUsername = usernameData['value'] as String?;
+            final storedDeviceId = usernameData['device_id'] as String?;
+            if (storedDeviceId != null && storedDeviceId == deviceId && storedUsername != null) {
+              return storedUsername;
+            }
+          }
+        }
+      }
+      return null;
+    } catch (e) {
+      AppLogger.error('Failed to get username by device ID', e);
+      return null;
+    }
+  }
+
+  /// Adds a following listener
+  void addFollowingListener(Function(List<String>) callback) {
+    addListener(_followingKey, (data) {
+      final followingList = List<String>.from(data['value'] as List<dynamic>? ?? []);
+      callback(followingList);
+    });
+  }
+
+  /// Adds a followers listener
+  void addFollowersListener(Function(List<String>) callback) {
+    addListener(_followersKey, (data) {
+      final followersList = List<String>.from(data['value'] as List<dynamic>? ?? []);
+      callback(followersList);
+    });
   }
 }
