@@ -82,6 +82,7 @@ class AppStrings {
   static const String lessonComplete = 'Les voltooid';
   static const String percentage = 'Percentage';
   static const String bestStreak = 'Beste reeks';
+  static const String streakLabel = ' reeks';
   static const String retryLesson = 'Opnieuw proberen';
   static const String nextLesson = 'Volgende les';
   static const String backToLessons = 'Terug naar lessen';
@@ -115,6 +116,9 @@ class AppStrings {
   static const String complete = 'Voltooid';
   static const String perfectScore = 'Perfecte score!';
   static const String retry = 'Opnieuw proberen';
+  static const String unknownUser = 'Onbekende Gebruiker';
+  static const String lastScore = 'Laatste score:';
+  static const String notAvailable = 'Onbekend';
   
   // Guide screen
   static const String previous = 'Vorige';
@@ -242,8 +246,9 @@ class AppStrings {
   static const String socialFeatures = 'Sociale Functies';
   static const String connectWithOtherUsers = 'Verbind met andere BijbelQuiz-gebruikers, deel prestaties en strijd op de scoreborden!';
   static const String search = 'Zoeken';
-  static const String myFollowing = 'Mijn Volgers';
-  static const String myFollowers = 'Mijn Gevolgden';
+  static const String myFollowing = 'Volgend';
+  static const String myFollowers = 'Volgers';
+  static const String followedUsersScores = 'Scores van Gevolgde Gebruikers';
   static const String searchUsers = 'Zoek Gebruikers';
   static const String searchByUsername = 'Zoek op gebruikersnaam';
   static const String enterUsernameToSearch = 'Voer gebruikersnaam in om te zoeken...';

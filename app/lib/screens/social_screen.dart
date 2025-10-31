@@ -228,9 +228,9 @@ class _SocialScreenState extends State<SocialScreen> {
         itemCount: 3,
         itemBuilder: (context, index) {
           final features = [
-            {'icon': Icons.search, 'label': 'Zoeken', 'onPressed': _navigateToUserSearchScreen},
-            {'icon': Icons.people_alt_rounded, 'label': 'Volgend', 'onPressed': _navigateToFollowingList},
-            {'icon': Icons.person_add_rounded, 'label': 'Volgers', 'onPressed': _navigateToFollowersList},
+            {'icon': Icons.search, 'label': strings.AppStrings.search, 'onPressed': _navigateToUserSearchScreen},
+            {'icon': Icons.people_alt_rounded, 'label': strings.AppStrings.myFollowing, 'onPressed': _navigateToFollowingList},
+            {'icon': Icons.person_add_rounded, 'label': strings.AppStrings.myFollowers, 'onPressed': _navigateToFollowersList},
           ];
           
           final feature = features[index];
@@ -250,21 +250,21 @@ class _SocialScreenState extends State<SocialScreen> {
           _buildSmallerFullWidthButton(
             colorScheme: colorScheme,
             icon: Icons.search,
-            label: 'Zoeken',
+            label: strings.AppStrings.search,
             onPressed: _navigateToUserSearchScreen,
           ),
           const SizedBox(height: 16),
           _buildSmallerFullWidthButton(
             colorScheme: colorScheme,
             icon: Icons.people_alt_rounded,
-            label: 'Volgend',
+            label: strings.AppStrings.myFollowing,
             onPressed: _navigateToFollowingList,
           ),
           const SizedBox(height: 16),
           _buildSmallerFullWidthButton(
             colorScheme: colorScheme,
             icon: Icons.person_add_rounded,
-            label: 'Volgers',
+            label: strings.AppStrings.myFollowers,
             onPressed: _navigateToFollowersList,
           ),
         ],
@@ -298,7 +298,7 @@ class _SocialScreenState extends State<SocialScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
-                'Scores van Gevolgde Gebruikers',
+                strings.AppStrings.followedUsersScores,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: colorScheme.onSurface,
@@ -319,7 +319,7 @@ class _SocialScreenState extends State<SocialScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              user['username'] ?? 'Unknown User',
+                              user['username'] ?? strings.AppStrings.unknownUser,
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w500,
                                 color: colorScheme.onSurface,
@@ -327,7 +327,7 @@ class _SocialScreenState extends State<SocialScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Laatste score: ${user['score'] ?? 'N/A'}',
+                              '${strings.AppStrings.lastScore} ${user['score'] ?? strings.AppStrings.notAvailable}',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
                               ),
@@ -342,7 +342,7 @@ class _SocialScreenState extends State<SocialScreen> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          '${user['streak'] ?? 0} reeks',
+                          '${user['streak'] ?? 0}${strings.AppStrings.streakLabel}',
                           style: TextStyle(
                             color: colorScheme.onPrimaryContainer,
                             fontWeight: FontWeight.w600,
@@ -379,7 +379,7 @@ class _SocialScreenState extends State<SocialScreen> {
           usersWithScores.add({
             'username': username,
             'deviceId': deviceId,
-            'score': 'N/A',
+            'score': strings.AppStrings.notAvailable,
             'streak': 0,
           });
         }
