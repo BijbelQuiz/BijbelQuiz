@@ -29,14 +29,17 @@ The core Flutter application with the following structure:
   - `screens/`: UI screens (Quiz, Lesson Select, etc.)
   - `services/`: Business logic services (Sound, Notifications, Analytics, etc.)
   - `theme/`: Application theming
+  - `ui/`: UI components and design elements
   - `utils/`: Utility functions
   - `widgets/`: Reusable UI widgets (AnswerButton, QuestionCard, etc.)
 - `assets/`: Static assets
   - `categories.json`: Quiz categories
+  - `questions-en.json`: Questions in English
   - `questions-nl-sv.json`: Questions in Dutch
   - `fonts/`: Custom fonts (Quicksand)
   - `icon/`: App icons
   - `sounds/`: Audio files for feedback
+  - `themes/`: Theme files
 - `linux/`, `macos/`, `web/`, `windows/`: Platform-specific code
 - `test/`: Unit tests
 
@@ -49,13 +52,15 @@ Documentation for the project.
 Web applications:
 
 - `backend.bijbelquiz.app/`: Backend API and services.
-  - `api/`: API endpoints
   - `question-editor/`: Question editing interface
 - `bijbelquiz.app/`: Main website
-  - `blog/`: Blog content
   - `downloads/`: Downloadable resources
   - `instructie/`: Download instructions
+  - `mcp/`: MCP (Model Context Protocol) files
 - `play.bijbelquiz.app/`: Web version of the app
+  - `assets/`: Web assets
+  - `canvaskit/`: CanvasKit files for Flutter web
+  - `icons/`: App icons for web
 
 ## Getting Started
 
