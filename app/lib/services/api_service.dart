@@ -96,7 +96,7 @@ class ApiService {
           .addMiddleware(_createCorsMiddleware())
           .addMiddleware(_createValidationMiddleware())
           .addMiddleware(_createLoggingMiddleware())
-          .addHandler(app);
+          .addHandler(app.call);
 
       _server = await shelf_io.serve(handler, _defaultBindAddress, port);
       _isRunning = true;

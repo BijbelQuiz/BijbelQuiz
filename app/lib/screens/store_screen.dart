@@ -9,10 +9,7 @@ import '../widgets/top_snackbar.dart';
 import '../l10n/strings_nl.dart' as strings;
 import '../screens/quiz_screen.dart';
 import '../screens/ai_theme_designer_screen.dart';
-import '../screens/sync_screen.dart';
 import '../services/logger.dart';
-import '../services/gemini_service.dart';
-import '../models/ai_theme.dart';
 
 
 

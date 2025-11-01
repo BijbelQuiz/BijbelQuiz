@@ -1,5 +1,4 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart';
 import 'dart:async';
 import '../services/logger.dart';
 
@@ -62,7 +61,7 @@ class TimeTrackingService {
     _prefs?.setString(_lastSessionDateKey, DateTime.now().toIso8601String().split('T')[0]);
     
     _startTracking();
-    AppLogger.info('Time tracking session started at ${_sessionStartTime}');
+    AppLogger.info('Time tracking session started at $_sessionStartTime');
   }
 
   /// End the current session and save the time

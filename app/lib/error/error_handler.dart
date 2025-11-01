@@ -4,7 +4,6 @@ import 'package:logging/logging.dart';
 import 'error_types.dart';
 import '../widgets/top_snackbar.dart';
 import '../l10n/strings_en.dart' as strings_en;
-import '../l10n/strings_nl.dart' as strings_nl;
 
 /// Centralized error handling service that provides user-friendly error messages
 /// and consistent error handling across the application

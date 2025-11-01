@@ -244,9 +244,7 @@ class SyncService {
 
   /// Gets the current device ID
   Future<String> getCurrentDeviceId() async {
-    if (_currentDeviceId == null) {
-      _currentDeviceId = await _getOrCreateDeviceId();
-    }
+    _currentDeviceId ??= await _getOrCreateDeviceId();
     return _currentDeviceId!;
   }
 
@@ -285,7 +283,7 @@ class SyncService {
             .from(_tableName)
             .update({'devices': devices})
             .eq('room_id', _currentRoomId!);
-        AppLogger.info('Removed device $deviceId from room ${_currentRoomId}');
+        AppLogger.info('Removed device $deviceId from room $_currentRoomId');
         return true;
       }
       return false;
@@ -398,9 +396,7 @@ class SyncService {
       if (usernamesData == null) return null;
 
       String? targetDeviceId = deviceId;
-      if (targetDeviceId == null) {
-        targetDeviceId = await _getOrCreateDeviceId();
-      }
+      targetDeviceId ??= await _getOrCreateDeviceId();
 
       final usernameInfo = usernamesData[targetDeviceId] as Map<String, dynamic>?;
       if (usernameInfo != null) {
@@ -517,17 +513,13 @@ class SyncService {
     addListener(_usernamesKey, (data) async {
       // Get current device ID to return its specific username
       final currentDeviceId = await _getOrCreateDeviceId();
-      if (data is Map<String, dynamic>) {
-        final usernameInfo = data[currentDeviceId] as Map<String, dynamic>?;
-        if (usernameInfo != null) {
-          callback(usernameInfo['value'] as String?);
-        } else {
-          callback(null);
-        }
+      final usernameInfo = data[currentDeviceId] as Map<String, dynamic>?;
+      if (usernameInfo != null) {
+        callback(usernameInfo['value'] as String?);
       } else {
         callback(null);
       }
-    });
+        });
   }
 
   /// Checks if a username already exists across all rooms
@@ -672,7 +664,6 @@ class SyncService {
               if (usernameInfo != null) {
                 final username = usernameInfo['value'] as String?;
                 if (username != null && 
-                    deviceId != null && 
                     username.toLowerCase().contains(query.toLowerCase())) {
                   // Only add if not already in the list (to avoid duplicates)
                   bool alreadyAdded = false;

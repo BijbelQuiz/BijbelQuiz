@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import '../providers/game_stats_provider.dart';
 import '../providers/lesson_progress_provider.dart';
@@ -133,10 +131,10 @@ class _SyncScreenState extends State<SyncScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(strings.AppStrings.remove),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
+            child: Text(strings.AppStrings.remove),
           ),
         ],
       ),
@@ -786,7 +784,7 @@ class _SyncScreenState extends State<SyncScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: colorScheme.surfaceVariant,
+                          color: colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Column(
@@ -928,7 +926,7 @@ class _SyncScreenState extends State<SyncScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: colorScheme.surfaceVariant,
+                          color: colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Column(

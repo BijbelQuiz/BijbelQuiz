@@ -1,7 +1,6 @@
 import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/strings_nl.dart' as strings;
 import '../config/supabase_config.dart';
 import 'sync_screen.dart';
@@ -388,7 +387,7 @@ class _SocialScreenState extends State<SocialScreen> {
                       ),
                     ),
                   ),
-                ).toList(),
+                ),
               ],
             );
           },
@@ -443,7 +442,7 @@ class _SocialScreenState extends State<SocialScreen> {
             stats = await syncService.getGameStatsForDevice(deviceId);
             
             // If that returns null or empty, try to get stats from all rooms globally
-            if (stats == null || stats!.isEmpty) {
+            if (stats == null || stats.isEmpty) {
               stats = await _getGameStatsForDeviceGlobally(deviceId);
             }
             

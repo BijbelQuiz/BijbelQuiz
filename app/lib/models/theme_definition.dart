@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 
 /// Model class representing a theme definition loaded from JSON
 class ThemeDefinition {

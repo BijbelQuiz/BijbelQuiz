@@ -21,7 +21,7 @@
 /// await ErrorHandler().showErrorDialog(context: context, error: error);
 /// ```
 
-library error_system;
+library;
 
 export 'error/error_types.dart';
 export 'error/error_handler.dart';

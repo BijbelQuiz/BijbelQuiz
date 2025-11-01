@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'dart:math';
 import '../models/quiz_question.dart';
 import '../models/quiz_state.dart';
 import '../services/sound_service.dart';
@@ -12,7 +11,6 @@ import '../services/performance_service.dart';
 import '../services/connection_service.dart';
 import '../services/platform_feedback_service.dart';
 import '../providers/settings_provider.dart';
-import '../providers/game_stats_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/quiz_timer_manager.dart';
 import '../services/quiz_animation_controller.dart';
@@ -21,9 +19,7 @@ import '../services/quiz_answer_handler.dart';
 import '../widgets/quiz_error_display.dart';
 import '../error/error_handler.dart';
 import '../error/error_types.dart';
-import '../widgets/quiz_bottom_bar.dart';
 import '../widgets/question_widget.dart';
-import '../widgets/metrics_widget.dart';
 import '../widgets/quiz_skeleton.dart';
 import '../widgets/top_snackbar.dart';
 import '../l10n/strings_nl.dart' as strings;
@@ -585,14 +581,16 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
                 bool? isPlayer1;
                 if ([LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyS, LogicalKeyboardKey.keyD, LogicalKeyboardKey.keyF].contains(key)) {
                   isPlayer1 = true;
-                  if (key == LogicalKeyboardKey.keyA) answerIndex = 0;
-                  else if (key == LogicalKeyboardKey.keyS) answerIndex = 1;
+                  if (key == LogicalKeyboardKey.keyA) {
+                    answerIndex = 0;
+                  } else if (key == LogicalKeyboardKey.keyS) answerIndex = 1;
                   else if (key == LogicalKeyboardKey.keyD) answerIndex = 2;
                   else if (key == LogicalKeyboardKey.keyF) answerIndex = 3;
                 } else if ([LogicalKeyboardKey.keyH, LogicalKeyboardKey.keyJ, LogicalKeyboardKey.keyK, LogicalKeyboardKey.keyL].contains(key)) {
                   isPlayer1 = false;
-                  if (key == LogicalKeyboardKey.keyH) answerIndex = 0;
-                  else if (key == LogicalKeyboardKey.keyJ) answerIndex = 1;
+                  if (key == LogicalKeyboardKey.keyH) {
+                    answerIndex = 0;
+                  } else if (key == LogicalKeyboardKey.keyJ) answerIndex = 1;
                   else if (key == LogicalKeyboardKey.keyK) answerIndex = 2;
                   else if (key == LogicalKeyboardKey.keyL) answerIndex = 3;
                 }
