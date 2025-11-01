@@ -1,11 +1,4 @@
-  ____  _ _ _          _  ____        _     
- |  _ \(_|_) |        | |/ __ \      (_)    
- | |_) |_ _| |__   ___| | |  | |_   _ _ ____
- |  _ <| | | '_ \ / _ \ | |  | | | | | |_  /
- | |_) | | | |_) |  __/ | |__| | |_| | |/ / 
- |____/|_| |_.__/ \___|_|\___\_\\__,_|_/___|
-        _/ |                                
-       |__/                                 
+# BijbelQuiz
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?logo=flutter)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
