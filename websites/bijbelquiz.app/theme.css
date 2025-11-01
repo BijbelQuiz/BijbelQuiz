@@ -3,20 +3,20 @@
 /* BijbelQuiz promotional site theme – matches Flutter app theme */
 
 :root {
-  /* Light mode colors from appLightTheme */
-  --primary: #2563eb;
-  --secondary: #7c3aed;
-  --tertiary: #dc2626;
-  --error: #dc2626;
+  /* Dark mode colors as default (light mode disabled) */
+  --primary: #3b82f6;
+  --secondary: #8b5cf6;
+  --tertiary: #ef4444;
+  --error: #ef4444;
   --success: #10b981;
 
-  --surface: #fafafa;
-  --surface-highest: #f8fafc;
-  --on-surface: #0f172a;
-  --outline: #e2e8f0;
+  --surface: #0f172a;
+  --surface-highest: #1e293b;
+  --on-surface: #f8fafc;
+  --outline: #334155;
 
   --text: var(--on-surface);
-  --text-secondary: #475569;
+  --text-secondary: #94a3b8;
 
   --radius-lg: 20px;
   --radius-md: 16px;
@@ -52,23 +52,7 @@
   --space-xxl: 3rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --primary: #3b82f6;
-    --secondary: #8b5cf6;
-    --tertiary: #ef4444;
-    --error: #ef4444;
-    --success: #10b981;
-
-    --surface: #0f172a;
-    --surface-highest: #1e293b;
-    --on-surface: #f8fafc;
-    --outline: #334155;
-
-    --text: var(--on-surface);
-    --text-secondary: #94a3b8;
-  }
-}
+/* Remove the light mode media query to ensure dark mode is always used */
 
 /* Base reset */
 * {
