@@ -93,6 +93,7 @@ flutter:
     - assets/sounds/
     - assets/.env
     - assets/themes/
+    - assets/blacklisted_usernames.json
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

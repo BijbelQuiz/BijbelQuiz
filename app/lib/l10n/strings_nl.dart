@@ -524,5 +524,6 @@ class AppStrings {
   static const String pleaseEnterUsername = 'Voer een gebruikersnaam in';
   static const String usernameTooLong = 'Gebruikersnaam mag maximaal 30 tekens bevatten';
   static const String usernameAlreadyTaken = 'Gebruikersnaam is al in gebruik';
+  static const String usernameBlacklisted = 'Deze gebruikersnaam is niet toegestaan';
   static const String usernameSaved = 'Gebruikersnaam opgeslagen!';
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import '../providers/game_stats_provider.dart';
 import '../providers/lesson_progress_provider.dart';
@@ -27,6 +29,7 @@ class _SyncScreenState extends State<SyncScreen> {
   bool _isLoadingDevices = false;
   String? _currentDeviceId;
   String? _currentUsername;
+  List<String>? _blacklistedUsernames;
 
   @override
   void initState() {
@@ -35,6 +38,7 @@ class _SyncScreenState extends State<SyncScreen> {
     _getCurrentDeviceId();
     _loadDevicesInRoom();
     _loadCurrentUsername();
+    _loadBlacklistedUsernames();
   }
 
   Future<void> _loadCurrentUsername() async {
@@ -52,6 +56,48 @@ class _SyncScreenState extends State<SyncScreen> {
     } catch (e) {
       AppLogger.error('Error loading current username', e);
     }
+  }
+
+  Future<void> _loadBlacklistedUsernames() async {
+    try {
+      // Load blacklisted usernames from assets
+      final String response = await DefaultAssetBundle.of(context)
+          .loadString('assets/blacklisted_usernames.json');
+      final List<dynamic> jsonData = json.decode(response);
+      setState(() {
+        _blacklistedUsernames = jsonData.map((item) => item.toString().toLowerCase()).toList();
+      });
+    } catch (e) {
+      AppLogger.error('Error loading blacklisted usernames', e);
+      // Set a default list if the file fails to load
+      setState(() {
+        _blacklistedUsernames = [
+          'god',
+          'jesus',
+          'allah',
+          'yahweh',
+          'jehovah',
+          'christ',
+          'buddha',
+          'muhammad',
+          'holy',
+          'sacred',
+          'lord',
+          'saint',
+          'bible',
+          'quran',
+          'torah',
+        ].map((item) => item.toLowerCase()).toList();
+      });
+    }
+  }
+
+  bool _isUsernameBlacklisted(String username) {
+    if (_blacklistedUsernames == null || _blacklistedUsernames!.isEmpty) {
+      return false;
+    }
+    final usernameLower = username.toLowerCase().trim();
+    return _blacklistedUsernames!.contains(usernameLower);
   }
 
   void _setupSyncListeners() {
@@ -211,6 +257,14 @@ class _SyncScreenState extends State<SyncScreen> {
     if (username.length > 30) {
       setState(() {
         _usernameError = strings.AppStrings.usernameTooLong;
+      });
+      return;
+    }
+
+    // Check if username is blacklisted
+    if (_isUsernameBlacklisted(username)) {
+      setState(() {
+        _usernameError = strings.AppStrings.usernameBlacklisted ?? 'This username is not allowed';
       });
       return;
     }
@@ -774,6 +828,13 @@ class _SyncScreenState extends State<SyncScreen> {
                                 if (_usernameError != null) {
                                   setState(() {
                                     _usernameError = null;
+                                  });
+                                }
+                                
+                                // Check for blacklisted username in real-time
+                                if (_isUsernameBlacklisted(value)) {
+                                  setState(() {
+                                    _usernameError = strings.AppStrings.usernameBlacklisted ?? 'This username is not allowed';
                                   });
                                 }
                               },
