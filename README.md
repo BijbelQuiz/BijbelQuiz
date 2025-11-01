@@ -2,6 +2,10 @@
 
 **Version 1.2.3+10**
 
+BijbelQuiz is a cross-platform Bible quiz app designed to test and improve your knowledge of the Bible. Built with Flutter, it features multiple question types, performance optimizations for low-end devices, and comprehensive offline capabilities.
+
+**Note: The app is only available in Dutch. All in-app content, questions, and UI are in Dutch.**
+
 [![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?logo=flutter)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
