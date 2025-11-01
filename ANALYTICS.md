@@ -10,7 +10,7 @@ Users can opt out of analytics collection through a setting in the app's setting
 
 ## AnalyticsService
 
-The `AnalyticsService` is a focused wrapper around the `posthog_flutter` package that provides feature usage tracking capabilities. It is located in `bijbelquiz/lib/services/analytics_service.dart`.
+The `AnalyticsService` is a focused wrapper around the `posthog_flutter` package that provides feature usage tracking capabilities. It is located in `app/lib/services/analytics_service.dart`.
 
 ### Core Methods
 

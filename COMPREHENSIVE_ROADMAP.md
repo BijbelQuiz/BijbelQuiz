@@ -12,11 +12,11 @@ To develop and continuously improve the BijbelQuiz application, providing an eng
 
 - [ ] Practice Mode Improvements: Allow category-specific practice sessions
 
-  - Status: Partially Done — practice/free-practice flows and labels exist in the app (see `bijbelquiz/lib/widgets/progress_header.dart`, `bijbelquiz/lib/screens/store_screen.dart`, analytics event `start_practice_quiz` in `docs/ANALYTICS.md`). Category-specific UI may still be missing.
+  - Status: Partially Done — practice/free-practice flows and labels exist in the app (see `app/lib/widgets/progress_header.dart`, `app/lib/screens/store_screen.dart`, analytics event `start_practice_quiz` in `ANALYTICS.md`). Category-specific UI may still be missing.
 
 - [ ] Streak Rewards: Implement streak milestone celebrations
 
-  - Status: Partially Done — streak tracking is present (current/longest streak used in web builds and services; see `bijbelquiz/lib/services/progressive_question_selector.dart`, built web `main.dart.js` references). Celebration UI not found.
+  - Status: Partially Done — streak tracking is present (current/longest streak used in web builds and services; see `app/lib/services/progressive_question_selector.dart`, built web `main.dart.js` references). Celebration UI not found.
 
 - [ ] Streak Rewards: Add streak protection mechanisms
 
@@ -28,7 +28,7 @@ To develop and continuously improve the BijbelQuiz application, providing an eng
 
 - [ ] Cross-Platform Compatibility: Ensure smooth operation across supported platforms (Android, iOS, Web, Desktop)
 
-  - Status: Partially Done — repo contains platform folders (android/ios/web/linux/macos/windows) and build scripts (`bijbelquiz/build_all.sh`).
+  - Status: Partially Done — repo contains platform folders (android/ios/web/linux/macos/windows) and build scripts (`app/build_all.sh`).
 
 - [ ] Accessibility: Ensure the app is usable by a wide range of users
 
@@ -40,7 +40,7 @@ To develop and continuously improve the BijbelQuiz application, providing an eng
 
 - [ ] Loading States: Add progress indicators for question loading
 
-  - Status: Partially Done — some loading feedback exists in question loading services (`bijbelquiz/lib/services/question_loading_service.dart`).
+  - Status: Partially Done — some loading feedback exists in question loading services (`app/lib/services/question_loading_service.dart`).
 
 - [ ] Loading States: Show loading feedback during answer processing
 
@@ -152,11 +152,11 @@ To develop and continuously improve the BijbelQuiz application, providing an eng
 
 - [ ] Customizable Themes: Allow users to personalize the app's appearance
 
-  - Status: Partially Done — theming exists under `bijbelquiz/lib/theme`.
+  - Status: Partially Done — theming exists under `app/lib/theme`.
 
 - [ ] Progress Sync: Synchronize offline progress when online
 
-  - Status: Partially Done — local progress and settings are stored using `shared_preferences` in multiple providers (`bijbelquiz/lib/providers/*_provider.dart`), but remote sync was not found.
+  - Status: Partially Done — local progress and settings are stored using `shared_preferences` in multiple providers (`app/lib/providers/*_provider.dart`), but remote sync was not found.
 
 - [ ] Question Categories: Allow filtering by biblical books or topics
 
@@ -180,7 +180,7 @@ To develop and continuously improve the BijbelQuiz application, providing an eng
 
 - [ ] Study Mode: Non-timed mode for learning without pressure
 
-  - Status: Partially Done — free/practice labels exist (`bijbelquiz/lib/l10n/strings_nl.dart` contains `freePractice`).
+  - Status: Partially Done — free/practice labels exist (`app/lib/l10n/strings_nl.dart` contains `freePractice`).
 
 - [ ] Study Mode: Allow bookmarking difficult questions for review
 
@@ -188,7 +188,7 @@ To develop and continuously improve the BijbelQuiz application, providing an eng
 
 - [ ] Multi-language Support: Expand beyond Dutch (English)
 
-  - Status: Partially Done — `flutter_localizations` is enabled in `pubspec.yaml`, `bijbelquiz/lib/l10n/strings_nl.dart` exists, web manifest lang is `nl`, and question assets include `questions-nl-sv.json`. More languages need adding.
+  - Status: Partially Done — `flutter_localizations` is enabled in `pubspec.yaml`, `app/lib/l10n/strings_nl.dart` exists, web manifest lang is `nl`, and question assets include `questions-nl-sv.json`. More languages need adding.
 
 - [ ] Multi-language Support: Prepare for RTL language support
 
@@ -208,7 +208,7 @@ To develop and continuously improve the BijbelQuiz application, providing an eng
 
 - [ ] Premium Content: Offer exclusive question sets or features
 
-  - Status: Not Started / Partial — in-app store screen exists (`bijbelquiz/lib/screens/store_screen.dart`) but monetization flow not fully evident.
+  - Status: Not Started / Partial — in-app store screen exists (`app/lib/screens/store_screen.dart`) but monetization flow not fully evident.
 
 - [ ] Ad Integration: (Carefully considered) Non-intrusive advertising
 
@@ -216,7 +216,7 @@ To develop and continuously improve the BijbelQuiz application, providing an eng
 
 - [ ] Backend API: Develop a robust and scalable backend for all dynamic features
 
-  - Status: Partially Done — `bijbelquiz/lib/config/app_config.dart` references `https://backend.bijbelquiz.app/api` and there is a `websites/backend.bijbelquiz.app/` folder; full backend implementation coverage unclear.
+  - Status: Partially Done — `app/lib/config/app_config.dart` references `https://backend.bijbelquiz.app/api` and there is a `websites/backend.bijbelquiz.app/` folder; full backend implementation coverage unclear.
 
 - [ ] Authentication: Implement secure and flexible authentication methods
 
@@ -228,7 +228,7 @@ To develop and continuously improve the BijbelQuiz application, providing an eng
 
 - [ ] Notifications: Implement push notifications for various app events
 
-  - Status: Partially Done — `flutter_local_notifications_plus` is in `pubspec.yaml` and notification settings are covered in tests (`bijbelquiz/test/settings_provider_test.dart`).
+  - Status: Partially Done — `flutter_local_notifications_plus` is in `pubspec.yaml` and notification settings are covered in tests (`app/test/settings_provider_test.dart`).
 
 - [ ] Scalability & Security: Design the system for future growth and protect user data
-  - Status: Ongoing / Not Fully Tracked — security docs exist (`docs/SECURITY_DOCS.md`) and some best practices are documented.
+  - Status: Ongoing / Not Fully Tracked — security docs exist (`SECURITY_DOCS.md`) and some best practices are documented.

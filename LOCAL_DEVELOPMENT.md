@@ -1,6 +1,6 @@
 # Local Development Setup
 
-This document explains how to set up and use the local development environment for BijbelQuiz v1.2.1+3.
+This document explains how to set up and use the local development environment for BijbelQuiz v1.2.3+10.
 
 ## Prerequisites
 
@@ -147,7 +147,7 @@ Install platform-specific dependencies:
 
 ## Version Management
 
-- **Current Version**: 1.2.3+3
+- **Current Version**: 1.2.3+10
 - **Flutter SDK Range**: >=3.2.3 <4.0.0
 - **Dart SDK Range**: >=2.19 <4.0.0
 

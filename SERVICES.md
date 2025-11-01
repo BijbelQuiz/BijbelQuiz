@@ -10,7 +10,7 @@ The BijbelQuiz app follows a service-oriented architecture with modular services
 
 ### QuizSoundService
 
-**Location:** `bijbelquiz/lib/services/quiz_sound_service.dart`
+**Location:** `app/lib/services/quiz_sound_service.dart`
 
 **Purpose:** Simple sound management for quiz-related audio feedback with mute support.
 
@@ -122,7 +122,7 @@ await questionLoadingService.loadMoreQuestionsAdvanced(
 
 ### ProgressiveQuestionSelector
 
-**Location:** `bijbelquiz/lib/services/progressive_question_selector.dart`
+**Location:** `app/lib/services/progressive_question_selector.dart`
 
 **Purpose:** Advanced 11-phase Progressive Question Up-selection (PQU) algorithm for dynamic difficulty adjustment.
 
@@ -171,7 +171,7 @@ selector.resetForNewGame();
 
 ### AnalyticsService
 
-**Location:** `bijbelquiz/lib/services/analytics_service.dart`
+**Location:** `app/lib/services/analytics_service.dart`
 
 **Purpose:** Focused feature usage analytics service for understanding user engagement with app features.
 
@@ -184,7 +184,7 @@ selector.resetForNewGame();
 
 ### FeatureFlagsService
 
-**Location:** `bijbelquiz/lib/services/feature_flags_service.dart`
+**Location:** `app/lib/services/feature_flags_service.dart`
 
 **Purpose:** Feature flag management for controlling app functionality remotely.
 
@@ -197,7 +197,7 @@ selector.resetForNewGame();
 
 ### GeminiService
 
-**Location:** `bijbelquiz/lib/services/gemini_service.dart`
+**Location:** `app/lib/services/gemini_service.dart`
 
 **Purpose:** Integration with Google's Gemini AI for enhanced app features.
 
@@ -210,7 +210,7 @@ selector.resetForNewGame();
 
 ### LessonService
 
-**Location:** `bijbelquiz/lib/services/lesson_service.dart`
+**Location:** `app/lib/services/lesson_service.dart`
 
 **Purpose:** Lesson management and progression tracking.
 
@@ -223,7 +223,7 @@ selector.resetForNewGame();
 
 ### PlatformFeedbackService
 
-**Location:** `bijbelquiz/lib/services/platform_feedback_service.dart`
+**Location:** `app/lib/services/platform_feedback_service.dart`
 
 **Purpose:** Platform-specific feedback and haptic responses.
 
@@ -236,7 +236,7 @@ selector.resetForNewGame();
 
 ### QuizAnswerHandler
 
-**Location:** `bijbelquiz/lib/services/quiz_answer_handler.dart`
+**Location:** `app/lib/services/quiz_answer_handler.dart`
 
 **Purpose:** Quiz answer processing and validation logic.
 
@@ -249,7 +249,7 @@ selector.resetForNewGame();
 
 ### QuizTimerManager
 
-**Location:** `bijbelquiz/lib/services/quiz_timer_manager.dart`
+**Location:** `app/lib/services/quiz_timer_manager.dart`
 
 **Purpose:** Quiz timer functionality and time management.
 
@@ -262,7 +262,7 @@ selector.resetForNewGame();
 
 ### Logger
 
-**Location:** `bijbelquiz/lib/services/logger.dart`
+**Location:** `app/lib/services/logger.dart`
 
 **Purpose:** Centralized logging system with configurable levels.
 
