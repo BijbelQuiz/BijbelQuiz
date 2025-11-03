@@ -1804,6 +1804,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+import 'package:bijbelquiz/l10n/strings_nl.dart' as strings;
+
   Widget _buildProfileManagementGroup(BuildContext context, SettingsProvider settings, ColorScheme colorScheme, bool isSmallScreen, bool isDesktop) {
     final profileProvider = Provider.of<ProfileProvider>(context);
     final profiles = profileProvider.profiles;
@@ -1815,7 +1817,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       colorScheme,
       isSmallScreen,
       isDesktop,
-      title: 'Profiles',
+      title: strings.AppStrings.profiles,
       children: [
         _buildSettingItem(
           context,
@@ -1823,8 +1825,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           colorScheme,
           isSmallScreen,
           isDesktop,
-          title: 'Current Profile',
-          subtitle: 'Switch between profiles',
+          title: strings.AppStrings.currentProfile,
+          subtitle: strings.AppStrings.switchProfiles,
           icon: Icons.person,
           child: DropdownButton<String>(
             value: activeProfile?.id,
@@ -1848,7 +1850,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           isSmallScreen,
           isDesktop,
           onPressed: () => _showAddProfileDialog(context),
-          label: 'Add Profile',
+          label: strings.AppStrings.addProfile,
           icon: Icons.add,
         ),
         _buildActionButton(
@@ -1858,7 +1860,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           isSmallScreen,
           isDesktop,
           onPressed: () => _showEditProfileDialog(context, activeProfile),
-          label: 'Edit Profile',
+          label: strings.AppStrings.editProfile,
           icon: Icons.edit,
         ),
       ],
@@ -1871,15 +1873,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Create Profile'),
+          title: const Text(strings.AppStrings.createProfile),
           content: TextField(
             controller: nameController,
-            decoration: const InputDecoration(labelText: 'Profile Name'),
+            decoration: const InputDecoration(labelText: strings.AppStrings.profileName),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: const Text(strings.AppStrings.cancel),
             ),
             ElevatedButton(
               onPressed: () {
@@ -1891,7 +1893,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Navigator.of(context).pop();
                 }
               },
-              child: const Text('Create'),
+              child: const Text(strings.AppStrings.create),
             ),
           ],
         );
@@ -1908,15 +1910,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Edit Profile'),
+          title: const Text(strings.AppStrings.editProfile),
           content: TextField(
             controller: nameController,
-            decoration: const InputDecoration(labelText: 'Profile Name'),
+            decoration: const InputDecoration(labelText: strings.AppStrings.profileName),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: const Text(strings.AppStrings.cancel),
             ),
             ElevatedButton(
               onPressed: () {
@@ -1928,7 +1930,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Navigator.of(context).pop();
                 }
               },
-              child: const Text('Save'),
+              child: const Text(strings.AppStrings.save),
             ),
           ],
         );

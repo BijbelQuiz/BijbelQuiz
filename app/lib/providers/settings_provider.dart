@@ -99,6 +99,28 @@ class SettingsProvider extends ChangeNotifier {
     await syncService.initialize();
   }
 
+  Future<void> _migrateLegacyData() async {
+    final keys = _prefs!.getKeys();
+    for (final key in keys) {
+      if (!key.startsWith('user_')) {
+        final value = _prefs!.get(key);
+        if (value != null) {
+          final newKey = _getProfileKey(key);
+          if (value is bool) {
+            await _prefs!.setBool(newKey, value);
+          } else if (value is int) {
+            await _prefs!.setInt(newKey, value);
+          } else if (value is String) {
+            await _prefs!.setString(newKey, value);
+          } else if (value is List<String>) {
+            await _prefs!.setStringList(newKey, value);
+          }
+          await _prefs!.remove(key);
+        }
+      }
+    }
+  }
+
   /// De huidige taalinstelling (altijd 'nl')
   String get language => _language;
   
@@ -344,6 +366,9 @@ class SettingsProvider extends ChangeNotifier {
       notifyListeners();
 
       _prefs = await SharedPreferences.getInstance();
+      if (_profileId != null && _prefs!.containsKey('game_score')) {
+        await _migrateLegacyData();
+      }
       AppLogger.info('SharedPreferences instance obtained');
       // Altijd Nederlands forceren
       _language = 'nl';

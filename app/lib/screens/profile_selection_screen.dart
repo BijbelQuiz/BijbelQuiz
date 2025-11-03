@@ -4,6 +4,8 @@ import '../providers/profile_provider.dart';
 import '../models/user_profile.dart';
 import 'main_navigation_screen.dart';
 
+import 'package:bijbelquiz/l10n/strings_nl.dart' as strings;
+
 class ProfileSelectionScreen extends StatelessWidget {
   const ProfileSelectionScreen({super.key});
 
@@ -13,7 +15,7 @@ class ProfileSelectionScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select a Profile'),
+        title: const Text(strings.AppStrings.selectProfile),
       ),
       body: Consumer<ProfileProvider>(
         builder: (context, provider, child) {
@@ -25,7 +27,7 @@ class ProfileSelectionScreen extends StatelessWidget {
             return Center(
               child: ElevatedButton(
                 onPressed: () => _showAddProfileDialog(context),
-                child: const Text('Create a New Profile'),
+                child: const Text(strings.AppStrings.createNewProfile),
               ),
             );
           }
@@ -65,15 +67,15 @@ class ProfileSelectionScreen extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Create Profile'),
+          title: const Text(strings.AppStrings.createProfile),
           content: TextField(
             controller: nameController,
-            decoration: const InputDecoration(labelText: 'Profile Name'),
+            decoration: const InputDecoration(labelText: strings.AppStrings.profileName),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: const Text(strings.AppStrings.cancel),
             ),
             ElevatedButton(
               onPressed: () {
@@ -85,7 +87,7 @@ class ProfileSelectionScreen extends StatelessWidget {
                   Navigator.of(context).pop();
                 }
               },
-              child: const Text('Create'),
+              child: const Text(strings.AppStrings.create),
             ),
           ],
         );

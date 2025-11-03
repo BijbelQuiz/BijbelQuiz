@@ -283,6 +283,9 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
               ),
             );
           }
+          if (profileProvider.profiles.length == 1 && profileProvider.activeProfile == null) {
+            Future.microtask(() => profileProvider.setActiveProfile(profileProvider.profiles.first.id));
+          }
           return profileProvider.activeProfile == null
               ? const ProfileSelectionScreen()
               : const MainNavigationScreen();

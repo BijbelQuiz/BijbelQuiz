@@ -57,6 +57,18 @@ class ProfileProvider extends ChangeNotifier {
         _activeProfile = _profiles.first;
       }
 
+      if (_profiles.isEmpty) {
+        final oldScoreKey = 'game_score';
+        if (_prefs!.containsKey(oldScoreKey)) {
+          final defaultProfile = UserProfile(name: 'Hoofdprofiel');
+          _profiles.add(defaultProfile);
+          _activeProfile = defaultProfile;
+          await _saveProfiles();
+          await _prefs!.setString(_activeProfileKey, defaultProfile.id);
+          AppLogger.info('Migrated old data to a new default profile.');
+        }
+      }
+
       AppLogger.info('Loaded ${_profiles.length} profiles. Active profile: ${_activeProfile?.name}');
     } catch (e) {
       _error = 'Failed to load profiles: $e';

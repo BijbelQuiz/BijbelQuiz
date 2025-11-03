@@ -43,6 +43,21 @@ class LessonProgressProvider extends ChangeNotifier {
     await syncService.initialize();
   }
 
+  Future<void> _migrateLegacyData() async {
+    final keysToMigrate = {
+      _unlockedCountKey: (value) => _prefs!.setInt(_getProfileKey(_unlockedCountKey), value as int),
+      _storageKey: (value) => _prefs!.setString(_getProfileKey(_storageKey), value as String),
+    };
+
+    for (final key in keysToMigrate.keys) {
+      final value = _prefs!.get(key);
+      if (value != null) {
+        await keysToMigrate[key]!(value);
+        await _prefs!.remove(key);
+      }
+    }
+  }
+
   Future<void> _load() async {
     try {
       _isLoading = true;
@@ -50,6 +65,9 @@ class LessonProgressProvider extends ChangeNotifier {
       notifyListeners();
 
       _prefs = await SharedPreferences.getInstance();
+      if (_profileId != null && _prefs!.containsKey(_unlockedCountKey)) {
+        await _migrateLegacyData();
+      }
 
       _unlockedCount = _prefs?.getInt(_getProfileKey(_unlockedCountKey)) ?? 1;
       final raw = _prefs?.getString(_getProfileKey(_storageKey));

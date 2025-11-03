@@ -97,6 +97,20 @@ class GameStatsProvider extends ChangeNotifier {
     await syncService.initialize();
   }
 
+  Future<void> _migrateLegacyData() async {
+    final keysToMigrate = [_scoreKey, _currentStreakKey, _longestStreakKey, _incorrectAnswersKey];
+    for (final key in keysToMigrate) {
+      final value = _prefs!.get(key);
+      if (value != null) {
+        final newKey = _getProfileKey(key);
+        if (value is int) {
+          await _prefs!.setInt(newKey, value);
+        }
+        await _prefs!.remove(key);
+      }
+    }
+  }
+
   /// The current game score
   int get score => _score;
   
@@ -123,6 +137,9 @@ class GameStatsProvider extends ChangeNotifier {
       notifyListeners();
 
       _prefs = await SharedPreferences.getInstance();
+      if (_profileId != null && _prefs!.containsKey(_scoreKey)) {
+        await _migrateLegacyData();
+      }
       _score = _prefs?.getInt(_getProfileKey(_scoreKey)) ?? 0;
       _currentStreak = _prefs?.getInt(_getProfileKey(_currentStreakKey)) ?? 0;
       _longestStreak = _prefs?.getInt(_getProfileKey(_longestStreakKey)) ?? 0;

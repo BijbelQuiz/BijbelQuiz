@@ -536,4 +536,15 @@ class AppStrings {
   static const String usernameAlreadyTaken = 'Gebruikersnaam is al in gebruik';
   static const String usernameBlacklisted = 'Deze gebruikersnaam is niet toegestaan';
   static const String usernameSaved = 'Gebruikersnaam opgeslagen!';
+
+  // Profile Management
+  static const String profiles = 'Profielen';
+  static const String selectProfile = 'Selecteer een profiel';
+  static const String createProfile = 'Profiel aanmaken';
+  static const String editProfile = 'Profiel bewerken';
+  static const String profileName = 'Profielnaam';
+  static const String createNewProfile = 'Nieuw profiel aanmaken';
+  static const String currentProfile = 'Huidig profiel';
+  static const String switchProfiles = 'Wisselen tussen profielen';
+  static const String addProfile = 'Profiel toevoegen';
 }
