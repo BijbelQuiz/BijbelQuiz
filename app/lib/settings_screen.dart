@@ -1873,15 +1873,15 @@ import 'package:bijbelquiz/l10n/strings_nl.dart' as strings;
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text(strings.AppStrings.createProfile),
+          title: Text(strings.AppStrings.createProfile),
           content: TextField(
             controller: nameController,
-            decoration: const InputDecoration(labelText: strings.AppStrings.profileName),
+            decoration: InputDecoration(labelText: strings.AppStrings.profileName),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text(strings.AppStrings.cancel),
+              child: Text(strings.AppStrings.cancel),
             ),
             ElevatedButton(
               onPressed: () {
@@ -1893,7 +1893,7 @@ import 'package:bijbelquiz/l10n/strings_nl.dart' as strings;
                   Navigator.of(context).pop();
                 }
               },
-              child: const Text(strings.AppStrings.create),
+              child: Text(strings.AppStrings.create),
             ),
           ],
         );
@@ -1910,15 +1910,15 @@ import 'package:bijbelquiz/l10n/strings_nl.dart' as strings;
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text(strings.AppStrings.editProfile),
+          title: Text(strings.AppStrings.editProfile),
           content: TextField(
             controller: nameController,
-            decoration: const InputDecoration(labelText: strings.AppStrings.profileName),
+            decoration: InputDecoration(labelText: strings.AppStrings.profileName),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text(strings.AppStrings.cancel),
+              child: Text(strings.AppStrings.cancel),
             ),
             ElevatedButton(
               onPressed: () {
@@ -1930,7 +1930,7 @@ import 'package:bijbelquiz/l10n/strings_nl.dart' as strings;
                   Navigator.of(context).pop();
                 }
               },
-              child: const Text(strings.AppStrings.save),
+              child: Text(strings.AppStrings.save),
             ),
           ],
         );

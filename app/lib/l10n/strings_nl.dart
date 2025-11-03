@@ -547,4 +547,6 @@ class AppStrings {
   static const String currentProfile = 'Huidig profiel';
   static const String switchProfiles = 'Wisselen tussen profielen';
   static const String addProfile = 'Profiel toevoegen';
+  static const String create = 'Aanmaken';
+  static const String save = 'Opslaan';
 }

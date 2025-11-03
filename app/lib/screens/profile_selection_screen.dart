@@ -67,15 +67,15 @@ class ProfileSelectionScreen extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text(strings.AppStrings.createProfile),
+          title: Text(strings.AppStrings.createProfile),
           content: TextField(
             controller: nameController,
-            decoration: const InputDecoration(labelText: strings.AppStrings.profileName),
+            decoration: InputDecoration(labelText: strings.AppStrings.profileName),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text(strings.AppStrings.cancel),
+              child: Text(strings.AppStrings.cancel),
             ),
             ElevatedButton(
               onPressed: () {
@@ -87,7 +87,7 @@ class ProfileSelectionScreen extends StatelessWidget {
                   Navigator.of(context).pop();
                 }
               },
-              child: const Text(strings.AppStrings.create),
+              child: Text(strings.AppStrings.create),
             ),
           ],
         );
