@@ -660,4 +660,16 @@ class AppStrings {
 
   // Beta
   static const String beta = 'Bèta';
+  
+  // Share functionality
+  static const String shareStatsTitle = 'Deel je statistieken';
+  static const String shareYourBijbelQuizStats = 'Deel je BijbelQuiz statistieken';
+  static const String correctAnswersShare = 'Correcte antwoorden';
+  static const String currentStreakShare = 'Huidige reeks';
+  static const String bestStreakShare = 'Beste reeks';
+  static const String mistakesShare = 'Fouten';
+  static const String accuracyShare = 'Accuraatheid';
+  static const String timeSpentShare = 'Tijd besteed';
+  static const String shareResults = 'Deel je resultaten';
+  static const String copyLink = 'Kopieer link';
 }

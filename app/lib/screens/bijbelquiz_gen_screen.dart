@@ -594,27 +594,54 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          OutlinedButton.icon(
-            onPressed: () => _shareStats(context, gameStats, timeTracking),
-            icon: Icon(
-              Icons.copy,
-              color: Colors.black,
-              size: 18,
-            ),
-            label: Text(
-              'Kopieer link',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.black,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => _copyLink(context, gameStats, timeTracking),
+                icon: Icon(
+                  Icons.copy,
+                  color: Colors.black,
+                  size: 18,
+                ),
+                label: Text(
+                  strings.AppStrings.copyLink,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                    color: Colors.black,
+                    width: 2,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                ),
               ),
-            ),
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(
-                color: Colors.black,
-                width: 2,
+              OutlinedButton.icon(
+                onPressed: () => _shareStats(context, gameStats, timeTracking),
+                icon: Icon(
+                  Icons.share,
+                  color: Colors.black,
+                  size: 18,
+                ),
+                label: Text(
+                  strings.AppStrings.shareResults,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                    color: Colors.black,
+                    width: 2,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                ),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            ),
+            ],
           ),
         ],
       ),
@@ -765,13 +792,29 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
 
   // Method to handle sharing stats
   void _shareStats(BuildContext context, GameStatsProvider gameStats, TimeTrackingService timeTracking) async {
-    final shareUrl = _encodeStatsToUrl(gameStats, timeTracking);
-    
     final totalQuestions = gameStats.score + gameStats.incorrectAnswers;
     final correctPercentage = totalQuestions > 0
         ? (gameStats.score / totalQuestions * 100).round()
         : 0;
 
+    final shareText = '''Dit is mijn BijbelQuiz Gen van ${BijbelQuizGenPeriod.getStatsYear()}:
+✅ ${strings.AppStrings.correctAnswersShare}: ${gameStats.score}
+🎯 ${strings.AppStrings.currentStreakShare}: ${gameStats.currentStreak}
+🔥 ${strings.AppStrings.bestStreakShare}: ${gameStats.longestStreak}
+❌ ${strings.AppStrings.mistakesShare}: ${gameStats.incorrectAnswers}
+📊 ${strings.AppStrings.accuracyShare}: $correctPercentage%
+⏱️ ${strings.AppStrings.timeSpentShare}: ${timeTracking.getTotalTimeSpentInHours().toStringAsFixed(1)} uur''';
+
+    await Share.share(
+      shareText,
+      subject: 'Mijn BijbelQuiz statistieken',
+    );
+  }
+
+  // Method to copy the stats link to clipboard
+  void _copyLink(BuildContext context, GameStatsProvider gameStats, TimeTrackingService timeTracking) async {
+    final shareUrl = _encodeStatsToUrl(gameStats, timeTracking);
+    
     // Copy the URL to clipboard
     await Clipboard.setData(ClipboardData(text: shareUrl));
     
