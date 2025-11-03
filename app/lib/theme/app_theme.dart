@@ -150,13 +150,13 @@ final ThemeData appLightTheme = ThemeData(
     shadow: const Color(0xFF0F172A),
   ),
   useMaterial3: true,
-  textTheme: ThemeData.light().textTheme.apply(fontFamily: 'Quicksand').merge(
+  textTheme: ThemeData.light().textTheme.merge(
         _createBaseTextTheme(
           primaryColor: const Color(0xFF0F172A),
           bodyLargeColor: const Color(0xFF334155),
           bodyMediumColor: const Color(0xFF475569),
         ),
-      ),
+      ).apply(fontFamily: 'Quicksand'),
   elevatedButtonTheme: _createBaseElevatedButtonTheme(
     const Color(0xFF2563EB),
     Colors.white,
@@ -186,13 +186,13 @@ final ThemeData appDarkTheme = ThemeData(
     shadow: const Color(0xFF000000),
   ),
   useMaterial3: true,
-  textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'Quicksand').merge(
+  textTheme: ThemeData.dark().textTheme.merge(
         _createBaseTextTheme(
           primaryColor: const Color(0xFFF8FAFC),
           bodyLargeColor: const Color(0xFFCBD5E1),
           bodyMediumColor: const Color(0xFF94A3B8),
         ),
-      ),
+      ).apply(fontFamily: 'Quicksand'),
   elevatedButtonTheme: _createBaseElevatedButtonTheme(
     const Color(0xFF2563EB),
     Colors.white,
@@ -220,13 +220,13 @@ final ThemeData oledTheme = ThemeData(
     onError: Colors.white,
   ),
   useMaterial3: true,
-  textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'Quicksand').merge(
+  textTheme: ThemeData.dark().textTheme.merge(
         _createBaseTextTheme(
           primaryColor: Colors.white,
           bodyLargeColor: Colors.white,
           bodyMediumColor: Colors.white,
         ),
-      ),
+      ).apply(fontFamily: 'Quicksand'),
   elevatedButtonTheme: _createBaseElevatedButtonTheme(
     Colors.white,
     Colors.black,
@@ -244,13 +244,13 @@ final ThemeData greenTheme = ThemeData(
   colorScheme:
       ColorScheme.fromSeed(seedColor: Colors.green, brightness: Brightness.light),
   useMaterial3: true,
-  textTheme: ThemeData.light().textTheme.apply(fontFamily: 'Quicksand').merge(
+  textTheme: ThemeData.light().textTheme.merge(
         _createBaseTextTheme(
           primaryColor: const Color(0xFF0F172A),
           bodyLargeColor: const Color(0xFF334155),
           bodyMediumColor: const Color(0xFF475569),
         ),
-      ),
+      ).apply(fontFamily: 'Quicksand'),
   elevatedButtonTheme: _createBaseElevatedButtonTheme(
     Colors.green,
     Colors.white,
@@ -269,13 +269,13 @@ final ThemeData orangeTheme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.orange, brightness: Brightness.light),
   useMaterial3: true,
-  textTheme: ThemeData.light().textTheme.apply(fontFamily: 'Quicksand').merge(
+  textTheme: ThemeData.light().textTheme.merge(
         _createBaseTextTheme(
           primaryColor: const Color(0xFF0F172A),
           bodyLargeColor: const Color(0xFF334155),
           bodyMediumColor: const Color(0xFF475569),
         ),
-      ),
+      ).apply(fontFamily: 'Quicksand'),
   elevatedButtonTheme: _createBaseElevatedButtonTheme(
     Colors.orange,
     Colors.white,
@@ -306,13 +306,13 @@ final ThemeData greyTheme = ThemeData(
     shadow: const Color(0xFF111827),
   ),
   useMaterial3: true,
-  textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'Quicksand').merge(
+  textTheme: ThemeData.dark().textTheme.merge(
         _createBaseTextTheme(
           primaryColor: const Color(0xFFF9FAFB),
           bodyLargeColor: const Color(0xFFFFFFFF),
           bodyMediumColor: const Color(0xE6FFFFFF),
         ),
-      ),
+      ).apply(fontFamily: 'Quicksand'),
   elevatedButtonTheme: _createBaseElevatedButtonTheme(
     const Color(0xFF4B5563),
     Colors.white,
