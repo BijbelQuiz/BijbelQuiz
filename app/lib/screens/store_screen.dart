@@ -13,6 +13,8 @@ import '../screens/sync_screen.dart';
 import '../services/logger.dart';
 import '../services/gemini_service.dart';
 import '../models/ai_theme.dart';
+import '../utils/automatic_error_reporter.dart';
+import '../error/error_types.dart';
 
 
 
@@ -405,62 +407,95 @@ class _StoreScreenState extends State<StoreScreen> {
             final canAfford = isDev || localGameStats.score >= cost;
             if (canAfford) {
               AppLogger.info('Sufficient stars available for power-up: $title');
-              final success = isDev ? true : await localGameStats.spendStarsWithTransaction(
-                amount: cost,
-                reason: 'Thema aankoop: $title',
-                metadata: {
-                  'theme_name': title,
-                },
-              );
-              if (success) {
-
-                final message = onPurchase();
-                if (!localContext.mounted) return;
-                
-                // Show confirmation dialog
-                await showDialog(
-                  context: localContext,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      backgroundColor: colorScheme.surface,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      title: ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.check_circle_rounded, color: colorScheme.primary, size: 24),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Power-up Geactiveerd!',
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      content: Text(message),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            // Start free play (random practice) regardless of how Store is shown
-                            Navigator.of(localContext).push(
-                              MaterialPageRoute(
-                                builder: (_) => const QuizScreen(),
-                              ),
-                            );
-                          },
-                          child: Text('Naar de quiz', style: TextStyle(color: colorScheme.primary)),
-                        ),
-                      ],
-                    );
+              try {
+                final success = isDev ? true : await localGameStats.spendStarsWithTransaction(
+                  amount: cost,
+                  reason: 'Power-up aankoop: $title',
+                  metadata: {
+                    'powerup_name': title,
+                    'feature': 'store',
                   },
                 );
+                if (success) {
+                  final message = onPurchase();
+                  if (!localContext.mounted) return;
+                  
+                  // Show confirmation dialog
+                  await showDialog(
+                    context: localContext,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        backgroundColor: colorScheme.surface,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        title: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.check_circle_rounded, color: colorScheme.primary, size: 24),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Power-up Geactiveerd!',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        content: Text(message),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              // Start free play (random practice) regardless of how Store is shown
+                              Navigator.of(localContext).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const QuizScreen(),
+                                ),
+                              );
+                            },
+                            child: Text('Naar de quiz', style: TextStyle(color: colorScheme.primary)),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  // Auto-report transaction failure
+                  await AutomaticErrorReporter.reportStorageError(
+                    message: 'Failed to process power-up purchase transaction',
+                    userMessage: 'Failed to purchase power-up',
+                    operation: 'spend_stars',
+                    additionalInfo: {
+                      'powerup_name': title,
+                      'cost': cost,
+                      'expected_amount': cost,
+                    },
+                  );
+                  if (localContext.mounted) {
+                    showTopSnackBar(localContext, 'Aankoop mislukt, probeer het opnieuw', style: TopSnackBarStyle.error);
+                  }
+                }
+              } catch (e) {
+                // Auto-report the error
+                await AutomaticErrorReporter.reportStorageError(
+                  message: 'Error processing power-up purchase: ${e.toString()}',
+                  userMessage: 'Error processing power-up purchase',
+                  operation: 'spend_stars',
+                  additionalInfo: {
+                    'powerup_name': title,
+                    'cost': cost,
+                    'error': e.toString(),
+                    'feature': 'store',
+                  },
+                );
+                if (localContext.mounted) {
+                  showTopSnackBar(localContext, 'Fout bij aankoop: ${e.toString()}', style: TopSnackBarStyle.error);
+                }
               }
             } else {
               showTopSnackBar(localContext, 'Niet genoeg sterren!', style: TopSnackBarStyle.error);
@@ -607,20 +642,56 @@ class _StoreScreenState extends State<StoreScreen> {
             }
             if (canAfford) {
               AppLogger.info('Sufficient stars available for theme: $themeKey');
-              final success = isDev ? true : await localGameStats.spendStarsWithTransaction(
-                amount: cost,
-                reason: 'Power-up aankoop: $title',
-                metadata: {
-                  'powerup_type': title,
-                  'duration_questions': title.contains('vragen') ? 5 : null,
-                  'duration_seconds': title.contains('seconden') ? 60 : null,
-                },
-              );
-              if (success) {
-                await localSettings.unlockTheme(themeKey);
-                if (!localContext.mounted) return;
-                final message = '$title ontgrendeld!';
-                showTopSnackBar(localContext, message, style: TopSnackBarStyle.success);
+              try {
+                final success = isDev ? true : await localGameStats.spendStarsWithTransaction(
+                  amount: cost,
+                  reason: 'Thema aankoop: $title',
+                  metadata: {
+                    'theme_name': title,
+                    'theme_key': themeKey,
+                    'feature': 'store',
+                  },
+                );
+                if (success) {
+                  await localSettings.unlockTheme(themeKey);
+                  if (!localContext.mounted) return;
+                  final message = '$title ontgrendeld!';
+                  showTopSnackBar(localContext, message, style: TopSnackBarStyle.success);
+                } else {
+                  // Auto-report transaction failure
+                  await AutomaticErrorReporter.reportStorageError(
+                    message: 'Failed to process theme purchase transaction',
+                    userMessage: 'Failed to purchase theme',
+                    operation: 'spend_stars',
+                    additionalInfo: {
+                      'theme_name': title,
+                      'theme_key': themeKey,
+                      'cost': cost,
+                      'expected_amount': cost,
+                      'feature': 'store',
+                    },
+                  );
+                  if (localContext.mounted) {
+                    showTopSnackBar(localContext, 'Aankoop mislukt, probeer het opnieuw', style: TopSnackBarStyle.error);
+                  }
+                }
+              } catch (e) {
+                // Auto-report the error
+                await AutomaticErrorReporter.reportStorageError(
+                  message: 'Error processing theme purchase: ${e.toString()}',
+                  userMessage: 'Error processing theme purchase',
+                  operation: 'spend_stars',
+                  additionalInfo: {
+                    'theme_name': title,
+                    'theme_key': themeKey,
+                    'cost': cost,
+                    'error': e.toString(),
+                    'feature': 'store',
+                  },
+                );
+                if (localContext.mounted) {
+                  showTopSnackBar(localContext, 'Fout bij aankoop: ${e.toString()}', style: TopSnackBarStyle.error);
+                }
               }
             } else {
               showTopSnackBar(localContext, 'Niet genoeg sterren!', style: TopSnackBarStyle.error);
@@ -767,12 +838,72 @@ class _StoreScreenState extends State<StoreScreen> {
             final canAfford = isDev || localGameStats.score >= cost;
 
             if (canAfford) {
+              // Spend stars for AI theme generation
+              bool transactionSuccess = false;
+              try {
+                transactionSuccess = isDev ? true : await localGameStats.spendStarsWithTransaction(
+                  amount: cost,
+                  reason: 'AI thema generator toegang',
+                  metadata: {
+                    'feature': 'ai_theme_generator_access',
+                    'cost': cost,
+                  },
+                );
+                if (!transactionSuccess) {
+                  await AutomaticErrorReporter.reportStorageError(
+                    message: 'Failed to process AI theme generator access payment',
+                    userMessage: 'Failed to process AI theme generator payment',
+                    operation: 'spend_stars',
+                    additionalInfo: {
+                      'cost': cost,
+                      'feature': 'ai_theme_generator',
+                    },
+                  );
+                  if (localContext.mounted) {
+                    showTopSnackBar(localContext, 'Aankoop mislukt, probeer het opnieuw', style: TopSnackBarStyle.error);
+                  }
+                  return;
+                }
+              } catch (e) {
+                await AutomaticErrorReporter.reportStorageError(
+                  message: 'Error processing AI theme generator access payment: ${e.toString()}',
+                  userMessage: 'Error processing AI theme generator payment',
+                  operation: 'spend_stars',
+                  additionalInfo: {
+                    'cost': cost,
+                    'error': e.toString(),
+                    'feature': 'ai_theme_generator',
+                  },
+                );
+                if (localContext.mounted) {
+                  showTopSnackBar(localContext, 'Fout bij betaling: ${e.toString()}', style: TopSnackBarStyle.error);
+                }
+                return;
+              }
+              
               // Navigate to AI Theme Designer screen
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const AIThemeDesignerScreen(),
-                ),
-              );
+              try {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const AIThemeDesignerScreen(),
+                  ),
+                );
+              } catch (navError) {
+                // Auto-report navigation error
+                await AutomaticErrorReporter.reportStorageError(
+                  message: 'Failed to navigate to AI theme designer: ${navError.toString()}',
+                  userMessage: 'Failed to open AI theme designer',
+                  operation: 'navigation',
+                  additionalInfo: {
+                    'cost': cost,
+                    'error': navError.toString(),
+                    'feature': 'ai_theme_generator',
+                  },
+                );
+                if (localContext.mounted) {
+                  showTopSnackBar(localContext, 'Fout bij openen van AI thema generator', style: TopSnackBarStyle.error);
+                }
+              }
             } else {
               showTopSnackBar(localContext, 'Niet genoeg sterren!', style: TopSnackBarStyle.error);
             }

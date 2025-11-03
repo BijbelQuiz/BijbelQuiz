@@ -9,6 +9,8 @@ import '../providers/lesson_progress_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/logger.dart';
 import '../l10n/strings_nl.dart' as strings;
+import '../utils/automatic_error_reporter.dart';
+import '../error/error_types.dart';
 
 class SyncScreen extends StatefulWidget {
   const SyncScreen({super.key});
@@ -54,6 +56,16 @@ class _SyncScreenState extends State<SyncScreen> {
         });
       }
     } catch (e) {
+      // Auto-report the error
+      await AutomaticErrorReporter.reportStorageError(
+        message: 'Error loading current username: ${e.toString()}',
+        userMessage: 'Error loading username',
+        operation: 'load_username',
+        additionalInfo: {
+          'error': e.toString(),
+          'feature': 'sync',
+        },
+      );
       AppLogger.error('Error loading current username', e);
     }
   }
@@ -68,6 +80,17 @@ class _SyncScreenState extends State<SyncScreen> {
         _blacklistedUsernames = jsonData.map((item) => item.toString().toLowerCase()).toList();
       });
     } catch (e) {
+      // Auto-report the error
+      await AutomaticErrorReporter.reportStorageError(
+        message: 'Error loading blacklisted usernames: ${e.toString()}',
+        userMessage: 'Error loading blacklisted usernames',
+        operation: 'load_asset',
+        additionalInfo: {
+          'file': 'assets/blacklisted_usernames.json',
+          'error': e.toString(),
+          'feature': 'sync',
+        },
+      );
       AppLogger.error('Error loading blacklisted usernames', e);
       // Set a default list if the file fails to load
       setState(() {
@@ -116,6 +139,16 @@ class _SyncScreenState extends State<SyncScreen> {
         _currentDeviceId = deviceId;
       });
     } catch (e) {
+      // Auto-report the error
+      await AutomaticErrorReporter.reportStorageError(
+        message: 'Error getting current device ID: ${e.toString()}',
+        userMessage: 'Error getting device ID',
+        operation: 'get_device_id',
+        additionalInfo: {
+          'error': e.toString(),
+          'feature': 'sync',
+        },
+      );
       AppLogger.error('Error getting current device ID', e);
     }
   }
@@ -156,6 +189,16 @@ class _SyncScreenState extends State<SyncScreen> {
           // Reload the device list
           await _loadDevicesInRoom();
         } else {
+          // Auto-report the failure
+          await AutomaticErrorReporter.reportStorageError(
+            message: 'Failed to remove device: $deviceId',
+            userMessage: 'Failed to remove device',
+            operation: 'remove_device',
+            additionalInfo: {
+              'device_id': deviceId,
+              'feature': 'sync',
+            },
+          );
           AppLogger.error('Failed to remove device: $deviceId');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -167,6 +210,17 @@ class _SyncScreenState extends State<SyncScreen> {
           }
         }
       } catch (e) {
+        // Auto-report the error
+        await AutomaticErrorReporter.reportStorageError(
+          message: 'Error removing device: $deviceId - ${e.toString()}',
+          userMessage: 'Error removing device',
+          operation: 'remove_device',
+          additionalInfo: {
+            'device_id': deviceId,
+            'error': e.toString(),
+            'feature': 'sync',
+          },
+        );
         AppLogger.error('Error removing device: $deviceId', e);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -206,6 +260,17 @@ class _SyncScreenState extends State<SyncScreen> {
       }
       return false; // Username is not taken by any other device
     } catch (e) {
+      // Auto-report the error but return false to avoid false positives
+      await AutomaticErrorReporter.reportStorageError(
+        message: 'Error checking if username is taken by other devices: $username - ${e.toString()}',
+        userMessage: 'Error checking username availability',
+        operation: 'check_username_availability',
+        additionalInfo: {
+          'username': username,
+          'error': e.toString(),
+          'feature': 'sync',
+        },
+      );
       AppLogger.error('Error checking if username is taken by other devices', e);
       return false; // Assume it's not taken on error to avoid false positives
     }
@@ -230,6 +295,16 @@ class _SyncScreenState extends State<SyncScreen> {
         _devicesInRoom = devices;
       });
     } catch (e) {
+      // Auto-report the error
+      await AutomaticErrorReporter.reportStorageError(
+        message: 'Error loading devices in room: ${e.toString()}',
+        userMessage: 'Error loading devices',
+        operation: 'get_devices_in_room',
+        additionalInfo: {
+          'error': e.toString(),
+          'feature': 'sync',
+        },
+      );
       AppLogger.error('Error loading devices in room', e);
     } finally {
       setState(() {
@@ -291,6 +366,16 @@ class _SyncScreenState extends State<SyncScreen> {
           );
         }
       } else {
+        // Auto-report the failure
+        await AutomaticErrorReporter.reportStorageError(
+          message: 'Username already taken: $username',
+          userMessage: 'Username already taken',
+          operation: 'set_username',
+          additionalInfo: {
+            'username': username,
+            'feature': 'sync',
+          },
+        );
         if (mounted) {
           setState(() {
             _usernameError = strings.AppStrings.usernameAlreadyTaken;
@@ -298,6 +383,17 @@ class _SyncScreenState extends State<SyncScreen> {
         }
       }
     } catch (e) {
+      // Auto-report the error
+      await AutomaticErrorReporter.reportStorageError(
+        message: 'Error saving username: $username - ${e.toString()}',
+        userMessage: 'Error saving username',
+        operation: 'set_username',
+        additionalInfo: {
+          'username': username,
+          'error': e.toString(),
+          'feature': 'sync',
+        },
+      );
       if (mounted) {
         setState(() {
           _usernameError = '${strings.AppStrings.errorGeneric}${e.toString()}';
@@ -354,11 +450,32 @@ class _SyncScreenState extends State<SyncScreen> {
         
         Navigator.of(context).pop(true); // Return success
       } else {
+        // Auto-report the failure
+        await AutomaticErrorReporter.reportStorageError(
+          message: 'Failed to connect to sync room: $code',
+          userMessage: 'Failed to connect to sync room',
+          operation: 'join_sync_room',
+          additionalInfo: {
+            'code': code,
+            'feature': 'sync',
+          },
+        );
         setState(() {
           _error = strings.AppStrings.failedToConnectToUser;
         });
       }
     } catch (e) {
+      // Auto-report the error
+      await AutomaticErrorReporter.reportStorageError(
+        message: 'Error joining sync room: $code - ${e.toString()}',
+        userMessage: 'Error joining sync room',
+        operation: 'join_sync_room',
+        additionalInfo: {
+          'code': code,
+          'error': e.toString(),
+          'feature': 'sync',
+        },
+      );
       setState(() {
         _error = '${strings.AppStrings.errorGeneric}${e.toString()}';
       });
@@ -386,6 +503,16 @@ class _SyncScreenState extends State<SyncScreen> {
       AppLogger.info('Left sync room');
       Navigator.of(context).pop(false); // Return left
     } catch (e) {
+      // Auto-report the error
+      await AutomaticErrorReporter.reportStorageError(
+        message: 'Error leaving sync room: ${e.toString()}',
+        userMessage: 'Error leaving sync room',
+        operation: 'leave_sync_room',
+        additionalInfo: {
+          'error': e.toString(),
+          'feature': 'sync',
+        },
+      );
       setState(() {
         _error = '${strings.AppStrings.errorLeavingSyncRoom}${e.toString()}';
       });
@@ -430,6 +557,16 @@ class _SyncScreenState extends State<SyncScreen> {
         AppLogger.info('Synced settings to room');
       }
     } catch (e) {
+      // Auto-report the error
+      await AutomaticErrorReporter.reportStorageError(
+        message: 'Error syncing all data: ${e.toString()}',
+        userMessage: 'Error syncing data',
+        operation: 'sync_all_data',
+        additionalInfo: {
+          'error': e.toString(),
+          'feature': 'sync',
+        },
+      );
       AppLogger.error('Error syncing all data', e);
     }
   }
@@ -459,11 +596,31 @@ class _SyncScreenState extends State<SyncScreen> {
         
         Navigator.of(context).pop(true); // Return success
       } else {
+        // Auto-report the failure
+        await AutomaticErrorReporter.reportStorageError(
+          message: 'Failed to create sync room: $code',
+          userMessage: 'Failed to create sync room',
+          operation: 'create_sync_room',
+          additionalInfo: {
+            'code': code,
+            'feature': 'sync',
+          },
+        );
         setState(() {
           _error = strings.AppStrings.failedToCreateUserId;
         });
       }
     } catch (e) {
+      // Auto-report the error
+      await AutomaticErrorReporter.reportStorageError(
+        message: 'Error starting sync room: ${e.toString()}',
+        userMessage: 'Error starting sync room',
+        operation: 'create_sync_room',
+        additionalInfo: {
+          'error': e.toString(),
+          'feature': 'sync',
+        },
+      );
       setState(() {
         _error = '${strings.AppStrings.errorGeneric}${e.toString()}';
       });

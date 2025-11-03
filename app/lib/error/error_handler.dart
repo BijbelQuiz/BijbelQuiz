@@ -91,15 +91,76 @@ class ErrorHandler {
     String? questionId,
     Map<String, dynamic>? additionalInfo,
   }) {
-    ErrorReportingService()
-        .reportError(
-          appError: error,
-          questionId: questionId,
-          additionalInfo: additionalInfo,
-        )
-        .catchError((e) {
-          _logger.warning('Failed to report error to Supabase: $e');
-        });
+    // For certain error types, always report automatically (especially for critical features like biblical references)
+    final shouldAutoReport = _shouldAutoReportError(error);
+    
+    if (shouldAutoReport) {
+      // Report automatically without user intervention
+      ErrorReportingService()
+          .reportError(
+            appError: error,
+            questionId: questionId,
+            additionalInfo: additionalInfo,
+          )
+          .then((_) {
+            _logger.info('Error automatically reported to Supabase: ${error.userMessage}');
+          })
+          .catchError((e) {
+            _logger.warning('Failed to auto-report error to Supabase: $e');
+          });
+    } else {
+      // For other errors, still report but with lower priority
+      ErrorReportingService()
+          .reportError(
+            appError: error,
+            questionId: questionId,
+            additionalInfo: additionalInfo,
+          )
+          .catchError((e) {
+            _logger.warning('Failed to report error to Supabase: $e');
+          });
+    }
+  }
+
+  /// Determines if an error should be automatically reported without user intervention
+  bool _shouldAutoReportError(AppError error) {
+    // Auto-report errors related to critical features
+    switch (error.type) {
+      case AppErrorType.api:
+      case AppErrorType.network:
+      case AppErrorType.dataLoading:
+        return true;
+      
+      case AppErrorType.validation:
+        // Auto-report validation errors that might affect core functionality
+        if (error.technicalMessage.toLowerCase().contains('biblical') ||
+            error.technicalMessage.toLowerCase().contains('reference') ||
+            error.technicalMessage.toLowerCase().contains('book') ||
+            error.technicalMessage.toLowerCase().contains('verses')) {
+          return true;
+        }
+        return false;
+      
+      case AppErrorType.storage:
+        // Auto-report storage errors as they can affect user progress
+        return true;
+      
+      case AppErrorType.unknown:
+        // For unknown errors, check if they're related to critical features
+        final message = error.technicalMessage.toLowerCase();
+        if (message.contains('biblical') ||
+            message.contains('reference') ||
+            message.contains('api') ||
+            message.contains('network') ||
+            message.contains('database')) {
+          return true;
+        }
+        return false;
+      
+      default:
+        // For other error types, don't auto-report unless specifically handled
+        return false;
+    }
   }
 
   /// Creates an AppError from a generic exception

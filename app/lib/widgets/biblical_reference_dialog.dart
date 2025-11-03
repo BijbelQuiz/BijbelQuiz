@@ -6,6 +6,10 @@ import 'package:xml/xml.dart' as xml;
 import '../l10n/strings_nl.dart' as strings;
 import '../constants/urls.dart';
 import '../utils/bible_book_mapper.dart';
+import '../error/error_handler.dart';
+import '../error/error_types.dart';
+import '../services/error_reporting_service.dart';
+import '../utils/automatic_error_reporter.dart';
 
 class BiblicalReferenceDialog extends StatefulWidget {
   final String reference;
@@ -41,6 +45,14 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
       // Parse the reference to extract book, chapter, and verse
       final parsed = _parseReference(widget.reference);
       if (parsed == null) {
+        await AutomaticErrorReporter.reportBiblicalReferenceError(
+          message: 'Ongeldige bijbelverwijzing: "${widget.reference}"',
+          userMessage: 'Invalid Bible reference format',
+          reference: widget.reference,
+          additionalInfo: {
+            'parsing_error': 'Reference could not be parsed',
+          },
+        );
         throw Exception('Ongeldige bijbelverwijzing: "${widget.reference}"');
       }
 
@@ -52,6 +64,16 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
       // Convert book name to book number for the new API
       final bookNumber = BibleBookMapper.getBookNumber(book);
       if (bookNumber == null) {
+        // Auto-report book mapping errors
+        await AutomaticErrorReporter.reportBiblicalReferenceError(
+          message: 'Ongeldig boeknaam: "$book"',
+          userMessage: 'Invalid book name in biblical reference',
+          reference: widget.reference,
+          additionalInfo: {
+            'book': book,
+            'available_books': BibleBookMapper.getAllBookNames().take(10).join(", "),
+          },
+        );
         // Debug: show what book name was received and what valid names are available
         final validBooks = BibleBookMapper.getAllBookNames();
         throw Exception('Ongeldig boeknaam: "$book". Geldige boeken: ${validBooks.take(10).join(", ")}...');
@@ -72,6 +94,16 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
       // Validate URL to ensure it's from our trusted domain
       final uri = Uri.parse(url);
       if (uri.host != Uri.parse(AppUrls.bibleApiBase).host) {
+        await AutomaticErrorReporter.reportBiblicalReferenceError(
+          message: 'Ongeldige API URL',
+          userMessage: 'Invalid API URL for biblical reference',
+          reference: widget.reference,
+          additionalInfo: {
+            'url': url,
+            'expected_host': Uri.parse(AppUrls.bibleApiBase).host,
+            'actual_host': uri.host,
+          },
+        );
         throw Exception('Ongeldige API URL');
       }
 
@@ -79,6 +111,18 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
       final response = await _client.get(uri).timeout(
         const Duration(seconds: 10),
         onTimeout: () {
+          // Auto-report timeout errors
+          AutomaticErrorReporter.reportBiblicalReferenceError(
+            message: 'Time-out bij het laden van de bijbeltekst',
+            userMessage: 'Timeout loading biblical text',
+            reference: widget.reference,
+            additionalInfo: {
+              'url': url,
+              'timeout_seconds': 10,
+            },
+          ).catchError((e) {
+            // Don't let reporting errors affect the main functionality
+          });
           throw Exception('Time-out bij het laden van de bijbeltekst');
         },
       );
@@ -87,6 +131,20 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
         // Validate content type - be more flexible
         final contentType = response.headers['content-type'];
         if (contentType == null || (!contentType.contains('xml') && !contentType.contains('text'))) {
+          // Auto-report content type errors
+          AutomaticErrorReporter.reportBiblicalReferenceError(
+            message: 'Ongeldig antwoord van de server. Content-Type: $contentType',
+            userMessage: 'Invalid response from biblical text API',
+            reference: widget.reference,
+            additionalInfo: {
+              'url': url,
+              'status_code': response.statusCode,
+              'content_type': contentType,
+              'response_preview': response.body.substring(0, 300),
+            },
+          ).catchError((e) {
+            // Don't let reporting errors affect the main functionality
+          });
           throw Exception('Ongeldig antwoord van de server. Content-Type: $contentType. Response: ${response.body.substring(0, 300)}...');
         }
 
@@ -150,6 +208,18 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
 
           // If still no content, show debug info
           if (content.isEmpty) {
+            AutomaticErrorReporter.reportBiblicalReferenceError(
+              message: 'Geen tekst gevonden in XML na parsing',
+              userMessage: 'No text found in biblical reference response',
+              reference: widget.reference,
+              additionalInfo: {
+                'url': url,
+                'response_length': response.body.length,
+                'response_preview': response.body.substring(0, 300),
+              },
+            ).catchError((e) {
+              // Don't let reporting errors affect the main functionality
+            });
             throw Exception('Geen tekst gevonden in XML na parsing. XML length: ${response.body.length}, First 300 chars: ${response.body.substring(0, 300)}');
           }
         } catch (e) {
@@ -158,6 +228,19 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
           if (extractedText.isNotEmpty) {
             content = _sanitizeText(extractedText);
           } else {
+            // Report XML parsing errors
+            AutomaticErrorReporter.reportBiblicalReferenceError(
+              message: 'XML parsing mislukt en geen tekst gevonden',
+              userMessage: 'XML parsing failed for biblical reference',
+              reference: widget.reference,
+              additionalInfo: {
+                'url': url,
+                'error': e.toString(),
+                'response_preview': response.body.substring(0, 300),
+              },
+            ).catchError((e) {
+              // Don't let reporting errors affect the main functionality
+            });
             throw Exception('XML parsing mislukt en geen tekst gevonden: $e');
           }
         }
@@ -169,11 +252,43 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
           });
         }
       } else if (response.statusCode == 429) {
+        // Report rate limiting errors
+        AutomaticErrorReporter.reportBiblicalReferenceError(
+          message: 'Te veel verzoeken naar de biblical API',
+          userMessage: 'Rate limited by biblical text API',
+          reference: widget.reference,
+          additionalInfo: {
+            'url': url,
+            'status_code': response.statusCode,
+          },
+        ).catchError((e) {
+          // Don't let reporting errors affect the main functionality
+        });
         throw Exception('Te veel verzoeken. Probeer het later opnieuw.');
       } else {
+        // Report other HTTP errors
+        AutomaticErrorReporter.reportBiblicalReferenceError(
+          message: 'Fout bij het laden van de bijbeltekst (status: ${response.statusCode})',
+          userMessage: 'HTTP error loading biblical text',
+          reference: widget.reference,
+          additionalInfo: {
+            'url': url,
+            'status_code': response.statusCode,
+          },
+        ).catchError((e) {
+          // Don't let reporting errors affect the main functionality
+        });
         throw Exception('Fout bij het laden van de bijbeltekst (status: ${response.statusCode})');
       }
     } on SocketException {
+      // Report network errors
+      AutomaticErrorReporter.reportBiblicalReferenceError(
+        message: 'Netwerkfout bij laden van bijbeltekst',
+        userMessage: 'Network error loading biblical text',
+        reference: widget.reference,
+      ).catchError((e) {
+        // Don't let reporting errors affect the main functionality
+      });
       if (mounted) {
         setState(() {
           _error = 'Netwerkfout. Controleer uw internetverbinding.';
@@ -181,7 +296,9 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
         });
       }
     } on Exception catch (e) {
-      if (e.toString().contains('Time-out')) {
+      String errorMessage = e.toString();
+      if (errorMessage.contains('Time-out')) {
+        // Time-out was already handled above, but in case it bubbles up
         if (mounted) {
           setState(() {
             _error = 'Time-out bij het laden van de bijbeltekst. Probeer het later opnieuw.';
@@ -189,14 +306,36 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
           });
         }
       } else {
+        // Report other errors
+        AutomaticErrorReporter.reportBiblicalReferenceError(
+          message: 'Fout bij het laden van bijbeltekst',
+          userMessage: 'Error loading biblical text',
+          reference: widget.reference,
+          additionalInfo: {
+            'error': errorMessage,
+          },
+        ).catchError((e) {
+          // Don't let reporting errors affect the main functionality
+        });
         if (mounted) {
           setState(() {
-            _error = 'Fout bij het laden: ${e.toString()}';
+            _error = 'Fout bij het laden: $errorMessage';
             _isLoading = false;
           });
         }
       }
     } catch (e) {
+      // Report any other errors
+      AutomaticErrorReporter.reportBiblicalReferenceError(
+        message: 'Onverwachte fout bij laden van bijbeltekst',
+        userMessage: 'Unexpected error loading biblical text',
+        reference: widget.reference,
+        additionalInfo: {
+          'error': e.toString(),
+        },
+      ).catchError((e) {
+        // Don't let reporting errors affect the main functionality
+      });
       if (mounted) {
         setState(() {
           _error = 'Fout bij het laden: ${e.toString()}';

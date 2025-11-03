@@ -41,6 +41,8 @@ import '../services/quiz_animation_controller.dart';
 import '../services/progressive_question_selector.dart';
 import '../services/quiz_answer_handler.dart';
 import '../services/error_reporting_service.dart';
+import '../error/error_types.dart';
+import '../utils/automatic_error_reporter.dart';
 
 /// The main quiz screen that displays questions and handles user interactions
 /// with performance optimizations for low-end devices and poor connections.
@@ -1047,13 +1049,12 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     try {
       // Report the issue to the Supabase database
       final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-      await ErrorReportingService().reportSimpleError(
+      await AutomaticErrorReporter.reportQuestionError(
         message: 'User reported issue with question',
-        type: AppErrorType.dataLoading, // Using data loading type for question issues
         userMessage: 'Question reported by user',
         questionId: questionId,
+        questionText: question.question,
         additionalInfo: {
-          'question_text': question.question,
           'correct_answer': question.correctAnswer,
           'incorrect_answers': question.incorrectAnswers,
           'category': question.category,
@@ -1161,6 +1162,18 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     // First check if the reference can be parsed
     final parsed = _parseBiblicalReference(_quizState.question.biblicalReference!);
     if (parsed == null) {
+      // Report this error automatically since it indicates issues with question data
+      await AutomaticErrorReporter.reportBiblicalReferenceError(
+        message: 'Could not parse biblical reference',
+        userMessage: 'Invalid biblical reference in question',
+        reference: question.biblicalReference ?? 'null',
+        questionId: question.id,
+        additionalInfo: {
+          'question_id': question.id,
+          'question_text': question.question,
+        },
+      );
+      
       if (mounted) {
         showTopSnackBar(localContext, strings.AppStrings.invalidBiblicalReference, style: TopSnackBarStyle.error);
       }
@@ -1203,7 +1216,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
         }
       });
     } else {
-      // Not enough stars
+      // Not enough stars - this is a user state issue, not an error to report automatically
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           showTopSnackBar(localContext, strings.AppStrings.notEnoughStars, style: TopSnackBarStyle.warning);
