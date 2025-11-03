@@ -130,6 +130,7 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
       _buildBestStreakPage(context, gameStats),
       _buildYearInReviewPage(context, gameStats, timeTrackingService),
       _buildThankYouPage(context),
+      _buildDonationPage(context),
     ];
 
     return AnimatedBuilder(
@@ -147,7 +148,8 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
           Colors.green.shade300, // Time spent page - light blue
           Colors.pink.shade300, // Best streak page - pink
           Colors.amber.shade200, // Year in review page - amber
-          Colors.lightBlue.shade200, // Thank you page - green
+          Colors.lightBlue.shade200, // Thank you page - light blue
+          Colors.yellow.shade200, // Donation page - yellow
         ];
 
         return Scaffold(
@@ -626,7 +628,7 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
           ),
           const SizedBox(height: 24),
           Text(
-            strings.AppStrings.thankYouForUsingBijbelQuiz,
+            strings.AppStrings.thankYouForSupport,
             style: Theme.of(context).textTheme.displayMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -636,6 +638,39 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
           const SizedBox(height: 8),
           Text(
             strings.AppStrings.bijbelquizGenThankYouText,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Colors.black,
+                ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDonationPage(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.monetization_on,
+            size: 80,
+            color: Colors.black,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            strings.AppStrings.supportWithDonation,
+            style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            strings.AppStrings.bijbelquizGenDonationText,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: Colors.black,
                 ),
