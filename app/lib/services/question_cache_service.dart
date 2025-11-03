@@ -200,7 +200,9 @@ class QuestionCacheService {
       }
       
       // If no cache, load from assets
-      final String response = await rootBundle.loadString('assets/questions-nl-sv.json');
+      final String response = language == 'en'
+          ? await rootBundle.loadString('assets/questions-en.json')
+          : await rootBundle.loadString('assets/questions-nl-sv.json');
       final List<dynamic> data = json.decode(response);
       
       if (data.isEmpty) {
@@ -266,7 +268,9 @@ class QuestionCacheService {
       }
       
       // Load the full questions from assets
-      final String response = await rootBundle.loadString('assets/questions-nl-sv.json');
+      final String response = language == 'en'
+          ? await rootBundle.loadString('assets/questions-en.json')
+          : await rootBundle.loadString('assets/questions-nl-sv.json');
       final List<dynamic> data = json.decode(response) as List;
       
       if (data.isEmpty) {

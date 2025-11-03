@@ -36,9 +36,10 @@ class SettingsProvider extends ChangeNotifier {
   static const String _layoutTypeKey = 'layout_type';
   static const String _colorfulModeKey = 'colorful_mode';
   static const String _hidePromoCardKey = 'hide_promo_card';
+  static const String _languageKey = 'language';
 
   SharedPreferences? _prefs;
-  String _language = 'nl';
+  String _language = 'auto';
   ThemeMode _themeMode = ThemeMode.system;
   String _gameSpeed = 'medium'; // 'slow', 'medium', 'fast'
   bool _hasSeenGuide = false;
@@ -340,8 +341,8 @@ class SettingsProvider extends ChangeNotifier {
 
       _prefs = await SharedPreferences.getInstance();
       AppLogger.info('SharedPreferences instance obtained');
-      // Altijd Nederlands forceren
-      _language = 'nl';
+
+      _language = _prefs?.getString(_languageKey) ?? 'auto';
       final themeModeIndex = _prefs?.getInt(_themeModeKey) ?? 0;
       _themeMode = ThemeMode.values[themeModeIndex];
       // Load old boolean slow mode setting for backward compatibility
@@ -426,11 +427,16 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Update de taalinstelling (alleen 'nl' toegestaan)
   Future<void> setLanguage(String language) async {
-    if (language != 'nl') {
-      throw ArgumentError('Taal moet "nl" zijn (alleen Nederlands toegestaan)');
+    if (language != 'auto' && language != 'nl' && language != 'en') {
+      throw ArgumentError('Language must be "auto", "nl", or "en"');
     }
-    // Geen effect, altijd Nederlands
-    notifyListeners();
+    await _saveSetting(
+      action: () async {
+        _language = language;
+        await _prefs?.setString(_languageKey, language);
+      },
+      errorMessage: 'Failed to save language setting',
+    );
   }
 
   /// Updates the theme mode setting
@@ -810,6 +816,7 @@ class SettingsProvider extends ChangeNotifier {
   /// Gets all settings data for export
   Map<String, dynamic> getExportData() {
     return {
+      'language': _language,
       'themeMode': _themeMode.index,
       'gameSpeed': _gameSpeed,
       'hasSeenGuide': _hasSeenGuide,
@@ -842,6 +849,7 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Loads settings data from import
   Future<void> loadImportData(Map<String, dynamic> data) async {
+    _language = data['language'] ?? 'auto';
     _themeMode = ThemeMode.values[data['themeMode'] ?? 0];
     _gameSpeed = data['gameSpeed'] ?? 'medium';
     _hasSeenGuide = data['hasSeenGuide'] ?? false;

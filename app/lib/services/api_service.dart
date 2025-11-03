@@ -371,11 +371,12 @@ class ApiService {
         }
 
         List<QuizQuestion> questions;
+        final language = settingsProvider.language == 'auto' ? 'en' : settingsProvider.language;
 
         if (category != null && category.isNotEmpty) {
-          questions = await questionCacheService.getQuestionsByCategory('nl', category, count: limit);
+          questions = await questionCacheService.getQuestionsByCategory(language, category, count: limit);
         } else {
-          questions = await questionCacheService.getQuestions('nl', count: limit);
+          questions = await questionCacheService.getQuestions(language, count: limit);
         }
 
         // Filter by difficulty if specified
@@ -461,7 +462,8 @@ class ApiService {
           }
         }
 
-        final questions = await questionCacheService.getQuestionsByCategory('nl', category, count: limit);
+        final language = settingsProvider.language == 'auto' ? 'en' : settingsProvider.language;
+        final questions = await questionCacheService.getQuestionsByCategory(language, category, count: limit);
 
         // Filter by difficulty if specified
         final filteredQuestions = difficulty != null && difficulty.isNotEmpty

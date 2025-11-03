@@ -30,6 +30,7 @@ import 'providers/lesson_progress_provider.dart';
 import 'screens/main_navigation_screen.dart';
 import 'settings_screen.dart';
 import 'screens/sync_screen.dart';
+import 'l10n/app_localizations.dart';
 import 'l10n/strings_nl.dart' as strings;
 import 'config/supabase_config.dart';
 
@@ -256,14 +257,18 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
       darkTheme: ThemeUtils.getDarkTheme(settings),
       themeMode: ThemeUtils.getThemeMode(settings),
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [
+        Locale('en', ''), // English
         Locale('nl', ''), // Dutch
       ],
-      locale: const Locale('nl', ''), // Force Dutch locale
+      locale: settings.language == 'auto'
+          ? null
+          : Locale(settings.language, ''),
       routes: {
         '/store': (context) => const StoreScreen(),
         '/settings': (context) => const SettingsScreen(),

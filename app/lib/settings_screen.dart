@@ -205,6 +205,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
               colorScheme,
               isSmallScreen,
               isDesktop,
+              title: strings.AppStrings.language,
+              subtitle: strings.AppStrings.selectAppLanguage,
+              icon: Icons.language,
+              child: DropdownButton<String>(
+                value: settings.language,
+                items: [
+                  DropdownMenuItem(
+                    value: 'auto',
+                    child: Text("Auto"),
+                  ),
+                  DropdownMenuItem(
+                    value: 'nl',
+                    child: Text("Nederlands"),
+                  ),
+                  DropdownMenuItem(
+                    value: 'en',
+                    child: Text("English"),
+                  ),
+                ],
+                onChanged: (String? value) {
+                  if (value != null) {
+                    settings.setLanguage(value);
+                  }
+                },
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: isSmallScreen ? 12 : 14,
+                ),
+                dropdownColor: colorScheme.surfaceContainerHighest,
+              ),
+            ),
+            _buildSettingItem(
+              context,
+              settings,
+              colorScheme,
+              isSmallScreen,
+              isDesktop,
               title: strings.AppStrings.theme,
               subtitle: strings.AppStrings.chooseTheme,
               icon: Icons.palette,

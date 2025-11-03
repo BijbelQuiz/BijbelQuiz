@@ -660,4 +660,6 @@ class AppStrings {
 
   // Beta
   static const String beta = 'Bèta';
+
+  static const String selectAppLanguage = 'Selecteer de app-taal';
 }

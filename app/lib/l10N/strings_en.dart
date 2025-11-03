@@ -660,6 +660,4 @@ class AppStrings {
 
   // Beta
   static const String beta = 'Beta';
-
-  static const String selectAppLanguage = 'Select the app language';
 }
