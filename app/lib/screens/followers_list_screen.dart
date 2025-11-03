@@ -52,7 +52,7 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
           
           // Show warning if not in a room since followers/following requires being in a room
           if (!gameStatsProvider.syncService.isInRoom) {
-            _error = 'You need to join a room to see your followers';
+            _error = strings.AppStrings.joinRoomToViewFollowers;
           }
         });
       }
@@ -154,7 +154,7 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'You don\'t have any followers yet',
+                          strings.AppStrings.noFollowers,
                           style: theme.textTheme.titleLarge?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.7),
                           ),
@@ -162,7 +162,7 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Share your BQID with others to start getting followers',
+                          strings.AppStrings.shareBQIDFollowers,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.6),
                           ),

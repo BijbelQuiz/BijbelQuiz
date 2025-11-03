@@ -515,7 +515,17 @@ class AppStrings {
   static const String bijbelquizGenDonateButton = 'Doneer aan ons om te zorgen dat we BijbelQuiz kunnen blijven verbeteren en onderhouden, en dat je volgend jaar weer zo\'n overzicht kunt krijgen!';
   static const String done = 'Klaar';
   static const String bijbelquizGenSkip = 'Overslaan';
-  
+
+  // Following-list screen
+  static const String notFollowing = "Je volgt op dit moment niemand";
+  static const String joinRoomToViewFollowing = "Je moet een ruimte toetreden om te zien wij jij volgt";
+  static const String searchUsersToFollow = "Zoek naar gebruikers om ze te volgen";
+
+  // Followers-list screen
+  static const String noFollowers = "Je hebt op dit moment geen volgers";
+  static const String joinRoomToViewFollowers = "Je moet een ruimte toetreden om je volgers te zien";
+  static const String shareBQIDFollowers  = "Deel jouw BQID met anderen om volgers te krijgen";
+
   // Username
   static const String username = 'Gebruikersnaam';
   static const String enterUsername = 'Voer gebruikersnaam in';

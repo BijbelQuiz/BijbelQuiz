@@ -491,7 +491,17 @@ class AppStrings {
   static const String of = 'Or';
   static const String tapToCopyUserId = 'Tap to copy BQID';
   static const String userIdCopiedToClipboard = 'BQID copied to clipboard';
-  
+
+  // Following-list screen
+  static const String notFollowing = "You are not following anyone yet";
+  static const String joinRoomToViewFollowing = "You need to join a room to see who you are following";
+  static const String searchUsersToFollow = "Search for users to start following them";
+
+  // Followers-list screen
+  static const String noFollowers = "You don\'t have any followers yet";
+  static const String joinRoomToViewFollowers = "You need to join a room to see your followers";
+  static const String shareBQIDFollowers  = "Share your BQID with others to start getting followers";
+
   // BijbelQuiz Gen (Year in Review) Strings
   static const String bijbelquizGenTitle = 'BibleQuiz Year in Review';
   static const String bijbelquizGenSubtitle = 'Your year in ';

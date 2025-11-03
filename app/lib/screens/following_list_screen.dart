@@ -1,3 +1,4 @@
+import 'package:bijbelquiz/l10n/strings_en.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../l10n/strings_nl.dart' as strings;
@@ -52,7 +53,7 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
           
           // Show warning if not in a room since followers/following requires being in a room
           if (!gameStatsProvider.syncService.isInRoom) {
-            _error = 'You need to join a room to see who you are following';
+            _error = strings.AppStrings.joinRoomToViewFollowing;
           }
         });
       }
@@ -154,7 +155,7 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'You are not following anyone yet',
+                          strings.AppStrings.notFollowing,
                           style: theme.textTheme.titleLarge?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.7),
                           ),
@@ -162,7 +163,7 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Search for users to start following them',
+                          strings.AppStrings.searchUsersToFollow,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.6),
                           ),

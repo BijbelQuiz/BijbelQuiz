@@ -152,7 +152,7 @@ class _ProgressHeaderState extends State<ProgressHeader>
                                     ),
                               ),
                               Text(
-                                'Je gebruikt ${strings.AppStrings.appName} al ${widget.streakDays} dagen op rij',
+                                'Je gebruikt ${strings.AppStrings.appName} al ${widget.streakDays} ${widget.streakDays == 1 ? "dag" : "dagen"} op rij',
                                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                       fontWeight: FontWeight.w500,
                                       color: cs.onSurfaceVariant,
