@@ -92,7 +92,7 @@ class QuizBottomBar extends StatelessWidget {
               _buildActionButton(
                 context: context,
                 icon: Icons.flag_rounded,
-                label: settings.language == 'en' ? 'Report' : 'Melden',
+                label: strings.AppStrings.reportQuestion,
                 cost: 0,
                 canUse: true,
                 onPressed: onFlagPressed,

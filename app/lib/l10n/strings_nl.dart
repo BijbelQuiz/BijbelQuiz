@@ -684,4 +684,7 @@ class AppStrings {
   static const String description = 'Beschrijving';
   static const String pleaseEnterDescription = 'Voer een beschrijving in';
   static const String emailOptional = 'E-mail (optioneel)';
+  static const String reportQuestion = 'Meld Vraag';
+  static const String questionReportedSuccessfully = 'Vraag succesvol gemeld';
+  static const String errorReportingQuestion = 'Fout bij melden van vraag';
 }

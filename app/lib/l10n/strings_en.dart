@@ -537,4 +537,7 @@ class AppStrings {
   static const String description = 'Description';
   static const String pleaseEnterDescription = 'Please enter a description';
   static const String emailOptional = 'Email (optional)';
+  static const String reportQuestion = 'Report Question';
+  static const String questionReportedSuccessfully = 'Question reported successfully';
+  static const String errorReportingQuestion = 'Error reporting question';
 }

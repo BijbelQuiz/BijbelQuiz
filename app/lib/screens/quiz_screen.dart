@@ -40,6 +40,7 @@ import '../services/quiz_timer_manager.dart';
 import '../services/quiz_animation_controller.dart';
 import '../services/progressive_question_selector.dart';
 import '../services/quiz_answer_handler.dart';
+import '../services/error_reporting_service.dart';
 
 /// The main quiz screen that displays questions and handles user interactions
 /// with performance optimizations for low-end devices and poor connections.
@@ -1042,17 +1043,42 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
   Future<void> _handleFlag() async {
     final question = _quizState.question;
     final questionId = question.id;
-    final subject = '${strings.AppStrings.appName} vraag is incorrect';
-    final body = 'Er is een probleem met vraag $questionId in de ${strings.AppStrings.appName} app.';
-    final email = AppUrls.contactEmail;
-    final url = 'mailto:$email?subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(body)}';
+    
+    try {
+      // Report the issue to the Supabase database
+      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      await ErrorReportingService().reportSimpleError(
+        message: 'User reported issue with question',
+        type: AppErrorType.dataLoading, // Using data loading type for question issues
+        userMessage: 'Question reported by user',
+        questionId: questionId,
+        additionalInfo: {
+          'question_text': question.question,
+          'correct_answer': question.correctAnswer,
+          'incorrect_answers': question.incorrectAnswers,
+          'category': question.category,
+          'difficulty': question.difficulty,
+          'current_streak': gameStatsProvider.currentStreak,
+          'score': gameStatsProvider.score,
+        },
+      );
 
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
-    } else {
-      // Handle error, perhaps show a snackbar
+      // Show success feedback to user
       if (mounted) {
-        showTopSnackBar(context, strings.AppStrings.couldNotOpenEmail, style: TopSnackBarStyle.error);
+        showTopSnackBar(
+          context,
+          strings.AppStrings.questionReportedSuccessfully,
+          style: TopSnackBarStyle.success,
+        );
+      }
+    } catch (e) {
+      // If reporting fails, show error to user
+      if (mounted) {
+        showTopSnackBar(
+          context,
+          strings.AppStrings.errorReportingQuestion,
+          style: TopSnackBarStyle.error,
+        );
       }
     }
   }
