@@ -26,6 +26,7 @@ class GameStatsProvider extends ChangeNotifier {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   void Function(String message)? onError;
   late SyncService syncService;
+  String? _profileId;
 
   Powerup? _activePowerup;
   DateTime? _powerupActivatedAt;
@@ -82,7 +83,11 @@ class GameStatsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  GameStatsProvider() {
+  String _getProfileKey(String key) {
+    return 'user_${_profileId}_$key';
+  }
+
+  GameStatsProvider({String? profileId}) : _profileId = profileId {
     syncService = SyncService();
     _initializeSyncService();
     _loadStats();
@@ -118,10 +123,10 @@ class GameStatsProvider extends ChangeNotifier {
       notifyListeners();
 
       _prefs = await SharedPreferences.getInstance();
-      _score = _prefs?.getInt(_scoreKey) ?? 0;
-      _currentStreak = _prefs?.getInt(_currentStreakKey) ?? 0;
-      _longestStreak = _prefs?.getInt(_longestStreakKey) ?? 0;
-      _incorrectAnswers = _prefs?.getInt(_incorrectAnswersKey) ?? 0;
+      _score = _prefs?.getInt(_getProfileKey(_scoreKey)) ?? 0;
+      _currentStreak = _prefs?.getInt(_getProfileKey(_currentStreakKey)) ?? 0;
+      _longestStreak = _prefs?.getInt(_getProfileKey(_longestStreakKey)) ?? 0;
+      _incorrectAnswers = _prefs?.getInt(_getProfileKey(_incorrectAnswersKey)) ?? 0;
       AppLogger.info('Game stats loaded: score=$_score, streak=$_currentStreak, longest=$_longestStreak, incorrect=$_incorrectAnswers');
     } catch (e) {
       // Use the new error handling system
@@ -165,7 +170,7 @@ class GameStatsProvider extends ChangeNotifier {
           _longestStreak = _currentStreak;
           pointsToAdd += 5;
           _score += 5;
-          await _prefs?.setInt(_longestStreakKey, _longestStreak);
+          await _prefs?.setInt(_getProfileKey(_longestStreakKey), _longestStreak);
         }
         // Play click sound for each point earned
         for (int i = 0; i < pointsToAdd; i++) {
@@ -179,11 +184,11 @@ class GameStatsProvider extends ChangeNotifier {
       } else {
         _currentStreak = 0;
         _incorrectAnswers++;
-        await _prefs?.setInt(_incorrectAnswersKey, _incorrectAnswers);
+        await _prefs?.setInt(_getProfileKey(_incorrectAnswersKey), _incorrectAnswers);
         AppLogger.info('Stats updated: incorrect, score=$_score, streak=$_currentStreak, incorrect=$_incorrectAnswers');
       }
-      await _prefs?.setInt(_scoreKey, _score);
-      await _prefs?.setInt(_currentStreakKey, _currentStreak);
+      await _prefs?.setInt(_getProfileKey(_scoreKey), _score);
+      await _prefs?.setInt(_getProfileKey(_currentStreakKey), _currentStreak);
       notifyListeners();
 
       // Sync data if in a room
@@ -213,10 +218,10 @@ class GameStatsProvider extends ChangeNotifier {
       _longestStreak = 0;
       _incorrectAnswers = 0;
       
-      await _prefs?.setInt(_scoreKey, _score);
-      await _prefs?.setInt(_currentStreakKey, _currentStreak);
-      await _prefs?.setInt(_longestStreakKey, _longestStreak);
-      await _prefs?.setInt(_incorrectAnswersKey, _incorrectAnswers);
+      await _prefs?.setInt(_getProfileKey(_scoreKey), _score);
+      await _prefs?.setInt(_getProfileKey(_currentStreakKey), _currentStreak);
+      await _prefs?.setInt(_getProfileKey(_longestStreakKey), _longestStreak);
+      await _prefs?.setInt(_getProfileKey(_incorrectAnswersKey), _incorrectAnswers);
       notifyListeners();
       AppLogger.info('Game stats reset');
     } catch (e) {
@@ -323,7 +328,7 @@ class GameStatsProvider extends ChangeNotifier {
     try {
       if (_score >= 50) {
         _score -= 50;
-        await _prefs?.setInt(_scoreKey, _score);
+        await _prefs?.setInt(_getProfileKey(_scoreKey), _score);
         notifyListeners();
         return true;
       }
@@ -346,7 +351,7 @@ class GameStatsProvider extends ChangeNotifier {
   Future<bool> spendStars(int amount) async {
     if (_score >= amount) {
       _score -= amount;
-      await _prefs?.setInt(_scoreKey, _score);
+      await _prefs?.setInt(_getProfileKey(_scoreKey), _score);
       notifyListeners();
       return true;
     } else {
@@ -358,7 +363,7 @@ class GameStatsProvider extends ChangeNotifier {
   Future<bool> addStars(int amount) async {
     try {
       _score += amount;
-      await _prefs?.setInt(_scoreKey, _score);
+      await _prefs?.setInt(_getProfileKey(_scoreKey), _score);
       notifyListeners();
       return true;
     } catch (e) {
@@ -452,10 +457,10 @@ class GameStatsProvider extends ChangeNotifier {
     _longestStreak = data['longestStreak'] ?? 0;
     _incorrectAnswers = data['incorrectAnswers'] ?? 0;
 
-    await _prefs?.setInt(_scoreKey, _score);
-    await _prefs?.setInt(_currentStreakKey, _currentStreak);
-    await _prefs?.setInt(_longestStreakKey, _longestStreak);
-    await _prefs?.setInt(_incorrectAnswersKey, _incorrectAnswers);
+    await _prefs?.setInt(_getProfileKey(_scoreKey), _score);
+    await _prefs?.setInt(_getProfileKey(_currentStreakKey), _currentStreak);
+    await _prefs?.setInt(_getProfileKey(_longestStreakKey), _longestStreak);
+    await _prefs?.setInt(_getProfileKey(_incorrectAnswersKey), _incorrectAnswers);
     notifyListeners();
   }
 

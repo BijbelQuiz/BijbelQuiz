@@ -1,6 +1,8 @@
 import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:bijbelquiz/providers/profile_provider.dart';
+import 'package:bijbelquiz/models/user_profile.dart';
 import 'providers/settings_provider.dart';
 import 'providers/game_stats_provider.dart';
 import 'providers/lesson_progress_provider.dart';
@@ -191,6 +193,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        _buildProfileManagementGroup(context, settings, colorScheme, isSmallScreen, isDesktop),
         _buildSettingsGroup(
           context,
           settings,
@@ -1799,6 +1802,138 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       }
     }
+  }
+
+  Widget _buildProfileManagementGroup(BuildContext context, SettingsProvider settings, ColorScheme colorScheme, bool isSmallScreen, bool isDesktop) {
+    final profileProvider = Provider.of<ProfileProvider>(context);
+    final profiles = profileProvider.profiles;
+    final activeProfile = profileProvider.activeProfile;
+
+    return _buildSettingsGroup(
+      context,
+      settings,
+      colorScheme,
+      isSmallScreen,
+      isDesktop,
+      title: 'Profiles',
+      children: [
+        _buildSettingItem(
+          context,
+          settings,
+          colorScheme,
+          isSmallScreen,
+          isDesktop,
+          title: 'Current Profile',
+          subtitle: 'Switch between profiles',
+          icon: Icons.person,
+          child: DropdownButton<String>(
+            value: activeProfile?.id,
+            items: profiles.map((profile) {
+              return DropdownMenuItem(
+                value: profile.id,
+                child: Text(profile.name),
+              );
+            }).toList(),
+            onChanged: (String? profileId) {
+              if (profileId != null) {
+                profileProvider.setActiveProfile(profileId);
+              }
+            },
+          ),
+        ),
+        _buildActionButton(
+          context,
+          settings,
+          colorScheme,
+          isSmallScreen,
+          isDesktop,
+          onPressed: () => _showAddProfileDialog(context),
+          label: 'Add Profile',
+          icon: Icons.add,
+        ),
+        _buildActionButton(
+          context,
+          settings,
+          colorScheme,
+          isSmallScreen,
+          isDesktop,
+          onPressed: () => _showEditProfileDialog(context, activeProfile),
+          label: 'Edit Profile',
+          icon: Icons.edit,
+        ),
+      ],
+    );
+  }
+
+  void _showAddProfileDialog(BuildContext context) {
+    final TextEditingController nameController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Create Profile'),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(labelText: 'Profile Name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final name = nameController.text;
+                if (name.isNotEmpty) {
+                  final profile = UserProfile(name: name);
+                  Provider.of<ProfileProvider>(context, listen: false)
+                      .addProfile(profile);
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Create'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEditProfileDialog(BuildContext context, UserProfile? profile) {
+    if (profile == null) return;
+
+    final TextEditingController nameController =
+        TextEditingController(text: profile.name);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Profile'),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(labelText: 'Profile Name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final name = nameController.text;
+                if (name.isNotEmpty) {
+                  profile.name = name;
+                  Provider.of<ProfileProvider>(context, listen: false)
+                      .updateProfile(profile);
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildSocialMediaButton(BuildContext context, String platform, IconData icon, String url, ColorScheme colorScheme) {

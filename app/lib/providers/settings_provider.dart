@@ -61,6 +61,7 @@ class SettingsProvider extends ChangeNotifier {
   String? _selectedCustomThemeKey;
   Set<String> _unlockedThemes = {};
   final Map<String, AITheme> _aiThemes = {};
+  String? _profileId;
 
   // API settings
   bool _apiEnabled = false;
@@ -83,11 +84,15 @@ class SettingsProvider extends ChangeNotifier {
   // Promo card settings
   bool _hidePromoCard = false; // default to false (don't hide the promo card, so show it)
 
-  SettingsProvider() {
+  String _getProfileKey(String key) {
+    return 'user_${_profileId}_$key';
+  }
+
+  SettingsProvider({String? profileId}) : _profileId = profileId {
     syncService = SyncService();
     _initializeSyncService();
-    AppLogger.info('SettingsProvider initializing...');
-    // Settings will be loaded later
+    AppLogger.info('SettingsProvider initializing for profile: $_profileId');
+    loadSettings();
   }
 
   Future<void> _initializeSyncService() async {
@@ -177,7 +182,7 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> unlockTheme(String key) async {
     if (!_unlockedThemes.contains(key)) {
       _unlockedThemes.add(key);
-      await _prefs?.setStringList(_unlockedThemesKey, _unlockedThemes.toList());
+      await _prefs?.setStringList(_getProfileKey(_unlockedThemesKey), _unlockedThemes.toList());
       notifyListeners();
     }
   }
@@ -227,7 +232,7 @@ class SettingsProvider extends ChangeNotifier {
   /// Loads AI themes from persistent storage
   Future<void> _loadAIThemes() async {
     try {
-      final aiThemesJson = _prefs?.getString(_aiThemesKey);
+      final aiThemesJson = _prefs?.getString(_getProfileKey(_aiThemesKey));
       if (aiThemesJson != null && aiThemesJson.isNotEmpty) {
         final themesData = _decodeJson(aiThemesJson);
 
@@ -285,7 +290,7 @@ class SettingsProvider extends ChangeNotifier {
 
       // Properly encode the JSON data
       final jsonString = _encodeJson(themesData);
-      await _prefs?.setString(_aiThemesKey, jsonString);
+      await _prefs?.setString(_getProfileKey(_aiThemesKey), jsonString);
     } catch (e) {
       AppLogger.error('Failed to save AI themes to storage: $e');
       throw Exception('Failed to save AI themes');
@@ -326,7 +331,7 @@ class SettingsProvider extends ChangeNotifier {
 
   Future<void> setCustomTheme(String? key) async {
     _selectedCustomThemeKey = key;
-    await _prefs?.setString(_customThemeKey, key ?? '');
+    await _prefs?.setString(_getProfileKey(_customThemeKey), key ?? '');
     notifyListeners();
   }
 
@@ -342,19 +347,19 @@ class SettingsProvider extends ChangeNotifier {
       AppLogger.info('SharedPreferences instance obtained');
       // Altijd Nederlands forceren
       _language = 'nl';
-      final themeModeIndex = _prefs?.getInt(_themeModeKey) ?? 0;
+      final themeModeIndex = _prefs?.getInt(_getProfileKey(_themeModeKey)) ?? 0;
       _themeMode = ThemeMode.values[themeModeIndex];
       // Load old boolean slow mode setting for backward compatibility
-      final oldSlowMode = _getBoolSetting(_slowModeKey, defaultValue: false);
+      final oldSlowMode = _getBoolSetting(_getProfileKey(_slowModeKey), defaultValue: false);
       _gameSpeed = oldSlowMode ? 'slow' : 'medium';
       
       // Migrate to new string-based setting if needed
       if (oldSlowMode) {
-        await _prefs?.setString(_slowModeKey, 'slow');
+        await _prefs?.setString(_getProfileKey(_slowModeKey), 'slow');
       }
       
       // Load new string-based game speed setting if it exists
-      final storedGameSpeed = _prefs?.getString(_slowModeKey);
+      final storedGameSpeed = _prefs?.getString(_getProfileKey(_slowModeKey));
       if (storedGameSpeed != null && storedGameSpeed.isNotEmpty) {
         // Validate the game speed value
         if (storedGameSpeed == 'slow' || storedGameSpeed == 'medium' || storedGameSpeed == 'fast') {
@@ -362,57 +367,57 @@ class SettingsProvider extends ChangeNotifier {
         }
       }
       // Safely load boolean settings with type checking
-      _hasSeenGuide = _getBoolSetting(_hasSeenGuideKey, defaultValue: false);
-      _mute = _getBoolSetting(_muteKey, defaultValue: false);
-      _notificationEnabled = _getBoolSetting(_notificationEnabledKey, defaultValue: true);
-      _hasDonated = _getBoolSetting(_hasDonatedKey, defaultValue: false);
-      _hasCheckedForUpdate = _getBoolSetting(_hasCheckedForUpdateKey, defaultValue: false);
-      _analyticsEnabled = _getBoolSetting(_analyticsEnabledKey, defaultValue: true); // Default to true
+      _hasSeenGuide = _getBoolSetting(_getProfileKey(_hasSeenGuideKey), defaultValue: false);
+      _mute = _getBoolSetting(_getProfileKey(_muteKey), defaultValue: false);
+      _notificationEnabled = _getBoolSetting(_getProfileKey(_notificationEnabledKey), defaultValue: true);
+      _hasDonated = _getBoolSetting(_getProfileKey(_hasDonatedKey), defaultValue: false);
+      _hasCheckedForUpdate = _getBoolSetting(_getProfileKey(_hasCheckedForUpdateKey), defaultValue: false);
+      _analyticsEnabled = _getBoolSetting(_getProfileKey(_analyticsEnabledKey), defaultValue: true); // Default to true
       
       // Load popup tracking data
-      final lastDonationPopupMs = _prefs?.getInt(_lastDonationPopupKey);
+      final lastDonationPopupMs = _prefs?.getInt(_getProfileKey(_lastDonationPopupKey));
       _lastDonationPopup = lastDonationPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastDonationPopupMs) : null;
       
-      final lastFollowPopupMs = _prefs?.getInt(_lastFollowPopupKey);
+      final lastFollowPopupMs = _prefs?.getInt(_getProfileKey(_lastFollowPopupKey));
       _lastFollowPopup = lastFollowPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastFollowPopupMs) : null;
       
-      final lastSatisfactionPopupMs = _prefs?.getInt(_lastSatisfactionPopupKey);
+      final lastSatisfactionPopupMs = _prefs?.getInt(_getProfileKey(_lastSatisfactionPopupKey));
       _lastSatisfactionPopup = lastSatisfactionPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSatisfactionPopupMs) : null;
       
-      final lastDifficultyPopupMs = _prefs?.getInt(_lastDifficultyPopupKey);
+      final lastDifficultyPopupMs = _prefs?.getInt(_getProfileKey(_lastDifficultyPopupKey));
       _lastDifficultyPopup = lastDifficultyPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastDifficultyPopupMs) : null;
       
-      _difficultyPreference = _prefs?.getString(_difficultyPreferenceKey);
+      _difficultyPreference = _prefs?.getString(_getProfileKey(_difficultyPreferenceKey));
       
-      _hasClickedDonationLink = _getBoolSetting(_hasClickedDonationLinkKey, defaultValue: false);
-      _hasClickedFollowLink = _getBoolSetting(_hasClickedFollowLinkKey, defaultValue: false);
-      _hasClickedSatisfactionLink = _getBoolSetting(_hasClickedSatisfactionLinkKey, defaultValue: false);
+      _hasClickedDonationLink = _getBoolSetting(_getProfileKey(_hasClickedDonationLinkKey), defaultValue: false);
+      _hasClickedFollowLink = _getBoolSetting(_getProfileKey(_hasClickedFollowLinkKey), defaultValue: false);
+      _hasClickedSatisfactionLink = _getBoolSetting(_getProfileKey(_hasClickedSatisfactionLinkKey), defaultValue: false);
 
       // Load API settings
-      _apiEnabled = _getBoolSetting(_apiEnabledKey, defaultValue: false);
-      _apiKey = _prefs?.getString(_apiKeyKey) ?? '';
-      _apiPort = _prefs?.getInt(_apiPortKey) ?? 7777;
+      _apiEnabled = _getBoolSetting(_getProfileKey(_apiEnabledKey), defaultValue: false);
+      _apiKey = _prefs?.getString(_getProfileKey(_apiKeyKey)) ?? '';
+      _apiPort = _prefs?.getInt(_getProfileKey(_apiPortKey)) ?? 7777;
 
       // Load navigation settings
-      _showNavigationLabels = _getBoolSetting(_showNavigationLabelsKey, defaultValue: true);
+      _showNavigationLabels = _getBoolSetting(_getProfileKey(_showNavigationLabelsKey), defaultValue: true);
 
       // Load layout type setting
-      _layoutType = _prefs?.getString(_layoutTypeKey) ?? layoutGrid;
+      _layoutType = _prefs?.getString(_getProfileKey(_layoutTypeKey)) ?? layoutGrid;
 
       // Load colorful mode setting
-      _colorfulMode = _getBoolSetting(_colorfulModeKey, defaultValue: false);
+      _colorfulMode = _getBoolSetting(_getProfileKey(_colorfulModeKey), defaultValue: false);
 
       // Load hide promo card setting
-      _hidePromoCard = _getBoolSetting(_hidePromoCardKey, defaultValue: false);
+      _hidePromoCard = _getBoolSetting(_getProfileKey(_hidePromoCardKey), defaultValue: false);
 
-      final unlocked = _prefs?.getStringList(_unlockedThemesKey);
+      final unlocked = _prefs?.getStringList(_getProfileKey(_unlockedThemesKey));
       if (unlocked != null) {
         _unlockedThemes = unlocked.toSet();
       } else {
         _unlockedThemes = {};
       }
       // Fix: treat empty string as null for custom theme
-      final loadedCustomTheme = _prefs?.getString(_customThemeKey);
+      final loadedCustomTheme = _prefs?.getString(_getProfileKey(_customThemeKey));
       _selectedCustomThemeKey = (loadedCustomTheme == null || loadedCustomTheme.isEmpty) ? null : loadedCustomTheme;
 
       // Load AI themes
@@ -439,7 +444,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _themeMode = mode;
-        await _prefs?.setInt(_themeModeKey, mode.index);
+        await _prefs?.setInt(_getProfileKey(_themeModeKey), mode.index);
         AppLogger.info('Theme mode saved successfully: $mode');
 
         // Sync data if in a room
@@ -456,7 +461,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _gameSpeed = enabled ? 'slow' : 'medium';
-        await _prefs?.setString(_slowModeKey, _gameSpeed);
+        await _prefs?.setString(_getProfileKey(_slowModeKey), _gameSpeed);
       },
       errorMessage: 'Failed to save slow mode setting',
     );
@@ -473,7 +478,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _gameSpeed = speed;
-        await _prefs?.setString(_slowModeKey, speed);
+        await _prefs?.setString(_getProfileKey(_slowModeKey), speed);
         AppLogger.info('Game speed saved successfully: $speed');
       },
       errorMessage: 'Failed to save game speed setting',
@@ -486,7 +491,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _mute = enabled;
-        await _prefs?.setBool(_muteKey, enabled);
+        await _prefs?.setBool(_getProfileKey(_muteKey), enabled);
         AppLogger.info('Mute setting saved successfully: $enabled');
       },
       errorMessage: 'Failed to save mute setting',
@@ -498,7 +503,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _hasDonated = true;
-        await _prefs?.setBool(_hasDonatedKey, true);
+        await _prefs?.setBool(_getProfileKey(_hasDonatedKey), true);
       },
       errorMessage: 'Failed to update donation status',
     );
@@ -509,7 +514,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _hasCheckedForUpdate = checked;
-        await _prefs?.setBool(_hasCheckedForUpdateKey, checked);
+        await _prefs?.setBool(_getProfileKey(_hasCheckedForUpdateKey), checked);
       },
       errorMessage: 'Failed to update check for update status',
     );
@@ -521,7 +526,7 @@ class SettingsProvider extends ChangeNotifier {
       action: () async {
         _prefs ??= await SharedPreferences.getInstance(); // Ensure _prefs is initialized
         _hasSeenGuide = true;
-        await _prefs!.setBool(_hasSeenGuideKey, true);
+        await _prefs!.setBool(_getProfileKey(_hasSeenGuideKey), true);
       },
       errorMessage: 'Failed to save guide status',
     );
@@ -533,7 +538,7 @@ class SettingsProvider extends ChangeNotifier {
       action: () async {
         _prefs ??= await SharedPreferences.getInstance(); // Ensure _prefs is initialized
         _hasSeenGuide = false;
-        await _prefs!.setBool(_hasSeenGuideKey, false);
+        await _prefs!.setBool(_getProfileKey(_hasSeenGuideKey), false);
       },
       errorMessage: 'Failed to reset guide status',
     );
@@ -556,7 +561,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _hasCheckedForUpdate = false;
-        await _prefs?.setBool(_hasCheckedForUpdateKey, false);
+        await _prefs?.setBool(_getProfileKey(_hasCheckedForUpdateKey), false);
       },
       errorMessage: 'Failed to reset check for update status',
     );
@@ -567,7 +572,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _lastDonationPopup = DateTime.now();
-        await _prefs?.setInt(_lastDonationPopupKey, _lastDonationPopup!.millisecondsSinceEpoch);
+        await _prefs?.setInt(_getProfileKey(_lastDonationPopupKey), _lastDonationPopup!.millisecondsSinceEpoch);
       },
       errorMessage: 'Failed to update donation popup timestamp',
     );
@@ -578,7 +583,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _lastFollowPopup = DateTime.now();
-        await _prefs?.setInt(_lastFollowPopupKey, _lastFollowPopup!.millisecondsSinceEpoch);
+        await _prefs?.setInt(_getProfileKey(_lastFollowPopupKey), _lastFollowPopup!.millisecondsSinceEpoch);
       },
       errorMessage: 'Failed to update follow popup timestamp',
     );
@@ -589,7 +594,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _lastSatisfactionPopup = DateTime.now();
-        await _prefs?.setInt(_lastSatisfactionPopupKey, _lastSatisfactionPopup!.millisecondsSinceEpoch);
+        await _prefs?.setInt(_getProfileKey(_lastSatisfactionPopupKey), _lastSatisfactionPopup!.millisecondsSinceEpoch);
       },
       errorMessage: 'Failed to update satisfaction popup timestamp',
     );
@@ -600,7 +605,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _lastDifficultyPopup = DateTime.now();
-        await _prefs?.setInt(_lastDifficultyPopupKey, _lastDifficultyPopup!.millisecondsSinceEpoch);
+        await _prefs?.setInt(_getProfileKey(_lastDifficultyPopupKey), _lastDifficultyPopup!.millisecondsSinceEpoch);
       },
       errorMessage: 'Failed to update difficulty popup timestamp',
     );
@@ -611,7 +616,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _hasClickedDonationLink = true;
-        await _prefs?.setBool(_hasClickedDonationLinkKey, true);
+        await _prefs?.setBool(_getProfileKey(_hasClickedDonationLinkKey), true);
       },
       errorMessage: 'Failed to update donation link status',
     );
@@ -622,7 +627,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _hasClickedFollowLink = true;
-        await _prefs?.setBool(_hasClickedFollowLinkKey, true);
+        await _prefs?.setBool(_getProfileKey(_hasClickedFollowLinkKey), true);
       },
       errorMessage: 'Failed to update follow link status',
     );
@@ -633,7 +638,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _hasClickedSatisfactionLink = true;
-        await _prefs?.setBool(_hasClickedSatisfactionLinkKey, true);
+        await _prefs?.setBool(_getProfileKey(_hasClickedSatisfactionLinkKey), true);
       },
       errorMessage: 'Failed to update satisfaction link status',
     );
@@ -644,7 +649,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _hasClickedDifficultyLink = true;
-        await _prefs?.setBool(_hasClickedDifficultyLinkKey, true);
+        await _prefs?.setBool(_getProfileKey(_hasClickedDifficultyLinkKey), true);
       },
       errorMessage: 'Failed to update difficulty link status',
     );
@@ -656,9 +661,9 @@ class SettingsProvider extends ChangeNotifier {
       action: () async {
         _difficultyPreference = preference;
         if (preference != null) {
-          await _prefs?.setString(_difficultyPreferenceKey, preference);
+          await _prefs?.setString(_getProfileKey(_difficultyPreferenceKey), preference);
         } else {
-          await _prefs?.remove(_difficultyPreferenceKey);
+          await _prefs?.remove(_getProfileKey(_difficultyPreferenceKey));
         }
       },
       errorMessage: 'Failed to update difficulty preference',
@@ -669,7 +674,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _notificationEnabled = enabled;
-        await _prefs?.setBool(_notificationEnabledKey, enabled);
+        await _prefs?.setBool(_getProfileKey(_notificationEnabledKey), enabled);
       },
       errorMessage: 'Failed to save notification setting',
     );
@@ -680,7 +685,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _analyticsEnabled = enabled;
-        await _prefs?.setBool(_analyticsEnabledKey, enabled);
+        await _prefs?.setBool(_getProfileKey(_analyticsEnabledKey), enabled);
       },
       errorMessage: 'Failed to save analytics setting',
     );
@@ -691,7 +696,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _apiEnabled = enabled;
-        await _prefs?.setBool(_apiEnabledKey, enabled);
+        await _prefs?.setBool(_getProfileKey(_apiEnabledKey), enabled);
       },
       errorMessage: 'Failed to save API enabled setting',
     );
@@ -702,7 +707,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _apiKey = key;
-        await _prefs?.setString(_apiKeyKey, key);
+        await _prefs?.setString(_getProfileKey(_apiKeyKey), key);
       },
       errorMessage: 'Failed to save API key',
     );
@@ -716,7 +721,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _apiPort = port;
-        await _prefs?.setInt(_apiPortKey, port);
+        await _prefs?.setInt(_getProfileKey(_apiPortKey), port);
       },
       errorMessage: 'Failed to save API port',
     );
@@ -736,7 +741,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _showNavigationLabels = show;
-        await _prefs?.setBool(_showNavigationLabelsKey, show);
+        await _prefs?.setBool(_getProfileKey(_showNavigationLabelsKey), show);
       },
       errorMessage: 'Failed to save show navigation labels setting',
     );
@@ -753,7 +758,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _layoutType = layoutType;
-        await _prefs?.setString(_layoutTypeKey, layoutType);
+        await _prefs?.setString(_getProfileKey(_layoutTypeKey), layoutType);
         AppLogger.info('Layout type saved successfully: $layoutType');
       },
       errorMessage: 'Failed to save layout type setting',
@@ -766,7 +771,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _colorfulMode = enabled;
-        await _prefs?.setBool(_colorfulModeKey, enabled);
+        await _prefs?.setBool(_getProfileKey(_colorfulModeKey), enabled);
         AppLogger.info('Colorful mode saved successfully: $enabled');
       },
       errorMessage: 'Failed to save colorful mode setting',
@@ -779,7 +784,7 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _hidePromoCard = hide;
-        await _prefs?.setBool(_hidePromoCardKey, hide);
+        await _prefs?.setBool(_getProfileKey(_hidePromoCardKey), hide);
         AppLogger.info('Hide promo card setting saved successfully: $hide');
       },
       errorMessage: 'Failed to save hide promo card setting',
@@ -909,55 +914,55 @@ class SettingsProvider extends ChangeNotifier {
       }
     }
 
-    await _prefs?.setInt(_themeModeKey, _themeMode.index);
-    await _prefs?.setString(_slowModeKey, _gameSpeed);
-    await _prefs?.setBool(_hasSeenGuideKey, _hasSeenGuide);
-    await _prefs?.setBool(_muteKey, _mute);
-    await _prefs?.setBool(_notificationEnabledKey, _notificationEnabled);
-    await _prefs?.setBool(_hasDonatedKey, _hasDonated);
-    await _prefs?.setBool(_hasCheckedForUpdateKey, _hasCheckedForUpdate);
-    await _prefs?.setBool(_analyticsEnabledKey, _analyticsEnabled);
-    await _prefs?.setString(_customThemeKey, _selectedCustomThemeKey ?? '');
-    await _prefs?.setStringList(_unlockedThemesKey, _unlockedThemes.toList());
+    await _prefs?.setInt(_getProfileKey(_themeModeKey), _themeMode.index);
+    await _prefs?.setString(_getProfileKey(_slowModeKey), _gameSpeed);
+    await _prefs?.setBool(_getProfileKey(_hasSeenGuideKey), _hasSeenGuide);
+    await _prefs?.setBool(_getProfileKey(_muteKey), _mute);
+    await _prefs?.setBool(_getProfileKey(_notificationEnabledKey), _notificationEnabled);
+    await _prefs?.setBool(_getProfileKey(_hasDonatedKey), _hasDonated);
+    await _prefs?.setBool(_getProfileKey(_hasCheckedForUpdateKey), _hasCheckedForUpdate);
+    await _prefs?.setBool(_getProfileKey(_analyticsEnabledKey), _analyticsEnabled);
+    await _prefs?.setString(_getProfileKey(_customThemeKey), _selectedCustomThemeKey ?? '');
+    await _prefs?.setStringList(_getProfileKey(_unlockedThemesKey), _unlockedThemes.toList());
     
     // Save popup tracking data
     if (_lastDonationPopup != null) {
-      await _prefs?.setInt(_lastDonationPopupKey, _lastDonationPopup!.millisecondsSinceEpoch);
+      await _prefs?.setInt(_getProfileKey(_lastDonationPopupKey), _lastDonationPopup!.millisecondsSinceEpoch);
     }
     if (_lastFollowPopup != null) {
-      await _prefs?.setInt(_lastFollowPopupKey, _lastFollowPopup!.millisecondsSinceEpoch);
+      await _prefs?.setInt(_getProfileKey(_lastFollowPopupKey), _lastFollowPopup!.millisecondsSinceEpoch);
     }
     if (_lastSatisfactionPopup != null) {
-      await _prefs?.setInt(_lastSatisfactionPopupKey, _lastSatisfactionPopup!.millisecondsSinceEpoch);
+      await _prefs?.setInt(_getProfileKey(_lastSatisfactionPopupKey), _lastSatisfactionPopup!.millisecondsSinceEpoch);
     }
-    await _prefs?.setBool(_hasClickedDonationLinkKey, _hasClickedDonationLink);
-    await _prefs?.setBool(_hasClickedFollowLinkKey, _hasClickedFollowLink);
-    await _prefs?.setBool(_hasClickedSatisfactionLinkKey, _hasClickedSatisfactionLink);
-    await _prefs?.setBool(_hasClickedDifficultyLinkKey, _hasClickedDifficultyLink);
+    await _prefs?.setBool(_getProfileKey(_hasClickedDonationLinkKey), _hasClickedDonationLink);
+    await _prefs?.setBool(_getProfileKey(_hasClickedFollowLinkKey), _hasClickedFollowLink);
+    await _prefs?.setBool(_getProfileKey(_hasClickedSatisfactionLinkKey), _hasClickedSatisfactionLink);
+    await _prefs?.setBool(_getProfileKey(_hasClickedDifficultyLinkKey), _hasClickedDifficultyLink);
     if (_difficultyPreference != null) {
-      await _prefs?.setString(_difficultyPreferenceKey, _difficultyPreference!);
+      await _prefs?.setString(_getProfileKey(_difficultyPreferenceKey), _difficultyPreference!);
     }
 
     // Save API settings
-    await _prefs?.setBool(_apiEnabledKey, _apiEnabled);
-    await _prefs?.setString(_apiKeyKey, _apiKey);
-    await _prefs?.setInt(_apiPortKey, _apiPort);
+    await _prefs?.setBool(_getProfileKey(_apiEnabledKey), _apiEnabled);
+    await _prefs?.setString(_getProfileKey(_apiKeyKey), _apiKey);
+    await _prefs?.setInt(_getProfileKey(_apiPortKey), _apiPort);
 
     // Save navigation settings
-    await _prefs?.setBool(_showNavigationLabelsKey, _showNavigationLabels);
+    await _prefs?.setBool(_getProfileKey(_showNavigationLabelsKey), _showNavigationLabels);
 
     // Save layout type
-    await _prefs?.setString(_layoutTypeKey, _layoutType);
+    await _prefs?.setString(_getProfileKey(_layoutTypeKey), _layoutType);
 
     // Save colorful mode setting
-    await _prefs?.setBool(_colorfulModeKey, _colorfulMode);
+    await _prefs?.setBool(_getProfileKey(_colorfulModeKey), _colorfulMode);
 
     // Save hide promo card setting
-    await _prefs?.setBool(_hidePromoCardKey, _hidePromoCard);
+    await _prefs?.setBool(_getProfileKey(_hidePromoCardKey), _hidePromoCard);
 
     // Save difficulty popup tracking data
     if (_lastDifficultyPopup != null) {
-      await _prefs?.setInt(_lastDifficultyPopupKey, _lastDifficultyPopup!.millisecondsSinceEpoch);
+      await _prefs?.setInt(_getProfileKey(_lastDifficultyPopupKey), _lastDifficultyPopup!.millisecondsSinceEpoch);
     }
 
     notifyListeners();

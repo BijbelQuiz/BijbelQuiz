@@ -23,12 +23,17 @@ class LessonProgressProvider extends ChangeNotifier {
   /// Map: lessonId -> bestStars (0..3)
   final Map<String, int> _bestStarsByLesson = {};
   late SyncService syncService;
+  String? _profileId;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get unlockedCount => _unlockedCount;
 
-  LessonProgressProvider() {
+  String _getProfileKey(String key) {
+    return 'user_${_profileId}_$key';
+  }
+
+  LessonProgressProvider({String? profileId}) : _profileId = profileId {
     syncService = SyncService();
     _initializeSyncService();
     _load();
@@ -46,8 +51,8 @@ class LessonProgressProvider extends ChangeNotifier {
 
       _prefs = await SharedPreferences.getInstance();
 
-      _unlockedCount = _prefs?.getInt(_unlockedCountKey) ?? 1;
-      final raw = _prefs?.getString(_storageKey);
+      _unlockedCount = _prefs?.getInt(_getProfileKey(_unlockedCountKey)) ?? 1;
+      final raw = _prefs?.getString(_getProfileKey(_storageKey));
       if (raw != null && raw.isNotEmpty) {
         final Map data = json.decode(raw) as Map;
         _bestStarsByLesson.clear();
@@ -67,9 +72,9 @@ class LessonProgressProvider extends ChangeNotifier {
 
   Future<void> _persist() async {
     try {
-      await _prefs?.setInt(_unlockedCountKey, _unlockedCount);
+      await _prefs?.setInt(_getProfileKey(_unlockedCountKey), _unlockedCount);
       final jsonMap = _bestStarsByLesson.map((k, v) => MapEntry(k, v));
-      await _prefs?.setString(_storageKey, json.encode(jsonMap));
+      await _prefs?.setString(_getProfileKey(_storageKey), json.encode(jsonMap));
     } catch (e) {
       AppLogger.error('Failed to save lesson progress', e);
     }

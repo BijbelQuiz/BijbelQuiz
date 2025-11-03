@@ -32,6 +32,8 @@ import 'settings_screen.dart';
 import 'screens/sync_screen.dart';
 import 'l10n/strings_nl.dart' as strings;
 import 'config/supabase_config.dart';
+import 'providers/profile_provider.dart';
+import 'screens/profile_selection_screen.dart';
 
 final analyticsService = AnalyticsService();
 
@@ -73,21 +75,24 @@ void main() async {
     ]);
   }
   
-  final gameStatsProvider = GameStatsProvider();
-  AppLogger.info('Game stats provider initialized');
-
-  // Initialize settings provider and wait for it
-  final settingsProvider = SettingsProvider();
-  await settingsProvider.loadSettings();
-
   AppLogger.info('Starting Flutter app with providers...');
   final appStartTime = DateTime.now();
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: settingsProvider),
-        ChangeNotifierProvider.value(value: gameStatsProvider),
-        ChangeNotifierProvider(create: (_) => LessonProgressProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProxyProvider<ProfileProvider, SettingsProvider>(
+          create: (context) => SettingsProvider(profileId: Provider.of<ProfileProvider>(context, listen: false).activeProfile?.id),
+          update: (context, profileProvider, previous) => SettingsProvider(profileId: profileProvider.activeProfile?.id),
+        ),
+        ChangeNotifierProxyProvider<ProfileProvider, GameStatsProvider>(
+          create: (context) => GameStatsProvider(profileId: Provider.of<ProfileProvider>(context, listen: false).activeProfile?.id),
+          update: (context, profileProvider, previous) => GameStatsProvider(profileId: profileProvider.activeProfile?.id),
+        ),
+        ChangeNotifierProxyProvider<ProfileProvider, LessonProgressProvider>(
+          create: (context) => LessonProgressProvider(profileId: Provider.of<ProfileProvider>(context, listen: false).activeProfile?.id),
+          update: (context, profileProvider, previous) => LessonProgressProvider(profileId: profileProvider.activeProfile?.id),
+        ),
         Provider.value(value: analyticsService),
       ],
       child: BijbelQuizApp(),
@@ -269,7 +274,20 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
         '/settings': (context) => const SettingsScreen(),
         '/userId': (context) => const SyncScreen(),
       },
-      home: const MainNavigationScreen(),
+      home: Consumer<ProfileProvider>(
+        builder: (context, profileProvider, child) {
+          if (profileProvider.isLoading) {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+          return profileProvider.activeProfile == null
+              ? const ProfileSelectionScreen()
+              : const MainNavigationScreen();
+        },
+      ),
     );
   }
 
