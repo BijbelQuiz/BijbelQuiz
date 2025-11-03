@@ -525,4 +525,16 @@ class AppStrings {
   static const String bijbelquizGenDonateButton = 'Donate to us to show your continued support for our development, so we can continue to improve the app and so you can look back on another educational year next year.';
   static const String done = 'Done';
   static const String bijbelquizGenSkip = 'Skip';
+  
+  // Error Reporting Strings
+  static const String success = 'Success';
+  static const String reportSubmittedSuccessfully = 'Your report has been submitted successfully!';
+  static const String reportSubmissionFailed = 'Failed to submit report. Please try again later.';
+  static const String reportBug = 'Report a Bug';
+  static const String reportBugDescription = 'Report a bug or issue with the app';
+  static const String subject = 'Subject';
+  static const String pleaseEnterSubject = 'Please enter a subject';
+  static const String description = 'Description';
+  static const String pleaseEnterDescription = 'Please enter a description';
+  static const String emailOptional = 'Email (optional)';
 }

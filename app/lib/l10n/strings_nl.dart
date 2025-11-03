@@ -672,4 +672,16 @@ class AppStrings {
   static const String timeSpentShare = 'Tijd besteed';
   static const String shareResults = 'Deel je resultaten';
   static const String copyLink = 'Kopieer link';
+  
+  // Error Reporting Strings
+  static const String success = 'Succes';
+  static const String reportSubmittedSuccessfully = 'Je melding is succesvol verstuurd!';
+  static const String reportSubmissionFailed = 'Melding kon niet worden verstuurd. Probeer het later opnieuw.';
+  static const String reportBug = 'Meld een bug';
+  static const String reportBugDescription = 'Meld een bug of probleem met de app';
+  static const String subject = 'Onderwerp';
+  static const String pleaseEnterSubject = 'Voer een onderwerp in';
+  static const String description = 'Beschrijving';
+  static const String pleaseEnterDescription = 'Voer een beschrijving in';
+  static const String emailOptional = 'E-mail (optioneel)';
 }

@@ -97,6 +97,17 @@ BijbelQuiz/
     └── play.bijbelquiz.app/   # Web app version (Flutter web build)
 ```
 
+## Features
+
+- **Multiple Question Types**: Multiple choice, fill-in-the-blank, and true/false questions
+- **Performance Optimized**: Optimized for low-end devices with efficient data structures
+- **Cross-Platform**: Works on Android, iOS, Web, and Desktop
+- **Offline Capable**: All questions work offline
+- **User-Friendly Interface**: Intuitive navigation and clean design
+- **Centralized Error Reporting**: Built-in bug reporting system integrated with Supabase
+- **Analytics**: Comprehensive usage tracking and analytics
+- **Customizable Themes**: Multiple theme options including dark mode and AI-generated themes
+
 ## Security
 
 See [SECURITY_DOCS.md](SECURITY_DOCS.md) for details on security measures implemented in this app.
@@ -104,6 +115,10 @@ See [SECURITY_DOCS.md](SECURITY_DOCS.md) for details on security measures implem
 ## Asset Licenses
 
 See [ASSETS_LICENSES.md](ASSETS_LICENSES.md) for details on the licenses of fonts, images, and sounds used in this app.
+
+## Error Reporting
+
+The app includes a centralized error reporting system that allows users to report bugs directly from the settings screen. The reported errors are stored in a Supabase database for debugging and monitoring purposes. See [README-questions.md](README-questions.md) for more technical details about the error reporting system.
 
 ## License
 

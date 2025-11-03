@@ -15,4 +15,9 @@ class SupabaseConfig {
     );
     client = Supabase.instance.client;
   }
+
+  /// Gets the Supabase client for database operations
+  static SupabaseClient getClient() {
+    return client;
+  }
 }

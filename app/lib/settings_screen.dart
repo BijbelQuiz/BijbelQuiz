@@ -26,6 +26,7 @@ import 'package:archive/archive.dart';
 import 'utils/bijbelquiz_gen_utils.dart';
 import 'screens/bijbelquiz_gen_screen.dart';
 import 'theme/theme_manager.dart';
+import 'widgets/bug_report_widget.dart';
 
 /// The settings screen that allows users to customize app preferences
 class SettingsScreen extends StatefulWidget {
@@ -861,19 +862,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               label: strings.AppStrings.showIntroduction,
               icon: Icons.help_outline,
             ),
-            _buildActionButton(
-              context,
-              settings,
-              colorScheme,
-              isSmallScreen,
-              isDesktop,
-              onPressed: () {
-                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'report_issue');
-                _launchBugReportEmail(context);
-              },
-              label: strings.AppStrings.reportIssue,
-              icon: Icons.bug_report,
-            ),
+            BugReportWidget(),
             _buildActionButton(
               context,
               settings,
@@ -919,24 +908,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: Icons.delete_sweep,
               isDestructive: true,
             ),
-            _buildActionButton(
-              context,
-              settings,
-              colorScheme,
-              isSmallScreen,
-              isDesktop,
-              onPressed: () async {
-                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'contact_us');
-                final Uri url = Uri.parse(AppUrls.contactEmailUrl);
-                if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-                  if (context.mounted) {
-                    showTopSnackBar(context, strings.AppStrings.emailNotAvailable, style: TopSnackBarStyle.error);
-                  }
-                }
-              },
-              label: strings.AppStrings.contactUs,
-              icon: Icons.email,
-            ),
+
             _buildActionButton(
               context,
               settings,
@@ -1410,51 +1382,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Future<void> _launchBugReportEmail(BuildContext context) async {
-    final Uri emailLaunchUri = Uri(
-      scheme: 'mailto',
-      path: AppUrls.contactEmail,
-      queryParameters: {
-        'subject': '${strings.AppStrings.appName} error report',
-      },
-    );
-    final localContext = context;
 
-    try {
-      if (await canLaunchUrl(emailLaunchUri)) {
-        await launchUrl(emailLaunchUri);
-      } else {
-        // Fallback: Show a dialog with the email address
-        if (localContext.mounted) {
-          _showBugReportDialog(localContext);
-        }
-      }
-    } catch (e) {
-      // If there's any error, show the fallback dialog
-      if (localContext.mounted) {
-        _showBugReportDialog(localContext);
-      }
-    }
-  }
-
-  void _showBugReportDialog(BuildContext context) {
-    final localContext = context;
-    showDialog(
-      context: localContext,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(strings.AppStrings.emailAddress),
-          content: Text(AppUrls.contactEmail),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(strings.AppStrings.ok),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   Future<void> _exportStats(BuildContext context) async {
     try {

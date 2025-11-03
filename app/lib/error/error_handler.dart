@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import '../services/error_reporting_service.dart';
 
 import 'error_types.dart';
 import '../widgets/top_snackbar.dart';
@@ -20,8 +21,13 @@ class ErrorHandler {
     required BuildContext context,
     required AppError error,
     bool showTechnicalDetails = false,
+    String? questionId,
+    Map<String, dynamic>? additionalInfo,
   }) {
     _logError(error);
+    
+    // Report the error to Supabase for debugging
+    _reportErrorToSupabase(error, questionId: questionId, additionalInfo: additionalInfo);
     
     final String message = _buildUserErrorMessage(error, showTechnicalDetails);
     showTopSnackBar(
@@ -37,8 +43,13 @@ class ErrorHandler {
     required AppError error,
     bool showTechnicalDetails = false,
     String? title,
+    String? questionId,
+    Map<String, dynamic>? additionalInfo,
   }) async {
     _logError(error);
+    
+    // Report the error to Supabase for debugging
+    _reportErrorToSupabase(error, questionId: questionId, additionalInfo: additionalInfo);
     
     final String message = _buildUserErrorMessage(error, showTechnicalDetails);
     
@@ -74,6 +85,23 @@ class ErrorHandler {
     );
   }
 
+  /// Reports an error to the Supabase database
+  void _reportErrorToSupabase(
+    AppError error, {
+    String? questionId,
+    Map<String, dynamic>? additionalInfo,
+  }) {
+    ErrorReportingService()
+        .reportError(
+          appError: error,
+          questionId: questionId,
+          additionalInfo: additionalInfo,
+        )
+        .catchError((e) {
+          _logger.warning('Failed to report error to Supabase: $e');
+        });
+  }
+
   /// Creates an AppError from a generic exception
   AppError fromException(
     Object exception, {
@@ -82,6 +110,8 @@ class ErrorHandler {
     String? errorCode,
     StackTrace? stackTrace,
     Map<String, dynamic>? context,
+    String? questionId,
+    Map<String, dynamic>? additionalInfo,
   }) {
     String technicalMessage = exception.toString();
     String finalUserMessage = userMessage ?? _getDefaultUserMessage(type);
@@ -159,22 +189,26 @@ class ErrorHandler {
 /// Extension to make error handling more convenient
 extension ErrorHandlerExtension on BuildContext {
   /// Shows an error using the centralized error handler
-  void showError(AppError error, {bool showTechnicalDetails = false}) {
+  void showError(AppError error, {bool showTechnicalDetails = false, String? questionId, Map<String, dynamic>? additionalInfo}) {
     ErrorHandler().showError(
       context: this,
       error: error,
       showTechnicalDetails: showTechnicalDetails,
+      questionId: questionId,
+      additionalInfo: additionalInfo,
     );
   }
 
   /// Shows an error dialog using the centralized error handler
   Future<void> showErrorDialog(AppError error,
-      {bool showTechnicalDetails = false, String? title}) {
+      {bool showTechnicalDetails = false, String? title, String? questionId, Map<String, dynamic>? additionalInfo}) {
     return ErrorHandler().showErrorDialog(
       context: this,
       error: error,
       showTechnicalDetails: showTechnicalDetails,
       title: title,
+      questionId: questionId,
+      additionalInfo: additionalInfo,
     );
   }
 }

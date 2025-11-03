@@ -221,3 +221,44 @@ extension ThemeContext on BuildContext {
   Color themeAwareOpacity({required Color color, required double lightOpacity, required double darkOpacity}) =>
       ThemeUtils.getThemeAwareOpacity(context: this, color: color, lightOpacity: lightOpacity, darkOpacity: darkOpacity);
 }
+
+/// Utility function to check if the current theme is dark mode
+extension ThemeModeExtension on SettingsProvider {
+  bool get isDarkMode {
+    // Check if the selected custom theme is a dark theme
+    if (selectedCustomThemeKey != null) {
+      // Check if it's an AI theme first
+      if (hasAITheme(selectedCustomThemeKey!)) {
+        return getAITheme(selectedCustomThemeKey!)!.darkTheme != null;
+      }
+      
+      // Use theme manager to determine if theme is dark
+      final themeDef = ThemeManager().getThemeDefinition(selectedCustomThemeKey!);
+      if (themeDef != null) {
+        return themeDef.type.toLowerCase() == 'dark';
+      }
+      
+      // Fallback to hardcoded theme logic
+      switch (selectedCustomThemeKey) {
+        case 'grey':
+        case 'oled':
+        case 'dark':
+          return true;
+        default:
+          return false;
+      }
+    }
+    
+    // If no custom theme is selected, check the system theme mode
+    switch (themeMode) {
+      case ThemeMode.dark:
+        return true;
+      case ThemeMode.light:
+        return false;
+      case ThemeMode.system:
+        // For system mode, we can't determine without context, so default to false
+        // In practice, this would be determined by MediaQuery.of(context).platformBrightness
+        return false;
+    }
+  }
+}
