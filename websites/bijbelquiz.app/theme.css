@@ -1293,12 +1293,15 @@ footer {
   position: relative;
   border: none;
   box-shadow: none;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align to top to prevent top cut-off */
 }
 
 .app-screenshot {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto; /* Allow natural height based on aspect ratio */
+  object-fit: fill; /* Fill the width while maintaining aspect ratio */
   border-radius: 20px;
   border: none;
   box-shadow: none;
