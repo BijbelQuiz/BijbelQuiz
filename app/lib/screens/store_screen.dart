@@ -87,7 +87,9 @@ class _StoreScreenState extends State<StoreScreen> {
         currentPrice: 0,
         isDiscounted: false,
         discountPercentage: 0,
-        isActive: true
+        isActive: true,
+        discountStart: null,
+        discountEnd: null,
       )
     );
     
@@ -106,7 +108,9 @@ class _StoreScreenState extends State<StoreScreen> {
         currentPrice: 0,
         isDiscounted: false,
         discountPercentage: 0,
-        isActive: true
+        isActive: true,
+        discountStart: null,  // Add these to ensure isCurrentlyDiscounted works properly
+        discountEnd: null,
       )
     );
     
@@ -125,7 +129,9 @@ class _StoreScreenState extends State<StoreScreen> {
         currentPrice: 0,
         isDiscounted: false,
         discountPercentage: 0,
-        isActive: true
+        isActive: true,
+        discountStart: null,
+        discountEnd: null,
       )
     );
     

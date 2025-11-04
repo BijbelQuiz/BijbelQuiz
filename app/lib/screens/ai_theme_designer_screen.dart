@@ -12,6 +12,8 @@ import '../services/gemini_service.dart';
 import '../models/ai_theme.dart';
 import '../utils/automatic_error_reporter.dart';
 import '../error/error_types.dart';
+import '../services/store_service.dart';
+import '../models/store_item.dart';
 
 class AIThemeDesignerScreen extends StatefulWidget {
   const AIThemeDesignerScreen({super.key});
@@ -24,6 +26,8 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
   final TextEditingController _themeController = TextEditingController();
   bool _isGenerating = false;
   String _generationStatus = '';
+  int _cost = 200; // Default cost
+  bool _isLoadingCost = true;
 
   @override
   void initState() {
@@ -37,6 +41,42 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
       context, 
       AnalyticsService.FEATURE_AI_THEME_GENERATOR
     );
+    
+    // Load the current price from store
+    _loadCost();
+  }
+
+  Future<void> _loadCost() async {
+    try {
+      final storeService = StoreService();
+      final items = await storeService.getStoreItems();
+      final aiThemeItem = items.firstWhere(
+        (item) => item.itemKey == 'ai_theme_generator',
+        orElse: () => StoreItem(
+          itemKey: 'ai_theme_generator',
+          itemName: 'AI Theme Generator',
+          itemDescription: '',
+          itemType: 'feature_access',
+          basePrice: 200,
+          currentPrice: 200,
+          isDiscounted: false,
+          discountPercentage: 0,
+          isActive: true,
+        ),
+      );
+      
+      setState(() {
+        _cost = aiThemeItem.currentPrice;
+        _isLoadingCost = false;
+      });
+      
+      AppLogger.info('Loaded AI theme generator cost: ${aiThemeItem.currentPrice}, isDiscounted: ${aiThemeItem.isDiscounted}');
+    } catch (e) {
+      AppLogger.error('Failed to load AI theme generator cost: $e');
+      setState(() {
+        _isLoadingCost = false; // Still set to false to show the UI with default cost
+      });
+    }
   }
 
   @override
@@ -170,13 +210,21 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
                             ),
                             const SizedBox(width: 8),
                             Expanded(
-                              child: Text(
-                                'AI thema generatie kost ${isDev ? '0' : cost} sterren',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              child: _isLoadingCost
+                                  ? Text(
+                                      'Laden...',
+                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: colorScheme.primary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    )
+                                  : Text(
+                                      'AI thema generatie kost ${isDev ? '0' : _cost} sterren',
+                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: colorScheme.primary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                             ),
                           ],
                         ),
@@ -254,14 +302,14 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.only(bottom: 16),
                 child: ElevatedButton(
-                  onPressed: _isGenerating 
+                  onPressed: _isGenerating || _isLoadingCost
                     ? null 
                     : () async {
                         await _generateAITheme(
                           context, 
                           _themeController, 
                           gameStats, 
-                          cost, 
+                          _cost, 
                           isDev
                         );
                       },
@@ -273,14 +321,23 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text(
-                    _isGenerating ? 'Aan het genereren...' : 'Genereer Thema', 
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: _isLoadingCost 
+                    ? Text(
+                        'Laden...',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
+                      )
+                    : Text(
+                        _isGenerating ? 'Aan het genereren...' : 'Genereer Thema', 
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
                 ),
               ),
             ],
