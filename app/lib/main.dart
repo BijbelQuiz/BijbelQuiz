@@ -353,7 +353,10 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
       }
       
       // Check if we're in the BijbelQuiz Gen period and redirect if needed
-      if (BijbelQuizGenPeriod.isGenPeriod()) {
+      if (BijbelQuizGenPeriod.isGenPeriod() && !_timeTrackingService.hasGenBeenShownThisPeriod()) {
+        // Mark the Gen as shown for this period before navigating
+        _timeTrackingService.markGenAsShownThisPeriod();
+        
         // Small delay to ensure context is ready
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {

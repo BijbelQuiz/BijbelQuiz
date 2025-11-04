@@ -2,18 +2,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:async';
 import '../services/logger.dart';
+import '../utils/bijbelquiz_gen_utils.dart';
 
 /// Service to track time spent using the app for year-end statistics
 class TimeTrackingService {
   static const String _totalTimeKey = 'total_time_spent_seconds';
   static const String _sessionStartTimeKey = 'session_start_time';
   static const String _lastSessionDateKey = 'last_session_date';
+  static const String _genShownThisPeriodKey = 'gen_shown_this_period';
   
   SharedPreferences? _prefs;
   DateTime? _sessionStartTime;
   int _totalTimeSpent = 0; // in seconds
   Timer? _timer;
   static TimeTrackingService? _instance;
+  bool _genShownThisPeriod = false;
   
   TimeTrackingService._privateConstructor();
   
@@ -45,6 +48,9 @@ class TimeTrackingService {
     if (lastSessionDateStr != null) {
       // We can use this for daily statistics if needed in the future
     }
+    
+    // Load whether Gen was shown during the current period
+    _genShownThisPeriod = _prefs?.getBool(_genShownThisPeriodKey) ?? false;
   }
 
   /// Start a new session, but only if not already in a session
@@ -61,8 +67,28 @@ class TimeTrackingService {
     // Update last session date
     _prefs?.setString(_lastSessionDateKey, DateTime.now().toIso8601String().split('T')[0]);
     
+    // Check if we're entering a new Gen period and reset the flag if needed
+    _checkAndResetGenShownFlagForNewPeriod();
+    
     _startTracking();
     AppLogger.info('Time tracking session started at ${_sessionStartTime}');
+  }
+  
+  /// Check if we're in a new Gen period and reset the flag if needed
+  void _checkAndResetGenShownFlagForNewPeriod() {
+    if (_prefs != null) {
+      // Get the year associated with the flag from shared preferences
+      final lastGenYear = _prefs?.getInt('gen_year') ?? 0;
+      final currentGenYear = BijbelQuizGenPeriod.getStatsYear();
+      
+      // If we're now in a different Gen year, reset the flag
+      if (currentGenYear != lastGenYear) {
+        _genShownThisPeriod = false;
+        _prefs?.setBool(_genShownThisPeriodKey, false);
+        _prefs?.setInt('gen_year', currentGenYear);
+        AppLogger.info('Reset Gen shown flag for new period: $currentGenYear');
+      }
+    }
   }
 
   /// End the current session and save the time
@@ -148,6 +174,17 @@ class TimeTrackingService {
   /// Check if there's an ongoing session that needs to be resumed
   bool hasOngoingSession() {
     return _sessionStartTime != null;
+  }
+
+  /// Check if the BijbelQuiz Gen has been shown during the current period
+  bool hasGenBeenShownThisPeriod() {
+    return _genShownThisPeriod;
+  }
+
+  /// Mark that the BijbelQuiz Gen has been shown during the current period
+  void markGenAsShownThisPeriod() {
+    _genShownThisPeriod = true;
+    _prefs?.setBool(_genShownThisPeriodKey, true);
   }
 
   /// Clean up resources
