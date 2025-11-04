@@ -274,6 +274,10 @@ class ModernAdminDashboard:
         tb.Button(controls_frame, text="Clear Filters", 
                  command=self.clear_error_filters, bootstyle=SECONDARY).pack(side=tk.LEFT, padx=5)
         
+        # Delete button
+        tb.Button(controls_frame, text="Delete Selected Error", 
+                 command=self.delete_selected_error, bootstyle=DANGER).pack(side=tk.LEFT, padx=5)
+        
         # Filters
         tb.Label(controls_frame, text="Error Type:").pack(side=tk.LEFT, padx=(20, 5))
         self.error_type_filter = tb.Combobox(controls_frame, width=20, bootstyle="secondary", values=[
@@ -1004,6 +1008,44 @@ Build Number: {error.get('build_number', 'N/A')}
         self.user_filter.delete(0, tk.END)
         self.question_filter.delete(0, tk.END)
         self.load_error_reports()
+    
+    def delete_selected_error(self):
+        """Delete the currently selected error report from the database"""
+        if not self.supabase_client:
+            messagebox.showerror("Error", "Not connected to Supabase. Please check your credentials.")
+            return
+        
+        # Check if an error is selected
+        selection = self.error_tree.selection()
+        if not selection:
+            messagebox.showwarning("Warning", "Please select an error report to delete.")
+            return
+        
+        # Get the error ID from the selected item
+        item = self.error_tree.item(selection[0])
+        error_id = item['tags'][0]  # Get error ID from tags
+        
+        # Confirm deletion with the user
+        result = messagebox.askyesno("Confirm Deletion", 
+                                  f"Are you sure you want to delete error report with ID: {error_id}?\n\nThis action cannot be undone.")
+        
+        if result:
+            try:
+                # Delete the error from the database
+                response = self.supabase_client.table('error_reports').delete().eq('id', error_id).execute()
+                
+                if response:
+                    # Show success message
+                    messagebox.showinfo("Success", f"Error report with ID {error_id} has been deleted successfully.")
+                    
+                    # Update status
+                    self.status_var.set(f"Deleted error report with ID: {error_id}")
+                    
+                    # Reload the error reports to reflect the deletion
+                    self.load_error_reports()
+                    
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to delete error report: {str(e)}")
     
 
 
