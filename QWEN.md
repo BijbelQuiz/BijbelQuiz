@@ -34,19 +34,19 @@ Use the provided responsive utilities for scalable UI elements:
 - `getResponsiveFontSize(BuildContext context, double baseSize)` - Get responsive font size
 - `getResponsivePadding(BuildContext context, EdgeInsets basePadding)` - Get responsive padding
 
-## PostHog Analytics Integration
+## Analytics Integration
 
-Always implement analytics tracking using `@app/lib/services/analytics_service.dart`:
+Always implement analytics tracking using `@app/lib/services/tracking_service.dart` (replaces analytics_service.dart):
 
-### Accessing Analytics Service
+### Accessing Tracking Service
 ```dart
-final analytics = Provider.of<AnalyticsService>(context, listen: false);
+final trackingService = TrackingService();
 ```
 
 ### Feature Tracking Standards
 Use the standardized constants for consistent tracking:
-- Features: `AnalyticsService.FEATURE_QUIZ_GAMEPLAY`, `AnalyticsService.FEATURE_LESSON_SYSTEM`, etc.
-- Actions: `AnalyticsService.ACTION_ACCESSED`, `AnalyticsService.ACTION_USED`, `AnalyticsService.ACTION_COMPLETED`, etc.
+- Features: `TrackingService.FEATURE_QUIZ_GAMEPLAY`, `TrackingService.FEATURE_LESSON_SYSTEM`, etc.
+- Actions: `TrackingService.ACTION_ACCESSED`, `TrackingService.ACTION_USED`, `TrackingService.ACTION_COMPLETED`, etc.
 
 ### Event Tracking Methods
 - `trackFeatureUsage()` - General feature usage tracking
@@ -55,6 +55,19 @@ Use the standardized constants for consistent tracking:
 - `trackFeatureCompletion()` - When user completes a feature flow
 - `screen()` - Track screen views
 - `capture()` - Track custom events
+- `trackQuizStart()` / `trackQuizComplete()` - Track quiz gameplay
+- `trackThemePurchase()` / `trackThemeChange()` - Track theme usage
+- `trackLessonStart()` / `trackLessonComplete()` - Track lesson system
+- `trackSkipUsed()` / `trackRetryUsed()` - Track specific feature usage
+- `trackAnalyticsToggle()` - Track user preference changes
+- And many more specialized tracking methods
+
+### Data Analysis Tool
+Use the Python-based tracking data analyzer (`@data_analyzer.py`) to:
+- Load data directly from Supabase tracking_events table
+- View individual tracking records
+- Analyze feature usage patterns
+- Visualize usage trends and distributions
 
 ## Automattic Error Reporting
 
@@ -75,8 +88,8 @@ Use the appropriate reporting method for different error types:
 
 ## Implementation Checklist
 When adding or modifying code, ensure you:
-- [ ] Use standardized theme elements from `app_theme.dart`
-- [ ] Add appropriate analytics tracking using `analytics_service.dart`
-- [ ] Implement proper error reporting using `automatic_error_reporter.dart`
-- [ ] Follow responsive design principles with provided utilities
-- [ ] Maintain consistency with existing code patterns
+- [ ] Use standardized theme elements from `app_theme.dart`.
+- [ ] Add appropriate analytics tracking using `analytics_service.dart`.
+- [ ] Implement proper error reporting using `automatic_error_reporter.dart`.
+- [ ] Follow responsive design principles with provided utilities.
+- [ ] Maintain consistency with existing code patterns.
