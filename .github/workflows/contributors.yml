@@ -10,13 +10,21 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    env:
+      GH_PAT: ${{ secrets.GH_PAT }}
 
     steps:
+    - name: Ensure GH_PAT secret is available
+      run: |
+        if [ -z "${GH_PAT}" ]; then
+          echo "::error::GH_PAT secret is not configured. Please add a Personal Access Token to the repository secrets."
+          exit 1
+
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         ref: main
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ env.GH_PAT }}
 
     - name: Get PR author info
       id: pr-author
@@ -25,7 +33,7 @@ jobs:
         AUTHOR_URL="${{ github.event.pull_request.user.html_url }}"
         PR_NUMBER="${{ github.event.number }}"
         PR_URL="${{ github.event.pull_request.html_url }}"
-        
+
         echo "author_login=$AUTHOR_LOGIN" >> $GITHUB_OUTPUT
         echo "author_url=$AUTHOR_URL" >> $GITHUB_OUTPUT
         echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
@@ -60,10 +68,10 @@ jobs:
         AUTHOR_URL="${{ steps.pr-author.outputs.author_url }}"
         PR_NUMBER="${{ steps.pr-author.outputs.pr_number }}"
         PR_URL="${{ steps.pr-author.outputs.pr_url }}"
-        
+
         # Create the entry format as per existing style
         NEW_ENTRY="($AUTHOR_LOGIN)\[$AUTHOR_URL\] in PR (#$PR_NUMBER)\[$PR_URL\]"
-        
+
         # Add new entry to the file, preserving existing content
         echo "" >> docs/CONTRIBUTORS.md  # Add a blank line for separation
         echo "$NEW_ENTRY" >> docs/CONTRIBUTORS.md
@@ -72,7 +80,7 @@ jobs:
       if: steps.check-contributor.outputs.contributor_exists == 'false'
       uses: peter-evans/create-pull-request@v6
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ env.GH_PAT }}
         commit-message: "Add ${{ steps.pr-author.outputs.author_login }} to contributors list"
         title: "Add ${{ steps.pr-author.outputs.author_login }} to contributors"
         body: "Automated PR to add ${{ steps.pr-author.outputs.author_login }} to the contributors list for PR #${{ steps.pr-author.outputs.pr_number }}"
@@ -80,3 +88,4 @@ jobs:
         base: main
         add-paths: |
           docs/CONTRIBUTORS.md
+
