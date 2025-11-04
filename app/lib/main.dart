@@ -122,7 +122,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
   // FeatureFlagsService removed
   ApiService? _apiService;
   StarTransactionService? _starTransactionService;
-  final TimeTrackingService _timeTrackingService = TimeTrackingService.instance;
+  TimeTrackingService _timeTrackingService = TimeTrackingService.instance;
 
   // Add mounted getter for older Flutter versions
   @override

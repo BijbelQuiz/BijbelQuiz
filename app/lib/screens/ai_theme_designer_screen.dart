@@ -229,7 +229,7 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: colorScheme.surfaceContainerHighest,
+                            color: colorScheme.surfaceVariant,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(

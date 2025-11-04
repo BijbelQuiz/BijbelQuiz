@@ -1,4 +1,5 @@
 import '../l10n/strings_en.dart' as strings_en;
+import '../l10n/strings_nl.dart' as strings_nl;
 
 /// Utility class that provides standardized error messages for common scenarios
 class ErrorMessages {

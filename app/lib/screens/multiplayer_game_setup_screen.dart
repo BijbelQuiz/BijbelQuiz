@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/analytics_service.dart';
+import '../l10n/strings_nl.dart' as strings;
 import 'multiplayer_quiz_screen.dart';
 
 /// Screen for setting up a multiplayer game

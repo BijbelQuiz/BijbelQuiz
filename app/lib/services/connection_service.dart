@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'logger.dart';
+import 'analytics_service.dart';
 
 /// A service for monitoring network connectivity and optimizing for poor connections
 class ConnectionService {

@@ -119,8 +119,8 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(isFollowing 
-            ? 'Unfollowed $username' 
-            : 'Started following $username'),
+            ? 'Unfollowed ${username}' 
+            : 'Started following ${username}'),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );

@@ -979,7 +979,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               },
               label: strings.AppStrings.bijbelquizGenTitle,
-              subtitle: '${strings.AppStrings.bijbelquizGenSubtitle}${BijbelQuizGenPeriod.getStatsYear()}',
+              subtitle: strings.AppStrings.bijbelquizGenSubtitle + '${BijbelQuizGenPeriod.getStatsYear()}',
               icon: Icons.auto_awesome,
             ),
 
@@ -1473,7 +1473,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       // Combine hash and compressed data (no version field to save space)
       final exportData = {
         'hash': hash,
-        'data': base64Url.encode(compressedBytes),
+        'data': base64Url.encode(compressedBytes!),
       };
 
       final exportString = base64.encode(utf8.encode(json.encode(exportData)));
@@ -1696,7 +1696,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final correctPercentage = totalQuestions > 0 ? (gameStats.score / totalQuestions * 100).round() : 0;
 
       // Create compact stats string (format: score:currentStreak:longestStreak:incorrectAnswers:totalQuestions:correctPercentage)
-      final statsString = '${gameStats.score}:${gameStats.currentStreak}:${gameStats.longestStreak}:${gameStats.incorrectAnswers}:$totalQuestions:$correctPercentage';
+      final statsString = '${gameStats.score}:${gameStats.currentStreak}:${gameStats.longestStreak}:${gameStats.incorrectAnswers}:${totalQuestions}:${correctPercentage}';
 
       // Create hash for tamper-proofing (just based on stats data)
       final hash = sha256.convert(utf8.encode(statsString)).toString().substring(0, 16); // Use first 16 chars for shorter URL
