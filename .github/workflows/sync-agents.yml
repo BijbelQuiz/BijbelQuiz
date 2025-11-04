@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BOT_PAT_TOKEN }}
 
       - name: Copy AGENTS.md to GEMINI.md, QWEN.md, and CLAUDE.md
         run: |
@@ -22,9 +22,12 @@ jobs:
           cp AGENTS.md CLAUDE.md
 
       - name: Commit and push if changed
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_PAT_TOKEN }}
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "GitHub Action"
+          git remote set-url origin https://x-access-token:${{ secrets.BOT_PAT_TOKEN }}@github.com/${{ github.repository }}
           git add GEMINI.md QWEN.md CLAUDE.md
           if ! git diff --staged --quiet; then
             git commit -m "Sync: Update GEMINI.md, QWEN.md, and CLAUDE.md from AGENTS.md [skip ci]"
