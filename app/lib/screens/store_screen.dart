@@ -754,12 +754,51 @@ class _StoreScreenState extends State<StoreScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            title,
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          if (isDiscounted && discountAmount > 0) ...[
+                            SizedBox(width: isDesktop ? 8 : 6),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isDesktop ? 8 : 6,
+                                vertical: isDesktop ? 2 : 1,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.green[700]?.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.green[700]!.withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.local_offer_rounded,
+                                    color: Colors.green[700],
+                                    size: getResponsiveFontSize(context, 10),
+                                  ),
+                                  SizedBox(width: isDesktop ? 2 : 1),
+                                  Text(
+                                    'Korting!',
+                                    style: textTheme.labelSmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.green[700],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       SizedBox(height: isDesktop ? 4 : 2),
                       Text(
@@ -775,40 +814,6 @@ class _StoreScreenState extends State<StoreScreen> {
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Discount indicator
-                    if (isDiscounted && discountAmount > 0)
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isDesktop ? 10 : 8,
-                          vertical: isDesktop ? 4 : 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green[700]?.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.green[700]!.withOpacity(0.3),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.local_offer_rounded,
-                              color: Colors.green[700],
-                              size: getResponsiveFontSize(context, 12),
-                            ),
-                            SizedBox(width: isDesktop ? 4 : 2),
-                            Text(
-                              'Korting!',
-                              style: textTheme.labelSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.green[700],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     // Price display
                     Container(
                       padding: EdgeInsets.symmetric(
@@ -992,12 +997,51 @@ class _StoreScreenState extends State<StoreScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            title,
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          if (isDiscounted && discountAmount > 0) ...[
+                            SizedBox(width: isDesktop ? 8 : 6),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isDesktop ? 8 : 6,
+                                vertical: isDesktop ? 2 : 1,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.green[700]?.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.green[700]!.withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.local_offer_rounded,
+                                    color: Colors.green[700],
+                                    size: getResponsiveFontSize(context, 10),
+                                  ),
+                                  SizedBox(width: isDesktop ? 2 : 1),
+                                  Text(
+                                    'Korting!',
+                                    style: textTheme.labelSmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.green[700],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       SizedBox(height: isDesktop ? 4 : 2),
                       Text(
@@ -1026,40 +1070,6 @@ class _StoreScreenState extends State<StoreScreen> {
                     : Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Discount indicator
-                          if (isDiscounted && discountAmount > 0)
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: isDesktop ? 10 : 8,
-                                vertical: isDesktop ? 4 : 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.green[700]?.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: Colors.green[700]!.withOpacity(0.3),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.local_offer_rounded,
-                                    color: Colors.green[700],
-                                    size: getResponsiveFontSize(context, 12),
-                                  ),
-                                  SizedBox(width: isDesktop ? 4 : 2),
-                                  Text(
-                                    'Korting!',
-                                    style: textTheme.labelSmall?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.green[700],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           // Price display
                           Container(
                             padding: EdgeInsets.symmetric(
@@ -1245,12 +1255,51 @@ class _StoreScreenState extends State<StoreScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            title,
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          if (isDiscounted && discountAmount > 0) ...[
+                            SizedBox(width: isDesktop ? 8 : 6),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isDesktop ? 8 : 6,
+                                vertical: isDesktop ? 2 : 1,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.green[700]?.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.green[700]!.withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.local_offer_rounded,
+                                    color: Colors.green[700],
+                                    size: getResponsiveFontSize(context, 10),
+                                  ),
+                                  SizedBox(width: isDesktop ? 2 : 1),
+                                  Text(
+                                    'Korting!',
+                                    style: textTheme.labelSmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.green[700],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       SizedBox(height: isDesktop ? 4 : 2),
                       Text(
@@ -1266,40 +1315,6 @@ class _StoreScreenState extends State<StoreScreen> {
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Discount indicator
-                    if (isDiscounted && discountAmount > 0)
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isDesktop ? 10 : 8,
-                          vertical: isDesktop ? 4 : 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green[700]?.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.green[700]!.withOpacity(0.3),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.local_offer_rounded,
-                              color: Colors.green[700],
-                              size: getResponsiveFontSize(context, 12),
-                            ),
-                            SizedBox(width: isDesktop ? 4 : 2),
-                            Text(
-                              'Korting!',
-                              style: textTheme.labelSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.green[700],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     // Price display
                     Container(
                       padding: EdgeInsets.symmetric(
