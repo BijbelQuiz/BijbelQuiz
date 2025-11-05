@@ -1,6 +1,6 @@
 # BijbelQuiz Admin Dashboard
 
-A secure Next.js admin dashboard for managing the BijbelQuiz application, including tracking data analysis, error reports, store management, and message management.
+A secure admin dashboard for managing the BijbelQuiz application, including tracking data analysis, error reports, store management, and message management.
 
 ## Security Model
 
@@ -37,14 +37,8 @@ JWT_SECRET=your_jwt_secret_here
 npm install
 ```
 
-3. For development:
+3. Start the server:
 ```bash
-npm run dev
-```
-
-4. For production build:
-```bash
-npm run build
 npm start
 ```
 
@@ -60,7 +54,7 @@ When deploying for public access:
 
 ### Vercel Deployment
 
-This Next.js dashboard is optimized for Vercel deployment:
+This dashboard can be deployed on Vercel using the following steps:
 
 1. Push your code to a GitHub repository
 2. Import your project into Vercel
@@ -69,7 +63,7 @@ This Next.js dashboard is optimized for Vercel deployment:
    - `SUPABASE_URL`: Your Supabase project URL
    - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key
    - `JWT_SECRET`: Secret for signing JWT tokens
-4. Vercel will automatically detect and deploy your Next.js application
+4. Vercel will automatically detect and deploy your Node.js application
 5. Access your dashboard at the URL provided by Vercel
 
 ## Architecture

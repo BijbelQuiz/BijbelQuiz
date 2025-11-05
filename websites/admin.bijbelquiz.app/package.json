@@ -2,12 +2,12 @@
   "name": "bijbelquiz-admin-dashboard",
   "version": "1.0.0",
   "description": "Admin dashboard for BijbelQuiz application",
+  "main": "server.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "vercel-build": "next build"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "vercel-build": "echo 'Build completed'",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "bijbelquiz",
@@ -20,9 +20,6 @@
   "author": "BijbelQuiz Team",
   "license": "MIT",
   "dependencies": {
-    "next": "14.2.5",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
     "@supabase/supabase-js": "^2.44.4",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
