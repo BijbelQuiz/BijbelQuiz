@@ -24,6 +24,7 @@ import 'services/gemini_service.dart';
 import 'services/api_service.dart';
 import 'services/star_transaction_service.dart';
 import 'services/time_tracking_service.dart';
+import 'services/messaging_service.dart';
 import 'utils/bijbelquiz_gen_utils.dart';
 import 'screens/bijbelquiz_gen_screen.dart';
 import 'screens/store_screen.dart';
@@ -93,6 +94,7 @@ void main() async {
         ChangeNotifierProvider.value(value: gameStatsProvider),
         ChangeNotifierProvider(create: (_) => LessonProgressProvider()),
         Provider.value(value: analyticsService),
+        Provider(create: (_) => MessagingService()),
       ],
       child: BijbelQuizApp(),
     ),

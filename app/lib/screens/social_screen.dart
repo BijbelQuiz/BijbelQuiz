@@ -8,6 +8,7 @@ import 'sync_screen.dart';
 import 'user_search_screen.dart';
 import 'following_list_screen.dart';
 import 'followers_list_screen.dart';
+import 'messages_screen.dart';
 import '../providers/game_stats_provider.dart';
 import '../services/logger.dart';
 
@@ -237,12 +238,13 @@ class _SocialScreenState extends State<SocialScreen> {
           mainAxisSpacing: 16.0,
           childAspectRatio: 1.0,
         ),
-        itemCount: 3,
+        itemCount: 4,
         itemBuilder: (context, index) {
           final features = [
             {'icon': Icons.search, 'label': strings.AppStrings.search, 'onPressed': _navigateToUserSearchScreen},
             {'icon': Icons.people_alt_rounded, 'label': strings.AppStrings.myFollowing, 'onPressed': _navigateToFollowingList},
             {'icon': Icons.person_add_rounded, 'label': strings.AppStrings.myFollowers, 'onPressed': _navigateToFollowersList},
+            {'icon': Icons.message_rounded, 'label': strings.AppStrings.messages, 'onPressed': _navigateToMessagesScreen},
           ];
           
           final feature = features[index];
@@ -282,6 +284,14 @@ class _SocialScreenState extends State<SocialScreen> {
             icon: Icons.person_add_rounded,
             label: strings.AppStrings.myFollowers,
             onPressed: _navigateToFollowersList,
+          ),
+          const SizedBox(height: 16),
+          _buildSmallerFullWidthButton(
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+            icon: Icons.message_rounded,
+            label: strings.AppStrings.messages,
+            onPressed: _navigateToMessagesScreen,
           ),
         ],
       );
@@ -688,6 +698,16 @@ class _SocialScreenState extends State<SocialScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const FollowersListScreen(),
+      ),
+    );
+  }
+
+  /// Navigate to messages screen
+  void _navigateToMessagesScreen() {
+    _analyticsService.capture(context, 'messages_screen_opened');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const MessagesScreen(),
       ),
     );
   }

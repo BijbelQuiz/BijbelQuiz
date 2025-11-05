@@ -97,6 +97,7 @@ class ModernAdminDashboard:
         self.setup_tracking_tab()
         self.setup_errors_tab()
         self.setup_store_tab()
+        self.setup_messages_tab()
         
         # Initially show tracking tab
         self.notebook.select(0)
@@ -1610,6 +1611,413 @@ Build Number: {error.get('build_number', 'N/A')}
                 messagebox.showerror("Error", f"Failed to add store item: {str(e)}")
         
         tb.Button(button_frame, text="Save", command=save_new_item, bootstyle=SUCCESS).pack(side=tk.LEFT, padx=(0, 10))
+        tb.Button(button_frame, text="Cancel", command=add_window.destroy, bootstyle=SECONDARY).pack(side=tk.LEFT)
+
+    def setup_messages_tab(self):
+        """Setup the messages management tab"""
+        # Main message frame
+        message_frame = tb.Frame(self.notebook)
+        self.notebook.add(message_frame, text="Message Management")
+        
+        # Controls and filters frame
+        controls_frame = tb.Labelframe(message_frame, text="Message Controls & Filters", padding=10)
+        controls_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Load data button
+        tb.Button(controls_frame, text="Load Messages", 
+                 command=self.load_messages, bootstyle=SUCCESS).pack(side=tk.LEFT, padx=5)
+        
+        # Add new message button
+        tb.Button(controls_frame, text="Add New Message", 
+                 command=self.add_new_message, bootstyle=INFO).pack(side=tk.LEFT, padx=5)
+        
+        # Search by title
+        tb.Label(controls_frame, text="Search:").pack(side=tk.LEFT, padx=(20, 5))
+        self.message_search = tb.Entry(controls_frame, width=15, bootstyle="secondary")
+        self.message_search.pack(side=tk.LEFT, padx=5)
+        self.message_search.bind('<KeyRelease>', lambda e: self.load_messages())
+        
+        # Split message frame into two main sections
+        message_data_frame = tb.Frame(message_frame)
+        message_data_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Left: Messages list
+        left_message_frame = tb.Frame(message_data_frame)
+        left_message_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
+        
+        # Messages list frame
+        message_list_frame = tb.Labelframe(left_message_frame, text="Messages", padding=10)
+        message_list_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Treeview for messages
+        message_tree_frame = tb.Frame(message_list_frame)
+        message_tree_frame.pack(fill=tk.BOTH, expand=True)
+        
+        self.message_tree = tb.Treeview(message_tree_frame, 
+                                      columns=('id', 'title', 'content', 'expiration_date', 'created_at'), 
+                                      show='headings', height=15, bootstyle="primary")
+        
+        # Define headings
+        self.message_tree.heading('id', text='ID')
+        self.message_tree.heading('title', text='Title')
+        self.message_tree.heading('content', text='Content')
+        self.message_tree.heading('expiration_date', text='Expiration Date')
+        self.message_tree.heading('created_at', text='Created At')
+        
+        # Define column widths
+        self.message_tree.column('id', width=80)
+        self.message_tree.column('title', width=150)
+        self.message_tree.column('content', width=200)
+        self.message_tree.column('expiration_date', width=150)
+        self.message_tree.column('created_at', width=150)
+        
+        # Add scrollbar
+        message_v_scrollbar = tb.Scrollbar(message_tree_frame, orient=tk.VERTICAL, 
+                                         command=self.message_tree.yview, bootstyle="round")
+        self.message_tree.configure(yscrollcommand=message_v_scrollbar.set)
+        
+        self.message_tree.grid(row=0, column=0, sticky="nsew")
+        message_v_scrollbar.grid(row=0, column=1, sticky="ns")
+        
+        message_tree_frame.grid_rowconfigure(0, weight=1)
+        message_tree_frame.grid_columnconfigure(0, weight=1)
+        
+        # Bind selection event
+        self.message_tree.bind('<<TreeviewSelect>>', self.on_message_select)
+        
+        # Right: Message details and editing
+        right_message_frame = tb.Frame(message_data_frame)
+        right_message_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
+        
+        # Message details frame
+        message_details_frame = tb.Labelframe(right_message_frame, text="Message Details", padding=10)
+        message_details_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Create form fields for editing
+        self.create_message_form(message_details_frame)
+    
+    def create_message_form(self, parent_frame):
+        """Create form fields for message details"""
+        # Scrollable frame for the form
+        canvas = tk.Canvas(parent_frame)
+        scrollbar = tb.Scrollbar(parent_frame, orient="vertical", command=canvas.yview, bootstyle="round")
+        scrollable_frame = tb.Frame(canvas)
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        # Form fields
+        # ID (read-only)
+        tb.Label(scrollable_frame, text="ID:").grid(row=0, column=0, sticky="w", pady=2)
+        self.message_id_var = tk.StringVar()
+        self.message_id_label = tb.Label(scrollable_frame, textvariable=self.message_id_var, bootstyle="secondary")
+        self.message_id_label.grid(row=0, column=1, sticky="w", pady=2, padx=(10, 0))
+
+        # Title
+        tb.Label(scrollable_frame, text="Title:").grid(row=1, column=0, sticky="w", pady=2)
+        self.message_title_var = tk.StringVar()
+        self.message_title_entry = tb.Entry(scrollable_frame, textvariable=self.message_title_var, bootstyle="secondary", width=30)
+        self.message_title_entry.grid(row=1, column=1, sticky="ew", pady=2, padx=(10, 0))
+
+        # Content
+        tb.Label(scrollable_frame, text="Content:").grid(row=2, column=0, sticky="w", pady=2)
+        self.message_content_var = tk.StringVar()
+        self.message_content_entry = tb.Entry(scrollable_frame, textvariable=self.message_content_var, bootstyle="secondary", width=30)
+        self.message_content_entry.grid(row=2, column=1, sticky="ew", pady=2, padx=(10, 0))
+
+        # Expiration Date
+        tb.Label(scrollable_frame, text="Expiration Date:").grid(row=3, column=0, sticky="w", pady=2)
+        self.expiration_date_var = tk.StringVar()
+        self.expiration_date_entry = tb.Entry(scrollable_frame, textvariable=self.expiration_date_var, bootstyle="secondary", width=30)
+        self.expiration_date_entry.grid(row=3, column=1, sticky="ew", pady=2, padx=(10, 0))
+        tb.Label(scrollable_frame, text="(YYYY-MM-DD HH:MM:SS format)", font=("TkDefaultFont", 8)).grid(row=3, column=2, sticky="w", pady=2)
+
+        # Created At (read-only)
+        tb.Label(scrollable_frame, text="Created At:").grid(row=4, column=0, sticky="w", pady=2)
+        self.created_at_var = tk.StringVar()
+        self.created_at_label = tb.Label(scrollable_frame, textvariable=self.created_at_var, bootstyle="secondary")
+        self.created_at_label.grid(row=4, column=1, sticky="w", pady=2, padx=(10, 0))
+
+        # Button frame
+        button_frame = tb.Frame(scrollable_frame)
+        button_frame.grid(row=5, column=0, columnspan=2, pady=10)
+
+        # Update button
+        self.update_message_btn = tb.Button(button_frame, text="Update Message", 
+                                          command=self.update_message, bootstyle=INFO)
+        self.update_message_btn.pack(side=tk.LEFT, padx=(0, 10))
+
+        # Delete button
+        self.delete_message_btn = tb.Button(button_frame, text="Delete Message", 
+                                          command=self.delete_message, bootstyle=DANGER)
+        self.delete_message_btn.pack(side=tk.LEFT)
+
+        # Configure grid weights
+        parent_frame.grid_rowconfigure(0, weight=1)
+        parent_frame.grid_columnconfigure(0, weight=1)
+        scrollable_frame.grid_columnconfigure(1, weight=1)
+
+        # Pack the canvas and scrollbar
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+    
+    def load_messages(self, event=None):
+        """Load messages from Supabase with optional filtering"""
+        if not self.supabase_client:
+            messagebox.showerror("Error", "Not connected to Supabase. Please check your credentials.")
+            return
+        
+        try:
+            # Build query with filters
+            query = self.supabase_client.table('messages').select('*').order('created_at', desc=True)
+            
+            search_text = self.message_search.get().strip()
+            if search_text:
+                query = query.ilike('title', f'%{search_text}%').or_(query.ilike('content', f'%{search_text}%'))
+            
+            # Execute query
+            response = query.execute()
+            
+            # Clear existing messages
+            for item in self.message_tree.get_children():
+                self.message_tree.delete(item)
+            
+            # Add new messages
+            for message in response.data:
+                message_id = message.get('id', '')
+                title = message.get('title', '')
+                content = message.get('content', '')
+                expiration_date = message.get('expiration_date', '')
+                created_at = message.get('created_at', '')
+                
+                # Truncate content if too long
+                if len(content) > 50:
+                    content = content[:50] + "..."
+                
+                self.message_tree.insert('', tk.END, values=(
+                    message_id,
+                    title,
+                    content,
+                    expiration_date,
+                    created_at
+                ), tags=(message['id'],))  # Store message ID as tag
+            
+            self.status_var.set(f"Loaded {len(response.data)} messages")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load messages: {str(e)}")
+            self.status_var.set("Error loading messages")
+    
+    def on_message_select(self, event):
+        """Handle message selection in the treeview"""
+        selection = self.message_tree.selection()
+        if not selection:
+            return
+        
+        item = self.message_tree.item(selection[0])
+        message_id = item['tags'][0]  # Get message ID from tags
+        
+        self.load_message_details(message_id)
+    
+    def load_message_details(self, message_id):
+        """Load and display details of a selected message"""
+        if not self.supabase_client:
+            return
+        
+        try:
+            response = self.supabase_client.table('messages').select('*').eq('id', message_id).execute()
+            if not response.data:
+                messagebox.showinfo("Info", "Message not found")
+                return
+            
+            message = response.data[0]
+            
+            # Update form fields with message details
+            self.message_id_var.set(message.get('id', ''))
+            self.message_title_var.set(message.get('title', ''))
+            self.message_content_var.set(message.get('content', ''))
+            
+            # Format dates for display
+            expiration_date = message.get('expiration_date', '')
+            if expiration_date:
+                # Convert ISO format to a more readable format if needed
+                self.expiration_date_var.set(expiration_date[:19])  # Get only datetime part
+            else:
+                self.expiration_date_var.set('')
+                
+            created_at = message.get('created_at', '')
+            if created_at:
+                self.created_at_var.set(created_at[:19])  # Get only datetime part
+            else:
+                self.created_at_var.set('')
+            
+            # Update the UI to ensure it refreshes
+            self.root.update_idletasks()
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load message details: {str(e)}")
+    
+    def update_message(self):
+        """Update a message in the database"""
+        if not self.supabase_client:
+            messagebox.showerror("Error", "Not connected to Supabase. Please check your credentials.")
+            return
+        
+        try:
+            # Get the selected message ID
+            selection = self.message_tree.selection()
+            if not selection:
+                messagebox.showwarning("Warning", "Please select a message to update.")
+                return
+            
+            item = self.message_tree.item(selection[0])
+            message_id = item['tags'][0]
+            
+            # Prepare data to update
+            update_data = {
+                'title': self.message_title_var.get().strip(),
+                'content': self.message_content_var.get().strip(),
+                'expiration_date': self.expiration_date_var.get().strip(),
+            }
+            
+            # Validate required fields
+            if not update_data['title']:
+                messagebox.showerror("Error", "Message title is required.")
+                return
+            if not update_data['content']:
+                messagebox.showerror("Error", "Message content is required.")
+                return
+            if not update_data['expiration_date']:
+                messagebox.showerror("Error", "Expiration date is required (format: YYYY-MM-DD HH:MM:SS).")
+                return
+            
+            # Update the message in the database
+            response = self.supabase_client.table('messages').update(update_data).eq('id', message_id).execute()
+            
+            if response:
+                messagebox.showinfo("Success", "Message updated successfully.")
+                self.load_messages()  # Refresh the list
+            else:
+                messagebox.showerror("Error", "Failed to update message.")
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to update message: {str(e)}")
+    
+    def delete_message(self):
+        """Delete a message from the database"""
+        if not self.supabase_client:
+            messagebox.showerror("Error", "Not connected to Supabase. Please check your credentials.")
+            return
+        
+        try:
+            # Get the selected message ID
+            selection = self.message_tree.selection()
+            if not selection:
+                messagebox.showwarning("Warning", "Please select a message to delete.")
+                return
+            
+            item = self.message_tree.item(selection[0])
+            message_id = item['tags'][0]
+            
+            # Confirm deletion with the user
+            result = messagebox.askyesno("Confirm Deletion", 
+                                      f"Are you sure you want to delete message with ID: {message_id}?\n\nThis action cannot be undone.")
+            
+            if result:
+                # Delete the message from the database
+                response = self.supabase_client.table('messages').delete().eq('id', message_id).execute()
+                
+                if response:
+                    messagebox.showinfo("Success", "Message deleted successfully.")
+                    self.load_messages()  # Refresh the list
+                else:
+                    messagebox.showerror("Error", "Failed to delete message.")
+                    
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to delete message: {str(e)}")
+    
+    def add_new_message(self):
+        """Add a new message to the database"""
+        if not self.supabase_client:
+            messagebox.showerror("Error", "Not connected to Supabase. Please check your credentials.")
+            return
+        
+        # Create a new window for adding a message
+        add_window = tk.Toplevel(self.root)
+        add_window.title("Add New Message")
+        add_window.geometry("400x300")
+        
+        # Create form fields for new message
+        frame = tb.Frame(add_window, padding=20)
+        frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Title
+        tb.Label(frame, text="Title:").grid(row=0, column=0, sticky="w", pady=2)
+        title_var = tk.StringVar()
+        tb.Entry(frame, textvariable=title_var, bootstyle="secondary", width=30).grid(row=0, column=1, sticky="ew", pady=2, padx=(10, 0))
+        
+        # Content
+        tb.Label(frame, text="Content:").grid(row=1, column=0, sticky="w", pady=2)
+        content_var = tk.StringVar()
+        tb.Entry(frame, textvariable=content_var, bootstyle="secondary", width=30).grid(row=1, column=1, sticky="ew", pady=2, padx=(10, 0))
+        
+        # Expiration Date
+        tb.Label(frame, text="Expiration Date:").grid(row=2, column=0, sticky="w", pady=2)
+        expiration_date_var = tk.StringVar()
+        tb.Entry(frame, textvariable=expiration_date_var, bootstyle="secondary", width=30).grid(row=2, column=1, sticky="ew", pady=2, padx=(10, 0))
+        tb.Label(frame, text="(YYYY-MM-DD HH:MM:SS format)", font=("TkDefaultFont", 8)).grid(row=2, column=2, sticky="w", pady=2)
+        
+        # Category grid configuration
+        frame.grid_columnconfigure(1, weight=1)
+        
+        # Buttons
+        button_frame = tb.Frame(frame)
+        button_frame.grid(row=3, column=0, columnspan=2, pady=20)
+        
+        def save_new_message():
+            try:
+                # Validate required fields
+                title = title_var.get().strip()
+                content = content_var.get().strip()
+                expiration_date = expiration_date_var.get().strip()
+                
+                if not title:
+                    messagebox.showerror("Error", "Message title is required.")
+                    return
+                if not content:
+                    messagebox.showerror("Error", "Message content is required.")
+                    return
+                if not expiration_date:
+                    messagebox.showerror("Error", "Expiration date is required (format: YYYY-MM-DD HH:MM:SS).")
+                    return
+                
+                # Prepare data
+                new_message_data = {
+                    'title': title,
+                    'content': content,
+                    'expiration_date': expiration_date,
+                    'created_at': datetime.now().isoformat(),  # Set current time
+                }
+                
+                # Insert the new message into the database
+                response = self.supabase_client.table('messages').insert(new_message_data).execute()
+                
+                if response:
+                    messagebox.showinfo("Success", "Message added successfully.")
+                    add_window.destroy()
+                    self.load_messages()  # Refresh the list
+                else:
+                    messagebox.showerror("Error", "Failed to add message.")
+                    
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to add message: {str(e)}")
+        
+        tb.Button(button_frame, text="Save", command=save_new_message, bootstyle=SUCCESS).pack(side=tk.LEFT, padx=(0, 10))
         tb.Button(button_frame, text="Cancel", command=add_window.destroy, bootstyle=SECONDARY).pack(side=tk.LEFT)
     
 

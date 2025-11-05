@@ -288,6 +288,7 @@ class AppStrings {
   static const String search = 'Zoeken';
   static const String myFollowing = 'Volgend';
   static const String myFollowers = 'Volgers';
+  static const String messages = 'Berichten';
   static const String followedUsersScores = 'Scores van Gevolgde Gebruikers';
   static const String searchUsers = 'Zoek Gebruikers';
   static const String searchByUsername = 'Zoek op gebruikersnaam';
@@ -644,6 +645,19 @@ class AppStrings {
       "Je moet een ruimte toetreden om je volgers te zien";
   static const String shareBQIDFollowers =
       "Deel jouw BQID met anderen om volgers te krijgen";
+
+  // Messages
+  static const String noActiveMessages = 'Geen actieve berichten';
+  static const String noActiveMessagesSubtitle = 'Er zijn momenteel geen berichten om weer te geven';
+  static const String errorLoadingMessages = 'Fout bij laden van berichten';
+  static const String expiresIn = 'Verloopt over';
+  static const String expiringSoon = 'Verloopt binnenkort';
+  static const String days = 'dagen';
+  static const String noExpirationDate = 'Geen vervaldatum';
+  static const String hoursMessage = 'uren';  // Rename to avoid conflict
+  static const String minutes = 'minuten';
+  static const String lessThanAMinute = 'minder dan een minuut';
+  static const String created = 'Aangemaakt';
 
   // Username
   static const String username = 'Gebruikersnaam';

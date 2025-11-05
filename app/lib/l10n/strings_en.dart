@@ -249,6 +249,7 @@ class AppStrings {
   static const String search = 'Search';
   static const String myFollowing = 'My Following';
   static const String myFollowers = 'My Followers';
+  static const String messages = 'Messages';
   static const String searchUsers = 'Search Users';
   static const String searchByUsername = 'Search by username';
   static const String enterUsernameToSearch = 'Enter username to search...';
@@ -501,6 +502,18 @@ class AppStrings {
   static const String noFollowers = "You don\'t have any followers yet";
   static const String joinRoomToViewFollowers = "You need to join a room to see your followers";
   static const String shareBQIDFollowers  = "Share your BQID with others to start getting followers";
+
+  // Messages
+  static const String noActiveMessages = 'No active messages';
+  static const String noActiveMessagesSubtitle = 'There are currently no messages to display';
+  static const String errorLoadingMessages = 'Error loading messages';
+  static const String expiresIn = 'Expires in';
+  static const String expiringSoon = 'Expiring soon';
+  static const String days = 'days';
+  static const String hoursMessage = 'hours';
+  static const String minutes = 'minutes';
+  static const String lessThanAMinute = 'less than a minute';
+  static const String created = 'Created';
 
   // BijbelQuiz Gen (Year in Review) Strings
   static const String bijbelquizGenTitle = 'BibleQuiz Year in Review';
