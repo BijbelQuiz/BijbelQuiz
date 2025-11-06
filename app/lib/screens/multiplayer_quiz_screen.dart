@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'dart:math';
 import '../models/quiz_question.dart';
 import '../models/quiz_state.dart';
 import '../services/sound_service.dart';
@@ -23,11 +22,12 @@ import '../error/error_handler.dart';
 import '../error/error_types.dart';
 import '../widgets/quiz_bottom_bar.dart';
 import '../widgets/question_widget.dart';
-import '../widgets/metrics_widget.dart';
 import '../widgets/quiz_skeleton.dart';
 import '../widgets/top_snackbar.dart';
 import '../l10n/strings_nl.dart' as strings;
 import '../services/logger.dart';
+import '../widgets/biblical_reference_dialog.dart';
+import '../utils/automatic_error_reporter.dart';
 
 /// Multiplayer quiz screen with split-screen layout
 class MultiplayerQuizScreen extends StatefulWidget {
@@ -83,9 +83,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
   late FocusNode _keyboardFocusNode;
 
   // Managers
-  late QuizTimerManager _timerManager;
-  late QuizAnimationController _animationController;
-  late ProgressiveQuestionSelector _questionSelector;
   late QuizAnswerHandler _answerHandler;
 
   @override
@@ -604,16 +601,32 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
           },
           child: Column(
             children: [
-              // Split screen layout - full screen
+              // Split screen layout with individual bottom bars
               Expanded(
                 child: Row(
                   children: [
-                    // Left half - Player 1 (normal orientation)
+                    // Left half - Player 1 (normal orientation) with its own bottom bar
                     Expanded(
-                      child: _buildScrollablePlayerArea(
-                        context,
-                        isPlayer1: true,
-                        playerName: 'Speler 1',
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: _buildScrollablePlayerArea(
+                              context,
+                              isPlayer1: true,
+                              playerName: 'Speler 1',
+                            ),
+                          ),
+                          QuizBottomBar(
+                            quizState: _player1QuizState,
+                            gameStats: Provider.of<GameStatsProvider>(context),
+                            settings: Provider.of<SettingsProvider>(context),
+                            questionId: _player1QuizState.question.id,
+                            onSkipPressed: () => _handleSkipForPlayer(true),
+                            onUnlockPressed: () => _handleUnlockBiblicalReferenceForPlayer(true),
+                            onFlagPressed: () => _handleFlagForPlayer(true),
+                            isDesktop: false, // This is a mobile app screen
+                          ),
+                        ],
                       ),
                     ),
 
@@ -624,12 +637,28 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
                       margin: EdgeInsets.zero,
                     ),
 
-                    // Right half - Player 2 (normal orientation)
+                    // Right half - Player 2 (normal orientation) with its own bottom bar
                     Expanded(
-                      child: _buildScrollablePlayerArea(
-                        context,
-                        isPlayer1: false,
-                        playerName: 'Speler 2',
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: _buildScrollablePlayerArea(
+                              context,
+                              isPlayer1: false,
+                              playerName: 'Speler 2',
+                            ),
+                          ),
+                          QuizBottomBar(
+                            quizState: _player2QuizState,
+                            gameStats: Provider.of<GameStatsProvider>(context),
+                            settings: Provider.of<SettingsProvider>(context),
+                            questionId: _player2QuizState.question.id,
+                            onSkipPressed: () => _handleSkipForPlayer(false),
+                            onUnlockPressed: () => _handleUnlockBiblicalReferenceForPlayer(false),
+                            onFlagPressed: () => _handleFlagForPlayer(false),
+                            isDesktop: false, // This is a mobile app screen
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -763,9 +792,277 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
     );
   }
 
-  String _formatDuration(Duration duration) {
-    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
+
+  
+  Map<String, dynamic>? _parseBiblicalReference(String reference) {
+    try {
+      // Handle different reference formats:
+      // "Genesis 1:1" -> book: Genesis, chapter: 1, startVerse: 1
+      // "Genesis 1:1-3" -> book: Genesis, chapter: 1, startVerse: 1, endVerse: 3
+      // "Genesis 1" -> book: Genesis, chapter: 1
+      
+      // Remove extra spaces and split by space
+      reference = reference.trim();
+      final parts = reference.split(' ');
+      
+      if (parts.length < 2) return null;
+      
+      // Extract book name (everything except the last part)
+      final book = parts.sublist(0, parts.length - 1).join(' ');
+      final chapterAndVerses = parts.last;
+      
+      // Split chapter and verses by colon
+      final chapterVerseParts = chapterAndVerses.split(':');
+      
+      if (chapterVerseParts.isEmpty) return null;
+      
+      final chapter = int.tryParse(chapterVerseParts[0]);
+      if (chapter == null) return null;
+      
+      int? startVerse;
+      int? endVerse;
+      
+      if (chapterVerseParts.length > 1) {
+        // Has verse information
+        final versePart = chapterVerseParts[1];
+        if (versePart.contains('-')) {
+          // Range of verses
+          final verseRange = versePart.split('-');
+          startVerse = int.tryParse(verseRange[0]);
+          endVerse = int.tryParse(verseRange[1]);
+        } else {
+          // Single verse
+          startVerse = int.tryParse(versePart);
+        }
+      }
+      
+      return {
+        'book': book,
+        'chapter': chapter,
+        'startVerse': startVerse,
+        'endVerse': endVerse,
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Player-specific handler methods
+  Future<void> _handleSkipForPlayer(bool isPlayer1) async {
+    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    final QuizState quizState = isPlayer1 ? _player1QuizState : _player2QuizState;
+    final ProgressiveQuestionSelector questionSelector = isPlayer1 ? _player1QuestionSelector : _player2QuestionSelector;
+    final QuizTimerManager timerManager = isPlayer1 ? _player1TimerManager : _player2TimerManager;
+    final QuizAnimationController animationController = isPlayer1 ? _player1AnimationController : _player2AnimationController;
+    final String playerName = isPlayer1 ? 'Player1' : 'Player2';
+
+    // Track skip feature usage
+    analyticsService.trackFeatureAttempt(context, AnalyticsService.FEATURE_SKIP_QUESTION, additionalProperties: {
+      'question_category': quizState.question.category,
+      'question_difficulty': quizState.question.difficulty,
+      'time_remaining': quizState.timeRemaining,
+      'player': playerName,
+    });
+
+    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'skip_question_$playerName');
+    final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    final isDev = kDebugMode;
+
+    final success = isDev ? true : await gameStats.spendStarsWithTransaction(
+      amount: 35,
+      reason: 'Vraag overslaan',
+      metadata: {
+        'question_category': quizState.question.category,
+        'question_difficulty': quizState.question.difficulty,
+        'time_remaining': quizState.timeRemaining,
+        'player': playerName,
+      },
+    );
+    
+    if (success) {
+      // Stop the appropriate player's timer
+      timerManager.timeAnimationController.stop();
+      
+      setState(() {
+        if (isPlayer1) {
+          _player1QuizState = _player1QuizState.copyWith(
+            selectedAnswerIndex: null,
+            isTransitioning: true,
+          );
+        } else {
+          _player2QuizState = _player2QuizState.copyWith(
+            selectedAnswerIndex: null,
+            isTransitioning: true,
+          );
+        }
+      });
+      
+      await Future.delayed(_performanceService.getOptimalAnimationDuration(const Duration(milliseconds: 300)));
+      if (!mounted) return;
+      
+      setState(() {
+        // Record that the current question was not answered correctly (since it was skipped)
+        questionSelector.recordAnswerResult(quizState.question.question, false);
+        final nextQuestion = questionSelector.pickNextQuestion(quizState.currentDifficulty, context);
+        
+        if (isPlayer1) {
+          _player1QuizState = QuizState(
+            question: nextQuestion,
+            timeRemaining: 20, // Default timer
+            currentDifficulty: quizState.currentDifficulty,
+          );
+          
+          // Restart timer for player 1
+          _player1TimerManager.startTimer(context: context, reset: true);
+          _player1AnimationController.triggerTimeAnimation();
+        } else {
+          _player2QuizState = QuizState(
+            question: nextQuestion,
+            timeRemaining: 20, // Default timer
+            currentDifficulty: quizState.currentDifficulty,
+          );
+          
+          // Restart timer for player 2
+          _player2TimerManager.startTimer(context: context, reset: true);
+          _player2AnimationController.triggerTimeAnimation();
+        }
+      });
+    } else {
+      if (mounted) {
+        showTopSnackBar(context, strings.AppStrings.notEnoughStarsForSkip, style: TopSnackBarStyle.warning);
+      }
+    }
+  }
+
+  Future<void> _handleUnlockBiblicalReferenceForPlayer(bool isPlayer1) async {
+    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    final QuizState quizState = isPlayer1 ? _player1QuizState : _player2QuizState;
+    final QuizTimerManager timerManager = isPlayer1 ? _player1TimerManager : _player2TimerManager;
+    final String playerName = isPlayer1 ? 'Player1' : 'Player2';
+
+    // Track biblical reference unlock attempt
+    analyticsService.trackFeatureAttempt(context, AnalyticsService.FEATURE_BIBLICAL_REFERENCES, additionalProperties: {
+      'question_category': quizState.question.category,
+      'question_difficulty': quizState.question.difficulty,
+      'biblical_reference': quizState.question.biblicalReference ?? 'none',
+      'time_remaining': quizState.timeRemaining,
+      'player': playerName,
+    });
+
+    final localContext = context;
+    final gameStats = Provider.of<GameStatsProvider>(localContext, listen: false);
+    final isDev = kDebugMode;
+
+    // First check if the reference can be parsed
+    final parsed = _parseBiblicalReference(quizState.question.biblicalReference!);
+    if (parsed == null) {
+      // Report this error automatically since it indicates issues with question data
+      await AutomaticErrorReporter.reportBiblicalReferenceError(
+        message: 'Could not parse biblical reference',
+        userMessage: 'Invalid biblical reference in question',
+        reference: quizState.question.biblicalReference ?? 'null',
+        questionId: quizState.question.id,
+        additionalInfo: {
+          'question_id': quizState.question.id,
+          'question_text': quizState.question.question,
+          'player': playerName,
+        },
+      );
+      
+      if (mounted) {
+        showTopSnackBar(localContext, strings.AppStrings.invalidBiblicalReference, style: TopSnackBarStyle.error);
+      }
+      return;
+    }
+
+    // Spend 10 stars for unlocking the biblical reference (free in debug mode)
+    final success = isDev ? true : await gameStats.spendStarsWithTransaction(
+      amount: 10,
+      reason: 'Bijbelse referentie ontgrendelen',
+      metadata: {
+        'question_category': quizState.question.category,
+        'question_difficulty': quizState.question.difficulty,
+        'biblical_reference': quizState.question.biblicalReference ?? 'none',
+        'time_remaining': quizState.timeRemaining,
+        'player': playerName,
+      },
+    );
+    if (success) {
+      // Pause the appropriate player's timer
+      if (mounted) {
+        timerManager.pauseTimer();
+      }
+
+      // Show the biblical reference dialog
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          showDialog(
+            context: localContext,
+            builder: (BuildContext context) {
+              return BiblicalReferenceDialog(
+                reference: quizState.question.biblicalReference!,
+              );
+            },
+          ).then((_) {
+            // Resume the timer when dialog is closed
+            if (mounted) {
+              timerManager.resumeTimer();
+            }
+          });
+        }
+      });
+    } else {
+      // Not enough stars - this is a user state issue, not an error to report automatically
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          showTopSnackBar(localContext, strings.AppStrings.notEnoughStars, style: TopSnackBarStyle.warning);
+        }
+      });
+    }
+  }
+
+  Future<void> _handleFlagForPlayer(bool isPlayer1) async {
+    final QuizState quizState = isPlayer1 ? _player1QuizState : _player2QuizState;
+    final questionId = quizState.question.id;
+    final String playerName = isPlayer1 ? 'Player1' : 'Player2';
+    
+    try {
+      // Report the issue to the tracking service
+      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      await AutomaticErrorReporter.reportQuestionError(
+        message: 'User reported issue with question',
+        userMessage: 'Question reported by user',
+        questionId: questionId,
+        questionText: quizState.question.question,
+        additionalInfo: {
+          'correct_answer': quizState.question.correctAnswer,
+          'incorrect_answers': quizState.question.incorrectAnswers,
+          'category': quizState.question.category,
+          'difficulty': quizState.question.difficulty,
+          'current_streak': gameStatsProvider.currentStreak,
+          'score': gameStatsProvider.score,
+          'player': playerName,
+        },
+      );
+
+      // Show success feedback to user
+      if (mounted) {
+        showTopSnackBar(
+          context,
+          strings.AppStrings.questionReportedSuccessfully,
+          style: TopSnackBarStyle.success,
+        );
+      }
+    } catch (e) {
+      // If reporting fails, show error to user
+      if (mounted) {
+        showTopSnackBar(
+          context,
+          strings.AppStrings.errorReportingQuestion,
+          style: TopSnackBarStyle.error,
+        );
+      }
+    }
   }
 }
