@@ -426,7 +426,7 @@ class _SocialScreenState extends State<SocialScreen> {
                       ),
                     ),
                   ),
-                ).toList(),
+                ),
               ],
             );
           },
@@ -481,7 +481,7 @@ class _SocialScreenState extends State<SocialScreen> {
             stats = await syncService.getGameStatsForDevice(deviceId);
             
             // If that returns null or empty, try to get stats from all rooms globally
-            if (stats == null || stats!.isEmpty) {
+            if (stats == null || stats.isEmpty) {
               stats = await _getGameStatsForDeviceGlobally(deviceId);
             }
             

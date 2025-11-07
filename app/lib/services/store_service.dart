@@ -18,14 +18,9 @@ class StoreService {
           .order('category')
           .order('item_name');
 
-      if (response != null) {
-        final List<dynamic> rawData = response as List<dynamic>;
-        return rawData.map((item) => StoreItem.fromJson(item as Map<String, dynamic>)).toList();
-      } else {
-        AppLogger.warning('No store items found or response was null');
-        return [];
-      }
-    } catch (e) {
+      final List<dynamic> rawData = response as List<dynamic>;
+      return rawData.map((item) => StoreItem.fromJson(item as Map<String, dynamic>)).toList();
+        } catch (e) {
       AppLogger.error('Error fetching store items from Supabase: $e');
       rethrow;
     }
@@ -40,13 +35,8 @@ class StoreService {
           .eq('item_key', itemKey)
           .single();
 
-      if (response != null) {
-        return StoreItem.fromJson(response as Map<String, dynamic>);
-      } else {
-        AppLogger.warning('Store item with key $itemKey not found');
-        return null;
-      }
-    } catch (e) {
+      return StoreItem.fromJson(response as Map<String, dynamic>);
+        } catch (e) {
       AppLogger.error('Error fetching store item with key $itemKey: $e');
       return null;
     }
@@ -61,14 +51,9 @@ class StoreService {
           .eq('item_key', item.itemKey)
           .select();
 
-      if (response != null) {
-        AppLogger.info('Store item updated successfully: ${item.itemKey}');
-        return true;
-      } else {
-        AppLogger.error('Failed to update store item: ${item.itemKey}');
-        return false;
-      }
-    } catch (e) {
+      AppLogger.info('Store item updated successfully: ${item.itemKey}');
+      return true;
+        } catch (e) {
       AppLogger.error('Error updating store item: $e');
       return false;
     }

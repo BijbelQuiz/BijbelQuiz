@@ -87,17 +87,11 @@ class ThemeManager {
     final seedColor = _parseColor(themeDef.colors['primary']) ?? (brightness == Brightness.dark ? Colors.blue.shade200 : Colors.blue.shade600);
     
     ColorScheme baseScheme;
-    if (seedColor != null) {
-      baseScheme = ColorScheme.fromSeed(
-        seedColor: seedColor,
-        brightness: brightness,
-      );
-    } else {
-      baseScheme = brightness == Brightness.dark 
-          ? ColorScheme.dark() 
-          : ColorScheme.light();
-    }
-
+    baseScheme = ColorScheme.fromSeed(
+      seedColor: seedColor,
+      brightness: brightness,
+    );
+  
     // Override with specific colors from the theme definition
     return baseScheme.copyWith(
       primary: _parseColor(themeDef.colors['primary']) ?? baseScheme.primary,

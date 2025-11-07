@@ -80,8 +80,8 @@ class _AnswerButtonState extends State<AnswerButton>
         _iconColor = Colors.white;
         break;
       case AnswerFeedback.incorrect:
-        _backgroundColor = const Color(0xDC2626); // Darker red for better contrast
-        _borderColor = const Color(0xDC2626);
+        _backgroundColor = const Color(0x00dc2626); // Darker red for better contrast
+        _borderColor = const Color(0x00dc2626);
         _textColor = Colors.white;
         _iconColor = Colors.white;
         break;

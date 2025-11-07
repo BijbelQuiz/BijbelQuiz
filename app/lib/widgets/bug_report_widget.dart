@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../services/error_reporting_service.dart';
 import '../error/error_handler.dart';
-import '../providers/settings_provider.dart';
 import '../l10n/strings_nl.dart' as strings_nl;
 
 /// A dialog widget that allows users to submit bug reports

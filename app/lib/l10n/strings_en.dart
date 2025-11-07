@@ -499,7 +499,7 @@ class AppStrings {
   static const String searchUsersToFollow = "Search for users to start following them";
 
   // Followers-list screen
-  static const String noFollowers = "You don\'t have any followers yet";
+  static const String noFollowers = "You don't have any followers yet";
   static const String joinRoomToViewFollowers = "You need to join a room to see your followers";
   static const String shareBQIDFollowers  = "Share your BQID with others to start getting followers";
 

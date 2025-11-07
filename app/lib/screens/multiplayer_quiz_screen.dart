@@ -582,14 +582,16 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
                 bool? isPlayer1;
                 if ([LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyS, LogicalKeyboardKey.keyD, LogicalKeyboardKey.keyF].contains(key)) {
                   isPlayer1 = true;
-                  if (key == LogicalKeyboardKey.keyA) answerIndex = 0;
-                  else if (key == LogicalKeyboardKey.keyS) answerIndex = 1;
+                  if (key == LogicalKeyboardKey.keyA) {
+                    answerIndex = 0;
+                  } else if (key == LogicalKeyboardKey.keyS) answerIndex = 1;
                   else if (key == LogicalKeyboardKey.keyD) answerIndex = 2;
                   else if (key == LogicalKeyboardKey.keyF) answerIndex = 3;
                 } else if ([LogicalKeyboardKey.keyH, LogicalKeyboardKey.keyJ, LogicalKeyboardKey.keyK, LogicalKeyboardKey.keyL].contains(key)) {
                   isPlayer1 = false;
-                  if (key == LogicalKeyboardKey.keyH) answerIndex = 0;
-                  else if (key == LogicalKeyboardKey.keyJ) answerIndex = 1;
+                  if (key == LogicalKeyboardKey.keyH) {
+                    answerIndex = 0;
+                  } else if (key == LogicalKeyboardKey.keyJ) answerIndex = 1;
                   else if (key == LogicalKeyboardKey.keyK) answerIndex = 2;
                   else if (key == LogicalKeyboardKey.keyL) answerIndex = 3;
                 }

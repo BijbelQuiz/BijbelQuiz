@@ -65,7 +65,7 @@ class MessagingService {
       final response = await _client
           .from('messages')
           .select('*')
-          .or('expiration_date.is.null,expiration_date.gte.${now}')
+          .or('expiration_date.is.null,expiration_date.gte.$now')
           .order('created_at', ascending: false);
 
       return response.map((map) => Message.fromMap(map)).toList();

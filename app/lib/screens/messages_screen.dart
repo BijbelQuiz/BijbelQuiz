@@ -203,7 +203,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
   /// Builds a card for when there are no active messages
   Widget _buildEmptyMessagesCard(ColorScheme colorScheme, TextTheme textTheme) {
     return Card(
-      color: colorScheme.surfaceVariant,
+      color: colorScheme.surfaceContainerHighest,
       margin: const EdgeInsets.only(top: 16),
       child: Padding(
         padding: const EdgeInsets.all(24.0),

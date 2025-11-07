@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bijbelquiz/services/sound_service.dart';
-import 'package:bijbelquiz/services/logger.dart';
 
 void main() {
   group('SoundService', () {

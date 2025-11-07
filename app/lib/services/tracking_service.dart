@@ -708,15 +708,13 @@ class TrackingService {
           final properties = event['properties'] as Map<String, dynamic>?;
           if (properties != null) {
             final feature = properties['feature'] as String;
-            if (feature != null) {
-              featureUsage[feature] = (featureUsage[feature] ?? 0) + 1;
-              
-              final userId = event['user_id'] as String;
-              if (userId != null) {
-                featureUsers.putIfAbsent(feature, () => <String>{}).add(userId);
-              }
+            featureUsage[feature] = (featureUsage[feature] ?? 0) + 1;
+            
+            final userId = event['user_id'] as String;
+            if (userId != null) {
+              featureUsers.putIfAbsent(feature, () => <String>{}).add(userId);
             }
-          }
+                    }
         }
       }
       
@@ -825,10 +823,8 @@ class TrackingService {
       
       for (final event in events) {
         final userId = event['user_id'] as String;
-        if (userId != null) {
-          userIds.add(userId);
-        }
-        totalUsage++;
+        userIds.add(userId);
+              totalUsage++;
       }
 
       return {
@@ -887,7 +883,7 @@ class TrackingService {
               context,
               feature['feature'] as String,
               '${feature['usage_count']} uses',
-            )).toList(),
+            )),
             const SizedBox(height: 16),
             Text(
               'Features Needing Attention',
@@ -899,7 +895,7 @@ class TrackingService {
               feature['feature'] as String,
               'Last used ${feature['days_since_last_use']} days ago',
               isWarning: true,
-            )).toList(),
+            )),
           ],
         );
       },

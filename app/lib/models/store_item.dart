@@ -73,7 +73,7 @@ class StoreItem {
   int get discountAmount => basePrice - currentPrice;
 
   /// Gets the discount percentage as a formatted string
-  String get discountPercentageString => '${discountPercentage}%';
+  String get discountPercentageString => '$discountPercentage%';
 
   /// Checks if the item is currently discounted
   bool get isCurrentlyDiscounted {

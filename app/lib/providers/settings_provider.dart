@@ -233,7 +233,7 @@ class SettingsProvider extends ChangeNotifier {
 
         _aiThemes.clear();
         for (final entry in themesData.entries) {
-          final themeId = entry.key as String;
+          final themeId = entry.key;
           final themeData = entry.value as Map<String, dynamic>;
 
           // Reconstruct the ThemeData objects from stored color palette
@@ -891,7 +891,7 @@ class SettingsProvider extends ChangeNotifier {
     if (aiThemesData != null) {
       _aiThemes.clear();
       for (final entry in aiThemesData.entries) {
-        final themeId = entry.key as String;
+        final themeId = entry.key;
         final themeData = entry.value as Map<String, dynamic>;
 
         final lightTheme = AIThemeBuilder.createLightThemeFromPalette(

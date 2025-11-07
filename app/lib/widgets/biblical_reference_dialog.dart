@@ -6,9 +6,6 @@ import 'package:xml/xml.dart' as xml;
 import '../l10n/strings_nl.dart' as strings;
 import '../constants/urls.dart';
 import '../utils/bible_book_mapper.dart';
-import '../error/error_handler.dart';
-import '../error/error_types.dart';
-import '../services/error_reporting_service.dart';
 import '../utils/automatic_error_reporter.dart';
 
 class BiblicalReferenceDialog extends StatefulWidget {

@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io' show Platform;
 import '../providers/settings_provider.dart';
-import '../constants/urls.dart';
 import 'logger.dart';
-import '../widgets/common_widgets.dart';
 import 'tracking_service.dart';
 
 /// A service that provides an interface to the in-house tracking service.

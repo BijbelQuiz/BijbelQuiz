@@ -1,4 +1,3 @@
-import 'package:bijbelquiz/l10n/strings_en.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../l10n/strings_nl.dart' as strings;

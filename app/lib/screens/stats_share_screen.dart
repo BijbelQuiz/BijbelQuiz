@@ -84,7 +84,7 @@ class StatsShareScreen extends StatelessWidget {
                     _buildStatRow(
                       context,
                       Text(
-                        '${accuracy}%',
+                        '$accuracy%',
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.black,

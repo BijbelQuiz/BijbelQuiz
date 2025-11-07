@@ -96,7 +96,7 @@ class ApiService {
           .addMiddleware(_createCorsMiddleware())
           .addMiddleware(_createValidationMiddleware())
           .addMiddleware(_createLoggingMiddleware())
-          .addHandler(app);
+          .addHandler(app.call);
 
       _server = await shelf_io.serve(handler, _defaultBindAddress, port);
       _isRunning = true;
@@ -255,7 +255,7 @@ class ApiService {
         final userAgent = _sanitizeHeader(request.headers['user-agent'] ?? 'Unknown');
 
         // Only log non-sensitive information
-        AppLogger.info('API Request: ${request.method} ${request.url.path} from $clientIp (UA: ${userAgent.length > 100 ? userAgent.substring(0, 100) + '...' : userAgent})');
+        AppLogger.info('API Request: ${request.method} ${request.url.path} from $clientIp (UA: ${userAgent.length > 100 ? '${userAgent.substring(0, 100)}...' : userAgent})');
 
         try {
           final response = await innerHandler(request);

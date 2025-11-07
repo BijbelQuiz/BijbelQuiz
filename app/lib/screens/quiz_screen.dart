@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../models/quiz_state.dart';
 import '../models/quiz_question.dart';
 import '../services/sound_service.dart';
@@ -27,7 +26,6 @@ import '../widgets/metrics_widget.dart';
 import '../widgets/app_bar_widget.dart';
 import '../utils/responsive_utils.dart';
 import '../widgets/common_widgets.dart';
-import '../constants/urls.dart';
 import 'dart:async';
 import 'dart:math';
 import '../widgets/quiz_skeleton.dart';
@@ -40,8 +38,6 @@ import '../services/quiz_timer_manager.dart';
 import '../services/quiz_animation_controller.dart';
 import '../services/progressive_question_selector.dart';
 import '../services/quiz_answer_handler.dart';
-import '../services/error_reporting_service.dart';
-import '../error/error_types.dart';
 import '../utils/automatic_error_reporter.dart';
 
 /// The main quiz screen that displays questions and handles user interactions

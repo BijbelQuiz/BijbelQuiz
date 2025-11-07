@@ -71,7 +71,7 @@ class TimeTrackingService {
     _checkAndResetGenShownFlagForNewPeriod();
     
     _startTracking();
-    AppLogger.info('Time tracking session started at ${_sessionStartTime}');
+    AppLogger.info('Time tracking session started at $_sessionStartTime');
   }
   
   /// Check if we're in a new Gen period and reset the flag if needed
