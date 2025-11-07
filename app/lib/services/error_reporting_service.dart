@@ -148,12 +148,14 @@ class ErrorReportingService {
           .from('error_reports')
           .insert(errorReport.toMap());
 
-      if (response.error != null) {
+      if (response != null && response.error != null) {
         AppLogger.severe('Failed to report error to Supabase: ${response.error?.message}');
         // Even if Supabase fails, we still log locally
         AppLogger.warning('Error saved locally but failed to send to database: ${appError.userMessage}');
-      } else {
+      } else if (response != null) {
         AppLogger.info('Error successfully reported to Supabase: ${appError.userMessage}');
+      } else {
+        AppLogger.warning('Error reporting failed: no response from Supabase');
       }
     } catch (e) {
       AppLogger.severe('Failed to report error due to exception: $e');

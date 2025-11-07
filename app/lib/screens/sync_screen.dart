@@ -6,6 +6,8 @@ import '../providers/game_stats_provider.dart';
 import '../providers/lesson_progress_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/logger.dart';
+import '../services/centralized_sync_service.dart';
+import '../services/device_management_service.dart';
 import '../l10n/strings_nl.dart' as strings;
 import '../utils/automatic_error_reporter.dart';
 
@@ -19,31 +21,100 @@ class SyncScreen extends StatefulWidget {
 class _SyncScreenState extends State<SyncScreen> {
   final TextEditingController _codeController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _deviceNameController = TextEditingController();
   bool _isLoading = false;
   bool _isLoadingUsername = false;
+  bool _isLoadingDeviceName = false;
   String? _error;
   String? _usernameError;
+  String? _deviceNameError;
   String? _currentCode;
   List<String>? _devicesInRoom;
   bool _isLoadingDevices = false;
   String? _currentDeviceId;
   String? _currentUsername;
+  String? _currentDeviceAlias;
   List<String>? _blacklistedUsernames;
+  
+  // Sync service for centralized operations
+  late CentralizedSyncService _syncService;
+  late DeviceManagementService _deviceService;
 
   @override
   void initState() {
     super.initState();
-    _setupSyncListeners();
-    _getCurrentDeviceId();
-    _loadDevicesInRoom();
-    _loadCurrentUsername();
-    _loadBlacklistedUsernames();
+    _initializeServices();
+  }
+
+  Future<void> _initializeServices() async {
+    try {
+      _syncService = CentralizedSyncService.instance;
+      _deviceService = DeviceManagementService.instance;
+      
+      await _syncService.initialize();
+      await _deviceService.initialize();
+      
+      if (mounted) {
+        _setupSyncListeners();
+        _getCurrentDeviceId();
+        _loadDevicesInRoom();
+        _loadCurrentUsername();
+        _loadCurrentDeviceAlias();
+        _loadBlacklistedUsernames();
+        
+        // Listen to sync events
+        _syncService.eventStream.listen(_handleSyncEvent);
+      }
+    } catch (e) {
+      AppLogger.error('Failed to initialize sync services', e);
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to initialize sync services';
+        });
+      }
+    }
+  }
+
+  void _handleSyncEvent(SyncEvent event) {
+    if (!mounted) return;
+    
+    switch (event.type) {
+      case SyncEventType.roomJoined:
+        _loadDevicesInRoom();
+        _loadCurrentUsername();
+        _loadCurrentDeviceAlias();
+        break;
+      case SyncEventType.roomLeft:
+        setState(() {
+          _currentCode = null;
+          _devicesInRoom = null;
+          _currentUsername = null;
+          _currentDeviceAlias = null;
+        });
+        break;
+      case SyncEventType.usernameUpdated:
+        setState(() {
+          _currentUsername = event.data?['username'] as String?;
+          if (_currentUsername != null) {
+            _usernameController.text = _currentUsername!;
+          }
+        });
+        break;
+      case SyncEventType.deviceRemoved:
+        _loadDevicesInRoom();
+        break;
+      case SyncEventType.error:
+        final message = event.message ?? 'Sync error occurred';
+        setState(() {
+          _error = message;
+        });
+        break;
+    }
   }
 
   Future<void> _loadCurrentUsername() async {
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-      final currentUsername = await gameStatsProvider.syncService.getUsername();
+      final currentUsername = await _syncService.getUsername();
       if (mounted) {
         setState(() {
           _currentUsername = currentUsername;
@@ -53,7 +124,6 @@ class _SyncScreenState extends State<SyncScreen> {
         });
       }
     } catch (e) {
-      // Auto-report the error
       await AutomaticErrorReporter.reportStorageError(
         message: 'Error loading current username: ${e.toString()}',
         userMessage: 'Error loading username',
@@ -64,6 +134,22 @@ class _SyncScreenState extends State<SyncScreen> {
         },
       );
       AppLogger.error('Error loading current username', e);
+    }
+  }
+
+  Future<void> _loadCurrentDeviceAlias() async {
+    try {
+      final deviceAlias = _deviceService.currentDeviceAlias;
+      if (mounted) {
+        setState(() {
+          _currentDeviceAlias = deviceAlias;
+          if (deviceAlias != null) {
+            _deviceNameController.text = deviceAlias;
+          }
+        });
+      }
+    } catch (e) {
+      AppLogger.error('Error loading current device alias', e);
     }
   }
 
@@ -121,22 +207,35 @@ class _SyncScreenState extends State<SyncScreen> {
   }
 
   void _setupSyncListeners() {
-    final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-    final lessonProgressProvider = Provider.of<LessonProgressProvider>(context, listen: false);
-    final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
-
-    gameStatsProvider.setupSyncListener();
+    // Set up centralized sync listeners for all data types
+    _syncService.addListener('game_stats', (data) {
+      // Handle game stats sync
+      AppLogger.debug('Received game stats sync update');
+    });
+    
+    _syncService.addListener('lesson_progress', (data) {
+      // Handle lesson progress sync
+      AppLogger.debug('Received lesson progress sync update');
+    });
+    
+    _syncService.addListener('settings', (data) {
+      // Handle settings sync
+      AppLogger.debug('Received settings sync update');
+    });
+    
+    _syncService.addListener('usernames', (data) {
+      // Handle username updates
+      _loadCurrentUsername();
+    });
   }
 
   Future<void> _getCurrentDeviceId() async {
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-      final deviceId = await gameStatsProvider.getCurrentDeviceId();
+      final deviceId = await _deviceService.getUniqueDeviceId();
       setState(() {
         _currentDeviceId = deviceId;
       });
     } catch (e) {
-      // Auto-report the error
       await AutomaticErrorReporter.reportStorageError(
         message: 'Error getting current device ID: ${e.toString()}',
         userMessage: 'Error getting device ID',
@@ -178,15 +277,12 @@ class _SyncScreenState extends State<SyncScreen> {
       });
 
       try {
-        final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-        final success = await gameStatsProvider.removeDevice(deviceId);
+        final success = await _syncService.removeDevice(deviceId);
 
         if (success) {
           AppLogger.info('Successfully removed device: $deviceId');
-          // Reload the device list
           await _loadDevicesInRoom();
         } else {
-          // Auto-report the failure
           await AutomaticErrorReporter.reportStorageError(
             message: 'Failed to remove device: $deviceId',
             userMessage: 'Failed to remove device',
@@ -207,7 +303,6 @@ class _SyncScreenState extends State<SyncScreen> {
           }
         }
       } catch (e) {
-        // Auto-report the error
         await AutomaticErrorReporter.reportStorageError(
           message: 'Error removing device: $deviceId - ${e.toString()}',
           userMessage: 'Error removing device',
@@ -241,23 +336,20 @@ class _SyncScreenState extends State<SyncScreen> {
     if (username.isEmpty) return false;
     
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-      final devicesInRoom = await gameStatsProvider.getDevicesInRoom();
+      final devicesInRoom = await _syncService.getDevicesInRoom();
       
       if (devicesInRoom == null || devicesInRoom.isEmpty) return false;
       
       for (final deviceId in devicesInRoom) {
-        // Skip the current device when checking if username is taken
         if (deviceId != _currentDeviceId) {
-          final deviceUsername = await gameStatsProvider.syncService.getUsernameForDevice(deviceId);
+          final deviceUsername = await _syncService.getUsernameForDevice(deviceId);
           if (deviceUsername != null && deviceUsername == username) {
             return true; // Username is taken by another device
           }
         }
       }
-      return false; // Username is not taken by any other device
+      return false;
     } catch (e) {
-      // Auto-report the error but return false to avoid false positives
       await AutomaticErrorReporter.reportStorageError(
         message: 'Error checking if username is taken by other devices: $username - ${e.toString()}',
         userMessage: 'Error checking username availability',
@@ -269,12 +361,12 @@ class _SyncScreenState extends State<SyncScreen> {
         },
       );
       AppLogger.error('Error checking if username is taken by other devices', e);
-      return false; // Assume it's not taken on error to avoid false positives
+      return false;
     }
   }
 
   Future<void> _loadDevicesInRoom() async {
-    if (!Provider.of<GameStatsProvider>(context, listen: false).syncService.isInRoom) {
+    if (!_syncService.isInRoom) {
       setState(() {
         _devicesInRoom = null;
       });
@@ -286,13 +378,11 @@ class _SyncScreenState extends State<SyncScreen> {
     });
 
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-      final devices = await gameStatsProvider.getDevicesInRoom();
+      final devices = await _syncService.getDevicesInRoom();
       setState(() {
         _devicesInRoom = devices;
       });
     } catch (e) {
-      // Auto-report the error
       await AutomaticErrorReporter.reportStorageError(
         message: 'Error loading devices in room: ${e.toString()}',
         userMessage: 'Error loading devices',
@@ -333,7 +423,6 @@ class _SyncScreenState extends State<SyncScreen> {
       return;
     }
 
-    // Check if username is blacklisted
     if (_isUsernameBlacklisted(username)) {
       setState(() {
         _usernameError = strings.AppStrings.usernameBlacklisted ?? 'This username is not allowed';
@@ -347,8 +436,7 @@ class _SyncScreenState extends State<SyncScreen> {
     });
 
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-      final success = await gameStatsProvider.syncService.setUsername(username);
+      final success = await _syncService.setUsername(username);
 
       if (success) {
         if (mounted) {
@@ -363,7 +451,6 @@ class _SyncScreenState extends State<SyncScreen> {
           );
         }
       } else {
-        // Auto-report the failure
         await AutomaticErrorReporter.reportStorageError(
           message: 'Username already taken: $username',
           userMessage: 'Username already taken',
@@ -380,7 +467,6 @@ class _SyncScreenState extends State<SyncScreen> {
         }
       }
     } catch (e) {
-      // Auto-report the error
       await AutomaticErrorReporter.reportStorageError(
         message: 'Error saving username: $username - ${e.toString()}',
         userMessage: 'Error saving username',
@@ -401,6 +487,55 @@ class _SyncScreenState extends State<SyncScreen> {
       if (mounted) {
         setState(() {
           _isLoadingUsername = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _saveDeviceName() async {
+    final deviceName = _deviceNameController.text.trim();
+    if (deviceName.isEmpty) {
+      setState(() {
+        _deviceNameError = 'Please enter a device name';
+      });
+      return;
+    }
+
+    if (deviceName.length > 50) {
+      setState(() {
+        _deviceNameError = 'Device name is too long';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoadingDeviceName = true;
+      _deviceNameError = null;
+    });
+
+    try {
+      await _deviceService.setDeviceAlias(deviceName);
+
+      if (mounted) {
+        setState(() {
+          _currentDeviceAlias = deviceName;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Device name saved'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _deviceNameError = 'Error saving device name: ${e.toString()}';
+      });
+      AppLogger.error('Error saving device name', e);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingDeviceName = false;
         });
       }
     }
@@ -428,26 +563,18 @@ class _SyncScreenState extends State<SyncScreen> {
     });
 
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-      final lessonProgressProvider = Provider.of<LessonProgressProvider>(context, listen: false);
-      final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
-
-      final success = await gameStatsProvider.joinSyncRoom(code);
+      final success = await _syncService.joinRoom(code);
 
       if (success) {
         setState(() {
           _currentCode = code;
         });
         AppLogger.info('Successfully joined sync room: $code');
-        // Load the username after successfully joining the room
         await _loadCurrentUsername();
-        
-        // Trigger immediate sync of all data after joining room
+        await _loadCurrentDeviceAlias();
         await _syncAllData();
-        
-        Navigator.of(context).pop(true); // Return success
+        Navigator.of(context).pop(true);
       } else {
-        // Auto-report the failure
         await AutomaticErrorReporter.reportStorageError(
           message: 'Failed to connect to sync room: $code',
           userMessage: 'Failed to connect to sync room',
@@ -462,7 +589,6 @@ class _SyncScreenState extends State<SyncScreen> {
         });
       }
     } catch (e) {
-      // Auto-report the error
       await AutomaticErrorReporter.reportStorageError(
         message: 'Error joining sync room: $code - ${e.toString()}',
         userMessage: 'Error joining sync room',
@@ -491,16 +617,10 @@ class _SyncScreenState extends State<SyncScreen> {
     });
 
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-      final lessonProgressProvider = Provider.of<LessonProgressProvider>(context, listen: false);
-      final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
-
-      await gameStatsProvider.leaveSyncRoom();
-
+      await _syncService.leaveRoom();
       AppLogger.info('Left sync room');
-      Navigator.of(context).pop(false); // Return left
+      Navigator.of(context).pop(false);
     } catch (e) {
-      // Auto-report the error
       await AutomaticErrorReporter.reportStorageError(
         message: 'Error leaving sync room: ${e.toString()}',
         userMessage: 'Error leaving sync room',
@@ -532,29 +652,18 @@ class _SyncScreenState extends State<SyncScreen> {
   /// Syncs all current data to the room immediately
   Future<void> _syncAllData() async {
     try {
+      // Get current data from providers
       final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
       final lessonProgressProvider = Provider.of<LessonProgressProvider>(context, listen: false);
       final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
 
-      // Sync game stats
-      if (gameStatsProvider.syncService.isInRoom) {
-        await gameStatsProvider.syncService.syncData('game_stats', gameStatsProvider.getExportData());
-        AppLogger.info('Synced game stats to room');
-      }
+      // Sync all data types through the centralized service
+      await _syncService.syncData('game_stats', gameStatsProvider.getExportData());
+      await _syncService.syncData('lesson_progress', lessonProgressProvider.getExportData());
+      await _syncService.syncData('settings', settingsProvider.getExportData());
 
-      // Sync lesson progress
-      if (lessonProgressProvider.syncService.isInRoom) {
-        await lessonProgressProvider.syncService.syncData('lesson_progress', lessonProgressProvider.getExportData());
-        AppLogger.info('Synced lesson progress to room');
-      }
-
-      // Sync settings
-      if (settingsProvider.syncService.isInRoom) {
-        await settingsProvider.syncService.syncData('settings', settingsProvider.getExportData());
-        AppLogger.info('Synced settings to room');
-      }
+      AppLogger.info('Synced all data to room');
     } catch (e) {
-      // Auto-report the error
       await AutomaticErrorReporter.reportStorageError(
         message: 'Error syncing all data: ${e.toString()}',
         userMessage: 'Error syncing data',
@@ -576,24 +685,16 @@ class _SyncScreenState extends State<SyncScreen> {
 
     try {
       final code = _generateSyncCode();
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-      final lessonProgressProvider = Provider.of<LessonProgressProvider>(context, listen: false);
-      final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
-
-      final success = await gameStatsProvider.joinSyncRoom(code);
+      final success = await _syncService.joinRoom(code);
 
       if (success) {
         setState(() {
           _currentCode = code;
         });
         AppLogger.info('Successfully started sync room: $code');
-        
-        // Trigger immediate sync of all data after creating room
         await _syncAllData();
-        
-        Navigator.of(context).pop(true); // Return success
+        Navigator.of(context).pop(true);
       } else {
-        // Auto-report the failure
         await AutomaticErrorReporter.reportStorageError(
           message: 'Failed to create sync room: $code',
           userMessage: 'Failed to create sync room',
@@ -608,7 +709,6 @@ class _SyncScreenState extends State<SyncScreen> {
         });
       }
     } catch (e) {
-      // Auto-report the error
       await AutomaticErrorReporter.reportStorageError(
         message: 'Error starting sync room: ${e.toString()}',
         userMessage: 'Error starting sync room',
@@ -631,8 +731,7 @@ class _SyncScreenState extends State<SyncScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final gameStatsProvider = Provider.of<GameStatsProvider>(context);
-    final isInRoom = gameStatsProvider.syncService.isInRoom;
+    final isInRoom = _syncService.isInRoom;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -667,8 +766,8 @@ class _SyncScreenState extends State<SyncScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      isInRoom 
-                        ? strings.AppStrings.currentlyConnectedToUser 
+                      isInRoom
+                        ? strings.AppStrings.currentlyConnectedToUser
                         : strings.AppStrings.userIdDescription,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: colorScheme.onSurface.withOpacity(0.7),
@@ -711,525 +810,673 @@ class _SyncScreenState extends State<SyncScreen> {
               
               // Main content
               if (!isInRoom)
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      // Join section
-                      Text(
-                        strings.AppStrings.enterUserId,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _codeController,
-                        decoration: InputDecoration(
-                          labelText: strings.AppStrings.userIdCode,
-                          hintText: 'ABC123',
-                          prefixIcon: const Icon(Icons.person_rounded),
-                          filled: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: colorScheme.primary, width: 2),
-                          ),
-                        ),
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.done,
-                        textCapitalization: TextCapitalization.characters,
-                        enabled: !_isLoading,
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _joinRoom,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: colorScheme.primary,
-                            foregroundColor: colorScheme.onPrimary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                  ),
-                                )
-                              : Text(
-                                  strings.AppStrings.connectToUser,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      
-                      // Divider with OR
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Divider(
-                              thickness: 1,
-                              color: Theme.of(context).colorScheme.outline,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text(
-                              strings.AppStrings.of,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Divider(
-                              thickness: 1,
-                              color: Theme.of(context).colorScheme.outline,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      
-                      // Create section
-                      Text(
-                        strings.AppStrings.createUserId,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        strings.AppStrings.createUserIdDescription,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: OutlinedButton(
-                          onPressed: _isLoading ? null : _startRoom,
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: colorScheme.primary),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                                  ),
-                                )
-                              : Text(
-                                  strings.AppStrings.createUserIdButton,
-                                  style: TextStyle(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
+                _buildJoinRoomView(context)
               else
-                // Currently in room view
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              strings.AppStrings.yourUserId,
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: colorScheme.primary,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 16),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                              decoration: BoxDecoration(
-                                color: colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                gameStatsProvider.syncService.currentRoomId ?? strings.AppStrings.unknownError,
-                                style: theme.textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.primary,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      
-                      // Username section
-                      const SizedBox(height: 24),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.person_rounded,
-                                  size: 24,
-                                  color: colorScheme.primary,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  strings.AppStrings.username,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            TextField(
-                              controller: _usernameController,
-                              decoration: InputDecoration(
-                                labelText: strings.AppStrings.enterUsername,
-                                hintText: strings.AppStrings.usernameHint,
-                                prefixIcon: const Icon(Icons.person_outline),
-                                suffixIcon: _usernameController.text.isNotEmpty
-                                    ? FutureBuilder<bool>(
-                                        future: _isUsernameTakenByOtherDevices(_usernameController.text.trim()),
-                                        builder: (context, snapshot) {
-                                          if (snapshot.connectionState == ConnectionState.waiting) {
-                                            return const Padding(
-                                              padding: EdgeInsets.all(12.0),
-                                              child: SizedBox(
-                                                width: 20,
-                                                height: 20,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                          if (snapshot.hasData && snapshot.data == true) {
-                                            return const Icon(
-                                              Icons.close_rounded,
-                                              color: Colors.red,
-                                            );
-                                          }
-                                          return const Icon(
-                                            Icons.check_rounded,
-                                            color: Colors.green,
-                                          );
-                                        },
-                                      )
-                                    : null,
-                                filled: true,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: colorScheme.primary, width: 2),
-                                ),
-                                errorText: _usernameError,
-                              ),
-                              keyboardType: TextInputType.text,
-                              textInputAction: TextInputAction.done,
-                              enabled: !_isLoadingUsername,
-                              onChanged: (value) {
-                                // Clear error when user starts typing
-                                if (_usernameError != null) {
-                                  setState(() {
-                                    _usernameError = null;
-                                  });
-                                }
-                                
-                                // Check for blacklisted username in real-time
-                                if (_isUsernameBlacklisted(value)) {
-                                  setState(() {
-                                    _usernameError = strings.AppStrings.usernameBlacklisted ?? 'This username is not allowed';
-                                  });
-                                }
-                              },
-                            ),
-                            if (_usernameError != null) ...[
-                              const SizedBox(height: 8),
-                              Text(
-                                _usernameError!,
-                                style: TextStyle(
-                                  color: colorScheme.error,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 45,
-                              child: ElevatedButton(
-                                onPressed: _isLoadingUsername ? null : _saveUsername,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: colorScheme.primary,
-                                  foregroundColor: colorScheme.onPrimary,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  elevation: 0,
-                                ),
-                                child: _isLoadingUsername
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                        ),
-                                      )
-                                    : Text(
-                                        strings.AppStrings.saveUsername,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      // Devices in room section
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.devices_other_rounded,
-                                  size: 24,
-                                  color: colorScheme.primary,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  strings.AppStrings.connectedDevices,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            _isLoadingDevices
-                                ? const Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                                  )
-                                : _devicesInRoom != null && _devicesInRoom!.isNotEmpty
-                                    ? ListView.separated(
-                                        shrinkWrap: true,
-                                        physics: const NeverScrollableScrollPhysics(),
-                                        itemCount: _devicesInRoom!.length,
-                                        separatorBuilder: (context, index) => const Divider(height: 1),
-                                        itemBuilder: (context, index) {
-                                          final device = _devicesInRoom![index];
-                                          final isCurrentDevice = _currentDeviceId != null && device == _currentDeviceId;
-                                          
-                                          return FutureBuilder<String?>(
-                                            future: gameStatsProvider.syncService.getUsernameForDevice(device),
-                                            builder: (context, snapshot) {
-                                              final username = snapshot.data;
-                                              final displayName = username != null && username.isNotEmpty
-                                                  ? '$username ($device)'
-                                                  : (isCurrentDevice 
-                                                      ? '${strings.AppStrings.thisDevice} ($device)' 
-                                                      : device);
-                                              
-                                              return ListTile(
-                                                leading: Icon(
-                                                  username != null && username.isNotEmpty
-                                                      ? Icons.person_rounded
-                                                      : Icons.phone_android,
-                                                  color: isCurrentDevice 
-                                                      ? colorScheme.primary 
-                                                      : colorScheme.onSurfaceVariant,
-                                                ),
-                                                title: Text(
-                                                  displayName,
-                                                  style: TextStyle(
-                                                    fontWeight: isCurrentDevice 
-                                                        ? FontWeight.bold 
-                                                        : FontWeight.normal,
-                                                  ),
-                                                ),
-                                                trailing: isCurrentDevice
-                                                    ? Icon(
-                                                        Icons.check_circle,
-                                                        color: colorScheme.primary,
-                                                      )
-                                                    : IconButton(
-                                                        icon: Icon(
-                                                          Icons.remove_circle,
-                                                          color: colorScheme.error,
-                                                        ),
-                                                        onPressed: () => _removeDevice(device),
-                                                      ),
-                                              );
-                                            }
-                                          );
-                                        },
-                                      )
-                                    : Container(
-                                        padding: const EdgeInsets.all(12),
-                                        child: Text(
-                                          strings.AppStrings.noDevicesConnected,
-                                          style: theme.textTheme.bodyMedium?.copyWith(
-                                            color: colorScheme.onSurfaceVariant,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: OutlinedButton(
-                          onPressed: _isLoading ? null : _leaveRoom,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: colorScheme.error,
-                            side: BorderSide(color: colorScheme.error),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-                                  ),
-                                )
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.link_off_rounded,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      strings.AppStrings.leaveUserId,
-                                      style: TextStyle(
-                                        color: colorScheme.error,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _buildInRoomView(context),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildJoinRoomView(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Join section
+          Text(
+            strings.AppStrings.enterUserId,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _codeController,
+            decoration: InputDecoration(
+              labelText: strings.AppStrings.userIdCode,
+              hintText: 'ABC123',
+              prefixIcon: const Icon(Icons.person_rounded),
+              filled: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colorScheme.primary, width: 2),
+              ),
+            ),
+            keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.done,
+            textCapitalization: TextCapitalization.characters,
+            enabled: !_isLoading,
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _joinRoom,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Text(
+                      strings.AppStrings.connectToUser,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+            ),
+          ),
+          
+          // Divider with OR
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: Divider(
+                  thickness: 1,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  strings.AppStrings.of,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Divider(
+                  thickness: 1,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          
+          // Create section
+          Text(
+            strings.AppStrings.createUserId,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            strings.AppStrings.createUserIdDescription,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface.withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: OutlinedButton(
+              onPressed: _isLoading ? null : _startRoom,
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: colorScheme.primary),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                      ),
+                    )
+                  : Text(
+                      strings.AppStrings.createUserIdButton,
+                      style: TextStyle(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInRoomView(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Room info
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  strings.AppStrings.yourUserId,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    _currentCode ?? _syncService.currentRoomId ?? strings.AppStrings.unknownError,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Username section
+          const SizedBox(height: 24),
+          _buildUsernameSection(context),
+          
+          // Device name section
+          const SizedBox(height: 24),
+          _buildDeviceNameSection(context),
+          
+          // Devices in room section
+          const SizedBox(height: 24),
+          _buildDevicesSection(context),
+          
+          const SizedBox(height: 24),
+          _buildLeaveRoomButton(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUsernameSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.person_rounded,
+                size: 24,
+                color: colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                strings.AppStrings.username,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _usernameController,
+            decoration: InputDecoration(
+              labelText: strings.AppStrings.enterUsername,
+              hintText: strings.AppStrings.usernameHint,
+              prefixIcon: const Icon(Icons.person_outline),
+              suffixIcon: _usernameController.text.isNotEmpty
+                  ? FutureBuilder<bool>(
+                      future: _isUsernameTakenByOtherDevices(_usernameController.text.trim()),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            ),
+                          );
+                        }
+                        if (snapshot.hasData && snapshot.data == true) {
+                          return const Icon(
+                            Icons.close_rounded,
+                            color: Colors.red,
+                          );
+                        }
+                        return const Icon(
+                          Icons.check_rounded,
+                          color: Colors.green,
+                        );
+                      },
+                    )
+                  : null,
+              filled: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colorScheme.primary, width: 2),
+              ),
+              errorText: _usernameError,
+            ),
+            keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.done,
+            enabled: !_isLoadingUsername,
+            onChanged: (value) {
+              if (_usernameError != null) {
+                setState(() {
+                  _usernameError = null;
+                });
+              }
+              
+              if (_isUsernameBlacklisted(value)) {
+                setState(() {
+                  _usernameError = strings.AppStrings.usernameBlacklisted ?? 'This username is not allowed';
+                });
+              }
+            },
+          ),
+          if (_usernameError != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              _usernameError!,
+              style: TextStyle(
+                color: colorScheme.error,
+                fontSize: 12,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 45,
+            child: ElevatedButton(
+              onPressed: _isLoadingUsername ? null : _saveUsername,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+              ),
+              child: _isLoadingUsername
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Text(
+                      strings.AppStrings.saveUsername,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeviceNameSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.device_hub_rounded,
+                size: 24,
+                color: colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Device Name',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _deviceNameController,
+            decoration: InputDecoration(
+              labelText: 'Enter device name',
+              hintText: 'My Phone, Tablet, etc.',
+              prefixIcon: const Icon(Icons.devices_rounded),
+              filled: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colorScheme.primary, width: 2),
+              ),
+              errorText: _deviceNameError,
+            ),
+            keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.done,
+            enabled: !_isLoadingDeviceName,
+            onChanged: (value) {
+              if (_deviceNameError != null) {
+                setState(() {
+                  _deviceNameError = null;
+                });
+              }
+            },
+          ),
+          if (_deviceNameError != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              _deviceNameError!,
+              style: TextStyle(
+                color: colorScheme.error,
+                fontSize: 12,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 45,
+            child: ElevatedButton(
+              onPressed: _isLoadingDeviceName ? null : _saveDeviceName,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.secondary,
+                foregroundColor: colorScheme.onSecondary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+              ),
+              child: _isLoadingDeviceName
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Text(
+                      'Save Device Name',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDevicesSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.devices_other_rounded,
+                size: 24,
+                color: colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                strings.AppStrings.connectedDevices,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _isLoadingDevices
+              ? const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  ),
+                )
+              : _devicesInRoom != null && _devicesInRoom!.isNotEmpty
+                  ? ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _devicesInRoom!.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final device = _devicesInRoom![index];
+                        final isCurrentDevice = _currentDeviceId != null && device == _currentDeviceId;
+                        
+                        return FutureBuilder<String?>(
+                          future: _syncService.getUsernameForDevice(device),
+                          builder: (context, snapshot) {
+                            final username = snapshot.data;
+                            final displayName = username != null && username.isNotEmpty
+                                ? '$username ($device)'
+                                : (isCurrentDevice
+                                    ? '${strings.AppStrings.thisDevice} ($device)'
+                                    : device);
+                            
+                            return ListTile(
+                              leading: Icon(
+                                username != null && username.isNotEmpty
+                                    ? Icons.person_rounded
+                                    : Icons.phone_android,
+                                color: isCurrentDevice
+                                    ? colorScheme.primary
+                                    : colorScheme.onSurfaceVariant,
+                              ),
+                              title: Text(
+                                displayName,
+                                style: TextStyle(
+                                  fontWeight: isCurrentDevice
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              trailing: isCurrentDevice
+                                  ? Icon(
+                                      Icons.check_circle,
+                                      color: colorScheme.primary,
+                                    )
+                                  : IconButton(
+                                      icon: Icon(
+                                        Icons.remove_circle,
+                                        color: colorScheme.error,
+                                      ),
+                                      onPressed: () => _removeDevice(device),
+                                    ),
+                            );
+                          }
+                        );
+                      },
+                    )
+                  : Container(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        strings.AppStrings.noDevicesConnected,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLeaveRoomButton(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: OutlinedButton(
+        onPressed: _isLoading ? null : _leaveRoom,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: colorScheme.error,
+          side: BorderSide(color: colorScheme.error),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: _isLoading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.link_off_rounded,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    strings.AppStrings.leaveUserId,
+                    style: TextStyle(
+                      color: colorScheme.error,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }
