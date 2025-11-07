@@ -1,4 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -10,7 +9,6 @@ import 'dart:math';
 import 'dart:async';
 import '../config/supabase_config.dart';
 import '../providers/settings_provider.dart';
-import '../constants/urls.dart';
 import 'logger.dart';
 
 /// Data class that represents a tracking event to be sent to Supabase
