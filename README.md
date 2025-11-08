@@ -84,7 +84,7 @@ BijbelQuiz/
 │   ├── assets/                # App assets (questions, fonts, sounds)
 │   ├── test/                  # Unit and integration tests
 │   └── build_all.sh           # Build script for all platforms
-├── docs/      # Documentation (all .md files)
+├── docs/                      # Documentation (all .md files)
 └── websites/                  # Web assets and backend
     ├── backend.bijbelquiz.app/ # Backend API and admin tools
     │   ├── api/               # REST API endpoints
