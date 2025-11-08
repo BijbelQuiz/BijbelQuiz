@@ -553,4 +553,29 @@ class AppStrings {
   static const String reportQuestion = 'Report Question';
   static const String questionReportedSuccessfully = 'Question reported successfully';
   static const String errorReportingQuestion = 'Error reporting question';
+
+  // Additional hardcoded strings found in codebase
+  static const String apiErrorPrefix = 'API Error: ';
+  static const String grid = 'Grid';
+  static const String list = 'List';
+  static const String compactGrid = 'Compact Grid';
+  static const String useTheme = 'Use Theme';
+  static const String failedToRemoveDevice = 'Failed to remove device';
+  static const String errorRemovingDevice = 'Error removing device: ';
+  static const String sharedStats = 'Shared Statistics';
+  static const String newGame = 'New Game';
+  static const String loadingMessages = 'Loading messages...';
+  static const String errorLoadingUsernames = 'Error loading usernames: ';
+  static const String urlCopiedToClipboard = 'URL copied to clipboard!';
+  static const String tryAgainButton = 'Try Again';
+  static const String checkConnection = 'Check Connection';
+  static const String goToQuiz = 'Go to Quiz';
+  static const String errorLoadingAnalytics = 'Error loading analytics';
+  static const String bibleReferenceCopied = 'Bible reference copied: ';
+  static const String bibleReferenceCopiedForSharing = 'Bible reference copied for sharing';
+  static const String errorHandlingTest = 'Error Handling Test';
+  static const String errorHandlingTestDescription = 'This screen demonstrates the new error handling system';
+  static const String testErrorHandling = 'Test Error Handling';
+  static const String testErrorDialog = 'Test Error Dialog';
+  static const String retryButton = 'Retry';
 }

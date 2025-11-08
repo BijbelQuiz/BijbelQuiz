@@ -701,4 +701,29 @@ class AppStrings {
   static const String reportQuestion = 'Meld Vraag';
   static const String questionReportedSuccessfully = 'Vraag succesvol gemeld';
   static const String errorReportingQuestion = 'Fout bij melden van vraag';
+
+  // Additional hardcoded strings found in codebase
+  static const String apiErrorPrefix = 'API Fout: ';
+  static const String grid = 'Grid';
+  static const String list = 'Lijst';
+  static const String compactGrid = 'Compacte grid';
+  static const String useTheme = 'Gebruik Thema';
+  static const String failedToRemoveDevice = 'Kon apparaat niet verwijderen';
+  static const String errorRemovingDevice = 'Fout bij verwijderen apparaat: ';
+  static const String sharedStats = 'Gedeelde Statistieken';
+  static const String newGame = 'Nieuw spel';
+  static const String loadingMessages = 'Berichten laden...';
+  static const String errorLoadingUsernames = 'Fout bij laden gebruikersnamen: ';
+  static const String urlCopiedToClipboard = 'URL gekopieerd naar klembord!';
+  static const String tryAgainButton = 'Probeer Opnieuw';
+  static const String checkConnection = 'Controleer Verbinding';
+  static const String goToQuiz = 'Naar de Quiz';
+  static const String errorLoadingAnalytics = 'Fout bij laden analytics';
+  static const String bibleReferenceCopied = 'Bijbelverwijzing gekopieerd: ';
+  static const String bibleReferenceCopiedForSharing = 'Bijbelverwijzing gekopieerd voor delen';
+  static const String errorHandlingTest = 'Foutafhandeling Test';
+  static const String errorHandlingTestDescription = 'Dit scherm demonstreert het nieuwe foutafhandelingssysteem';
+  static const String testErrorHandling = 'Test Foutafhandeling';
+  static const String testErrorDialog = 'Test Foutdialoog';
+  static const String retryButton = 'Opnieuw Proberen';
 }

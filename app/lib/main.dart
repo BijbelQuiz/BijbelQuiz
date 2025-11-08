@@ -462,7 +462,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('API Error: ${e.toString()}'),
+              content: Text('${strings.AppStrings.apiErrorPrefix}${e.toString()}'),
               backgroundColor: Colors.red,
             ),
           );

@@ -333,15 +333,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 items: [
                   DropdownMenuItem(
                     value: SettingsProvider.layoutGrid,
-                    child: Text('Grid'),
+                    child: Text(strings.AppStrings.grid),
                   ),
                   DropdownMenuItem(
                     value: SettingsProvider.layoutList,
-                    child: Text('Lijst'),
+                    child: Text(strings.AppStrings.list),
                   ),
                   DropdownMenuItem(
                     value: SettingsProvider.layoutCompactGrid,
-                    child: Text('Compacte grid'),
+                    child: Text(strings.AppStrings.compactGrid),
                   ),
                 ],
                 onChanged: (String? value) {
