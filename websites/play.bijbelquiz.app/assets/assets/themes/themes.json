@@ -626,6 +626,111 @@
         }
       },
       "pageTransitionsTheme": {}
+    },
+    "christmas": {
+      "id": "christmas",
+      "name": "Kerst",
+      "type": "light",
+      "colors": {
+        "primary": "#EF4444",
+        "secondary": "#22C55E",
+        "tertiary": "#F59E0B",
+        "surface": "#FEF2F2",
+        "surfaceContainerHighest": "#DCFCE7",
+        "onSurface": "#7F1D1D",
+        "outline": "#FCA5A5",
+        "outlineVariant": "#BBF7D0",
+        "shadow": "#991B1B",
+        "scaffoldBackgroundColor": "#FEF2F2"
+      },
+      "textTheme": {
+        "headlineLarge": {
+          "fontSize": 32,
+          "fontWeight": "w700",
+          "letterSpacing": -0.5,
+          "color": "#7F1D1D"
+        },
+        "headlineMedium": {
+          "fontSize": 28,
+          "fontWeight": "w600",
+          "letterSpacing": -0.3,
+          "color": "#7F1D1D"
+        },
+        "headlineSmall": {
+          "fontSize": 24,
+          "fontWeight": "w600",
+          "letterSpacing": -0.2,
+          "color": "#7F1D1D"
+        },
+        "titleLarge": {
+          "fontSize": 22,
+          "fontWeight": "w600",
+          "letterSpacing": -0.1,
+          "color": "#7F1D1D"
+        },
+        "titleMedium": {
+          "fontSize": 18,
+          "fontWeight": "w600",
+          "letterSpacing": 0,
+          "color": "#7F1D1D"
+        },
+        "titleSmall": {
+          "fontSize": 16,
+          "fontWeight": "w600",
+          "letterSpacing": 0.1,
+          "color": "#7F1D1D"
+        },
+        "bodyLarge": {
+          "fontSize": 16,
+          "fontWeight": "w400",
+          "letterSpacing": 0.1,
+          "color": "#059669"
+        },
+        "bodyMedium": {
+          "fontSize": 14,
+          "fontWeight": "w400",
+          "letterSpacing": 0.1,
+          "color": "#047857"
+        },
+        "labelLarge": {
+          "fontSize": 14,
+          "fontWeight": "w600",
+          "letterSpacing": 0.5,
+          "color": "#B45309"
+        }
+      },
+      "buttonTheme": {
+        "padding": {"horizontal": 24, "vertical": 16},
+        "borderRadius": 16,
+        "elevation": 2,
+        "backgroundColor": "#22C55E",
+        "foregroundColor": "#FFFFFF",
+        "textStyle": {
+          "fontSize": 16,
+          "fontWeight": "w600",
+          "letterSpacing": 0.1
+        }
+      },
+      "cardTheme": {
+        "elevation": 2,
+        "borderRadius": 20,
+        "color": "#FFFFFF",
+        "surfaceTintColor": "#00000000"
+      },
+      "appBarTheme": {
+        "centerTitle": true,
+        "elevation": 0,
+        "scrolledUnderElevation": 0,
+        "backgroundColor": "#22C55E",
+        "foregroundColor": "#FFFFFF",
+        "titleTextStyle": {
+          "fontSize": 18,
+          "fontWeight": "w600",
+          "color": "#FFFFFF",
+          "letterSpacing": -0.1
+        }
+      },
+      "pageTransitionsTheme": {}
     }
   }
 }

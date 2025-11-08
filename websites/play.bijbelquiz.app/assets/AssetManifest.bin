@@ -1,12 +1,1 @@
-
-assets/.env
-assetassets/.env!assets/blacklisted_usernames.json
-asset!assets/blacklisted_usernames.jsonassets/fonts/Quicksand-Bold.ttf
-assetassets/fonts/Quicksand-Bold.ttf!assets/fonts/Quicksand-Medium.ttf
-asset!assets/fonts/Quicksand-Medium.ttf"assets/fonts/Quicksand-Regular.ttf
-asset"assets/fonts/Quicksand-Regular.ttfassets/questions-nl-sv.json
-assetassets/questions-nl-sv.jsonassets/sounds/click.mp3
-assetassets/sounds/click.mp3assets/sounds/correct.mp3
-assetassets/sounds/correct.mp3assets/sounds/incorrect.mp3
-assetassets/sounds/incorrect.mp3assets/themes/themes.json
-assetassets/themes/themes.json
+assets/.envassetassets/.env!assets/blacklisted_usernames.jsonasset!assets/blacklisted_usernames.jsonassets/fonts/Quicksand-Bold.ttfassetassets/fonts/Quicksand-Bold.ttf!assets/fonts/Quicksand-Medium.ttfasset!assets/fonts/Quicksand-Medium.ttf"assets/fonts/Quicksand-Regular.ttfasset"assets/fonts/Quicksand-Regular.ttfassets/greetings.jsonassetassets/greetings.jsonassets/questions-nl-sv.jsonassetassets/questions-nl-sv.jsonassets/sounds/click.mp3assetassets/sounds/click.mp3assets/sounds/correct.mp3assetassets/sounds/correct.mp3assets/sounds/incorrect.mp3assetassets/sounds/incorrect.mp3assets/themes/themes.jsonassetassets/themes/themes.json

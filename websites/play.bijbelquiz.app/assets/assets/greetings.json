@@ -1,0 +1,31 @@
+{
+  "greetings": {
+    "morning": [
+      "Goedemorgen! Dit is jouw voortgang",
+      "Goedemorgen! Hier is je voortgang op dit moment",
+      "Goedemorgen! Bekijk je voortgang"
+    ],
+    "afternoon": [
+      "Goedemiddag! Dit is jouw voortgang",
+      "Goedemiddag! Hier is je voortgang op dit moment",
+      "Goedemiddag! Bekijk je voortgang"
+    ],
+    "evening": [
+      "Goedenavond! Dit is jouw voortgang",
+      "Goedenavond! Hier is je voortgang op dit moment",
+      "Goedenavond! Bekijk je voortgang"
+    ],
+    "night": [
+      "Goedenacht! Dit is jouw voortgang",
+      "Goedenacht! Hier is je voortgang op dit moment",
+      "Goedenacht! Bekijk je voortgang"
+    ],
+    "general": [
+      "Dit is jouw voortgang",
+      "Hier is je voortgang op dit moment",
+      "Bekijk je voortgang",
+      "Je voortgang tot nu toe",
+      "Jouw leervoortgang"
+    ]
+  }
+}
