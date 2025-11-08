@@ -4,20 +4,22 @@ import '../constants/urls.dart';
 import '../l10n/strings_nl.dart' as strings;
 
 class PromoCard extends StatelessWidget {
-  final bool isDonation;
-  final bool isSatisfaction;
-  final bool isDifficulty;
-  final VoidCallback onDismiss;
-  final Function(String) onAction;
+   final bool isDonation;
+   final bool isSatisfaction;
+   final bool isDifficulty;
+   final String? socialMediaType;
+   final VoidCallback onDismiss;
+   final Function(String) onAction;
 
-  const PromoCard({
-    super.key,
-    required this.isDonation,
-    required this.isSatisfaction,
-    required this.isDifficulty,
-    required this.onDismiss,
-    required this.onAction,
-  });
+   const PromoCard({
+     super.key,
+     required this.isDonation,
+     required this.isSatisfaction,
+     required this.isDifficulty,
+     this.socialMediaType,
+     required this.onDismiss,
+     required this.onAction,
+   });
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +31,8 @@ class PromoCard extends StatelessWidget {
     } else if (isSatisfaction) {
       gradientColors = [cs.primary.withValues(alpha: 0.14), cs.primary.withValues(alpha: 0.06)];
     } else if (isDifficulty) {
+      gradientColors = [cs.primary.withValues(alpha: 0.14), cs.primary.withValues(alpha: 0.06)];
+    } else if (socialMediaType != null) {
       gradientColors = [cs.primary.withValues(alpha: 0.14), cs.primary.withValues(alpha: 0.06)];
     } else {
       gradientColors = [cs.primary.withValues(alpha: 0.14), cs.primary.withValues(alpha: 0.06)];
@@ -67,7 +71,21 @@ class PromoCard extends StatelessWidget {
                         ? Icons.feedback_rounded
                         : isDifficulty
                             ? Icons.tune_rounded
-                            : Icons.group_add_rounded,
+                            : socialMediaType == 'mastodon'
+                                ? Icons.alternate_email
+                                : socialMediaType == 'pixelfed'
+                                    ? Icons.camera_alt
+                                    : socialMediaType == 'kwebler'
+                                        ? Icons.group
+                                        : socialMediaType == 'signal'
+                                            ? Icons.message
+                                            : socialMediaType == 'discord'
+                                                ? Icons.discord
+                                                : socialMediaType == 'bluesky'
+                                                    ? Icons.cloud
+                                                    : socialMediaType == 'nooki'
+                                                        ? Icons.group
+                                                        : Icons.group_add_rounded,
                 color: cs.onSurface.withValues(alpha: 0.7),
                 size: 20,
               ),
@@ -80,7 +98,21 @@ class PromoCard extends StatelessWidget {
                           ? strings.AppStrings.satisfactionSurvey
                           : isDifficulty
                               ? strings.AppStrings.difficultyFeedbackTitle
-                              : strings.AppStrings.followUs,
+                              : socialMediaType == 'mastodon'
+                                  ? strings.AppStrings.followMastodon
+                                  : socialMediaType == 'pixelfed'
+                                      ? strings.AppStrings.followPixelfed
+                                      : socialMediaType == 'kwebler'
+                                          ? strings.AppStrings.followKwebler
+                                          : socialMediaType == 'signal'
+                                              ? strings.AppStrings.followSignal
+                                              : socialMediaType == 'discord'
+                                                  ? strings.AppStrings.followDiscord
+                                                  : socialMediaType == 'bluesky'
+                                                      ? strings.AppStrings.followBluesky
+                                                      : socialMediaType == 'nooki'
+                                                          ? strings.AppStrings.followNooki
+                                                          : strings.AppStrings.followUs,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: cs.onSurface,
@@ -103,7 +135,7 @@ class PromoCard extends StatelessWidget {
                     ? strings.AppStrings.satisfactionSurveyMessage
                     : isDifficulty
                         ? strings.AppStrings.difficultyFeedbackMessage
-                        : strings.AppStrings.followUsMessage,
+                        : 'Volg ons op ${socialMediaType ?? 'social media'} voor updates en community!',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 12),
@@ -182,6 +214,72 @@ class PromoCard extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(strings.AppStrings.difficultyTooEasy),
+                  ),
+                ),
+              ],
+            ),
+          ] else if (socialMediaType != null) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => onAction(
+                      socialMediaType == 'mastodon'
+                          ? strings.AppStrings.mastodonUrl
+                          : socialMediaType == 'pixelfed'
+                              ? AppUrls.pixelfedUrl
+                              : socialMediaType == 'kwebler'
+                                  ? strings.AppStrings.kweblerUrl
+                                  : socialMediaType == 'signal'
+                                      ? strings.AppStrings.signalUrl
+                                      : socialMediaType == 'discord'
+                                          ? strings.AppStrings.discordUrl
+                                          : socialMediaType == 'bluesky'
+                                              ? strings.AppStrings.blueskyUrl
+                                              : socialMediaType == 'nooki'
+                                                  ? strings.AppStrings.nookiUrl
+                                                  : '',
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: cs.primary,
+                      foregroundColor: cs.onPrimary,
+                      minimumSize: const Size.fromHeight(44),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    icon: Icon(
+                      socialMediaType == 'mastodon'
+                          ? Icons.alternate_email
+                          : socialMediaType == 'pixelfed'
+                              ? Icons.camera_alt
+                              : socialMediaType == 'kwebler'
+                                  ? Icons.group
+                                  : socialMediaType == 'signal'
+                                      ? Icons.message
+                                      : socialMediaType == 'discord'
+                                          ? Icons.discord
+                                          : socialMediaType == 'bluesky'
+                                              ? Icons.cloud
+                                              : socialMediaType == 'nooki'
+                                                  ? Icons.group
+                                                  : Icons.group_add_rounded,
+                    ),
+                    label: Text(
+                      socialMediaType == 'mastodon'
+                          ? strings.AppStrings.followMastodon
+                          : socialMediaType == 'pixelfed'
+                              ? strings.AppStrings.followPixelfed
+                              : socialMediaType == 'kwebler'
+                                  ? strings.AppStrings.followKwebler
+                                  : socialMediaType == 'signal'
+                                      ? strings.AppStrings.followSignal
+                                      : socialMediaType == 'discord'
+                                          ? strings.AppStrings.followDiscord
+                                          : socialMediaType == 'bluesky'
+                                              ? strings.AppStrings.followBluesky
+                                              : socialMediaType == 'nooki'
+                                                  ? strings.AppStrings.followNooki
+                                                  : strings.AppStrings.followUs,
+                    ),
                   ),
                 ),
               ],

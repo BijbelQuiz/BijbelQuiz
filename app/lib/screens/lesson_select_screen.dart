@@ -38,6 +38,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
   bool _isDonationPromo = true; // true for donation, false for follow
   bool _isSatisfactionPromo = false; // true for satisfaction survey
   bool _isDifficultyPromo = false; // true for difficulty feedback
+  String? _socialMediaType; // for individual social media popups
   // Search and filters removed for simplified UI
 
   // Daily usage streak tracking (persisted locally)
@@ -230,27 +231,62 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
           if (_showPromoCard) {
             // Determine which type of promo to show
             final rand = Random().nextDouble();
-            if (rand < 0.25) {
+            if (rand < 0.125) {
               _isDonationPromo = true;
               _isSatisfactionPromo = false;
               _isDifficultyPromo = false;
-            } else if (rand < 0.50) {
+              _socialMediaType = null;
+            } else if (rand < 0.25) {
               _isDonationPromo = false;
               _isSatisfactionPromo = false;
               _isDifficultyPromo = true;
+              _socialMediaType = null;
+            } else if (rand < 0.375) {
+              _isDonationPromo = false;
+              _isSatisfactionPromo = true;
+              _isDifficultyPromo = false;
+              _socialMediaType = null;
+            } else if (rand < 0.5) {
+              _isDonationPromo = false;
+              _isSatisfactionPromo = false;
+              _isDifficultyPromo = false;
+              _socialMediaType = 'mastodon';
+            } else if (rand < 0.625) {
+              _isDonationPromo = false;
+              _isSatisfactionPromo = false;
+              _isDifficultyPromo = false;
+              _socialMediaType = 'pixelfed';
             } else if (rand < 0.75) {
               _isDonationPromo = false;
               _isSatisfactionPromo = false;
               _isDifficultyPromo = false;
+              _socialMediaType = 'kwebler';
+            } else if (rand < 0.875) {
+              _isDonationPromo = false;
+              _isSatisfactionPromo = false;
+              _isDifficultyPromo = false;
+              _socialMediaType = 'signal';
+            } else if (rand < 0.9375) {
+              _isDonationPromo = false;
+              _isSatisfactionPromo = false;
+              _isDifficultyPromo = false;
+              _socialMediaType = 'discord';
+            } else if (rand < 0.96875) {
+              _isDonationPromo = false;
+              _isSatisfactionPromo = false;
+              _isDifficultyPromo = false;
+              _socialMediaType = 'bluesky';
             } else {
               _isDonationPromo = false;
-              _isSatisfactionPromo = true;
+              _isSatisfactionPromo = false;
               _isDifficultyPromo = false;
+              _socialMediaType = 'nooki';
             }
             Provider.of<AnalyticsService>(context, listen: false).capture(context, 'show_promo_card', properties: {
               'is_donation': _isDonationPromo,
               'is_satisfaction': _isSatisfactionPromo,
               'is_difficulty': _isDifficultyPromo,
+              'social_media_type': _socialMediaType ?? '',
             });
           }
         });
@@ -692,11 +728,12 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
                                     isDonation: _isDonationPromo,
                                     isSatisfaction: _isSatisfactionPromo,
                                     isDifficulty: _isDifficultyPromo,
+                                    socialMediaType: _socialMediaType,
                                     onDismiss: () {
                                       final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
                                       analyticsService.capture(context, 'dismiss_promo_card');
                                       analyticsService.trackFeatureDismissal(context, AnalyticsService.FEATURE_PROMO_CARDS, additionalProperties: {
-                                        'promo_type': _isDonationPromo ? 'donation' : (_isSatisfactionPromo ? 'satisfaction' : 'difficulty'),
+                                        'promo_type': _isDonationPromo ? 'donation' : (_isSatisfactionPromo ? 'satisfaction' : (_isDifficultyPromo ? 'difficulty' : (_socialMediaType ?? 'follow'))),
                                       });
                                       setState(() {
                                         _showPromoCard = false;
