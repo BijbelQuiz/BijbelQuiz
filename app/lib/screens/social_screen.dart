@@ -104,9 +104,10 @@ class _SocialScreenState extends State<SocialScreen> {
               color: colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.group_rounded,
               size: 20,
+              color: colorScheme.primary,
             ),
           ),
           const SizedBox(width: 12),

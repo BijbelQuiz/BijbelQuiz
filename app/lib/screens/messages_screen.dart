@@ -205,6 +205,10 @@ class _MessagesScreenState extends State<MessagesScreen> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -214,9 +218,10 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 color: colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.message_rounded,
                 size: 20,
+                color: colorScheme.primary,
               ),
             ),
             const SizedBox(width: 12),
@@ -235,7 +240,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: colorScheme.onSurface),
             onPressed: () {
               _messagingService.trackMessagesRefreshed(_analyticsService, context);
               _loadMessages();
