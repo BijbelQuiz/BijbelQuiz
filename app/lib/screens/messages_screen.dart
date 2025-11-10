@@ -20,6 +20,14 @@ class _MessagesScreenState extends State<MessagesScreen> {
   List<Message> _activeMessages = [];
   bool _isLoading = true;
   String? _errorMessage;
+  
+  // Reaction data - maps messageId to list of reaction counts
+  final Map<String, List<ReactionCount>> _messageReactions = {};
+  // Maps messageId to the current user's reaction emoji
+  final Map<String, String?> _userReactions = {};
+  
+  // Available emojis for reactions
+  final List<String> _availableEmojis = ['👍', '❤️', '😊', '😢', '😮', '😡'];
 
   @override
   void initState() {
@@ -40,21 +48,152 @@ class _MessagesScreenState extends State<MessagesScreen> {
       });
 
       final messages = await _messagingService.getActiveMessages();
-      _messagingService.trackMessagesViewed(_analyticsService, context);
-      setState(() {
-        _activeMessages = messages;
-        _isLoading = false;
-      });
+      
+      // Load reaction data for all messages
+      await _loadReactionsForMessages(messages);
+      
+      if (mounted) {
+        _messagingService.trackMessagesViewed(_analyticsService, context);
+        setState(() {
+          _activeMessages = messages;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       AutomaticErrorReporter.reportStorageError(
         message: 'Error loading messages in MessagesScreen',
         additionalInfo: {'error': e.toString()},
       );
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = strings.AppStrings.errorLoadingMessages;
+        });
+      }
+    }
+  }
+
+  /// Load reactions for all messages
+  Future<void> _loadReactionsForMessages(List<Message> messages) async {
+    final currentUserId = _messagingService.getCurrentUserId();
+    // Use anonymous user ID for anonymous users
+    final effectiveUserId = currentUserId ?? 'anonymous_user_2024';
+    
+    final newMessageReactions = <String, List<ReactionCount>>{};
+    final newUserReactions = <String, String?>{};
+    
+    for (final message in messages) {
+      try {
+        // Load reaction counts
+        final reactionCounts = await _messagingService.getMessageReactionCounts(message.id);
+        newMessageReactions[message.id] = reactionCounts;
+        
+        // Load current user's reaction (works for both authenticated and anonymous)
+        final userReaction = await _messagingService.getUserMessageReaction(message.id, effectiveUserId);
+        newUserReactions[message.id] = userReaction;
+      } catch (e) {
+        // Log error but continue loading other messages
+        debugPrint('Error loading reactions for message ${message.id}: $e');
+      }
+    }
+    
+    if (mounted) {
       setState(() {
-        _isLoading = false;
-        _errorMessage = strings.AppStrings.errorLoadingMessages;
+        _messageReactions.addAll(newMessageReactions);
+        _userReactions.addAll(newUserReactions);
       });
     }
+  }
+
+  /// Handles emoji reaction on a message
+  Future<void> _handleReaction(String messageId, String emoji) async {
+    final currentUserId = _messagingService.getCurrentUserId();
+
+    try {
+      // Show loading state for this specific message
+      if (mounted) {
+        setState(() {
+          // Could add a loading state for the reaction button if needed
+        });
+      }
+
+      final result = await _messagingService.toggleMessageReaction(
+        messageId: messageId,
+        userId: currentUserId, // This can be null for anonymous users
+        emoji: emoji,
+      );
+
+      // Update local state based on the result
+      if (mounted) {
+        setState(() {
+          if (result.action == 'removed') {
+            // Remove user's reaction
+            _userReactions[messageId] = null;
+          } else {
+            // User has a reaction now
+            _userReactions[messageId] = result.userReaction;
+          }
+        });
+      }
+
+      // Reload reaction counts for this message
+      final updatedCounts = await _messagingService.getMessageReactionCounts(messageId);
+      if (mounted) {
+        setState(() {
+          _messageReactions[messageId] = updatedCounts;
+        });
+      }
+
+      // Track analytics (only for authenticated users)
+      if (mounted && currentUserId != null) {
+        _analyticsService.trackFeatureUsage(
+          context,
+          'messaging',
+          'message_reaction_${result.action}',
+          additionalProperties: {
+            'message_id': messageId,
+            'emoji': emoji,
+            'action': result.action,
+          },
+        );
+      }
+
+    } catch (e) {
+      // Show error feedback
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update reaction: $e')),
+        );
+      }
+      
+      AutomaticErrorReporter.reportStorageError(
+        message: 'Error handling message reaction',
+        additionalInfo: {
+          'message_id': messageId,
+          'emoji': emoji,
+          'error': e.toString(),
+        },
+      );
+    }
+  }
+
+  /// Gets the count for a specific emoji on a message
+  int _getReactionCount(String messageId, String emoji) {
+    final reactions = _messageReactions[messageId];
+    if (reactions == null) return 0;
+    
+    final reaction = reactions.firstWhere(
+      (r) => r.emoji == emoji,
+      orElse: () => ReactionCount(emoji: emoji, count: 0),
+    );
+    
+    return reaction.count;
+  }
+
+  /// Checks if the current user has reacted with a specific emoji
+  bool _hasUserReactedWith(String messageId, String emoji) {
+    final userReaction = _userReactions[messageId];
+    return userReaction == emoji;
   }
 
   @override
@@ -308,6 +447,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 color: colorScheme.onSurface,
               ),
             ),
+            const SizedBox(height: 16),
+            // Emoji reactions row
+            _buildEmojiReactionsRow(message, colorScheme, textTheme),
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerRight,
@@ -321,6 +463,58 @@ class _MessagesScreenState extends State<MessagesScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  /// Builds the emoji reactions row
+  Widget _buildEmojiReactionsRow(Message message, ColorScheme colorScheme, TextTheme textTheme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: _availableEmojis.map((emoji) {
+        final isReacted = _hasUserReactedWith(message.id, emoji);
+        final count = _getReactionCount(message.id, emoji);
+        
+        return Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: InkWell(
+            onTap: () => _handleReaction(message.id, emoji),
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              decoration: BoxDecoration(
+                color: isReacted
+                    ? colorScheme.primaryContainer
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+                border: isReacted
+                    ? Border.all(color: colorScheme.primary, width: 1)
+                    : null,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    emoji,
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  if (count > 0) ...[
+                    const SizedBox(width: 6),
+                    Text(
+                      count.toString(),
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: isReacted
+                            ? colorScheme.onPrimaryContainer
+                            : colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
