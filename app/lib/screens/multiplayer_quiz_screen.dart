@@ -30,7 +30,7 @@ import '../l10n/strings_nl.dart' as strings;
 import '../constants/urls.dart';
 import '../utils/bible_book_mapper.dart';
 import '../services/logger.dart';
-import '../widgets/biblical_reference_dialog.dart';
+
 import '../utils/automatic_error_reporter.dart';
 
 /// Multiplayer quiz screen with split-screen layout
@@ -53,7 +53,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
   String? _error;
   late Timer _gameTimer;
   int _gameTimeRemaining = 0; // in seconds
-  bool _gameEnded = false;
+  
   bool _showResults = false;
 
   // Biblical reference overlay state
@@ -173,7 +173,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
     
     _gameEndInProgress = true;
     _gameTimer.cancel();
-    _gameEnded = true;
+    
     _showResults = true;
 
     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
@@ -540,8 +540,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final size = MediaQuery.of(context).size;
-    final isSmallScreen = size.width < 600;
 
     if (_isLoading) {
       return Scaffold(
@@ -644,8 +642,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
   Widget _buildPlayerColumn(BuildContext context, {required bool isPlayer1, required String playerName}) {
     final colorScheme = Theme.of(context).colorScheme;
     final settings = Provider.of<SettingsProvider>(context);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 600;
 
     // Determine winner
     String? winner;
@@ -702,8 +698,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
   Widget _buildScrollablePlayerArea(BuildContext context, {required bool isPlayer1, required String playerName}) {
     final colorScheme = Theme.of(context).colorScheme;
     final settings = Provider.of<SettingsProvider>(context);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 600;
 
     // Determine winner
     String? winner;
@@ -738,7 +732,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
                     child: Transform.scale(
                       scale: 0.85, // Scale down the entire content to reduce scrolling
                       child: Padding(
-                        padding: EdgeInsets.all(isSmallScreen ? 4 : 8),
+                        padding: const EdgeInsets.all(8),
                         child: _showResults
                             ? Center(
                                 child: _buildResultsWidget(context, isPlayer1, isWinner, isTie),

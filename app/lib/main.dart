@@ -139,11 +139,6 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
   final TimeTrackingService _timeTrackingService = TimeTrackingService.instance;
   StreamSubscription? _sub;
 
-  // Add mounted getter for older Flutter versions
-  @override
-  bool get mounted => _mounted;
-  bool _mounted = true;
-
   @override
   void initState() {
     super.initState();
@@ -192,8 +187,8 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
 
       // Set up connection status tracking
       connectionService.setConnectionStatusCallback((isConnected, connectionType) {
-        // Connection status tracking removed - emergency service navigator key no longer available
         AppLogger.info('Connection status changed: ${isConnected ? 'connected' : 'disconnected'} ($connectionType)');
+        // Note: Analytics tracking removed due to context issues
       });
 
       // Initialize StarTransactionService after providers are available
@@ -201,8 +196,13 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
       final starTransactionInitFuture = Future(() async {
         // Wait a bit for providers to be ready
         await Future.delayed(Duration(milliseconds: 100));
-        final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-        final lessonProgressProvider = Provider.of<LessonProgressProvider>(context, listen: false);
+        final currentContext = navigatorKey.currentContext;
+        if (currentContext == null) {
+          AppLogger.warning('Navigator context not available for star transaction initialization');
+          return;
+        }
+        final gameStatsProvider = Provider.of<GameStatsProvider>(currentContext, listen: false);
+        final lessonProgressProvider = Provider.of<LessonProgressProvider>(currentContext, listen: false);
         await starTransactionService.initialize(
           gameStatsProvider: gameStatsProvider,
           lessonProgressProvider: lessonProgressProvider,
@@ -476,10 +476,9 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
     AppLifecycleObserver(analyticsService, _timeTrackingService).observe();
   }
 
-  @override
+@override
   void dispose() {
     AppLogger.info('BijbelQuizApp disposing...');
-    _mounted = false;
 
     // Stop API server if running
     _apiService?.stopServer().then((_) {

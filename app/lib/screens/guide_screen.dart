@@ -62,7 +62,7 @@ class _GuideScreenState extends State<GuideScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
+    // final textTheme = theme.textTheme; // Not used
     final pages = _pages; // Get the current pages
     final isLastPage = _currentPage == pages.length - 1;
     // Log screen view for analytics

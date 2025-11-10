@@ -87,6 +87,7 @@ class AnalyticsService {
 
   // ===== COMPREHENSIVE FEATURE USAGE TRACKING =====
 
+  // ignore: constant_identifier_names
   /// Standardized feature names for consistent tracking
   static const String FEATURE_QUIZ_GAMEPLAY = 'quiz_gameplay';
   static const String FEATURE_LESSON_SYSTEM = 'lesson_system';
@@ -111,6 +112,7 @@ class AnalyticsService {
   static const String FEATURE_DIFFICULTY_FEEDBACK = 'difficulty_feedback';
   static const String FEATURE_MULTIPLAYER_GAME = 'multiplayer_game';
 
+  // ignore: constant_identifier_names
   /// Standardized action names for consistent tracking
   static const String ACTION_ACCESSED = 'accessed';
   static const String ACTION_USED = 'used';

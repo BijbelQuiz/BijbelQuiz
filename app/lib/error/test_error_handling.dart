@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:bijbelquiz/error_system.dart';
+import 'error_handler.dart';
+import 'error_types.dart';
 import '../services/logger.dart';
 
 /// Test widget to demonstrate the new error handling system

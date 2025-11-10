@@ -88,7 +88,7 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final gameStats = Provider.of<GameStatsProvider>(context);
-    final settings = Provider.of<SettingsProvider>(context);
+    // final settings = Provider.of<SettingsProvider>(context); // Not used in this method
     final isDev = kDebugMode; // Use kDebugMode to enable dev mode
 
     return Scaffold(
