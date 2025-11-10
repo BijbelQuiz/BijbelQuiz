@@ -22,6 +22,7 @@ class QuizAnswerHandler {
   final PlatformFeedbackService _platformFeedbackService;
   final QuizSoundService _quizSoundService;
   final bool _enableSounds;
+  bool _isProcessingAnswer = false; // Additional protection against rapid calls
 
   QuizAnswerHandler({
     required SoundService soundService,
@@ -39,43 +40,51 @@ class QuizAnswerHandler {
     required HandleNextQuestionCallback handleNextQuestion,
     required BuildContext context,
   }) {
-    if (quizState.isAnswering) return;
+    // Triple-check race condition prevention
+    if (quizState.isAnswering || _isProcessingAnswer) return;
 
-    // Set isAnswering: true immediately to prevent double triggering
-    updateQuizState(quizState.copyWith(
-      selectedAnswerIndex: selectedIndex,
-      isAnswering: true,
-    ));
+    _isProcessingAnswer = true;
 
-    if (quizState.question.type == QuestionType.mc || quizState.question.type == QuestionType.fitb) {
-      final selectedAnswer = quizState.question.allOptions[selectedIndex];
-      final isCorrect = selectedAnswer == quizState.question.correctAnswer;
+    try {
+      // Set isAnswering: true immediately to prevent double triggering
+      updateQuizState(quizState.copyWith(
+        selectedAnswerIndex: selectedIndex,
+        isAnswering: true,
+      ));
 
-      // Handle the answer sequence
-      _handleAnswerSequence(
-        isCorrect: isCorrect,
-        quizState: quizState,
-        updateQuizState: updateQuizState,
-        handleNextQuestion: handleNextQuestion,
-        context: context,
-      );
-    } else if (quizState.question.type == QuestionType.tf) {
-      // For true/false: index 0 = 'Goed', index 1 = 'Fout'
-      // Determine if the answer is correct by comparing indices rather than text
-      final lcCorrect = quizState.question.correctAnswer.toLowerCase();
-      final correctIndex = (lcCorrect == 'waar' || lcCorrect == 'true' || lcCorrect == 'goed') ? 0 : 1;
-      final isCorrect = selectedIndex == correctIndex;
+      if (quizState.question.type == QuestionType.mc || quizState.question.type == QuestionType.fitb) {
+        final selectedAnswer = quizState.question.allOptions[selectedIndex];
+        final isCorrect = selectedAnswer == quizState.question.correctAnswer;
 
-      // Handle the answer sequence
-      _handleAnswerSequence(
-        isCorrect: isCorrect,
-        quizState: quizState,
-        updateQuizState: updateQuizState,
-        handleNextQuestion: handleNextQuestion,
-        context: context,
-      );
-    } else {
-      // For other types, do nothing for now
+        // Handle the answer sequence
+        _handleAnswerSequence(
+          isCorrect: isCorrect,
+          quizState: quizState,
+          updateQuizState: updateQuizState,
+          handleNextQuestion: handleNextQuestion,
+          context: context,
+        );
+      } else if (quizState.question.type == QuestionType.tf) {
+        // For true/false: index 0 = 'Goed', index 1 = 'Fout'
+        // Determine if the answer is correct by comparing indices rather than text
+        final lcCorrect = quizState.question.correctAnswer.toLowerCase();
+        final correctIndex = (lcCorrect == 'waar' || lcCorrect == 'true' || lcCorrect == 'goed') ? 0 : 1;
+        final isCorrect = selectedIndex == correctIndex;
+
+        // Handle the answer sequence
+        _handleAnswerSequence(
+          isCorrect: isCorrect,
+          quizState: quizState,
+          updateQuizState: updateQuizState,
+          handleNextQuestion: handleNextQuestion,
+          context: context,
+        );
+      } else {
+        // For other types, do nothing for now
+      }
+    } finally {
+      // Note: We don't reset _isProcessingAnswer here because the answer sequence is still processing
+      // It will be reset in the next question handler call
     }
   }
 
@@ -114,16 +123,32 @@ class QuizAnswerHandler {
     await Future.delayed(feedbackDuration);
 
     // Phase 2: Clear feedback and prepare for transition
+    // First set isAnswering to false to allow UI to update properly,
+    // then transition to next state in the next microtask
     updateQuizState(quizState.copyWith(
-      selectedAnswerIndex: null,
-      isTransitioning: true,
+      isAnswering: false,
     ));
+
+    // Small delay to ensure UI has time to process the feedback display
+    await Future.microtask(() {});
 
     // Phase 3: Brief pause before transition (platform-optimized)
     final transitionPause = _platformFeedbackService.getTransitionPauseDuration();
     await Future.delayed(transitionPause);
 
-    // Phase 4: Transition to next question
+    // Phase 4: Now clear the selectedAnswerIndex and set transitioning
+    updateQuizState(quizState.copyWith(
+      selectedAnswerIndex: null,
+      isTransitioning: true,
+    ));
+
+    // Phase 5: Brief pause for transition animation
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    // Phase 6: Transition to next question
     await handleNextQuestion(isCorrect, quizState.currentDifficulty);
+    
+    // Phase 7: Reset processing flag (now that the full sequence is complete)
+    _isProcessingAnswer = false;
   }
 }
