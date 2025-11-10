@@ -16,7 +16,6 @@ import '../services/platform_feedback_service.dart';
 import '../providers/settings_provider.dart';
 import '../providers/game_stats_provider.dart';
 import '../services/analytics_service.dart';
-import '../services/quiz_timer_manager.dart';
 import '../services/quiz_animation_controller.dart';
 import '../services/progressive_question_selector.dart';
 import '../services/quiz_answer_handler.dart';
@@ -86,9 +85,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
   late ProgressiveQuestionSelector _player1QuestionSelector;
   late ProgressiveQuestionSelector _player2QuestionSelector;
 
-  // Separate timers for each player
-  late QuizTimerManager _player1TimerManager;
-  late QuizTimerManager _player2TimerManager;
 
   // Separate animation controllers for each player
   late QuizAnimationController _player1AnimationController;
@@ -218,13 +214,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
 
   void _initializeManagers() {
     // Player 1 managers
-    _player1TimerManager = QuizTimerManager(
-      performanceService: _performanceService,
-      vsync: this,
-      onTimeTick: () => _onPlayer1TimeTick(),
-      onTimeUp: _showPlayer1TimeUpDialog,
-    );
-
     _player1AnimationController = QuizAnimationController(
       performanceService: _performanceService,
       vsync: this,
@@ -237,13 +226,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
     _player1QuestionSelector.setMounted(mounted);
 
     // Player 2 managers
-    _player2TimerManager = QuizTimerManager(
-      performanceService: _performanceService,
-      vsync: this,
-      onTimeTick: () => _onPlayer2TimeTick(),
-      onTimeUp: _showPlayer2TimeUpDialog,
-    );
-
     _player2AnimationController = QuizAnimationController(
       performanceService: _performanceService,
       vsync: this,
@@ -316,12 +298,9 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
         currentDifficulty: 0.0,
       );
 
-      // Start timers for both players
+      // Trigger animations for both players
       if (!mounted) return;
-      _player1TimerManager.startTimer(context: context, reset: true);
       _player1AnimationController.triggerTimeAnimation();
-
-      _player2TimerManager.startTimer(context: context, reset: true);
       _player2AnimationController.triggerTimeAnimation();
 
     } catch (e) {
@@ -358,73 +337,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
     }
   }
 
-  // Player 1 timer tick
-  void _onPlayer1TimeTick() {
-    if (!mounted) return;
-    final duration = _player1TimerManager.timeAnimationController.duration;
-    if (duration == null) return;
-
-    final elapsedMs = (_player1TimerManager.timeAnimationController.value * duration.inMilliseconds)
-        .clamp(0.0, duration.inMilliseconds.toDouble())
-        .toInt();
-    final remainingMs = duration.inMilliseconds - elapsedMs;
-    final remainingSeconds = (remainingMs / 1000).ceil();
-
-    if (remainingSeconds != _player1QuizState.timeRemaining) {
-      setState(() {
-        _player1QuizState = _player1QuizState.copyWith(timeRemaining: remainingSeconds);
-      });
-
-      // Trigger animation when time reaches critical threshold (5 seconds)
-      if (remainingSeconds == 5) {
-        _player1AnimationController.triggerTimeAnimation();
-      }
-    }
-  }
-
-  // Player 2 timer tick
-  void _onPlayer2TimeTick() {
-    if (!mounted) return;
-    final duration = _player2TimerManager.timeAnimationController.duration;
-    if (duration == null) return;
-
-    final elapsedMs = (_player2TimerManager.timeAnimationController.value * duration.inMilliseconds)
-        .clamp(0.0, duration.inMilliseconds.toDouble())
-        .toInt();
-    final remainingMs = duration.inMilliseconds - elapsedMs;
-    final remainingSeconds = (remainingMs / 1000).ceil();
-
-    if (remainingSeconds != _player2QuizState.timeRemaining) {
-      setState(() {
-        _player2QuizState = _player2QuizState.copyWith(timeRemaining: remainingSeconds);
-      });
-
-      // Trigger animation when time reaches critical threshold (5 seconds)
-      if (remainingSeconds == 5) {
-        _player2AnimationController.triggerTimeAnimation();
-      }
-    }
-  }
-
-  // Player 1 time up dialog
-  Future<void> _showPlayer1TimeUpDialog() async {
-    // Ensure processing flag is reset even for time up
-    try {
-      await _handlePlayer1NextQuestion(false, _player1QuizState.currentDifficulty);
-    } finally {
-      _player1IsProcessingAnswer = false;
-    }
-  }
-
-  // Player 2 time up dialog
-  Future<void> _showPlayer2TimeUpDialog() async {
-    // Ensure processing flag is reset even for time up
-    try {
-      await _handlePlayer2NextQuestion(false, _player2QuizState.currentDifficulty);
-    } finally {
-      _player2IsProcessingAnswer = false;
-    }
-  }
 
   // Player 1 next question handler
   Future<void> _handlePlayer1NextQuestion(bool isCorrect, double newDifficulty) async {
@@ -468,7 +380,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
           timeRemaining: 20,
           currentDifficulty: calculatedNewDifficulty,
         );
-        _player1TimerManager.startTimer(context: context, reset: true);
         _player1AnimationController.triggerTimeAnimation();
       });
     } finally {
@@ -519,7 +430,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
           timeRemaining: 20,
           currentDifficulty: calculatedNewDifficulty,
         );
-        _player2TimerManager.startTimer(context: context, reset: true);
         _player2AnimationController.triggerTimeAnimation();
       });
     } finally {
@@ -594,12 +504,10 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
 
     // Dispose player 1 managers
     _player1QuestionSelector.setMounted(false);
-    _player1TimerManager.dispose();
     _player1AnimationController.dispose();
 
     // Dispose player 2 managers
     _player2QuestionSelector.setMounted(false);
-    _player2TimerManager.dispose();
     _player2AnimationController.dispose();
 
     // Dispose services
@@ -626,8 +534,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _player1TimerManager.handleAppLifecycleState(state, context);
-    _player2TimerManager.handleAppLifecycleState(state, context);
+    // Timer management removed - no action needed for app lifecycle state changes
   }
 
   @override
@@ -1079,7 +986,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
     final QuizState quizState = isPlayer1 ? _player1QuizState : _player2QuizState;
     final ProgressiveQuestionSelector questionSelector = isPlayer1 ? _player1QuestionSelector : _player2QuestionSelector;
-    final QuizTimerManager timerManager = isPlayer1 ? _player1TimerManager : _player2TimerManager;
     final QuizAnimationController animationController = isPlayer1 ? _player1AnimationController : _player2AnimationController;
     final String playerName = isPlayer1 ? 'Player1' : 'Player2';
 
@@ -1116,9 +1022,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
         'player': playerName,
       });
 
-      // Stop the appropriate player's timer
-      timerManager.timeAnimationController.stop();
-
       setState(() {
         if (isPlayer1) {
           _player1QuizState = _player1QuizState.copyWith(
@@ -1148,8 +1051,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
             currentDifficulty: quizState.currentDifficulty,
           );
 
-          // Restart timer for player 1
-          _player1TimerManager.startTimer(context: context, reset: true);
+          // Restart animation for player 1
           _player1AnimationController.triggerTimeAnimation();
         } else {
           _player2QuizState = QuizState(
@@ -1158,8 +1060,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
             currentDifficulty: quizState.currentDifficulty,
           );
 
-          // Restart timer for player 2
-          _player2TimerManager.startTimer(context: context, reset: true);
+          // Restart animation for player 2
           _player2AnimationController.triggerTimeAnimation();
         }
       });
@@ -1173,7 +1074,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
   Future<void> _handleUnlockBiblicalReferenceForPlayer(bool isPlayer1) async {
     final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
     final QuizState quizState = isPlayer1 ? _player1QuizState : _player2QuizState;
-    final QuizTimerManager timerManager = isPlayer1 ? _player1TimerManager : _player2TimerManager;
     final String playerName = isPlayer1 ? 'Player1' : 'Player2';
 
     // Track biblical reference unlock attempt
@@ -1224,19 +1124,13 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
       },
     );
     if (success) {
-      // Pause the appropriate player's timer
-      if (mounted) {
-        timerManager.pauseTimer();
-      }
-
       // Show the biblical reference dialog only for the specific player
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _showBiblicalReferenceDialogForPlayer(
             localContext,
             quizState.question.biblicalReference!,
-            isPlayer1,
-            timerManager
+            isPlayer1
           );
         }
       });
@@ -1306,11 +1200,9 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
   void _showBiblicalReferenceDialogForPlayer(
     BuildContext context,
     String biblicalReference,
-    bool isPlayer1,
-    QuizTimerManager timerManager
+    bool isPlayer1
   ) {
-    // Pause the timer immediately
-    timerManager.pauseTimer();
+    // Timer functionality removed
 
     // Show player-specific biblical reference overlay and start loading
     setState(() {
@@ -1731,8 +1623,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
   }
 
   void _closeBiblicalReferenceForPlayer(bool isPlayer1) {
-    final timerManager = isPlayer1 ? _player1TimerManager : _player2TimerManager;
-    
     setState(() {
       if (isPlayer1) {
         _player1ShowingBiblicalReference = false;
@@ -1743,7 +1633,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
       }
     });
 
-    // Resume the timer
-    timerManager.resumeTimer();
+    // Timer functionality removed - no action needed
   }
 }
