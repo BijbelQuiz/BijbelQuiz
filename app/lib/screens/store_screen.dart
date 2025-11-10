@@ -899,11 +899,15 @@ class _StoreScreenState extends State<StoreScreen> {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            title,
-                            style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onSurface,
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurface,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                           if (isDiscounted && discountAmount > 0) ...[
@@ -1142,11 +1146,15 @@ class _StoreScreenState extends State<StoreScreen> {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            title,
-                            style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onSurface,
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurface,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                           if (isDiscounted && discountAmount > 0) ...[
@@ -1400,11 +1408,15 @@ class _StoreScreenState extends State<StoreScreen> {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            title,
-                            style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onSurface,
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurface,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                           if (isDiscounted && discountAmount > 0) ...[
