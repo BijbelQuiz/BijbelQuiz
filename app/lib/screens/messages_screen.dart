@@ -75,10 +75,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   /// Load reactions for all messages
   Future<void> _loadReactionsForMessages(List<Message> messages) async {
-    final currentUserId = _messagingService.getCurrentUserId();
-    // Use anonymous user ID for anonymous users
-    final effectiveUserId = currentUserId ?? 'anonymous_user_2024';
-    
     final newMessageReactions = <String, List<ReactionCount>>{};
     final newUserReactions = <String, String?>{};
     
@@ -88,8 +84,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
         final reactionCounts = await _messagingService.getMessageReactionCounts(message.id);
         newMessageReactions[message.id] = reactionCounts;
         
-        // Load current user's reaction (works for both authenticated and anonymous)
-        final userReaction = await _messagingService.getUserMessageReaction(message.id, effectiveUserId);
+        // Load current user's reaction (service handles both authenticated and anonymous users)
+        final userReaction = await _messagingService.getUserMessageReaction(message.id, null);
         newUserReactions[message.id] = userReaction;
       } catch (e) {
         // Log error but continue loading other messages
@@ -107,8 +103,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   /// Handles emoji reaction on a message
   Future<void> _handleReaction(String messageId, String emoji) async {
-    final currentUserId = _messagingService.getCurrentUserId();
-
     try {
       // Show loading state for this specific message
       if (mounted) {
@@ -119,7 +113,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
       final result = await _messagingService.toggleMessageReaction(
         messageId: messageId,
-        userId: currentUserId, // This can be null for anonymous users
+        userId: null, // Service now handles user identification internally
         emoji: emoji,
       );
 
@@ -145,6 +139,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
       }
 
       // Track analytics (only for authenticated users)
+      final currentUserId = _messagingService.getCurrentUserId();
       if (mounted && currentUserId != null) {
         _analyticsService.trackFeatureUsage(
           context,

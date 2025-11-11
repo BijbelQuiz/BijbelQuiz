@@ -76,12 +76,12 @@ CREATE POLICY "Users can insert reactions" ON message_reactions
 -- Policy for updating reactions (users can only update their own reactions)
 CREATE POLICY "Users can update their own reactions" ON message_reactions
     FOR UPDATE TO authenticated, anon
-    USING (user_id LIKE 'anonymous_%' OR auth.uid()::text = user_id);
+    USING (user_id LIKE 'anonymous_user_%' OR auth.uid()::text = user_id);
 
 -- Policy for deleting reactions (users can only delete their own reactions)
 CREATE POLICY "Users can delete their own reactions" ON message_reactions
     FOR DELETE TO authenticated, anon
-    USING (user_id LIKE 'anonymous_%' OR auth.uid()::text = user_id);
+    USING (user_id LIKE 'anonymous_user_%' OR auth.uid()::text = user_id);
 
 -- Create a function to get reaction counts for a message
 CREATE OR REPLACE FUNCTION get_message_reaction_counts(message_uuid UUID)

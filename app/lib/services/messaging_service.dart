@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../config/supabase_config.dart';
 import '../utils/automatic_error_reporter.dart';
 import '../services/analytics_service.dart';
+import '../services/anonymous_user_service.dart';
 
 /// Represents a message in the system with expiration capability
 class Message {
@@ -364,12 +365,15 @@ class MessagingService {
   }
 
   /// Gets the current user's reaction for a specific message
-  Future<String?> getUserMessageReaction(String messageId, String userId) async {
+  Future<String?> getUserMessageReaction(String messageId, String? userId) async {
     try {
+      // Use effective user ID to ensure consistency with toggleMessageReaction
+      final effectiveUserId = await getEffectiveUserIdForReaction();
+      
       final response = await _client
           .rpc('get_user_message_reaction', params: {
             'message_uuid': messageId,
-            'user_uuid': userId
+            'user_uuid': effectiveUserId
           });
 
       return response as String?;
@@ -381,7 +385,7 @@ class MessagingService {
       
       AutomaticErrorReporter.reportStorageError(
         message: 'Error fetching user message reaction',
-        additionalInfo: {'message_id': messageId, 'user_id': userId, 'error': e.toString()},
+        additionalInfo: {'message_id': messageId, 'user_id': userId ?? 'anonymous', 'error': e.toString()},
       );
       rethrow;
     }
@@ -394,8 +398,8 @@ class MessagingService {
     required String emoji,
   }) async {
     try {
-      // For anonymous users, use a simple static ID that doesn't change
-      final effectiveUserId = userId ?? 'anonymous_user_2024';
+      // Get effective user ID - this ensures each user has a unique identity
+      final effectiveUserId = await getEffectiveUserIdForReaction();
       
       final response = await _client
           .rpc('toggle_message_reaction', params: {
@@ -459,5 +463,19 @@ class MessagingService {
   String? getCurrentUserId() {
     final user = _client.auth.currentUser;
     return user?.id;
+  }
+
+  /// Gets the effective user ID for reactions (authenticated or anonymous)
+  /// This ensures each user has a unique identity for emoji reactions
+  Future<String> getEffectiveUserIdForReaction() async {
+    final authenticatedUserId = getCurrentUserId();
+    
+    if (authenticatedUserId != null) {
+      return authenticatedUserId;
+    }
+    
+    // For anonymous users, get a unique persistent ID
+    final anonymousUserService = AnonymousUserService();
+    return await anonymousUserService.getAnonymousUserId();
   }
 }
