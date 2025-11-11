@@ -14,7 +14,6 @@ import 'services/api_service.dart';
 import 'widgets/top_snackbar.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter/services.dart';
-import 'package:crypto/crypto.dart' as crypto;
 import 'services/question_cache_service.dart';
 import 'services/connection_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1413,7 +1412,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final jsonString = json.encode(data);
 
       // Create hash for tamper-proofing (based on original JSON) - use SHA-1 for shorter hash
-      final hash = crypto.Hmac(crypto.sha1, utf8.encode(statsKey)).convert(utf8.encode(jsonString)).toString();
+      final hash = Hmac(sha1, utf8.encode(statsKey)).convert(utf8.encode(jsonString)).toString();
 
       // Compress the JSON string
       final compressedBytes = GZipEncoder().encode(utf8.encode(jsonString));
@@ -1981,7 +1980,7 @@ class _ImportStatsScreenState extends State<ImportStatsScreen> {
                             final compressedData = base64Url.decode(dataString);
                             jsonString = utf8.decode(GZipDecoder().decodeBytes(compressedData));
                             // Verify with SHA-1
-                            final computedHash = crypto.Hmac(crypto.sha1, utf8.encode(statsKey)).convert(utf8.encode(jsonString)).toString();
+                            final computedHash = Hmac(sha1, utf8.encode(statsKey)).convert(utf8.encode(jsonString)).toString();
                             if (computedHash != hash) {
                               if (!safeContext.mounted) return;
                               showTopSnackBar(safeContext, strings.AppStrings.invalidOrTamperedData, style: TopSnackBarStyle.error);
@@ -1996,7 +1995,7 @@ class _ImportStatsScreenState extends State<ImportStatsScreen> {
                           // Old uncompressed format with SHA-256
                           jsonString = dataString;
                           // Verify with SHA-256
-                          final computedHash = crypto.Hmac(crypto.sha256, utf8.encode(statsKey)).convert(utf8.encode(jsonString)).toString();
+                          final computedHash = Hmac(sha256, utf8.encode(statsKey)).convert(utf8.encode(jsonString)).toString();
                           if (computedHash != hash) {
                             if (!safeContext.mounted) return;
                             showTopSnackBar(safeContext, strings.AppStrings.invalidOrTamperedData, style: TopSnackBarStyle.error);
