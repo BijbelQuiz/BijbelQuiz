@@ -22,13 +22,13 @@ class AdService {
           .gte('expiry_date', now)
           .order('created_at', ascending: false);
 
-      if (response is! List<dynamic> || response.isEmpty) {
+      if (response.isEmpty) {
         AppLogger.info('No valid ads found in database');
         return null;
       }
 
       // Convert to Ad objects
-      final ads = response.map((item) => Ad.fromJson(item as Map<String, dynamic>)).toList();
+      final ads = response.map((item) => Ad.fromJson(item)).toList();
       
       // Pick a random ad
       final random = Random();
@@ -51,11 +51,6 @@ class AdService {
           .select()
           .eq('is_active', true)
           .order('created_at', ascending: false);
-
-      if (response is! List<dynamic>) {
-        AppLogger.warning('No ads found or invalid response format');
-        return [];
-      }
 
       if ((response as List<dynamic>).isEmpty) {
         AppLogger.info('No ads in database');
@@ -81,7 +76,7 @@ class AdService {
           .eq('id', adId)
           .single();
 
-      return Ad.fromJson(response as Map<String, dynamic>);
+      return Ad.fromJson(response);
     } catch (e) {
       AppLogger.warning('Error fetching ad with ID $adId (offline or not found): $e');
       return null;
@@ -97,7 +92,7 @@ class AdService {
           .select()
           .single();
 
-      final createdAd = Ad.fromJson(response as Map<String, dynamic>);
+      final createdAd = Ad.fromJson(response);
       AppLogger.info('Ad created successfully: ${createdAd.id}');
       return createdAd;
     } catch (e) {
