@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 import '../models/lesson.dart';
+import '../models/ad.dart';
 import './quiz_screen.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/lesson_service.dart';
+import '../services/ad_service.dart';
+import '../widgets/ad_widget.dart';
 import '../l10n/strings_nl.dart' as strings;
 
 class LessonCompleteScreen extends StatefulWidget {
@@ -34,8 +37,37 @@ class LessonCompleteScreen extends StatefulWidget {
 }
 
 class _LessonCompleteScreenState extends State<LessonCompleteScreen> with SingleTickerProviderStateMixin {
+  final AdService _adService = AdService();
+  Ad? _currentAd;
+  bool _showAd = false;
+  bool _adLoaded = false;
 
-  
+  @override
+  void initState() {
+    super.initState();
+    _loadAd();
+  }
+
+  Future<void> _loadAd() async {
+    try {
+      final ad = await _adService.getDisplayAd();
+      if (!mounted) return;
+      
+      setState(() {
+        _currentAd = ad;
+        _showAd = ad != null;
+        _adLoaded = true;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _currentAd = null;
+          _showAd = false;
+          _adLoaded = true;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -262,16 +294,94 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
       if (nextIndex < 0 || nextIndex >= lessons.length) return;
       final nextLesson = lessons[nextIndex];
       if (!mounted) return;
-      final nav = Navigator.of(context);
-      nav.pop();
-      await nav.push(
-        MaterialPageRoute(
-          builder: (_) => QuizScreen(lesson: nextLesson, sessionLimit: nextLesson.maxQuestions),
-        ),
-      );
+      
+      // Only show ad if we have one available, otherwise go directly to next lesson
+      if (_currentAd != null) {
+        // Show ad dialog first
+        await _showAdDialog(nextLesson);
+      } else {
+        // No ad available, go directly to next quiz
+        await _proceedToNextLesson(nextLesson);
+      }
     } catch (_) {
       // Silently ignore; button is disabled when not eligible.
     }
+  }
+
+  Future<void> _showAdDialog(Lesson nextLesson) async {
+    if (!mounted) return;
+    
+    final cs = Theme.of(context).colorScheme;
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Don't allow dismiss without choice
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: cs.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          contentPadding: const EdgeInsets.all(24),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Ad widget
+                AdWidget(
+                  ad: _currentAd!,
+                  onDismiss: () {
+                    // Close dialog and proceed without viewing ad
+                    Navigator.of(context).pop();
+                    _proceedToNextLesson(nextLesson);
+                  },
+                  onView: () {
+                    // Track ad view
+                    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+                    analyticsService.trackFeatureUsage(context, 'custom_ads', 'viewed', additionalProperties: {
+                      'ad_id': _currentAd!.id,
+                      'ad_title': _currentAd!.title,
+                    });
+                  },
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Continue button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close dialog
+                      _proceedToNextLesson(nextLesson);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Doorgaan naar volgende les'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _proceedToNextLesson(Lesson nextLesson) async {
+    if (!mounted) return;
+    
+    final nav = Navigator.of(context);
+    nav.pop(); // Close lesson complete screen
+    await nav.push(
+      MaterialPageRoute(
+        builder: (_) => QuizScreen(lesson: nextLesson, sessionLimit: nextLesson.maxQuestions),
+      ),
+    );
   }
 
   // Confetti helper removed
