@@ -1,9 +1,11 @@
 import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/game_stats_provider.dart';
 import 'providers/lesson_progress_provider.dart';
+import 'utils/automatic_error_reporter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'screens/guide_screen.dart';
 import 'dart:io' show Platform;
@@ -1400,6 +1402,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 
   Future<void> _exportStats(BuildContext context) async {
+    final statsKey = dotenv.env["STATS_KEY"] ?? "";
+
+    // Report error if STATS_KEY is not configured
+    if (statsKey.isEmpty) {
+      await AutomaticErrorReporter.reportStorageError(
+        message: 'STATS_KEY environment variable not found during stats export',
+        userMessage: 'Error preparing stats export - missing configuration',
+        operation: 'export_stats',
+        additionalInfo: {
+          'feature': 'stats_export_import',
+          'error_type': 'missing_config',
+        },
+      );
+        if (context.mounted) {
+          showTopSnackBar(
+            context,
+            'Fout: Exportconfiguratie voor statistieken ontbreekt. Neem contact op met support.',
+            style: TopSnackBarStyle.error,
+          );
+        }
+        return;
+    }
+
     try {
       final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
       final lessonProgress = Provider.of<LessonProgressProvider>(context, listen: false);
@@ -1417,7 +1442,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final jsonString = json.encode(data);
 
       // Create hash for tamper-proofing (based on original JSON) - use SHA-1 for shorter hash
-      final hash = sha1.convert(utf8.encode(jsonString)).toString();
+      final hash = Hmac(sha1, utf8.encode(statsKey)).convert(utf8.encode(jsonString)).toString();
 
       // Compress the JSON string
       final compressedBytes = GZipEncoder().encode(utf8.encode(jsonString));
@@ -1969,6 +1994,24 @@ class _ImportStatsScreenState extends State<ImportStatsScreen> {
                         final dataString = importData['data'] as String;
                         String jsonString;
 
+                        final statsKey = dotenv.env["STATS_KEY"] ?? "";
+
+                        // Report error if STATS_KEY is not configured
+                        if (statsKey.isEmpty) {
+                          await AutomaticErrorReporter.reportStorageError(
+                            message: 'STATS_KEY environment variable not found during stats import',
+                            userMessage: 'Error verifying stats import - missing configuration',
+                            operation: 'import_stats',
+                            additionalInfo: {
+                              'feature': 'stats_export_import',
+                              'error_type': 'missing_config',
+                            },
+                          );
+                          if (!safeContext.mounted) return;
+                          showTopSnackBar(safeContext, strings.AppStrings.invalidOrTamperedData, style: TopSnackBarStyle.error);
+                          return;
+                        }
+
                         // Detect format based on hash length: SHA-1 (40 chars) for new, SHA-256 (64 chars) for old
                         if (hash.length == 40) {
                           // New compressed format with SHA-1
@@ -1976,7 +2019,7 @@ class _ImportStatsScreenState extends State<ImportStatsScreen> {
                             final compressedData = base64Url.decode(dataString);
                             jsonString = utf8.decode(GZipDecoder().decodeBytes(compressedData));
                             // Verify with SHA-1
-                            final computedHash = sha1.convert(utf8.encode(jsonString)).toString();
+                            final computedHash = Hmac(sha1, utf8.encode(statsKey)).convert(utf8.encode(jsonString)).toString();
                             if (computedHash != hash) {
                               if (!safeContext.mounted) return;
                               showTopSnackBar(safeContext, strings.AppStrings.invalidOrTamperedData, style: TopSnackBarStyle.error);
@@ -1991,7 +2034,7 @@ class _ImportStatsScreenState extends State<ImportStatsScreen> {
                           // Old uncompressed format with SHA-256
                           jsonString = dataString;
                           // Verify with SHA-256
-                          final computedHash = sha256.convert(utf8.encode(jsonString)).toString();
+                          final computedHash = Hmac(sha256, utf8.encode(statsKey)).convert(utf8.encode(jsonString)).toString();
                           if (computedHash != hash) {
                             if (!safeContext.mounted) return;
                             showTopSnackBar(safeContext, strings.AppStrings.invalidOrTamperedData, style: TopSnackBarStyle.error);
