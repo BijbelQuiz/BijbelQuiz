@@ -1,84 +1,84 @@
-name: Add Contributor to List
+# name: Add Contributor to List
 
-on:
-  pull_request_target:
-    types: [opened, reopened]
+# on:
+#   pull_request_target:
+#     types: [opened, reopened]
 
-jobs:
-  add-contributor:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-    env:
-      GH_TOKEN: ${{ secrets.GH_PAT }}
+# jobs:
+#   add-contributor:
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: write
+#       pull-requests: write
+#     env:
+#       GH_TOKEN: ${{ secrets.GH_PAT }}
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          token: ${{ secrets.GH_PAT }}
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+#         with:
+#           ref: main
+#           token: ${{ secrets.GH_PAT }}
 
-      - name: Get PR author info
-      id: pr-author
-      run: |
-        AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
-        AUTHOR_URL="${{ github.event.pull_request.user.html_url }}"
-        PR_NUMBER="${{ github.event.number }}"
-        PR_URL="${{ github.event.pull_request.html_url }}"
+#       - name: Get PR author info
+#       id: pr-author
+#       run: |
+#         AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
+#         AUTHOR_URL="${{ github.event.pull_request.user.html_url }}"
+#         PR_NUMBER="${{ github.event.number }}"
+#         PR_URL="${{ github.event.pull_request.html_url }}"
         
-        echo "author_login=$AUTHOR_LOGIN" >> $GITHUB_OUTPUT
-        echo "author_url=$AUTHOR_URL" >> $GITHUB_OUTPUT
-        echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
-        echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+#         echo "author_login=$AUTHOR_LOGIN" >> $GITHUB_OUTPUT
+#         echo "author_url=$AUTHOR_URL" >> $GITHUB_OUTPUT
+#         echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+#         echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
 
-        - name: Check if contributor already exists in list
-        id: check-contributor
-          run: |
-          AUTHOR_LOGIN="${{ steps.pr-author.outputs.author_login }}"
-            if [ ! -f "docs/CONTRIBUTORS.md" ]; then
-            echo "Contributors file does not exist, will create it"
-            mkdir -p docs
-            echo "# Contributors" > docs/CONTRIBUTORS.md
-            echo "" >> docs/CONTRIBUTORS.md
-            echo "This file lists all the contributors to this project." >> docs/CONTRIBUTORS.md
-            echo "" >> docs/CONTRIBUTORS.md
-            echo "## List of Contributors" >> docs/CONTRIBUTORS.md
-            echo "" >> docs/CONTRIBUTORS.md
-            echo "contributor_exists=false" >> $GITHUB_OUTPUT
-            elif grep -q "\[$AUTHOR_LOGIN\](https://github.com/$AUTHOR_LOGIN)" docs/CONTRIBUTORS.md; then
-            echo "contributor_exists=true" >> $GITHUB_OUTPUT
-            echo "Contributor $AUTHOR_LOGIN already exists in the list"
-            else
-            echo "contributor_exists=false" >> $GITHUB_OUTPUT
-            echo "Contributor $AUTHOR_LOGIN does not exist in the list"
-                fi
+#         - name: Check if contributor already exists in list
+#         id: check-contributor
+#           run: |
+#           AUTHOR_LOGIN="${{ steps.pr-author.outputs.author_login }}"
+#             if [ ! -f "docs/CONTRIBUTORS.md" ]; then
+#             echo "Contributors file does not exist, will create it"
+#             mkdir -p docs
+#             echo "# Contributors" > docs/CONTRIBUTORS.md
+#             echo "" >> docs/CONTRIBUTORS.md
+#             echo "This file lists all the contributors to this project." >> docs/CONTRIBUTORS.md
+#             echo "" >> docs/CONTRIBUTORS.md
+#             echo "## List of Contributors" >> docs/CONTRIBUTORS.md
+#             echo "" >> docs/CONTRIBUTORS.md
+#             echo "contributor_exists=false" >> $GITHUB_OUTPUT
+#             elif grep -q "\[$AUTHOR_LOGIN\](https://github.com/$AUTHOR_LOGIN)" docs/CONTRIBUTORS.md; then
+#             echo "contributor_exists=true" >> $GITHUB_OUTPUT
+#             echo "Contributor $AUTHOR_LOGIN already exists in the list"
+#             else
+#             echo "contributor_exists=false" >> $GITHUB_OUTPUT
+#             echo "Contributor $AUTHOR_LOGIN does not exist in the list"
+#                 fi
 
-      - name: Add contributor to list
-        if: steps.check-contributor.outputs.contributor_exists == 'false'
-        run: |
-          AUTHOR_LOGIN="${{ steps.pr-author.outputs.author_login }}"
-          AUTHOR_URL="${{ steps.pr-author.outputs.author_url }}"
-          PR_NUMBER="${{ steps.pr-author.outputs.pr_number }}"
-          PR_URL="${{ steps.pr-author.outputs.pr_url }}"
+#       - name: Add contributor to list
+#         if: steps.check-contributor.outputs.contributor_exists == 'false'
+#         run: |
+#           AUTHOR_LOGIN="${{ steps.pr-author.outputs.author_login }}"
+#           AUTHOR_URL="${{ steps.pr-author.outputs.author_url }}"
+#           PR_NUMBER="${{ steps.pr-author.outputs.pr_number }}"
+#           PR_URL="${{ steps.pr-author.outputs.pr_url }}"
 
-          # Create the entry format as per existing style
-          NEW_ENTRY="($AUTHOR_LOGIN)\[$AUTHOR_URL\] in PR (#$PR_NUMBER)\[$PR_URL\]"
+#           # Create the entry format as per existing style
+#           NEW_ENTRY="($AUTHOR_LOGIN)\[$AUTHOR_URL\] in PR (#$PR_NUMBER)\[$PR_URL\]"
 
-          # Add new entry to the file, preserving existing content
-          echo "" >> docs/CONTRIBUTORS.md  # Add a blank line for separation
-          echo "$NEW_ENTRY" >> docs/CONTRIBUTORS.md
+#           # Add new entry to the file, preserving existing content
+#           echo "" >> docs/CONTRIBUTORS.md  # Add a blank line for separation
+#           echo "$NEW_ENTRY" >> docs/CONTRIBUTORS.md
 
-            - name: Create Pull Request for contributor update
-            if: steps.check-contributor.outputs.contributor_exists == 'false'
-            uses: peter-evans/create-pull-request@v6
-            with:
-              token: ${{ secrets.GH_PAT }}
-              commit-message: "Add ${{ steps.pr-author.outputs.author_login }} to contributors list"
-              title: "Add ${{ steps.pr-author.outputs.author_login }} to contributors"
-              body: "Automated PR to add ${{ steps.pr-author.outputs.author_login }} to the contributors list for PR #${{ steps.pr-author.outputs.pr_number }}"
-              branch: add-contributor-${{ steps.pr-author.outputs.author_login }}
-              base: main
-              add-paths: |
-                docs/CONTRIBUTORS.md
+#             - name: Create Pull Request for contributor update
+#             if: steps.check-contributor.outputs.contributor_exists == 'false'
+#             uses: peter-evans/create-pull-request@v6
+#             with:
+#               token: ${{ secrets.GH_PAT }}
+#               commit-message: "Add ${{ steps.pr-author.outputs.author_login }} to contributors list"
+#               title: "Add ${{ steps.pr-author.outputs.author_login }} to contributors"
+#               body: "Automated PR to add ${{ steps.pr-author.outputs.author_login }} to the contributors list for PR #${{ steps.pr-author.outputs.pr_number }}"
+#               branch: add-contributor-${{ steps.pr-author.outputs.author_login }}
+#               base: main
+#               add-paths: |
+#                 docs/CONTRIBUTORS.md
