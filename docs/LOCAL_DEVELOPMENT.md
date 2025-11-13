@@ -20,9 +20,9 @@ This document explains how to set up and use the local development environment f
 
 ### Running the App
 
-The backend is located in the `websites/backend.bijbelquiz.app/` directory. For local development:
+The app is located in the `app/` directory:
 
-1. **Debug Mode** (uses production backend):
+1. **Debug Mode**:
    ```bash
    flutter run
    ```
@@ -52,32 +52,6 @@ The backend is located in the `websites/backend.bijbelquiz.app/` directory. For 
    flutter run -d linux  # or macos, windows
    ```
 
-### Testing the Update Flow
-
-To test the update flow:
-
-1. Modify the version in `pubspec.yaml` to be lower than the production version (e.g., `1.1.1+2`)
-2. Run the app in debug mode: `flutter run`
-3. The app should detect the update and show the update dialog
-
-### Running Tests
-
-Execute the comprehensive test suite:
-
-```bash
-# Run all tests
-flutter test
-
-# Run with coverage
-flutter test --coverage
-
-# Run specific test file
-flutter test test/quiz_question_test.dart
-
-# Run tests with debugging
-flutter test --verbose
-```
-
 ### Code Quality
 
 ```bash
@@ -102,7 +76,7 @@ Use the provided build script for multi-platform builds:
 
 ```bash
 # Build for all platforms
-./build_all.sh
+cd scripts && ./build_all.sh
 
 # Build specific platform
 flutter build apk --release
@@ -123,35 +97,9 @@ flutter build linux --release
 
 3. **Logging**: Comprehensive logging system with configurable levels via `Logger` service
 
-## Backend Development
-
-For local backend development:
-1. See documentation in `websites/backend.bijbelquiz.app/README.md`
-2. The app defaults to production backend (`https://bijbelquiz.app/api`) in debug mode
-3. Configure local backend URL in `lib/config/app_config.dart` if needed
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Build Failures**: Run `flutter clean` then `flutter pub get`
-2. **Platform Issues**: Use `flutter doctor` to diagnose environment problems
-3. **Performance Issues**: Check `PerformanceService` logs for optimization opportunities
-
 ### Dependencies
 
 Install platform-specific dependencies:
 - **Linux**: Run `./install_dependencies.sh` for CMake and build tools
 - **macOS**: Install Xcode command line tools: `xcode-select --install`
 - **Android**: Install Android Studio and configure `ANDROID_HOME`
-
-## Version Management
-
-- **Current Version**: 1.2.6+10
-- **Flutter SDK Range**: >=3.2.3 <4.0.0
-- **Dart SDK Range**: >=2.19 <4.0.0
-
-For version updates:
-1. Update version in `pubspec.yaml`
-2. Update documentation version references
-3. Test update flow as described above
