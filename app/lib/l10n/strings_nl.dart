@@ -726,4 +726,15 @@ class AppStrings {
   static const String testErrorHandling = 'Test Foutafhandeling';
   static const String testErrorDialog = 'Test Foutdialoog';
   static const String retryButton = 'Opnieuw Proberen';
+
+ // Settings Screen - Additional hardcoded strings
+ static const String searchSettings = 'Zoek instellingen...';
+ static const String lessonLayoutSettings = 'Leslay-out';
+ static const String chooseLessonLayoutDesc = 'Kies hoe lessen worden weergegeven';
+ static const String showIntroductionDesc = 'Bekijk de app-introductie en tutorial';
+ static const String clearQuestionCacheDesc = 'Verwijder gecachte vragen om opslagruimte vrij te maken';
+ static const String followOnSocialMediaDesc = 'Verbind met ons op social media platforms';
+ static const String inviteFriendDesc = 'Deel een gepersonaliseerde uitnodigingslink met vrienden';
+ static const String bugReport = 'Bug Rapport';
+ static const String bugReportDesc = 'Rapporteer bugs en problemen met de app';
 }

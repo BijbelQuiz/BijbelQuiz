@@ -674,20 +674,35 @@ class _LessonSelectScreenState extends State<LessonSelectScreen> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.menu_book,
+                size: 20,
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Lessen',
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
         backgroundColor: colorScheme.surface,
         elevation: 0,
         scrolledUnderElevation: 0,
-        titleSpacing: 0,
-        title: Padding(
-          padding: const EdgeInsets.only(left: 12.0),
-          child: Text(
-            'Lessen',
-            style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-          ),
-        ),
-        actions: [],
+        centerTitle: true,
       ),
       body: _loading
           ? const LessonGridSkeleton()

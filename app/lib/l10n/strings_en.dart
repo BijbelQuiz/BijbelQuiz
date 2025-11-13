@@ -578,4 +578,15 @@ class AppStrings {
   static const String testErrorHandling = 'Test Error Handling';
   static const String testErrorDialog = 'Test Error Dialog';
   static const String retryButton = 'Retry';
+
+  // Settings Screen - Additional hardcoded strings
+  static const String searchSettings = 'Search settings...';
+  static const String lessonLayoutSettings = 'Lesson Layout';
+  static const String chooseLessonLayoutDesc = 'Choose how lessons are displayed';
+  static const String showIntroductionDesc = 'View the app introduction and tutorial';
+  static const String clearQuestionCacheDesc = 'Remove cached questions to free up storage space';
+  static const String followOnSocialMediaDesc = 'Connect with us on social media platforms';
+  static const String inviteFriendDesc = 'Share a personalized invite link with friends';
+  static const String bugReport = 'Bug Report';
+  static const String bugReportDesc = 'Report bugs and issues with the app';
 }
