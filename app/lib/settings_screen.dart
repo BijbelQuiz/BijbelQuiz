@@ -581,11 +581,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildSettingRow(BuildContext context, _SettingItem item, ColorScheme colorScheme) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: item.onTap != null
           ? InkWell(
               onTap: item.onTap,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.title,
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          if (item.subtitle != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              item.subtitle!,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurface.withValues(alpha: 0.7),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: item.child,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
                   Expanded(
@@ -621,41 +662,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ],
               ),
-            )
-          : Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.title,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      if (item.subtitle != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          item.subtitle!,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurface.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: item.child,
-                  ),
-                ),
-              ],
             ),
     );
   }
