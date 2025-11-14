@@ -5,9 +5,9 @@ import os
 import argparse
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-QUESTIONS_FILE = os.path.join(SCRIPT_DIR, "questions-nl-sv.json")
-QUESTIONS_FILE_WITH_CATEGORIES = os.path.join(SCRIPT_DIR, "questions-nl-sv_with_categories.json")
-CATEGORIES_FILE = os.path.join(SCRIPT_DIR, "categories.json")
+QUESTIONS_FILE = os.path.join(SCRIPT_DIR, "..", "app", "assets", "questions-nl-sv.json")
+QUESTIONS_FILE_WITH_CATEGORIES = os.path.join(SCRIPT_DIR, "..", "app", "assets", "questions-nl-sv_with_categories.json")
+CATEGORIES_FILE = os.path.join(SCRIPT_DIR, "..", "app", "assets", "categories.json")
 
 # --- Ollama helpers (from add-cat.py) ---
 def get_ollama_models():

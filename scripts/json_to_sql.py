@@ -24,7 +24,7 @@ def array_to_sql(arr):
 
 def main():
     # Path to the questions JSON file
-    json_path = Path(__file__).parent.parent / "websites" / "play.bijbelquiz.app" / "assets" / "assets" / "questions-nl-sv.json"
+    json_path = Path(__file__).parent.parent / "app" / "assets" / "questions-nl-sv.json"
 
     if not json_path.exists():
         print(f"Error: Questions JSON file not found at {json_path}")

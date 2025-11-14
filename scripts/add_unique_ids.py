@@ -39,7 +39,7 @@ def add_unique_ids_to_questions(file_path):
 
 def main():
     # Define the path to the questions file
-    file_path = os.path.join(os.path.dirname(__file__), 'assets', 'questions-nl-sv.json')
+    file_path = os.path.join(os.path.dirname(__file__), '..', 'app', 'assets', 'questions-nl-sv.json')
     
     # Check if the file exists
     if not os.path.exists(file_path):
