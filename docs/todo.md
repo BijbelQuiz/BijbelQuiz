@@ -5,64 +5,6 @@ This document outlines the major inefficiencies identified in the BijbelQuiz Flu
 
 ## Critical Performance Issues
 
-### 1. **Excessive Service Initialization Complexity**
-**Location**: `app/lib/main.dart` (lines 44-264)
-
-**Problem**: 
-- Complex parallel and sequential service initialization with 10+ services
-- Nested `addPostFrameCallback` calls creating deep call stacks
-- Services initializing other services in complex dependency chains
-- Multiple async operations without proper error boundaries
-
-**Impact**: 
-- Slow app startup time
-- Memory spikes during initialization
-- Potential race conditions
-- Difficult to debug initialization failures
-
-**Recommendation**: 
-- Simplify service architecture with clear dependency graph
-- Use dependency injection pattern
-- Implement lazy initialization where possible
-
-### 2. **Memory Leaks in Question Cache Service**
-**Location**: `app/lib/services/question_cache_service.dart`
-
-**Problem**:
-- Complex LRU cache with multiple tracking structures (`_memoryCache`, `_lruList`, `_accessFrequency`, `_lastAccessTime`)
-- Predictive loading candidates that may never be used
-- Multiple metadata caches per language
-- Circular buffer implementation issues
-
-**Impact**:
-- High memory usage on low-end devices
-- Potential memory leaks from unevicted cache entries
-- Performance degradation as cache grows
-
-**Recommendation**:
-- Simplify cache to single LRU structure
-- Remove predictive loading for now
-- Implement proper cache size limits and eviction
-
-### 3. **Performance Monitoring Overhead**
-**Location**: `app/lib/services/performance_service.dart`
-
-**Problem**:
-- Constant frame time monitoring impacting actual performance
-- Complex median calculations with quickselect algorithms
-- Memory usage calculations that sample every 10th item unnecessarily
-- Timer-based monitoring even when not needed
-
-**Impact**:
-- Performance service consuming resources it claims to optimize
-- False performance metrics due to monitoring overhead
-- Battery drain from continuous monitoring
-
-**Recommendation**:
-- Remove continuous monitoring, make it event-driven
-- Simplify calculations to basic averages
-- Only monitor when performance issues are detected
-
 ## Code Complexity Issues
 
 ### 4. **Over-Engineered Quiz Screen**

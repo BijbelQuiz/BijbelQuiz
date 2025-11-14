@@ -1,4 +1,3 @@
-import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -14,22 +13,18 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'providers/settings_provider.dart';
 import 'providers/game_stats_provider.dart';
 import 'providers/messages_provider.dart';
+import 'providers/lesson_progress_provider.dart';
 import 'utils/theme_utils.dart';
-import 'theme/theme_manager.dart';
 import 'services/logger.dart';
-import 'services/notification_service.dart';
-import 'services/performance_service.dart';
-import 'services/connection_service.dart';
-import 'services/question_cache_service.dart';
-import 'services/gemini_service.dart';
-import 'services/api_service.dart';
-import 'services/star_transaction_service.dart';
+import 'services/service_container.dart';
+import 'services/analytics_service.dart';
 import 'services/time_tracking_service.dart';
+import 'services/api_service.dart';
 import 'services/messaging_service.dart';
+import 'services/question_cache_service.dart';
 import 'utils/bijbelquiz_gen_utils.dart';
 import 'screens/bijbelquiz_gen_screen.dart';
 import 'screens/store_screen.dart';
-import 'providers/lesson_progress_provider.dart';
 import 'screens/main_navigation_screen.dart';
 import 'settings_screen.dart';
 import 'screens/sync_screen.dart';
@@ -37,88 +32,112 @@ import 'screens/stats_share_screen.dart';
 import 'l10n/strings_nl.dart' as strings;
 import 'config/supabase_config.dart';
 
-final analyticsService = AnalyticsService();
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-/// The main entry point of the BijbelQuiz application with performance optimizations.
-void main() async {
+/// The main entry point of the BijbelQuiz application with simplified service initialization.
+Future<void> main() async {
   // Ensure that the Flutter binding is initialized before running the app.
   WidgetsFlutterBinding.ensureInitialized();
   AppLogger.info('BijbelQuiz app starting up...');
 
-  // Initialize logging with secure settings based on environment
-  bool isProduction = const bool.fromEnvironment('dart.vm.product', defaultValue: false);
-  AppLogger.setSecureLevel(isProduction: isProduction, productionLevel: Level.INFO, developmentLevel: Level.ALL);
-  AppLogger.info('Logger initialized successfully with secure settings (Production: $isProduction)');
+  try {
+    // Initialize logging with secure settings based on environment
+    bool isProduction = const bool.fromEnvironment('dart.vm.product', defaultValue: false);
+    AppLogger.setSecureLevel(isProduction: isProduction, productionLevel: Level.INFO, developmentLevel: Level.ALL);
+    AppLogger.info('Logger initialized successfully with secure settings (Production: $isProduction)');
 
-  // Initialize analytics
-  AppLogger.info('Initializing analytics service...');
-  await analyticsService.init();
-  AppLogger.info('Analytics service initialized successfully');
+    // Load environment variables
+    AppLogger.info('Loading environment variables...');
+    await dotenv.load(fileName: "assets/.env");
+    AppLogger.info('Environment variables loaded successfully');
 
-  // Load environment variables
-  AppLogger.info('Loading environment variables...');
-  await dotenv.load(fileName: "assets/.env");
-  AppLogger.info('Environment variables loaded successfully');
-
-  // Initialize Supabase
-  AppLogger.info('Initializing Supabase...');
-  await SupabaseConfig.initialize();
-  AppLogger.info('Supabase initialized successfully');
-  
-  // Initialize theme manager
-  AppLogger.info('Initializing theme manager...');
-  await ThemeManager().initialize();
-  AppLogger.info('Theme manager initialized successfully');
-  
-  // Set preferred screen orientations. On web, this helps maintain a consistent layout.
-  if (kIsWeb) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-  }
-  
-  final gameStatsProvider = GameStatsProvider();
-  AppLogger.info('Game stats provider initialized');
-
-  // Initialize settings provider and wait for it
-  final settingsProvider = SettingsProvider();
-  await settingsProvider.loadSettings();
-
-  AppLogger.info('Starting Flutter app with providers...');
-  final appStartTime = DateTime.now();
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: settingsProvider),
-        ChangeNotifierProvider.value(value: gameStatsProvider),
-        ChangeNotifierProvider(create: (_) => LessonProgressProvider()),
-        Provider.value(value: analyticsService),
-        Provider(create: (_) => MessagingService()),
-        ChangeNotifierProvider(create: (context) {
-          final messagingService = Provider.of<MessagingService>(context, listen: false);
-          final messagesProvider = MessagesProvider(messagingService);
-          // Initialize the provider to load persisted data
-          messagesProvider.initialize();
-          return messagesProvider;
-        }),
-      ],
-      child: BijbelQuizApp(),
-    ),
-  );
-  final appStartDuration = DateTime.now().difference(appStartTime);
-  AppLogger.info('Flutter app started successfully in ${appStartDuration.inMilliseconds}ms');
-
-  // Track app launch performance
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
-    try {
-      // Analytics tracking removed - emergency service navigator key no longer available
-      AppLogger.info('App started successfully in ${appStartDuration.inMilliseconds}ms');
-    } catch (e) {
-      AppLogger.error('Error in app startup', e);
+    // Initialize Supabase
+    AppLogger.info('Initializing Supabase...');
+    await SupabaseConfig.initialize();
+    AppLogger.info('Supabase initialized successfully');
+    
+    // Set preferred screen orientations. On web, this helps maintain a consistent layout.
+    if (kIsWeb) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
     }
-  });
+
+    // Initialize service container with critical services first
+    final serviceContainer = ServiceContainer();
+    final startTime = DateTime.now();
+    
+    await serviceContainer.initializeCriticalServices();
+    
+    // Create providers for the app
+    final gameStatsProvider = serviceContainer.gameStatsProvider;
+    final settingsProvider = serviceContainer.settingsProvider;
+    final lessonProgressProvider = LessonProgressProvider();
+
+    AppLogger.info('Starting Flutter app with service container...');
+    runApp(
+      MultiProvider(
+        providers: [
+          // Core providers from service container
+          ChangeNotifierProvider.value(value: settingsProvider),
+          ChangeNotifierProvider.value(value: gameStatsProvider),
+          ChangeNotifierProvider.value(value: lessonProgressProvider),
+          
+          // Service container access
+          Provider.value(value: serviceContainer),
+          Provider.value(value: serviceContainer.analyticsService),
+          Provider.value(value: serviceContainer.themeManager),
+          Provider.value(value: serviceContainer.timeTrackingService),
+          
+          // Optional services (can be null)
+          Provider.value(value: serviceContainer.performanceService),
+          Provider.value(value: serviceContainer.connectionService),
+          Provider.value(value: serviceContainer.questionCacheService),
+          Provider.value(value: serviceContainer.geminiService),
+          Provider.value(value: serviceContainer.starTransactionService),
+          Provider.value(value: serviceContainer.messagingService),
+          Provider.value(value: serviceContainer.notificationService),
+          
+          // Messaging service and provider
+          Provider(create: (_) => serviceContainer.messagingService ?? MessagingService()),
+          ChangeNotifierProvider(create: (context) {
+            final messagingService = Provider.of<MessagingService>(context, listen: false);
+            final messagesProvider = MessagesProvider(messagingService);
+            messagesProvider.initialize();
+            return messagesProvider;
+          }),
+          
+          // Star transaction service initialization (deferred until providers are ready)
+          ChangeNotifierProvider(create: (context) {
+            // This will be initialized later with proper dependencies
+            return gameStatsProvider;
+          }),
+        ],
+        child: BijbelQuizApp(),
+      ),
+    );
+    
+    final appStartDuration = DateTime.now().difference(startTime);
+    AppLogger.info('Flutter app started successfully in ${appStartDuration.inMilliseconds}ms');
+
+    // Initialize optional services in background (don't wait for these)
+    serviceContainer.initializeOptionalServices();
+
+    // Track app launch performance
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        AppLogger.info('App fully loaded in ${appStartDuration.inMilliseconds}ms');
+      } catch (e) {
+        AppLogger.error('Error in app startup callback', e);
+      }
+    });
+
+  } catch (e, stackTrace) {
+    AppLogger.error('Critical error during app initialization', e, stackTrace);
+    // Re-run with minimal error handling if needed
+    rethrow;
+  }
 }
 
 class BijbelQuizApp extends StatefulWidget {
@@ -129,151 +148,38 @@ class BijbelQuizApp extends StatefulWidget {
 }
 
 class _BijbelQuizAppState extends State<BijbelQuizApp> {
-  PerformanceService? _performanceService;
-  ConnectionService? _connectionService;
-  QuestionCacheService? _questionCacheService;
-  GeminiService? _geminiService;
-  // FeatureFlagsService removed
-  ApiService? _apiService;
-  StarTransactionService? _starTransactionService;
-  final TimeTrackingService _timeTrackingService = TimeTrackingService.instance;
   StreamSubscription? _sub;
+  late ServiceContainer _serviceContainer;
 
   @override
   void initState() {
     super.initState();
     AppLogger.info('BijbelQuizApp state initializing...');
+    
+    _serviceContainer = Provider.of<ServiceContainer>(context, listen: false);
+    
+    // Initialize Star Transaction Service with proper dependencies
+    _initializeStarTransactionService();
 
     // Set up deep link handling
     _initDeepLinks();
 
     // Track app lifecycle for session management
     _trackAppLifecycle();
-
-    // Initialize time tracking service
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _timeTrackingService.initialize();
-      
-      // If there was an ongoing session (app crashed/force closed), end it
-      if (_timeTrackingService.hasOngoingSession()) {
-        _timeTrackingService.endSession();
-      }
-    });
-
-    // Defer service initialization; don't block first render
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      AppLogger.info('Starting deferred service initialization...');
-      final performanceService = PerformanceService();
-      final connectionService = ConnectionService();
-      final questionCacheService = QuestionCacheService(connectionService);
-      // FeatureFlagsService removed
-      final apiService = ApiService();
-
-      // Initialize StarTransactionService with required providers
-      AppLogger.info('Initializing star transaction service...');
-      final starTransactionService = StarTransactionService.instance;
-
-      // Initialize Gemini service (with error handling for missing API key)
-      AppLogger.info('Initializing Gemini service...');
-      final geminiService = GeminiService.instance;
-      // Defer Gemini initialization to not block startup
-      geminiService.initialize().catchError((e) {
-        AppLogger.warning('Gemini service initialization failed (API key may be missing): $e');
-        // Don't fail the entire app if Gemini API key is missing
-        return null;
-      });
-
-      // Feature flags service removed
-
-      // Set up connection status tracking
-      connectionService.setConnectionStatusCallback((isConnected, connectionType) {
-        AppLogger.info('Connection status changed: ${isConnected ? 'connected' : 'disconnected'} ($connectionType)');
-        // Note: Analytics tracking removed due to context issues
-      });
-
-      // Initialize StarTransactionService after providers are available
-      AppLogger.info('Initializing star transaction service...');
-      final starTransactionInitFuture = Future(() async {
-        // Wait a bit for providers to be ready
-        await Future.delayed(Duration(milliseconds: 100));
-        final currentContext = navigatorKey.currentContext;
-        if (currentContext == null) {
-          AppLogger.warning('Navigator context not available for star transaction initialization');
-          return;
-        }
-        // Use context safely after checking if it's available
-        if (mounted && navigatorKey.currentContext != null) {
-          final gameStatsProvider = Provider.of<GameStatsProvider>(navigatorKey.currentContext!, listen: false);
-          final lessonProgressProvider = Provider.of<LessonProgressProvider>(navigatorKey.currentContext!, listen: false);
-          await starTransactionService.initialize(
-            gameStatsProvider: gameStatsProvider,
-            lessonProgressProvider: lessonProgressProvider,
-          );
-        }
-      });
-
-      // Kick off initialization in background
-      AppLogger.info('Starting parallel service initialization...');
-      final initFuture = Future.wait([
-        performanceService.initialize(),
-        connectionService.initialize(),
-        questionCacheService.initialize(),
-        // featureFlagsInitFuture removed
-        starTransactionInitFuture,
-      ]);
-
-      // Expose services immediately so UI can build without waiting
-      AppLogger.info('Exposing services to providers...');
-      setState(() {
-        _performanceService = performanceService;
-        _connectionService = connectionService;
-        _questionCacheService = questionCacheService;
-        _geminiService = geminiService;
-        // _featureFlagsService removed
-        _apiService = apiService;
-        _starTransactionService = starTransactionService;
-      });
-
-      // Continue with any post-init work when ready
-      AppLogger.info('Waiting for service initialization to complete...');
-      await initFuture;
-      AppLogger.info('All services initialized successfully');
-
-
-      AppLogger.info('Initializing notification service for platform: ${Platform.operatingSystem}');
-      if (!kIsWeb && !Platform.isLinux) {
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          AppLogger.info('Initializing notifications for mobile platform...');
-          await NotificationService().init();
-          AppLogger.info('Notification service initialized for mobile');
-        });
-      } else if (!kIsWeb && Platform.isLinux) {
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          AppLogger.info('Initializing notifications for Linux platform...');
-          await NotificationService().init();
-          await NotificationService().cancelAllNotifications();
-          AppLogger.info('Notification service initialized for Linux');
-        });
-      } else {
-        AppLogger.info('Skipping notification service initialization for Web platform');
-      }
-
-      // Load messages on app startup (after other services are initialized)
-      await _loadMessagesOnAppStart();
-    });
   }
 
-  /// Load messages on app startup
-  Future<void> _loadMessagesOnAppStart() async {
+  /// Initialize Star Transaction Service with required providers
+  Future<void> _initializeStarTransactionService() async {
     try {
-      final context = navigatorKey.currentContext;
-      if (context != null) {
-        final messagesProvider = Provider.of<MessagesProvider>(context, listen: false);
-        await messagesProvider.loadActiveMessages();
-        AppLogger.info('Messages loaded on app startup');
-      }
+      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final lessonProgressProvider = Provider.of<LessonProgressProvider>(context, listen: false);
+      
+      await _serviceContainer.initializeStarTransactionService(
+        gameStatsProvider: gameStatsProvider,
+        lessonProgressProvider: lessonProgressProvider,
+      );
     } catch (e) {
-      AppLogger.warning('Could not load messages on app startup: $e');
+      AppLogger.warning('Failed to initialize star transaction service: $e');
     }
   }
 
@@ -327,15 +233,103 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
     }
   }
 
+  /// Track app lifecycle events for session management
+  void _trackAppLifecycle() {
+    final analyticsService = _serviceContainer.analyticsService;
+    final timeTrackingService = _serviceContainer.timeTrackingService;
+    AppLifecycleObserver(analyticsService, timeTrackingService).observe();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Guide showing logic moved to LessonSelectScreen for better control
+    
+    // Start time tracking when the app widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final timeTrackingService = _serviceContainer.timeTrackingService;
+      
+      if (!timeTrackingService.hasOngoingSession()) {
+        timeTrackingService.startSession();
+      }
+      
+      // Check if we're in the BijbelQuiz Gen period and redirect if needed
+      if (BijbelQuizGenPeriod.isGenPeriod() && !timeTrackingService.hasGenBeenShownThisPeriod()) {
+        // Mark the Gen as shown for this period before navigating
+        timeTrackingService.markGenAsShownThisPeriod();
+        
+        // Small delay to ensure context is ready
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted && navigatorKey.currentState != null) {
+            navigatorKey.currentState!.push(
+              MaterialPageRoute(
+                builder: (_) => const BijbelQuizGenScreen(),
+              ),
+            );
+          }
+        });
+      }
+    });
+
+    // Handle API server lifecycle based on settings
+    _handleApiServerLifecycle();
   }
 
+  /// Handle API server lifecycle based on settings changes
+  void _handleApiServerLifecycle() {
+    WidgetsBinding.instance.addPostFrameCallback(_handleApiServerLifecycleAsync);
+  }
+
+  Future<void> _handleApiServerLifecycleAsync(Duration timestamp) async {
+    if (!mounted) return;
+    
+    try {
+      final settings = Provider.of<SettingsProvider>(context, listen: false);
+      final apiService = Provider.of<ApiService?>(context, listen: false);
+      final questionCacheService = Provider.of<QuestionCacheService?>(context, listen: false);
+
+      if (apiService == null || questionCacheService == null) return;
+
+      if (settings.apiEnabled && settings.apiKey.isNotEmpty) {
+        // Start API server if not already running
+        if (!apiService.isRunning) {
+          final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+          final lessonProgressProvider = Provider.of<LessonProgressProvider>(context, listen: false);
+
+          await apiService.startServer(
+            port: settings.apiPort,
+            apiKey: settings.apiKey,
+            settingsProvider: settings,
+            gameStatsProvider: gameStatsProvider,
+            lessonProgressProvider: lessonProgressProvider,
+            questionCacheService: questionCacheService,
+          );
+          AppLogger.info('API server started via settings change');
+        }
+      } else {
+        // Stop API server if running
+        if (apiService.isRunning) {
+          await apiService.stopServer();
+          AppLogger.info('API server stopped via settings change');
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error managing API server lifecycle: $e');
+      // Show user-friendly error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${strings.AppStrings.apiErrorPrefix}${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   /// Builds the MaterialApp with theme configuration
   Widget _buildMaterialApp(SettingsProvider settings) {
+    final analyticsService = _serviceContainer.analyticsService;
+    
     return MaterialApp(
       navigatorKey: navigatorKey,
       navigatorObservers: [analyticsService.getObserver()],
@@ -362,137 +356,44 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
     );
   }
 
-  /// Gets deferred providers that are ready
-  List<SingleChildWidget> _getDeferredProviders() {
-    return [
-      if (_performanceService != null) Provider.value(value: _performanceService!),
-      if (_connectionService != null) Provider.value(value: _connectionService!),
-      if (_questionCacheService != null) Provider.value(value: _questionCacheService!),
-      if (_geminiService != null) Provider.value(value: _geminiService!),
-      // if (_featureFlagsService != null) removed
-      if (_apiService != null) Provider.value(value: _apiService!),
-      if (_starTransactionService != null) Provider.value(value: _starTransactionService!),
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Start time tracking when the app widget is built
+    // For deep link handling after app is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_timeTrackingService.hasOngoingSession()) {
-        _timeTrackingService.startSession();
-      }
-      
-      // Check if we're in the BijbelQuiz Gen period and redirect if needed
-      if (BijbelQuizGenPeriod.isGenPeriod() && !_timeTrackingService.hasGenBeenShownThisPeriod()) {
-        // Mark the Gen as shown for this period before navigating
-        _timeTrackingService.markGenAsShownThisPeriod();
-        
-        // Small delay to ensure context is ready
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted && navigatorKey.currentState != null) {
-            navigatorKey.currentState!.push(
-              MaterialPageRoute(
-                builder: (_) => const BijbelQuizGenScreen(),
-              ),
-            );
+      // Wait a bit to ensure the app is fully initialized before checking for deep links
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (kIsWeb) {
+          // For web, check current URI for stats parameters
+          final uri = Uri.base;
+          if (uri.path.startsWith('/stats') || uri.path.startsWith('/gen.html') || uri.hasQuery) {
+            _handleDeepLink(uri);
           }
-        });
-      }
+        }
+      });
     });
 
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
-        // Handle API server lifecycle based on settings
-        _handleApiServerLifecycle(context, settings);
-
         final app = _buildMaterialApp(settings);
-        final deferredProviders = _getDeferredProviders();
-
-        // For deep link handling after app is built
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          // Wait a bit to ensure the app is fully initialized before checking for deep links
-          Future.delayed(const Duration(milliseconds: 100), () {
-            if (kIsWeb) {
-              // For web, check current URI for stats parameters
-              final uri = Uri.base;
-              if (uri.path.startsWith('/stats') || uri.path.startsWith('/gen.html') || uri.hasQuery) {
-                _handleDeepLink(uri);
-              }
-            }
-          });
-        });
-
-        return deferredProviders.isNotEmpty
-            ? MultiProvider(providers: deferredProviders, child: app)
-            : app;
+        return app;
       },
     );
   }
 
-  /// Handle API server lifecycle based on settings changes
-  void _handleApiServerLifecycle(BuildContext context, SettingsProvider settings) {
-    if (_apiService == null || _questionCacheService == null) return;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        if (settings.apiEnabled && settings.apiKey.isNotEmpty) {
-          // Start API server if not already running
-          if (!_apiService!.isRunning) {
-            final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-            final lessonProgressProvider = Provider.of<LessonProgressProvider>(context, listen: false);
-
-            await _apiService!.startServer(
-              port: settings.apiPort,
-              apiKey: settings.apiKey,
-              settingsProvider: settings,
-              gameStatsProvider: gameStatsProvider,
-              lessonProgressProvider: lessonProgressProvider,
-              questionCacheService: _questionCacheService!,
-            );
-            AppLogger.info('API server started via settings change');
-          }
-        } else {
-          // Stop API server if running
-          if (_apiService!.isRunning) {
-            await _apiService!.stopServer();
-            AppLogger.info('API server stopped via settings change');
-          }
-        }
-      } catch (e) {
-        AppLogger.error('Error managing API server lifecycle: $e');
-        // Show user-friendly error message
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${strings.AppStrings.apiErrorPrefix}${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    });
-  }
-
-  /// Track app lifecycle events for session management
-  void _trackAppLifecycle() {
-    AppLifecycleObserver(analyticsService, _timeTrackingService).observe();
-  }
-
-@override
+  @override
   void dispose() {
     AppLogger.info('BijbelQuizApp disposing...');
-
+    
     // Stop API server if running
-    _apiService?.stopServer().then((_) {
+    final apiService = Provider.of<ApiService?>(context, listen: false);
+    apiService?.stopServer().then((_) {
       AppLogger.info('API server stopped during app disposal');
     }).catchError((e) {
       AppLogger.error('Error stopping API server during disposal: $e');
     });
 
-    _questionCacheService?.dispose();
-    _connectionService?.dispose();
-    _timeTrackingService.dispose();
+    // Dispose service container
+    _serviceContainer.dispose();
     
     // Cancel the deep link subscription
     _sub?.cancel();
@@ -504,9 +405,10 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
 
 /// Observer class to track app lifecycle events
 class AppLifecycleObserver {
+  final AnalyticsService _analyticsService;
   final TimeTrackingService _timeTrackingService;
 
-  AppLifecycleObserver(AnalyticsService analyticsService, this._timeTrackingService);
+  AppLifecycleObserver(this._analyticsService, this._timeTrackingService);
 
   void observe() {
     WidgetsBinding.instance.addObserver(_AppLifecycleObserver(this));
@@ -520,7 +422,6 @@ class _AppLifecycleObserver extends WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // App lifecycle tracking removed - emergency service navigator key no longer available
     switch (state) {
       case AppLifecycleState.resumed:
         AppLogger.info('App lifecycle: resumed');

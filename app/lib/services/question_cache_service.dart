@@ -8,30 +8,39 @@ import 'logger.dart';
 import '../config/supabase_config.dart';
 import 'connection_service.dart';
 
- // Simplified memory cache: store QuizQuestion directly; access tracked via LRU list
-
-/// Configuration for question loading and caching
-class QuestionCacheConfig {
-  static const int defaultBatchSize = 10;
-  static const int maxMemoryCacheSize = 25; // Reduced from 50 to 25 for very low-end devices
-  static const Duration cacheExpiry = Duration(days: 7);
-  static const int maxPersistentCacheSize = 25; // Reduced from 50 to 25 for very low-end devices
+/// Simplified LRU cache for questions with proper memory management
+class QuestionCacheEntry {
+  final QuizQuestion question;
+  late DateTime accessTime;
+  
+  QuestionCacheEntry(this.question) : accessTime = DateTime.now();
+  
+  void touch() {
+    accessTime = DateTime.now();
+  }
 }
 
-/// A service for caching and lazy loading quiz questions with optimized memory usage
-/// for low-end devices.
+/// Configuration for simplified question cache
+class QuestionCacheConfig {
+  static const int defaultBatchSize = 10;
+  static const int maxMemoryCacheSize = 25; // Reduced for low-end devices
+  static const Duration cacheExpiry = Duration(days: 7);
+  static const int maxPersistentCacheSize = 25; // Reduced for low-end devices
+}
+
+/// A simplified service for caching and lazy loading quiz questions with optimized memory usage
+/// for low-end devices. Uses single LRU structure instead of multiple tracking structures.
 class QuestionCacheService {
   static const String _cacheKey = 'cached_questions';
   static const String _cacheTimestampKey = 'cache_timestamp';
   static const String _metadataCacheKey = 'cached_metadata';
   static const String _appVersionKey = 'app_version';
 
-  // Enhanced LRU Cache implementation with predictive loading
-  final Map<String, QuizQuestion> _memoryCache = {};
+  // SIMPLIFIED: Single LRU cache structure instead of multiple tracking structures
+  final Map<String, QuestionCacheEntry> _memoryCache = {};
+  
+  // SIMPLIFIED: Single list for LRU order (keys only)
   final List<String> _lruList = [];
-  final Map<String, int> _accessFrequency = {}; // Track access frequency for smarter eviction
-  final Map<String, DateTime> _lastAccessTime = {}; // Track access time for temporal patterns
-  final Set<String> _predictiveLoadCandidates = {}; // Questions to load preemptively
 
   late SharedPreferences _prefs;
   bool _isInitialized = false;
@@ -44,14 +53,8 @@ class QuestionCacheService {
   // Track loading state per language
   final Map<String, Completer<void>> _loadingCompleters = {};
   
-  // Track question metadata
+  // Track question metadata (simplified - no extra tracking)
   final Map<String, List<Map<String, dynamic>>> _questionMetadata = {};
-  
-  // Track which questions are loaded in memory
-  final Map<String, Set<int>> _loadedQuestionIndices = {};
-  
-  
-  // LRU cache implementation
 
   /// Initialize the cache service
   Future<void> initialize() async {
@@ -98,11 +101,8 @@ class QuestionCacheService {
     }
   }
   
-  
 
   /// Get questions for a specific language with lazy loading
-  /// [startIndex] - The starting index of questions to load
-  /// [count] - Number of questions to load (defaults to batch size)
   Future<List<QuizQuestion>> getQuestions(
     String language, {
     int startIndex = 0,
@@ -113,8 +113,7 @@ class QuestionCacheService {
     // Ensure we have metadata loaded first
     await _ensureMetadataLoaded(language);
     
-    // Determine the end index. If `count` is provided we respect it; otherwise we
-    // load every remaining question starting from `startIndex`.
+    // Determine the end index
     final int endIndex;
     if (count != null) {
       endIndex = startIndex + count;
@@ -129,13 +128,9 @@ class QuestionCacheService {
     for (int i = startIndex; i < endIndex; i++) {
       if (i >= (_questionMetadata[language]?.length ?? 0)) break;
       
-      if (_isQuestionInMemory(language, i)) {
-        final question = _getQuestionFromMemory(language, i);
-        if (question != null) {
-          loadedQuestions.add(question);
-        } else {
-          questionsToLoad.add(i);
-        }
+      final question = _getQuestionFromMemory(language, i);
+      if (question != null) {
+        loadedQuestions.add(question);
       } else {
         questionsToLoad.add(i);
       }
@@ -147,16 +142,10 @@ class QuestionCacheService {
       loadedQuestions.addAll(loaded);
     }
     
-    // Update LRU
-    for (final index in questionsToLoad) {
-      _updateLru(language, index);
-    }
-    
     return loadedQuestions;
   }
 
-  /// Get a batch of questions for a specific language with lazy loading
-  /// This is now an alias for getQuestions with offset/count parameters
+  /// Get a batch of questions for a specific language
   Future<List<QuizQuestion>> getQuestionBatch(
     String language, 
     int batchSize, 
@@ -187,7 +176,6 @@ class QuestionCacheService {
       final cachedMetadata = await _getCachedMetadata(language);
       if (cachedMetadata != null && cachedMetadata.isNotEmpty) {
         _questionMetadata[language] = cachedMetadata;
-        _loadedQuestionIndices[language] = {};
         completer.complete();
         return;
       }
@@ -221,7 +209,6 @@ class QuestionCacheService {
       });
 
       _questionMetadata[language] = metadata;
-      _loadedQuestionIndices[language] = {};
 
       // Cache the metadata for faster startup next time
       await _cacheMetadata(language, metadata);
@@ -269,13 +256,11 @@ class QuestionCacheService {
         AppLogger.info('Loaded ${loadedQuestions.length} questions from JSON (fallback) for indices: $indices');
       }
 
-      // Add loaded questions to memory cache
+      // Add loaded questions to memory cache with LRU tracking
       for (int i = 0; i < loadedQuestions.length; i++) {
         final question = loadedQuestions[i];
         final index = indices[i];
         _addToMemoryCache(language, index, question);
-        _updateLru(language, index);
-        _loadedQuestionIndices.putIfAbsent(language, () => <int>{}).add(index);
       }
 
       return loadedQuestions;
@@ -307,8 +292,6 @@ class QuestionCacheService {
           final questionData = data[index] as Map<String, dynamic>;
           final question = QuizQuestion.fromJson(questionData);
           _addToMemoryCache(language, index, question);
-          _updateLru(language, index);
-          _loadedQuestionIndices.putIfAbsent(language, () => <int>{}).add(index);
           loadedQuestions.add(question);
         } catch (e) {
           AppLogger.error('Error parsing cached question at index $index', e);
@@ -322,6 +305,7 @@ class QuestionCacheService {
       return null;
     }
   }
+  
   
   /// Check if cached questions are still valid
   Future<bool> _isCacheValid(String language) async {
@@ -342,130 +326,65 @@ class QuestionCacheService {
     }
   }
   
-  
-  /// Update the LRU list and access tracking for a question
-  void _updateLru(String language, int index) {
-    final cacheKey = _getQuestionCacheKey(language, index);
 
-    // Remove existing entry if it exists
-    _lruList.remove(cacheKey);
-
-    // Add to end (most recently used)
-    _lruList.add(cacheKey);
-
-    // Update access frequency and time
-    _accessFrequency[cacheKey] = (_accessFrequency[cacheKey] ?? 0) + 1;
-    _lastAccessTime[cacheKey] = DateTime.now();
-  }
-  
-  /// Add a question to the memory cache with enhanced LRU eviction
+  /// SIMPLIFIED: Add question to memory cache with LRU eviction
   void _addToMemoryCache(String language, int index, QuizQuestion question) {
     final cacheKey = _getQuestionCacheKey(language, index);
 
-    // Check if we need to evict using smart eviction strategy
-    if (_memoryCache.length >= QuestionCacheConfig.maxMemoryCacheSize && _lruList.isNotEmpty) {
-      _performSmartEviction();
+    // Check if we need to evict oldest entries
+    if (_memoryCache.length >= QuestionCacheConfig.maxMemoryCacheSize && !_memoryCache.containsKey(cacheKey)) {
+      _evictOldestEntry();
     }
 
-    // Add to cache
-    _memoryCache[cacheKey] = question;
-    _updateLru(language, index);
-
-    // Update predictive loading candidates based on access patterns
-    _updatePredictiveCandidates(language, index);
+    // Add or update entry
+    if (_memoryCache.containsKey(cacheKey)) {
+      // Update existing entry - just touch it
+      _memoryCache[cacheKey]!.touch();
+      // Move to end of LRU list
+      _lruList.remove(cacheKey);
+      _lruList.add(cacheKey);
+    } else {
+      // Add new entry
+      _memoryCache[cacheKey] = QuestionCacheEntry(question);
+      _lruList.add(cacheKey);
+    }
   }
 
-  /// Check if a question is in memory
-  bool _isQuestionInMemory(String language, int index) {
-    final cacheKey = _getQuestionCacheKey(language, index);
-    return _memoryCache.containsKey(cacheKey);
+  /// SIMPLIFIED: Evict the oldest accessed entry (first in LRU list)
+  void _evictOldestEntry() {
+    if (_lruList.isEmpty) return;
+
+    final oldestKey = _lruList.removeAt(0);
+    _memoryCache.remove(oldestKey);
+    
+    AppLogger.debug('Evicted cache entry: $oldestKey');
   }
-  
+
   /// Get a question from memory cache
   QuizQuestion? _getQuestionFromMemory(String language, int index) {
     final cacheKey = _getQuestionCacheKey(language, index);
-    final question = _memoryCache[cacheKey];
-    if (question != null) {
-      _updateLru(language, index);
-      return question;
+    final entry = _memoryCache[cacheKey];
+    if (entry != null) {
+      // Touch the entry to mark as recently used
+      entry.touch();
+      // Move to end of LRU list (most recently used)
+      _lruList.remove(cacheKey);
+      _lruList.add(cacheKey);
+      return entry.question;
     }
     return null;
   }
+  
   
   /// Generate a unique cache key for a question
   String _getQuestionCacheKey(String language, int index) {
     return '${language}_$index';
   }
 
-  /// Perform smart eviction based on access patterns and temporal data
-  void _performSmartEviction() {
-    if (_lruList.isEmpty) return;
-
-    // Find the best candidate for eviction using multiple criteria
-    String bestCandidate = _lruList.first;
-    double lowestScore = double.infinity;
-
-    for (final candidate in _lruList) {
-      double score = _calculateEvictionScore(candidate);
-      if (score < lowestScore) {
-        lowestScore = score;
-        bestCandidate = candidate;
-      }
-    }
-
-    // Remove the best candidate
-    _lruList.remove(bestCandidate);
-    _memoryCache.remove(bestCandidate);
-    _accessFrequency.remove(bestCandidate);
-    _lastAccessTime.remove(bestCandidate);
-
-    AppLogger.info('Smart evicted question: $bestCandidate');
-  }
-
-  /// Calculate eviction score for a cache entry (lower is better to evict)
-  double _calculateEvictionScore(String cacheKey) {
-    final frequency = _accessFrequency[cacheKey] ?? 0;
-    final lastAccess = _lastAccessTime[cacheKey];
-    final timeSinceAccess = lastAccess != null
-        ? DateTime.now().difference(lastAccess).inMinutes
-        : double.infinity;
-
-    // Score combines recency, frequency, and temporal patterns
-    // Lower frequency + older access = better candidate for eviction
-    // Higher frequency + recent access = worse candidate for eviction
-    final recencyScore = timeSinceAccess / 60.0; // Normalize to hours
-    final frequencyScore = 1.0 / (frequency + 1.0); // Inverse frequency
-
-    return recencyScore + frequencyScore;
-  }
-
-  /// Update predictive loading candidates based on access patterns
-  void _updatePredictiveCandidates(String language, int index) {
-    // Add neighboring questions as candidates for predictive loading
-    final baseIndex = index ~/ 10 * 10; // Round to nearest 10
-    for (int i = -2; i <= 2; i++) {
-      final candidateIndex = baseIndex + i * 10;
-      if (candidateIndex >= 0 && candidateIndex != index) {
-        final candidateKey = _getQuestionCacheKey(language, candidateIndex);
-        if (!_memoryCache.containsKey(candidateKey)) {
-          _predictiveLoadCandidates.add(candidateKey);
-        }
-      }
-    }
-  }
-
-  /// Get predictive loading candidates for background loading
-  List<String> getPredictiveLoadCandidates() {
-    final candidates = _predictiveLoadCandidates.toList();
-    _predictiveLoadCandidates.clear(); // Clear after returning
-    return candidates;
-  }
-
   /// Public method to load questions by indices (used by ProgressiveQuestionSelector)
   Future<List<QuizQuestion>> loadQuestionsByIndices(String language, List<int> indices) async {
     return _loadQuestionsByIndices(language, indices);
   }
-  
   
 
   /// Get cached metadata for a language
@@ -523,16 +442,10 @@ class QuestionCacheService {
   Future<void> clearCache() async {
     await initialize();
     try {
-      // Clear memory caches
+      // Clear simplified memory cache
       _memoryCache.clear();
       _lruList.clear();
       _questionMetadata.clear();
-      _loadedQuestionIndices.clear();
-
-      // Clear enhanced LRU tracking
-      _accessFrequency.clear();
-      _lastAccessTime.clear();
-      _predictiveLoadCandidates.clear();
 
       // Clear persistent caches
       final keys = _prefs.getKeys().where((key) =>
@@ -670,35 +583,30 @@ class QuestionCacheService {
 
   /// Dispose of resources
   void dispose() {
-    // No resources to dispose
+    // Clear all caches
+    _memoryCache.clear();
+    _lruList.clear();
+    _questionMetadata.clear();
+    _loadingCompleters.clear();
   }
 
-  /// Get memory usage information with performance optimizations
+  /// Get memory usage information - simplified for single cache structure
   Map<String, dynamic> getMemoryUsage() {
-    // PERFORMANCE OPTIMIZATION: Sample only a subset of questions for size calculation
     int questionCount = _memoryCache.length;
     int totalQuestionSize = 0;
 
-    // Sample every 10th question to reduce calculation time
-    int sampleCount = 0;
-    _memoryCache.forEach((key, question) {
-      if (sampleCount % 10 == 0) { // Sample every 10th item
-        try {
-          totalQuestionSize += question.question.length * 2; // UTF-16 chars
-          totalQuestionSize += question.correctAnswer.length * 2;
-          totalQuestionSize += question.incorrectAnswers.fold<int>(
-            0, (sum, ans) => sum + ans.length * 2);
-        } catch (e) {
-          AppLogger.error('Error calculating question size', e);
-        }
+    // Calculate size for cached questions
+    _memoryCache.forEach((key, entry) {
+      try {
+        final question = entry.question;
+        totalQuestionSize += question.question.length * 2; // UTF-16 chars
+        totalQuestionSize += question.correctAnswer.length * 2;
+        totalQuestionSize += question.incorrectAnswers.fold<int>(
+          0, (sum, ans) => sum + ans.length * 2);
+      } catch (e) {
+        AppLogger.error('Error calculating question size', e);
       }
-      sampleCount++;
     });
-
-    // Extrapolate total size based on sample
-    if (sampleCount > 10) {
-      totalQuestionSize = (totalQuestionSize * sampleCount) ~/ (sampleCount ~/ 10 + 1);
-    }
 
     // Calculate metadata size
     int metadataCount = 0;
@@ -733,39 +641,28 @@ class QuestionCacheService {
         'totalQuestions': metadataCount,
         'totalSizeKB': (totalMetadataSize / 1024).toStringAsFixed(2),
       },
-      'lruList': <String, dynamic>{
-        'size': _lruList.length,
-      },
-      'enhancedTracking': <String, dynamic>{
-        'accessFrequencyEntries': _accessFrequency.length,
-        'lastAccessTimeEntries': _lastAccessTime.length,
-        'predictiveCandidates': _predictiveLoadCandidates.length,
-      },
-      'loadedIndices': {
-        for (final k in _loadedQuestionIndices.keys)
-          k: _loadedQuestionIndices[k]?.length ?? 0,
+      'simplifiedLRU': <String, dynamic>{
+        'lruListSize': _lruList.length,
       },
     };
   }
 
-  /// Clear memory cache if memory usage is too high
+  /// Clear memory cache if memory usage is too high - simplified eviction
   void optimizeMemoryUsage() {
     final memoryInfo = getMemoryUsage();
     final cacheUtilization = double.tryParse(memoryInfo['memoryCache']['cacheUtilizationPercent'] as String) ?? 0.0;
 
     if (cacheUtilization > 90.0) {
-      // Clear 30% of the cache to free up memory
+      // Clear 30% of the cache to free up memory using simple LRU
       final itemsToRemove = (_memoryCache.length * 0.3).round();
       for (int i = 0; i < itemsToRemove && _lruList.isNotEmpty; i++) {
-        final lruKey = _lruList.removeAt(0);
-        _memoryCache.remove(lruKey);
+        _evictOldestEntry();
       }
       AppLogger.info('Optimized memory usage by clearing $itemsToRemove cached questions');
     }
   }
 
   /// Returns a map of category -> frequency for the given language.
-  /// Frequencies are computed from metadata without loading full questions.
   Future<Map<String, int>> getCategoryFrequencies(String language) async {
     await initialize();
     await _ensureMetadataLoaded(language);
@@ -801,7 +698,6 @@ class QuestionCacheService {
   }
 
   /// Loads questions that belong to a specific category.
-  /// This uses metadata to find matching indices and only loads those items.
   Future<List<QuizQuestion>> getQuestionsByCategory(
     String language,
     String category, {
