@@ -12,16 +12,23 @@ enum AnimationType {
   verySlow,  // Major state changes (800ms base)
 }
 
-/// A service for monitoring and optimizing app performance on low-end devices
+/// A lightweight service for optimizing app performance with event-driven monitoring
 class PerformanceService {
+  static const int _maxSamples = 10; // Reduced from 30 for efficiency
+  static const int _lowFrameRateThreshold = 45; // FPS below which we consider performance issues
+  static const int _highFrameTimeThreshold = 22; // ms - frame time above which we have issues
+  
   bool _isLowEndDevice = false;
-  double _averageFrameRate = 120.0; // Default to 120Hz for modern devices
-  double _frameTimeMs = 8.33; // Default to ~120fps (1000ms / 120fps)
-  final List<double> _frameRates = [];
-  final List<double> _frameTimes = [];
-  final List<double> _memoryUsage = [];
-  Timer? _monitoringTimer;
+  double _averageFrameRate = 60.0; // Simplified to 60fps default
+  double _frameTimeMs = 16.67; // Default to 60fps
+  bool _monitoringEnabled = false;
+  bool _performanceIssueDetected = false;
+  
+  // Simple circular buffers for basic averages
+  final List<double> _frameRateSamples = [];
+  final List<double> _frameTimeSamples = [];
   DateTime? _lastFrameTime;
+  Timer? _monitoringTimer;
   
   /// Whether the device is detected as low-end
   bool get isLowEndDevice => _isLowEndDevice;
@@ -34,7 +41,7 @@ class PerformanceService {
     await _detectDeviceCapabilities();
     _detectRefreshRate();
     AppLogger.info('PerformanceService initialized with refresh rate: ${_averageFrameRate}Hz');
-    _startMonitoring();
+    // Don't start monitoring immediately - only when needed
   }
   
   /// Detect the device's refresh rate
@@ -55,8 +62,8 @@ class PerformanceService {
       AppLogger.info('Detected refresh rate: ${_averageFrameRate}Hz');
     } catch (e) {
       AppLogger.error('Error detecting refresh rate', e);
-      // Fall back to default 120Hz if detection fails
-      _averageFrameRate = 120.0;
+      // Fall back to default 60Hz if detection fails
+      _averageFrameRate = 60.0;
     }
   }
   
@@ -83,22 +90,80 @@ class PerformanceService {
     }
   }
   
-  /// Start performance monitoring
-  void _startMonitoring() {
-    if (_isLowEndDevice) {
-      _monitoringTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
-        _checkMemoryUsage();
-      });
+  /// Enable monitoring only when performance issues are detected
+  void _enableMonitoring() {
+    if (!_monitoringEnabled) {
+      _monitoringEnabled = true;
+      _startConditionalMonitoring();
+      AppLogger.info('Performance monitoring enabled due to performance issues');
     }
   }
   
-  /// Check current memory usage
-  void _checkMemoryUsage() {
-    // Simplified memory tracking
-    if (_memoryUsage.length > 20) {
-      _memoryUsage.removeAt(0);
+  /// Disable monitoring to save resources
+  void _disableMonitoring() {
+    if (_monitoringEnabled) {
+      _monitoringEnabled = false;
+      _monitoringTimer?.cancel();
+      AppLogger.info('Performance monitoring disabled');
     }
-    _memoryUsage.add(DateTime.now().millisecondsSinceEpoch.toDouble());
+  }
+  
+  /// Start conditional monitoring timer
+  void _startConditionalMonitoring() {
+    if (_monitoringTimer != null) return;
+    
+    _monitoringTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
+      if (_performanceIssueDetected) {
+        _checkPerformanceHealth();
+      } else {
+        timer.cancel();
+        _monitoringTimer = null;
+      }
+    });
+  }
+  
+  /// Check performance health (lightweight operation)
+  void _checkPerformanceHealth() {
+    // Simple check - if we've been having issues, see if they've resolved
+    if (_frameRateSamples.isNotEmpty) {
+      final recentAvgFrameRate = _calculateSimpleAverage(_frameRateSamples);
+      if (recentAvgFrameRate > _lowFrameRateThreshold + 10) {
+        // Performance seems to have improved
+        _performanceIssueDetected = false;
+        _disableMonitoring();
+        AppLogger.info('Performance improved, disabling intensive monitoring');
+      }
+    }
+  }
+  
+  /// Calculate simple average of a list of values
+  double _calculateSimpleAverage(List<double> values) {
+    if (values.isEmpty) return 0.0;
+    double sum = 0.0;
+    for (final value in values) {
+      sum += value;
+    }
+    return sum / values.length;
+  }
+  
+  /// Add value to circular buffer with max size
+  void _addToCircularBuffer(List<double> buffer, double value, int maxSize) {
+    buffer.add(value);
+    if (buffer.length > maxSize) {
+      buffer.removeAt(0);
+    }
+  }
+  
+  /// Check for performance issues and enable monitoring if needed
+  void _checkPerformanceIssues(double frameRate, double frameTime) {
+    // Check if we should enable monitoring based on current performance
+    if (!_monitoringEnabled && (
+        frameRate < _lowFrameRateThreshold || 
+        frameTime > _highFrameTimeThreshold)) {
+      _performanceIssueDetected = true;
+      _enableMonitoring();
+      AppLogger.warning('Performance issues detected, enabling monitoring. FPS: $frameRate, Frame time: ${frameTime}ms');
+    }
   }
   
   /// Get optimal animation duration based on device capabilities and refresh rate
@@ -160,7 +225,7 @@ class PerformanceService {
     return defaultDuration;
   }
   
-  /// Update frame timing (called from the app's frame callback)
+  /// Update frame timing (event-driven, only when performance issues detected)
   void updateFrameTime() {
     final now = DateTime.now();
 
@@ -176,82 +241,60 @@ class PerformanceService {
       // Calculate current FPS
       final frameRate = 1000.0 / frameTime;
 
-      // Update frame rate history with circular buffer for efficiency
-      _addToCircularBuffer(_frameRates, frameRate, 30);
+      // Only collect data if monitoring is enabled (event-driven)
+      if (_monitoringEnabled) {
+        // Update frame rate history with circular buffer for efficiency
+        _addToCircularBuffer(_frameRateSamples, frameRate, _maxSamples);
 
-      // Update frame time history
-      _addToCircularBuffer(_frameTimes, frameTime, 30);
+        // Update frame time history
+        _addToCircularBuffer(_frameTimeSamples, frameTime, _maxSamples);
 
-      // Calculate median values more efficiently
-      _updateMedianCalculations();
+        // Calculate simple averages instead of complex median calculations
+        _updateSimpleAverages();
+
+        // Continue checking for performance issues
+        _checkPerformanceIssues(frameRate, frameTime);
+      }
     }
 
     _lastFrameTime = now;
   }
+  
+  /// Update simple averages instead of complex median calculations
+  void _updateSimpleAverages() {
+    if (_frameRateSamples.isEmpty) return;
 
-  /// Efficient circular buffer addition
-  void _addToCircularBuffer(List<double> buffer, double value, int maxSize) {
-    if (buffer.length >= maxSize) {
-      buffer.removeAt(0);
-    }
-    buffer.add(value);
-  }
-
-  /// Update median calculations with optimized sorting
-  void _updateMedianCalculations() {
-    if (_frameRates.isEmpty) return;
-
-    // Use a more efficient median calculation for small lists
-    if (_frameRates.length <= 10) {
-      // For small lists, simple sort is fine
-      final sortedRates = List<double>.from(_frameRates)..sort();
-      final sortedTimes = List<double>.from(_frameTimes)..sort();
-
-      _averageFrameRate = sortedRates[sortedRates.length ~/ 2];
-      _frameTimeMs = sortedTimes[sortedTimes.length ~/ 2];
-    } else {
-      // For larger lists, use quickselect-like approach for median
-      _averageFrameRate = _quickSelectMedian(_frameRates);
-      _frameTimeMs = _quickSelectMedian(_frameTimes);
-    }
+    // Use simple averages instead of complex median calculations
+    _averageFrameRate = _calculateSimpleAverage(_frameRateSamples);
+    _frameTimeMs = _calculateSimpleAverage(_frameTimeSamples);
 
     // Ensure reasonable limits
     _averageFrameRate = _averageFrameRate.clamp(30.0, 120.0);
     _frameTimeMs = _frameTimeMs.clamp(8.33, 33.33); // 30fps to 120fps
   }
-
-  /// Quick select algorithm for finding median efficiently
-  double _quickSelectMedian(List<double> list) {
-    if (list.isEmpty) return 60.0; // Default fallback
-
-    final sorted = List<double>.from(list)..sort();
-    return sorted[sorted.length ~/ 2];
-  }
   
   /// Get the current frame time in milliseconds
   double get frameTimeMs => _frameTimeMs;
   
-  /// Get current memory usage estimate
+  /// Get current memory usage estimate (simplified)
   double get estimatedMemoryUsageMB {
-    // More accurate memory estimation based on actual data structures
+    // Simplified memory estimation - no complex calculations
     double memoryUsage = 0.0;
 
     // Base object overhead (approximate)
     memoryUsage += 100; // Base PerformanceService object
 
-    // Collections memory (more accurate estimation)
-    // Each List has overhead + element size
-    memoryUsage += _frameRates.length * 8 + 64; // 8 bytes per double + list overhead
-    memoryUsage += _frameTimes.length * 8 + 64; // 8 bytes per double + list overhead
-    memoryUsage += _memoryUsage.length * 8 + 64; // 8 bytes per double + list overhead
+    // Collections memory (simplified estimation)
+    memoryUsage += _frameRateSamples.length * 8 + 64; // 8 bytes per double + list overhead
+    memoryUsage += _frameTimeSamples.length * 8 + 64; // 8 bytes per double + list overhead
 
-    // Other fields
-    memoryUsage += 8 * 6; // double fields (_averageFrameRate, _frameTimeMs)
-    memoryUsage += 1 * 2; // bool fields (_isLowEndDevice)
+    // Other fields (simplified)
+    memoryUsage += 8 * 4; // double fields
+    memoryUsage += 1 * 2; // bool fields
     memoryUsage += 16; // Timer reference (approximate)
-    memoryUsage += 16; // DateTime reference (_lastFrameTime)
+    memoryUsage += 16; // DateTime reference
 
-    // Convert to MB with more precision
+    // Convert to MB with simple calculation
     return (memoryUsage / (1024 * 1024) * 100).round() / 100;
   }
 
@@ -262,8 +305,10 @@ class PerformanceService {
       'frameTimeMs': frameTimeMs,
       'isLowEndDevice': isLowEndDevice,
       'estimatedMemoryUsageMB': estimatedMemoryUsageMB,
-      'frameRateHistorySize': _frameRates.length,
-      'memoryHistorySize': _memoryUsage.length,
+      'monitoringEnabled': _monitoringEnabled,
+      'performanceIssueDetected': _performanceIssueDetected,
+      'frameRateHistorySize': _frameRateSamples.length,
+      'frameTimeHistorySize': _frameTimeSamples.length,
     };
   }
 
@@ -278,7 +323,7 @@ class PerformanceService {
   /// Dispose of resources
   void dispose() {
     _monitoringTimer?.cancel();
-    _frameRates.clear();
-    _memoryUsage.clear();
+    _frameRateSamples.clear();
+    _frameTimeSamples.clear();
   }
 }
