@@ -8,7 +8,7 @@ description: "Test je Bijbelkennis"
 package_name: app.bijbelquiz.play
 
 # The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.63
+# A version number is three numbers separated by dots, like 1.2.73
 # followed by an optional build number separated by a +.
 # Both the version and the builder number may be overridden in flutter
 # build by specifying --build-name and --build-number, respectively.
@@ -19,7 +19,7 @@ package_name: app.bijbelquiz.play
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.2.6+13
+version: 1.2.7+14
 
 environment:
   sdk: '>=3.2.3 <4.0.0'

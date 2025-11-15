@@ -1,6 +1,6 @@
 # Local Development Setup
 
-This document explains how to set up and use the local development environment for BijbelQuiz v1.2.6+10.
+This document explains how to set up and use the local development environment for BijbelQuiz.
 
 ## Prerequisites
 

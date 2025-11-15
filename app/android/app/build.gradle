@@ -29,8 +29,8 @@ android {
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
         multiDexEnabled true
-        versionCode 13
-        versionName "1.2.6"
+        versionCode 14
+        versionName "1.2.7"
 
         manifestPlaceholders = [
             applicationName: 'io.flutter.app.FlutterApplication'

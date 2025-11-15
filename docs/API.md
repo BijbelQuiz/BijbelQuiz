@@ -728,28 +728,3 @@ For API-related issues:
 2. Verify your setup matches the documentation
 3. Test with simple `curl` commands first
 4. Check BijbelQuiz app logs for error details
-
-## Changelog
-
-### Version 1.2.6 (Latest)
-- **Star Transaction System**: Complete star transaction management with history tracking
-- **New Star Endpoints**: Added `/v1/stars/*` endpoints for balance, transactions, and statistics
-- **Transaction Logging**: All star operations are logged with detailed metadata
-- **Enhanced Analytics**: Comprehensive star statistics and transaction analytics
-- **Improved Integration**: Better API integration with enhanced error handling
-
-### Version 1.1.0
-- **API Versioning**: All endpoints now use `/v1/` prefix for future compatibility
-- **Rate Limiting**: Implemented 100 requests/minute per IP with automatic cleanup
-- **Enhanced Security**: Added security headers, request size limiting, and input validation
-- **Performance Monitoring**: Added processing time metrics to all responses
-- **Improved Error Handling**: Enhanced error responses with timestamps and validation hints
-- **Better Logging**: Comprehensive request/response logging with timing information
-- **Input Validation**: Strict validation for all parameters with detailed error messages
-- **Documentation Updates**: Updated all examples and added new troubleshooting section
-
-### Version 1.0.0
-- Initial API implementation
-- Basic authentication and question endpoints
-- Progress and statistics endpoints
-- Settings endpoint for app configuration
