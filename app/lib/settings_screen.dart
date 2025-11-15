@@ -162,7 +162,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: () { settings.reloadSettings(); },
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: colorScheme.onPrimary),
             label: Text(strings.AppStrings.retry),
           ),
         ],
@@ -195,10 +195,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         controller: _searchController,
         decoration: InputDecoration(
           hintText: strings.AppStrings.searchSettings,
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: _searchController.text.isNotEmpty 
+          prefixIcon: Icon(Icons.search, color: colorScheme.onSurface.withValues(alpha: 0.6)),
+          suffixIcon: _searchController.text.isNotEmpty
             ? IconButton(
-                icon: const Icon(Icons.clear),
+                icon: Icon(Icons.clear, color: colorScheme.onSurface.withValues(alpha: 0.6)),
                 onPressed: () {
                   _searchController.clear();
                   setState(() {});
@@ -469,7 +469,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: strings.AppStrings.serverStatus,
               subtitle: strings.AppStrings.checkServiceStatus,
               child: IconButton(
-                icon: const Icon(Icons.open_in_new),
+                icon: Icon(Icons.open_in_new, color: Theme.of(context).colorScheme.primary),
                 onPressed: _openStatusPage,
                 tooltip: strings.AppStrings.openStatusPage,
                 color: Theme.of(context).colorScheme.primary,
@@ -480,7 +480,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: strings.AppStrings.checkForUpdates,
                 subtitle: strings.AppStrings.checkForUpdatesDescription,
                 child: IconButton(
-                  icon: const Icon(Icons.refresh),
+                  icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.primary),
                   onPressed: () => _checkForUpdates(context, settings),
                   tooltip: strings.AppStrings.checkForUpdatesTooltip,
                   color: Theme.of(context).colorScheme.primary,
@@ -490,7 +490,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: strings.AppStrings.privacyPolicy,
               subtitle: strings.AppStrings.privacyPolicyDescription,
               child: IconButton(
-                icon: const Icon(Icons.open_in_new),
+                icon: Icon(Icons.open_in_new, color: Theme.of(context).colorScheme.primary),
                 onPressed: () => _openPrivacyPolicy(context),
                 tooltip: strings.AppStrings.openPrivacyPolicyTooltip,
                 color: Theme.of(context).colorScheme.primary,
@@ -796,7 +796,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     return IconButton(
       onPressed: onTap,
-      icon: Icon(icon),
+      icon: Icon(icon, color: color ?? colorScheme.primary),
       color: color ?? colorScheme.primary,
       tooltip: null,
     );
@@ -810,7 +810,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         if (settings.apiKey.isNotEmpty) ...[
           IconButton(
             onPressed: () => _copyApiKeyToClipboard(context, settings.apiKey),
-            icon: const Icon(Icons.copy, size: 20),
+            icon: Icon(Icons.copy, size: 20, color: colorScheme.primary),
             tooltip: strings.AppStrings.copyApiKey,
             style: IconButton.styleFrom(
               backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
@@ -826,7 +826,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _showApiKeyDialog(context, settings);
               }
             },
-            icon: const Icon(Icons.refresh, size: 20),
+            icon: Icon(Icons.refresh, size: 20, color: colorScheme.primary),
             tooltip: strings.AppStrings.regenerateApiKey,
             style: IconButton.styleFrom(
               backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
@@ -1304,7 +1304,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return ListTile(
       leading: Icon(icon, color: colorScheme.primary),
       title: Text(platform),
-      trailing: const Icon(Icons.open_in_new, size: 16),
+      trailing: Icon(Icons.open_in_new, size: 16, color: colorScheme.primary),
       onTap: () async {
         final analytics = Provider.of<AnalyticsService>(context, listen: false);
         analytics.capture(context, 'follow_social_media', properties: {'platform': platform});
