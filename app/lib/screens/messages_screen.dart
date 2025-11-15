@@ -444,49 +444,48 @@ class _MessagesScreenState extends State<MessagesScreen> {
   /// Builds the emoji reactions row
   Widget _buildEmojiReactionsRow(
       Message message, ColorScheme colorScheme, TextTheme textTheme) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.start,
       children: _availableEmojis.map((emoji) {
         final isReacted = _hasUserReactedWith(message.id, emoji);
         final count = _getReactionCount(message.id, emoji);
 
-        return Padding(
-          padding: const EdgeInsets.only(right: 16),
-          child: InkWell(
-            onTap: () => _handleReaction(message.id, emoji),
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              decoration: BoxDecoration(
-                color: isReacted
-                    ? colorScheme.primaryContainer
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
-                border: isReacted
-                    ? Border.all(color: colorScheme.primary, width: 1)
-                    : null,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+        return InkWell(
+          onTap: () => _handleReaction(message.id, emoji),
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            decoration: BoxDecoration(
+              color: isReacted
+                  ? colorScheme.primaryContainer
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+              border: isReacted
+                  ? Border.all(color: colorScheme.primary, width: 1)
+                  : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  emoji,
+                  style: const TextStyle(fontSize: 20),
+                ),
+                if (count > 0) ...[
+                  const SizedBox(width: 6),
                   Text(
-                    emoji,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                  if (count > 0) ...[
-                    const SizedBox(width: 6),
-                    Text(
-                      count.toString(),
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: isReacted
-                            ? colorScheme.onPrimaryContainer
-                            : colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    count.toString(),
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: isReacted
+                          ? colorScheme.onPrimaryContainer
+                          : colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
                     ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
         );
