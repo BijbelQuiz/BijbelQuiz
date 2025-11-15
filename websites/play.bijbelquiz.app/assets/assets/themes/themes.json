@@ -110,14 +110,14 @@
       "name": "Donker",
       "type": "dark",
       "colors": {
-        "primary": "#2563EB",
-        "secondary": "#7C3AED",
-        "tertiary": "#DC2626",
+        "primary": "#60A5FA",
+        "secondary": "#A78BFA",
+        "tertiary": "#F87171",
         "surface": "#0F172A",
         "surfaceContainerHighest": "#1E293B",
         "onSurface": "#F8FAFC",
-        "outline": "#334155",
-        "outlineVariant": "#1E293B",
+        "outline": "#475569",
+        "outlineVariant": "#334155",
         "shadow": "#000000",
         "scaffoldBackgroundColor": "#0F172A"
       },
@@ -181,8 +181,8 @@
         "padding": {"horizontal": 24, "vertical": 16},
         "borderRadius": 16,
         "elevation": 2,
-        "backgroundColor": "#2563EB",
-        "foregroundColor": "#FFFFFF",
+        "backgroundColor": "#60A5FA",
+        "foregroundColor": "#0F172A",
         "textStyle": {
           "fontSize": 16,
           "fontWeight": "w600",
@@ -319,15 +319,15 @@
       "name": "Groen",
       "type": "light",
       "colors": {
-        "primary": "#4CAF50",
-        "secondary": "#81C784",
-        "tertiary": "#388E3C",
-        "surface": "#F1F8E9",
-        "surfaceContainerHighest": "#E8F5E9",
-        "onSurface": "#2E7D32",
+        "primary": "#1B5E20",
+        "secondary": "#2E7D32",
+        "tertiary": "#0D4F1F",
+        "surface": "#E8F5E9",
+        "surfaceContainerHighest": "#C8E6C9",
+        "onSurface": "#1B5E20",
         "outline": "#A5D6A7",
         "outlineVariant": "#81C784",
-        "scaffoldBackgroundColor": "#F5F5F5"
+        "scaffoldBackgroundColor": "#E8F5E9"
       },
       "textTheme": {
         "headlineLarge": {
@@ -389,7 +389,7 @@
         "padding": {"horizontal": 24, "vertical": 16},
         "borderRadius": 16,
         "elevation": 2,
-        "backgroundColor": "#4CAF50",
+        "backgroundColor": "#1B5E20",
         "foregroundColor": "#FFFFFF",
         "textStyle": {
           "fontSize": 16,
@@ -407,7 +407,7 @@
         "centerTitle": true,
         "elevation": 0,
         "scrolledUnderElevation": 0,
-        "backgroundColor": "#4CAF50",
+        "backgroundColor": "#1B5E20",
         "foregroundColor": "#FFFFFF",
         "titleTextStyle": {
           "fontSize": 18,
@@ -633,13 +633,13 @@
       "type": "light",
       "colors": {
         "primary": "#EF4444",
-        "secondary": "#22C55E",
+        "secondary": "#15803D",
         "tertiary": "#F59E0B",
         "surface": "#FEF2F2",
-        "surfaceContainerHighest": "#DCFCE7",
+        "surfaceContainerHighest": "#A7F3D0",
         "onSurface": "#7F1D1D",
         "outline": "#FCA5A5",
-        "outlineVariant": "#BBF7D0",
+        "outlineVariant": "#86EFAC",
         "shadow": "#991B1B",
         "scaffoldBackgroundColor": "#FEF2F2"
       },
@@ -684,19 +684,19 @@
           "fontSize": 16,
           "fontWeight": "w400",
           "letterSpacing": 0.1,
-          "color": "#059669"
+          "color": "#166534"
         },
         "bodyMedium": {
           "fontSize": 14,
           "fontWeight": "w400",
           "letterSpacing": 0.1,
-          "color": "#047857"
+          "color": "#15803D"
         },
         "labelLarge": {
           "fontSize": 14,
           "fontWeight": "w600",
           "letterSpacing": 0.5,
-          "color": "#B45309"
+          "color": "#166534"
         }
       },
       "buttonTheme": {

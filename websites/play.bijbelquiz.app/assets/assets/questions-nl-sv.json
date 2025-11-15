@@ -40,7 +40,7 @@
     "categories": [
       "Matteüs"
     ],
-    "biblicalReference": "Matthéüs 1",
+    "biblicalReference": "Mattheüs 1",
     "id": "000003"
   },
   {
@@ -70,7 +70,7 @@
     "categories": [
       "Matteüs"
     ],
-    "biblicalReference": "Matthéüs 5:5",
+    "biblicalReference": "Mattheüs 5:5",
     "id": "000005"
   },
   {
@@ -84,7 +84,7 @@
     "moeilijkheidsgraad": 3,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "Matthéüs 5:8",
+    "biblicalReference": "Mattheüs 5:8",
     "id": "000006"
   },
   {
@@ -116,7 +116,7 @@
     "categories": [
       "Hosea"
     ],
-    "biblicalReference": "Hoséa 1:2",
+    "biblicalReference": "Hosea 1:2",
     "id": "000008"
   },
   {
@@ -612,7 +612,7 @@
     "categories": [
       "Richteren"
     ],
-    "biblicalReference": "Richteren 3: 9, 10",
+    "biblicalReference": "Richteren 3:9-10",
     "id": "000039"
   },
   {
@@ -923,7 +923,7 @@
     "moeilijkheidsgraad": 1,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "1Samuël 17:12",
+    "biblicalReference": "1 Samuël 17:12",
     "id": "000059"
   },
   {
@@ -1002,7 +1002,7 @@
     "categories": [
       "1 Samuël"
     ],
-    "biblicalReference": "1 Samuël 1: 25",
+    "biblicalReference": "1 Samuël 1:25",
     "id": "000064"
   },
   {
@@ -1080,7 +1080,7 @@
     "categories": [
       "Psalmen"
     ],
-    "biblicalReference": "Psalm 23",
+    "biblicalReference": "Psalmen 23",
     "id": "000069"
   },
   {
@@ -1336,7 +1336,7 @@
     "categories": [
       "Matteüs"
     ],
-    "biblicalReference": "Matthéüs 2:23",
+    "biblicalReference": "Mattheüs 2:23",
     "id": "000085"
   },
   {
@@ -1364,7 +1364,7 @@
     "moeilijkheidsgraad": 1,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "Matthéüs 7:25",
+    "biblicalReference": "Mattheüs 7:25",
     "id": "000087"
   },
   {
@@ -1380,7 +1380,7 @@
     "categories": [
       "Matteüs"
     ],
-    "biblicalReference": "Matthéüs 8:10",
+    "biblicalReference": "Mattheüs 8:10",
     "id": "000088"
   },
   {
@@ -1396,7 +1396,7 @@
     "categories": [
       "Matteüs"
     ],
-    "biblicalReference": "Matthéüs 9:9",
+    "biblicalReference": "Mattheüs 9:9",
     "id": "000089"
   },
   {
@@ -1412,7 +1412,7 @@
     "categories": [
       "Matteüs"
     ],
-    "biblicalReference": "Matthéüs 17:20",
+    "biblicalReference": "Mattheüs 17:20",
     "id": "000090"
   },
   {
@@ -1426,7 +1426,7 @@
     "moeilijkheidsgraad": 1,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "Matthéüs 18:22",
+    "biblicalReference": "Mattheüs 18:22",
     "id": "000091"
   },
   {
@@ -1440,7 +1440,7 @@
     "moeilijkheidsgraad": 1,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "Matthéüs 20:30",
+    "biblicalReference": "Mattheüs 20:30",
     "id": "000092"
   },
   {
@@ -1582,7 +1582,7 @@
     "categories": [
       "Openbaring"
     ],
-    "biblicalReference": "Openbaring 3: 15, 16",
+    "biblicalReference": "Openbaring 3:15-16",
     "id": "000101"
   },
   {
@@ -1791,7 +1791,7 @@
       "1 Korintiërs",
       "2 Korintiërs"
     ],
-    "biblicalReference": " 1 en 2 Korinthe",
+    "biblicalReference": "1 en 2 Korinthe",
     "id": "000114"
   },
   {
@@ -1893,7 +1893,7 @@
     "moeilijkheidsgraad": 1,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "Hizkía 20:1",
+    "biblicalReference": "Hizkia 20:1",
     "id": "000121"
   },
   {
@@ -1925,7 +1925,7 @@
     "categories": [
       "Exodus"
     ],
-    "biblicalReference": "Éxodus 3:22",
+    "biblicalReference": "Exodus 3:22",
     "id": "000123"
   },
   {
@@ -1957,7 +1957,7 @@
     "categories": [
       "Handelingen"
     ],
-    "biblicalReference": "Handelingen 7: 54 - 60",
+    "biblicalReference": "Handelingen 7:54-60",
     "id": "000125"
   },
   {
@@ -2033,7 +2033,7 @@
     "moeilijkheidsgraad": 3,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "Matthéüs 8:14",
+    "biblicalReference": "Mattheüs 8:14",
     "id": "000130"
   },
   {
@@ -2173,7 +2173,7 @@
     "categories": [
       "Handelingen"
     ],
-    "biblicalReference": "Handelingen 2: 40, 41",
+    "biblicalReference": "Handelingen 2:40-41",
     "id": "000139"
   },
   {
@@ -2568,7 +2568,7 @@
     "moeilijkheidsgraad": 1,
     "type": "fitb",
     "categories": [],
-    "biblicalReference": "Éxodus 15:23",
+    "biblicalReference": "Exodus 15:23",
     "id": "000164"
   },
   {
@@ -2681,7 +2681,7 @@
     "categories": [
       "Psalmen"
     ],
-    "biblicalReference": "Psalm 1:1",
+    "biblicalReference": "Psalmen 1:1",
     "id": "000171"
   },
   {
@@ -2697,7 +2697,7 @@
       "Jehosabat",
       "Elisabet"
     ],
-    "biblicalReference": "Éxodus 6:22",
+    "biblicalReference": "Exodus 6:22",
     "id": "000172"
   },
   {
@@ -2713,7 +2713,7 @@
       "Ze verlieten de stad",
       "Ze kwamen in opstand"
     ],
-    "biblicalReference": "Nehémia 8:9",
+    "biblicalReference": "Nehemia 8:9",
     "id": "000173"
   },
   {
@@ -2729,7 +2729,7 @@
       "Bode",
       "Boekhouder"
     ],
-    "biblicalReference": "Nehémia 1:11",
+    "biblicalReference": "Nehemia 1:11",
     "id": "000174"
   },
   {
@@ -2920,7 +2920,7 @@
       "Aan de westzijden van het heilige der heiligen strijken",
       "Met wierook vermengen"
     ],
-    "biblicalReference": "Éxodus 29:12",
+    "biblicalReference": "Exodus 29:12",
     "id": "000186"
   },
   {
@@ -2937,7 +2937,7 @@
       "Gij zijt uitverkoren boven alle volken",
       "Ik ben uw God"
     ],
-    "biblicalReference": "Éxodus 3:6",
+    "biblicalReference": "Exodus 3:6",
     "id": "000187"
   },
   {
@@ -3067,7 +3067,7 @@
       "Adam",
       "Mozes"
     ],
-    "biblicalReference": "Mattéüs 1:1",
+    "biblicalReference": "Mattheüs 1:1",
     "id": "000195"
   },
   {
@@ -3317,7 +3317,7 @@
       "Een zondig vat",
       "Een tijdelijke tent"
     ],
-    "biblicalReference": "1 Korinthe 6: 19 en 20",
+    "biblicalReference": "1 Korintiërs 6 en 20",
     "id": "000211"
   },
   {
@@ -3333,7 +3333,7 @@
       "Drie",
       "Vier"
     ],
-    "biblicalReference": "Korinthe 1 en 2",
+    "biblicalReference": "Korintiërs 1 en 2",
     "id": "000212"
   },
   {
@@ -3349,7 +3349,7 @@
       "Vermijd zwakte ten alle tijde",
       "Geloof overwint de zwakheid"
     ],
-    "biblicalReference": "2 Korinthe 12:9",
+    "biblicalReference": "2 Korintiërs 12:9",
     "id": "000213"
   },
   {
@@ -3365,7 +3365,7 @@
       "Bediening van genade",
       "Bediening der geboden"
     ],
-    "biblicalReference": "2 Korinthe 5:18",
+    "biblicalReference": "2 Korintiërs 5:18",
     "id": "000214"
   },
   {
@@ -3581,7 +3581,7 @@
       "Dat zij het volk onderwijze",
       "Dat zij het volk predike"
     ],
-    "biblicalReference": "1 Timótheüs 2:11",
+    "biblicalReference": "1 Timotheüs 2:11",
     "id": "000228"
   },
   {
@@ -3595,7 +3595,7 @@
       "Een God van het oordeel",
       "Een God der twist"
     ],
-    "biblicalReference": "2 Timótheüs 1:7",
+    "biblicalReference": "2 Timotheüs 1:7",
     "id": "000229"
   },
   {
@@ -3611,7 +3611,7 @@
       "Vreemdeling, pelgrim, reiziger",
       "Visser, landbouwer, soldaat"
     ],
-    "biblicalReference": "2 Timótheüs 2",
+    "biblicalReference": "2 Timotheüs 2",
     "id": "000230"
   },
   {
@@ -3625,7 +3625,7 @@
     "fouteAntwoorden": [
       "Timotheüs"
     ],
-    "biblicalReference": "2 Timothéüs 4:10",
+    "biblicalReference": "2 Timotheüs 4:10",
     "id": "000231"
   },
   {
@@ -3777,7 +3777,7 @@
     "fouteAntwoorden": [
       "Waar"
     ],
-    "biblicalReference": "Éxodus 6:19",
+    "biblicalReference": "Exodus 6:19",
     "id": "000241"
   },
   {
@@ -4152,7 +4152,7 @@
     "fouteAntwoorden": [
       "Waar"
     ],
-    "biblicalReference": "Nehémia 1:11",
+    "biblicalReference": "Nehemia 1:11",
     "id": "000268"
   },
   {
@@ -4166,7 +4166,7 @@
     "fouteAntwoorden": [
       "Niet waar"
     ],
-    "biblicalReference": "Nehémia 2: 17 en 18",
+    "biblicalReference": "Nehemia 2 en 18",
     "id": "000269"
   },
   {
@@ -4376,7 +4376,7 @@
     "fouteAntwoorden": [
       "Niet waar"
     ],
-    "biblicalReference": "Jeremía 29:1",
+    "biblicalReference": "Jeremia 29:1",
     "id": "000284"
   },
   {
@@ -4390,7 +4390,7 @@
     "fouteAntwoorden": [
       "Waar"
     ],
-    "biblicalReference": "Jeremía 1:6",
+    "biblicalReference": "Jeremia 1:6",
     "id": "000285"
   },
   {
@@ -4488,7 +4488,7 @@
     "fouteAntwoorden": [
       "Niet waar"
     ],
-    "biblicalReference": "Hoséa 6:1",
+    "biblicalReference": "Hosea 6:1",
     "id": "000292"
   },
   {
@@ -4502,7 +4502,7 @@
     "fouteAntwoorden": [
       "Waar"
     ],
-    "biblicalReference": "Hoséa",
+    "biblicalReference": "Hosea",
     "id": "000293"
   },
   {
@@ -4684,7 +4684,7 @@
     "fouteAntwoorden": [
       "Niet waar"
     ],
-    "biblicalReference": "Hábakuk 2:4",
+    "biblicalReference": "Habakuk 2:4",
     "id": "000306"
   },
   {
@@ -4698,7 +4698,7 @@
     "fouteAntwoorden": [
       "Waar"
     ],
-    "biblicalReference": "Hábakuk",
+    "biblicalReference": "Habakuk",
     "id": "000307"
   },
   {
@@ -4712,7 +4712,7 @@
     "fouteAntwoorden": [
       "Niet waar"
     ],
-    "biblicalReference": "Zefánja 2:3",
+    "biblicalReference": "Sefanja 2:3",
     "id": "000308"
   },
   {
@@ -4726,7 +4726,7 @@
     "fouteAntwoorden": [
       "Waar"
     ],
-    "biblicalReference": "Zefánja",
+    "biblicalReference": "Sefanja",
     "id": "000309"
   },
   {
@@ -4782,7 +4782,7 @@
     "fouteAntwoorden": [
       "Waar"
     ],
-    "biblicalReference": "Zacharía 1, 3, 4 en 9",
+    "biblicalReference": "Zacharia 1 en 9",
     "id": "000313"
   },
   {
@@ -4794,7 +4794,7 @@
     "fouteAntwoorden": [
       "Waar"
     ],
-    "biblicalReference": "Maleáchi",
+    "biblicalReference": "Maleachi",
     "id": "000314"
   },
   {
@@ -4822,7 +4822,7 @@
     "fouteAntwoorden": [
       "Niet waar"
     ],
-    "biblicalReference": "Matthéüs 5, 6 en 7",
+    "biblicalReference": "Mattheüs 5 en 7",
     "id": "000316"
   },
   {
@@ -5050,7 +5050,7 @@
     "fouteAntwoorden": [
       "Waar"
     ],
-    "biblicalReference": "1 Korinthe 1:2",
+    "biblicalReference": "1 Korintiërs 1:2",
     "id": "000332"
   },
   {
@@ -5064,7 +5064,7 @@
     "fouteAntwoorden": [
       "Niet waar"
     ],
-    "biblicalReference": "1 Korinthe 13",
+    "biblicalReference": "1 Korintiërs 13",
     "id": "000333"
   },
   {
@@ -5079,7 +5079,7 @@
     "fouteAntwoorden": [
       "Waar"
     ],
-    "biblicalReference": "2 Korinthe 7:5",
+    "biblicalReference": "2 Korintiërs 7:5",
     "id": "000334"
   },
   {
@@ -5093,7 +5093,7 @@
     "fouteAntwoorden": [
       "Niet waar"
     ],
-    "biblicalReference": "2 Korinthe 8 en 9",
+    "biblicalReference": "2 Korintiërs 8 en 9",
     "id": "000335"
   },
   {
@@ -5150,7 +5150,7 @@
     "fouteAntwoorden": [
       "Waar"
     ],
-    "biblicalReference": "Éfeze 3:1",
+    "biblicalReference": "Efeziërs 3:1",
     "id": "000339"
   },
   {
@@ -5480,7 +5480,7 @@
       "tabernakel",
       "tempel"
     ],
-    "biblicalReference": "Éxodus 25:8",
+    "biblicalReference": "Exodus 25:8",
     "id": "000362"
   },
   {
@@ -5496,7 +5496,7 @@
       "knopen",
       "rieten"
     ],
-    "biblicalReference": "Éxodus 25:38",
+    "biblicalReference": "Exodus 25:38",
     "id": "000363"
   },
   {
@@ -5512,7 +5512,7 @@
       "genade",
       "grootheid"
     ],
-    "biblicalReference": "Éxodus 33:18",
+    "biblicalReference": "Exodus 33:18",
     "id": "000364"
   },
   {
@@ -6574,7 +6574,7 @@
       "priester",
       "profeet"
     ],
-    "biblicalReference": "Nehémia 1:11",
+    "biblicalReference": "Nehemia 1:11",
     "id": "000430"
   },
   {
@@ -6591,7 +6591,7 @@
       "30",
       "70"
     ],
-    "biblicalReference": "Nehémia 6:15",
+    "biblicalReference": "Nehemia 6:15",
     "id": "000431"
   },
   {
@@ -6624,7 +6624,7 @@
       "aan hen",
       "aan dezen"
     ],
-    "biblicalReference": "Nehémia 5:19",
+    "biblicalReference": "Nehemia 5:19",
     "id": "000433"
   },
   {
@@ -6640,7 +6640,7 @@
       "Kison",
       "Hinnom"
     ],
-    "biblicalReference": "Nehémia 6:2",
+    "biblicalReference": "Nehemia 6:2",
     "id": "000434"
   },
   {
@@ -6832,7 +6832,7 @@
       "blijdschap",
       "eer"
     ],
-    "biblicalReference": "Psalm 2:11",
+    "biblicalReference": "Psalmen 2:11",
     "id": "000445"
   },
   {
@@ -6848,7 +6848,7 @@
       "redde",
       "hoorde"
     ],
-    "biblicalReference": "Psalm 3:6",
+    "biblicalReference": "Psalmen 3:6",
     "id": "000446"
   },
   {
@@ -6864,7 +6864,7 @@
       "roepen",
       "klacht"
     ],
-    "biblicalReference": "Psalm 6:10",
+    "biblicalReference": "Psalmen 6:10",
     "id": "000447"
   },
   {
@@ -6880,7 +6880,7 @@
       "verheven",
       "liefelijk"
     ],
-    "biblicalReference": "Psalm 8:10",
+    "biblicalReference": "Psalmen 8:10",
     "id": "000448"
   },
   {
@@ -6896,7 +6896,7 @@
       "eren",
       "vrezen"
     ],
-    "biblicalReference": "Psalm 18:50",
+    "biblicalReference": "Psalmen 18:50",
     "id": "000449"
   },
   {
@@ -7727,7 +7727,7 @@
     "categories": [
       "Matteüs"
     ],
-    "biblicalReference": "Matthéüs 1:16",
+    "biblicalReference": "Mattheüs 1:16",
     "fouteAntwoorden": [
       "Eliud",
       "Mattan",
@@ -7741,7 +7741,7 @@
     "moeilijkheidsgraad": 1,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "Matthéüs 4:2",
+    "biblicalReference": "Mattheüs 4:2",
     "fouteAntwoorden": [
       "7",
       "10",
@@ -7757,7 +7757,7 @@
     "categories": [
       "Matteüs"
     ],
-    "biblicalReference": "Matthéüs 5:13",
+    "biblicalReference": "Mattheüs 5:13",
     "fouteAntwoorden": [
       "Het is tot genezing",
       "Het wordt gezuiverd",
@@ -7773,7 +7773,7 @@
     "categories": [
       "Matteüs"
     ],
-    "biblicalReference": "Matthéüs 5:3",
+    "biblicalReference": "Mattheüs 5:3",
     "fouteAntwoorden": [
       "Zalig zijn die treuren",
       "Zalig zijn de zachtmoedigen",
@@ -7791,7 +7791,7 @@
       "Lucas",
       "Kerst"
     ],
-    "biblicalReference": "Matthéüs 8:1",
+    "biblicalReference": "Mattheüs 8:1",
     "fouteAntwoorden": [
       "Hij onderwijst in de synagoge",
       "Hij gaat opnieuw prediken",
@@ -7821,7 +7821,7 @@
     "categories": [
       "Johannes"
     ],
-    "biblicalReference": "Matthéüs 26:63",
+    "biblicalReference": "Mattheüs 26:63",
     "fouteAntwoorden": [
       "Judas",
       "Pilatus",
@@ -7838,7 +7838,7 @@
       "Matteüs",
       "Kerst"
     ],
-    "biblicalReference": "Matthéüs 3:16",
+    "biblicalReference": "Mattheüs 3:16",
     "fouteAntwoorden": [
       "De aarde beefde",
       "De zon verduisterde",
@@ -7852,7 +7852,7 @@
     "moeilijkheidsgraad": 2,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "Matthéüs 4:18",
+    "biblicalReference": "Mattheüs 4:18",
     "fouteAntwoorden": [
       "Johannes",
       "Jakobus",
@@ -7869,7 +7869,7 @@
       "Matteüs",
       "Lucas"
     ],
-    "biblicalReference": "Matthéüs 14:27",
+    "biblicalReference": "Mattheüs 14:27",
     "fouteAntwoorden": [
       "Vreest niet, Ik ben het",
       "Volg mij",
@@ -7883,7 +7883,7 @@
     "moeilijkheidsgraad": 1,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "Matthéüs 26:15",
+    "biblicalReference": "Mattheüs 26:15",
     "fouteAntwoorden": [
       "20",
       "40",
@@ -7899,7 +7899,7 @@
     "categories": [
       "Matteüs"
     ],
-    "biblicalReference": "Matthéüs 27:11",
+    "biblicalReference": "Mattheüs 27:11",
     "fouteAntwoorden": [
       "Kájafas",
       "Herodes",
@@ -7943,7 +7943,7 @@
     "categories": [
       "Genesis"
     ],
-    "biblicalReference": "Matthéüs 27:19",
+    "biblicalReference": "Mattheüs 27:19",
     "fouteAntwoorden": [
       "De vrouw van Kájafas",
       "De vrouw van Herodes",
@@ -7959,7 +7959,7 @@
     "categories": [
       "Openbaring"
     ],
-    "biblicalReference": "Matthéüs 28:1",
+    "biblicalReference": "Mattheüs 28:1",
     "fouteAntwoorden": [
       "Maria Magdaléna",
       "Maria, de moeder van Jezus",
@@ -7975,7 +7975,7 @@
     "categories": [
       "Openbaring"
     ],
-    "biblicalReference": "Matthéüs 28:5",
+    "biblicalReference": "Mattheüs 28:5",
     "fouteAntwoorden": [
       "Hij is opgestaan",
       "Hij is hier niet; want Hij is opgestaan",
@@ -7993,7 +7993,7 @@
       "Pasen",
       "Hemelvaart"
     ],
-    "biblicalReference": "Matthéüs 28:19",
+    "biblicalReference": "Mattheüs 28:19",
     "fouteAntwoorden": [
       "De Heilige Geest",
       "Een zegen",
@@ -8171,7 +8171,7 @@
     "categories": [
       "Exodus"
     ],
-    "biblicalReference": "Éxodus 9:24",
+    "biblicalReference": "Exodus 9:24",
     "fouteAntwoorden": [
       "Kikvorsen",
       "Veepest",
@@ -8236,7 +8236,7 @@
     "categories": [
       "Exodus"
     ],
-    "biblicalReference": "Éxodus 25:31",
+    "biblicalReference": "Exodus 25:31",
     "fouteAntwoorden": [
       "Zilver",
       "Koper",
@@ -8252,7 +8252,7 @@
     "categories": [
       "Leviticus"
     ],
-    "biblicalReference": "Éxodus 6:22",
+    "biblicalReference": "Exodus 6:22",
     "fouteAntwoorden": [
       "Nadab",
       "Abíhu",
@@ -8509,7 +8509,7 @@
     "categories": [
       "Exodus"
     ],
-    "biblicalReference": "Éxodus 8:16",
+    "biblicalReference": "Exodus 8:16",
     "fouteAntwoorden": [
       "Kikvorsen",
       "Ongedierte",
@@ -8525,7 +8525,7 @@
     "categories": [
       "Exodus"
     ],
-    "biblicalReference": "Éxodus 10:22",
+    "biblicalReference": "Exodus 10:22",
     "fouteAntwoorden": [
       "3",
       "4",
@@ -8542,7 +8542,7 @@
       "Exodus",
       "Deuteronomium"
     ],
-    "biblicalReference": "Éxodus 20:12",
+    "biblicalReference": "Exodus 20:12",
     "fouteAntwoorden": [
       "2",
       "3",
@@ -8558,7 +8558,7 @@
     "categories": [
       "Exodus"
     ],
-    "biblicalReference": "Éxodus 28:19",
+    "biblicalReference": "Exodus 28:19",
     "fouteAntwoorden": [
       "1",
       "2",
@@ -8630,7 +8630,7 @@
     "categories": [
       "Jeremia"
     ],
-    "biblicalReference": "Jeremía 1:1",
+    "biblicalReference": "Jeremia 1:1",
     "fouteAntwoorden": [
       "Niet waar"
     ],
@@ -8644,7 +8644,7 @@
     "categories": [
       "Jeremia"
     ],
-    "biblicalReference": "Jeremía 1:3",
+    "biblicalReference": "Jeremia 1:3",
     "fouteAntwoorden": [
       "Waar"
     ],
@@ -8658,7 +8658,7 @@
     "categories": [
       "Jeremia"
     ],
-    "biblicalReference": "Jeremía 20:2",
+    "biblicalReference": "Jeremia 20:2",
     "fouteAntwoorden": [
       "Niet waar"
     ],
@@ -8672,7 +8672,7 @@
     "categories": [
       "Jeremia"
     ],
-    "biblicalReference": "Jeremía 29:12",
+    "biblicalReference": "Jeremia 29:12",
     "fouteAntwoorden": [
       "Waar"
     ],
@@ -8770,7 +8770,7 @@
     "categories": [
       "Hosea"
     ],
-    "biblicalReference": "Hoséa 14:4",
+    "biblicalReference": "Hosea 14:4",
     "fouteAntwoorden": [
       "Waar"
     ],
@@ -8965,7 +8965,7 @@
     "moeilijkheidsgraad": 2,
     "type": "fitb",
     "categories": [],
-    "biblicalReference": "Matthéüs 26:40",
+    "biblicalReference": "Mattheüs 26:40",
     "fouteAntwoorden": [
       "Johannes",
       "Jakobus",
@@ -9077,7 +9077,7 @@
     "moeilijkheidsgraad": 3,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "Matthéus 15:34",
+    "biblicalReference": "Mattheüs 15:34",
     "fouteAntwoorden": [
       "Vijf",
       "Drie",
@@ -9091,7 +9091,7 @@
     "moeilijkheidsgraad": 2,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "Matthéüs 16:16",
+    "biblicalReference": "Mattheüs 16:16",
     "fouteAntwoorden": [
       "Johannes",
       "Lukas",
@@ -9161,7 +9161,7 @@
     "moeilijkheidsgraad": 1,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "Matthéüs 2:1",
+    "biblicalReference": "Mattheüs 2:1",
     "fouteAntwoorden": [
       "Noorden",
       "Zuiden",
@@ -9175,7 +9175,7 @@
     "moeilijkheidsgraad": 3,
     "type": "tf",
     "categories": [],
-    "biblicalReference": "Matthéüs 4:9",
+    "biblicalReference": "Mattheüs 4:9",
     "fouteAntwoorden": [
       "Niet waar"
     ],
@@ -9187,7 +9187,7 @@
     "moeilijkheidsgraad": 4,
     "type": "tf",
     "categories": [],
-    "biblicalReference": "Matthéüs 5:7",
+    "biblicalReference": "Mattheüs 5:7",
     "fouteAntwoorden": [
       "Waar"
     ],
@@ -9199,7 +9199,7 @@
     "moeilijkheidsgraad": 2,
     "type": "mc",
     "categories": [],
-    "biblicalReference": "Matthéüs 14:20",
+    "biblicalReference": "Mattheüs 14:20",
     "fouteAntwoorden": [
       "Vijf",
       "Twee",
