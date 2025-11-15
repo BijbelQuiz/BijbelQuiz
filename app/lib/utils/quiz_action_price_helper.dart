@@ -3,7 +3,8 @@ import '../services/store_service.dart';
 
 /// Helper class to get dynamic prices for quiz actions from the store database
 class QuizActionPriceHelper {
-  static final QuizActionPriceHelper _instance = QuizActionPriceHelper._internal();
+  static final QuizActionPriceHelper _instance =
+      QuizActionPriceHelper._internal();
   factory QuizActionPriceHelper() => _instance;
   QuizActionPriceHelper._internal();
 
@@ -18,11 +19,13 @@ class QuizActionPriceHelper {
 
   /// Get price for unlocking biblical reference
   Future<int> getUnlockBiblicalReferencePrice() async {
-    return await _getPriceForItem('unlock_biblical_reference', defaultPrice: 10);
+    return await _getPriceForItem('unlock_biblical_reference',
+        defaultPrice: 10);
   }
 
   /// Internal method to get price for an item with caching
-  Future<int> _getPriceForItem(String itemKey, {required int defaultPrice}) async {
+  Future<int> _getPriceForItem(String itemKey,
+      {required int defaultPrice}) async {
     try {
       // Check if we need to refresh cache
       if (_cachedStoreItems == null || _shouldRefreshCache()) {

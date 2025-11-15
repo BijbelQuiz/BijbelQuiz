@@ -22,10 +22,11 @@ class ErrorHandler {
     Map<String, dynamic>? additionalInfo,
   }) {
     _logError(error);
-    
+
     // Report the error to Supabase for debugging
-    _reportErrorToSupabase(error, questionId: questionId, additionalInfo: additionalInfo);
-    
+    _reportErrorToSupabase(error,
+        questionId: questionId, additionalInfo: additionalInfo);
+
     final String message = _buildUserErrorMessage(error, showTechnicalDetails);
     showTopSnackBar(
       context,
@@ -44,12 +45,13 @@ class ErrorHandler {
     Map<String, dynamic>? additionalInfo,
   }) async {
     _logError(error);
-    
+
     // Report the error to Supabase for debugging
-    _reportErrorToSupabase(error, questionId: questionId, additionalInfo: additionalInfo);
-    
+    _reportErrorToSupabase(error,
+        questionId: questionId, additionalInfo: additionalInfo);
+
     final String message = _buildUserErrorMessage(error, showTechnicalDetails);
-    
+
     return showDialog<void>(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -63,7 +65,9 @@ class ErrorHandler {
                   const SizedBox(height: 8),
                   Text(
                     'Error Code: ${error.errorCode}',
-                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline),
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.outline),
                   ),
                 ],
               ],
@@ -90,32 +94,32 @@ class ErrorHandler {
   }) {
     // For certain error types, always report automatically (especially for critical features like biblical references)
     final shouldAutoReport = _shouldAutoReportError(error);
-    
+
     if (shouldAutoReport) {
       // Report automatically without user intervention
       ErrorReportingService()
           .reportError(
-            appError: error,
-            questionId: questionId,
-            additionalInfo: additionalInfo,
-          )
+        appError: error,
+        questionId: questionId,
+        additionalInfo: additionalInfo,
+      )
           .then((_) {
-            AppLogger.info('Error automatically reported to Supabase: ${error.userMessage}');
-          })
-          .catchError((e) {
-            AppLogger.warning('Failed to auto-report error to Supabase: $e');
-          });
+        AppLogger.info(
+            'Error automatically reported to Supabase: ${error.userMessage}');
+      }).catchError((e) {
+        AppLogger.warning('Failed to auto-report error to Supabase: $e');
+      });
     } else {
       // For other errors, still report but with lower priority
       ErrorReportingService()
           .reportError(
-            appError: error,
-            questionId: questionId,
-            additionalInfo: additionalInfo,
-          )
+        appError: error,
+        questionId: questionId,
+        additionalInfo: additionalInfo,
+      )
           .catchError((e) {
-            AppLogger.warning('Failed to report error to Supabase: $e');
-          });
+        AppLogger.warning('Failed to report error to Supabase: $e');
+      });
     }
   }
 
@@ -127,7 +131,7 @@ class ErrorHandler {
       case AppErrorType.network:
       case AppErrorType.dataLoading:
         return true;
-      
+
       case AppErrorType.validation:
         // Auto-report validation errors that might affect core functionality
         if (error.technicalMessage.toLowerCase().contains('biblical') ||
@@ -137,11 +141,11 @@ class ErrorHandler {
           return true;
         }
         return false;
-      
+
       case AppErrorType.storage:
         // Auto-report storage errors as they can affect user progress
         return true;
-      
+
       case AppErrorType.unknown:
         // For unknown errors, check if they're related to critical features
         final message = error.technicalMessage.toLowerCase();
@@ -153,7 +157,7 @@ class ErrorHandler {
           return true;
         }
         return false;
-      
+
       default:
         // For other error types, don't auto-report unless specifically handled
         return false;
@@ -205,7 +209,7 @@ class ErrorHandler {
     if (!showTechnicalDetails) {
       return error.userMessage;
     }
-    
+
     // If showing technical details, include both user and technical messages
     if (error.technicalMessage != error.userMessage) {
       return '${error.userMessage}\n\nTechnical: ${error.technicalMessage}';
@@ -229,13 +233,17 @@ class ErrorHandler {
       case AppErrorType.payment:
         return strings_en.AppStrings.purchaseError;
       case AppErrorType.ai:
-        return strings_en.AppStrings.aiError; // Note: this might not exist, will add to localization later
+        return strings_en.AppStrings
+            .aiError; // Note: this might not exist, will add to localization later
       case AppErrorType.api:
-        return strings_en.AppStrings.apiError; // Note: this might not exist, will add to localization later
+        return strings_en.AppStrings
+            .apiError; // Note: this might not exist, will add to localization later
       case AppErrorType.storage:
-        return strings_en.AppStrings.storageError; // Note: this might not exist, will add to localization later
+        return strings_en.AppStrings
+            .storageError; // Note: this might not exist, will add to localization later
       case AppErrorType.sync:
-        return strings_en.AppStrings.syncError; // Note: this might not exist, will add to localization later
+        return strings_en.AppStrings
+            .syncError; // Note: this might not exist, will add to localization later
       case AppErrorType.unknown:
         return strings_en.AppStrings.unknownError;
     }
@@ -245,7 +253,10 @@ class ErrorHandler {
 /// Extension to make error handling more convenient
 extension ErrorHandlerExtension on BuildContext {
   /// Shows an error using the centralized error handler
-  void showError(AppError error, {bool showTechnicalDetails = false, String? questionId, Map<String, dynamic>? additionalInfo}) {
+  void showError(AppError error,
+      {bool showTechnicalDetails = false,
+      String? questionId,
+      Map<String, dynamic>? additionalInfo}) {
     ErrorHandler().showError(
       context: this,
       error: error,
@@ -257,7 +268,10 @@ extension ErrorHandlerExtension on BuildContext {
 
   /// Shows an error dialog using the centralized error handler
   Future<void> showErrorDialog(AppError error,
-      {bool showTechnicalDetails = false, String? title, String? questionId, Map<String, dynamic>? additionalInfo}) {
+      {bool showTechnicalDetails = false,
+      String? title,
+      String? questionId,
+      Map<String, dynamic>? additionalInfo}) {
     return ErrorHandler().showErrorDialog(
       context: this,
       error: error,

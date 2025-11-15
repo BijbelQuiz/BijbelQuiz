@@ -40,7 +40,8 @@ class _SyncScreenState extends State<SyncScreen> {
 
   Future<void> _loadCurrentUsername() async {
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final gameStatsProvider =
+          Provider.of<GameStatsProvider>(context, listen: false);
       final currentUsername = await gameStatsProvider.syncService.getUsername();
       if (mounted) {
         setState(() {
@@ -71,7 +72,8 @@ class _SyncScreenState extends State<SyncScreen> {
           .loadString('assets/blacklisted_usernames.json');
       final List<dynamic> jsonData = json.decode(response);
       setState(() {
-        _blacklistedUsernames = jsonData.map((item) => item.toString().toLowerCase()).toList();
+        _blacklistedUsernames =
+            jsonData.map((item) => item.toString().toLowerCase()).toList();
       });
     } catch (e) {
       // Auto-report the error
@@ -118,7 +120,8 @@ class _SyncScreenState extends State<SyncScreen> {
   }
 
   void _setupSyncListeners() {
-    final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+    final gameStatsProvider =
+        Provider.of<GameStatsProvider>(context, listen: false);
     Provider.of<LessonProgressProvider>(context, listen: false);
     Provider.of<SettingsProvider>(context, listen: false);
 
@@ -127,7 +130,8 @@ class _SyncScreenState extends State<SyncScreen> {
 
   Future<void> _getCurrentDeviceId() async {
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final gameStatsProvider =
+          Provider.of<GameStatsProvider>(context, listen: false);
       final deviceId = await gameStatsProvider.getCurrentDeviceId();
       setState(() {
         _currentDeviceId = deviceId;
@@ -176,7 +180,8 @@ class _SyncScreenState extends State<SyncScreen> {
 
       try {
         if (!mounted) return;
-        final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+        final gameStatsProvider =
+            Provider.of<GameStatsProvider>(context, listen: false);
         final success = await gameStatsProvider.removeDevice(deviceId);
 
         if (success) {
@@ -237,17 +242,19 @@ class _SyncScreenState extends State<SyncScreen> {
 
   Future<bool> _isUsernameTakenByOtherDevices(String username) async {
     if (username.isEmpty) return false;
-    
+
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final gameStatsProvider =
+          Provider.of<GameStatsProvider>(context, listen: false);
       final devicesInRoom = await gameStatsProvider.getDevicesInRoom();
-      
+
       if (devicesInRoom == null || devicesInRoom.isEmpty) return false;
-      
+
       for (final deviceId in devicesInRoom) {
         // Skip the current device when checking if username is taken
         if (deviceId != _currentDeviceId) {
-          final deviceUsername = await gameStatsProvider.syncService.getUsernameForDevice(deviceId);
+          final deviceUsername = await gameStatsProvider.syncService
+              .getUsernameForDevice(deviceId);
           if (deviceUsername != null && deviceUsername == username) {
             return true; // Username is taken by another device
           }
@@ -257,7 +264,8 @@ class _SyncScreenState extends State<SyncScreen> {
     } catch (e) {
       // Auto-report the error but return false to avoid false positives
       await AutomaticErrorReporter.reportStorageError(
-        message: 'Error checking if username is taken by other devices: $username - ${e.toString()}',
+        message:
+            'Error checking if username is taken by other devices: $username - ${e.toString()}',
         userMessage: 'Error checking username availability',
         operation: 'check_username_availability',
         additionalInfo: {
@@ -266,13 +274,16 @@ class _SyncScreenState extends State<SyncScreen> {
           'feature': 'sync',
         },
       );
-      AppLogger.error('Error checking if username is taken by other devices', e);
+      AppLogger.error(
+          'Error checking if username is taken by other devices', e);
       return false; // Assume it's not taken on error to avoid false positives
     }
   }
 
   Future<void> _loadDevicesInRoom() async {
-    if (!Provider.of<GameStatsProvider>(context, listen: false).syncService.isInRoom) {
+    if (!Provider.of<GameStatsProvider>(context, listen: false)
+        .syncService
+        .isInRoom) {
       setState(() {
         _devicesInRoom = null;
       });
@@ -284,7 +295,8 @@ class _SyncScreenState extends State<SyncScreen> {
     });
 
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final gameStatsProvider =
+          Provider.of<GameStatsProvider>(context, listen: false);
       final devices = await gameStatsProvider.getDevicesInRoom();
       setState(() {
         _devicesInRoom = devices;
@@ -345,13 +357,13 @@ class _SyncScreenState extends State<SyncScreen> {
     });
 
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final gameStatsProvider =
+          Provider.of<GameStatsProvider>(context, listen: false);
       final success = await gameStatsProvider.syncService.setUsername(username);
 
       if (success) {
         if (mounted) {
-          setState(() {
-          });
+          setState(() {});
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(strings.AppStrings.usernameSaved),
@@ -425,22 +437,22 @@ class _SyncScreenState extends State<SyncScreen> {
     });
 
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final gameStatsProvider =
+          Provider.of<GameStatsProvider>(context, listen: false);
       Provider.of<LessonProgressProvider>(context, listen: false);
       Provider.of<SettingsProvider>(context, listen: false);
 
       final success = await gameStatsProvider.joinSyncRoom(code);
 
       if (success) {
-        setState(() {
-        });
+        setState(() {});
         AppLogger.info('Successfully joined sync room: $code');
         // Load the username after successfully joining the room
         await _loadCurrentUsername();
-        
+
         // Trigger immediate sync of all data after joining room
         await _syncAllData();
-        
+
         if (mounted) {
           Navigator.of(context).pop(true); // Return success
         }
@@ -491,7 +503,8 @@ class _SyncScreenState extends State<SyncScreen> {
     });
 
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final gameStatsProvider =
+          Provider.of<GameStatsProvider>(context, listen: false);
       Provider.of<LessonProgressProvider>(context, listen: false);
       Provider.of<SettingsProvider>(context, listen: false);
 
@@ -531,32 +544,39 @@ class _SyncScreenState extends State<SyncScreen> {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = Random();
     return String.fromCharCodes(
-      Iterable.generate(6, (_) => chars.codeUnitAt(random.nextInt(chars.length))),
+      Iterable.generate(
+          6, (_) => chars.codeUnitAt(random.nextInt(chars.length))),
     );
   }
 
   /// Syncs all current data to the room immediately
   Future<void> _syncAllData() async {
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-      final lessonProgressProvider = Provider.of<LessonProgressProvider>(context, listen: false);
-      final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+      final gameStatsProvider =
+          Provider.of<GameStatsProvider>(context, listen: false);
+      final lessonProgressProvider =
+          Provider.of<LessonProgressProvider>(context, listen: false);
+      final settingsProvider =
+          Provider.of<SettingsProvider>(context, listen: false);
 
       // Sync game stats
       if (gameStatsProvider.syncService.isInRoom) {
-        await gameStatsProvider.syncService.syncData('game_stats', gameStatsProvider.getExportData());
+        await gameStatsProvider.syncService
+            .syncData('game_stats', gameStatsProvider.getExportData());
         AppLogger.info('Synced game stats to room');
       }
 
       // Sync lesson progress
       if (lessonProgressProvider.syncService.isInRoom) {
-        await lessonProgressProvider.syncService.syncData('lesson_progress', lessonProgressProvider.getExportData());
+        await lessonProgressProvider.syncService.syncData(
+            'lesson_progress', lessonProgressProvider.getExportData());
         AppLogger.info('Synced lesson progress to room');
       }
 
       // Sync settings
       if (settingsProvider.syncService.isInRoom) {
-        await settingsProvider.syncService.syncData('settings', settingsProvider.getExportData());
+        await settingsProvider.syncService
+            .syncData('settings', settingsProvider.getExportData());
         AppLogger.info('Synced settings to room');
       }
     } catch (e) {
@@ -582,20 +602,20 @@ class _SyncScreenState extends State<SyncScreen> {
 
     try {
       final code = _generateSyncCode();
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final gameStatsProvider =
+          Provider.of<GameStatsProvider>(context, listen: false);
       Provider.of<LessonProgressProvider>(context, listen: false);
       Provider.of<SettingsProvider>(context, listen: false);
 
       final success = await gameStatsProvider.joinSyncRoom(code);
 
       if (success) {
-        setState(() {
-        });
+        setState(() {});
         AppLogger.info('Successfully started sync room: $code');
-        
+
         // Trigger immediate sync of all data after creating room
         await _syncAllData();
-        
+
         if (mounted) {
           Navigator.of(context).pop(true); // Return success
         }
@@ -676,9 +696,9 @@ class _SyncScreenState extends State<SyncScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      isInRoom 
-                        ? strings.AppStrings.currentlyConnectedToUser 
-                        : strings.AppStrings.userIdDescription,
+                      isInRoom
+                          ? strings.AppStrings.currentlyConnectedToUser
+                          : strings.AppStrings.userIdDescription,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
@@ -687,7 +707,7 @@ class _SyncScreenState extends State<SyncScreen> {
                   ],
                 ),
               ),
-              
+
               // Error message
               if (_error != null)
                 Container(
@@ -717,7 +737,7 @@ class _SyncScreenState extends State<SyncScreen> {
                     ],
                   ),
                 ),
-              
+
               // Main content
               if (!isInRoom)
                 Container(
@@ -761,7 +781,8 @@ class _SyncScreenState extends State<SyncScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                            borderSide: BorderSide(
+                                color: colorScheme.primary, width: 2),
                           ),
                         ),
                         keyboardType: TextInputType.text,
@@ -789,7 +810,8 @@ class _SyncScreenState extends State<SyncScreen> {
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
                                   ),
                                 )
                               : Text(
@@ -801,7 +823,7 @@ class _SyncScreenState extends State<SyncScreen> {
                                 ),
                         ),
                       ),
-                      
+
                       // Divider with OR
                       const SizedBox(height: 24),
                       Row(
@@ -830,7 +852,7 @@ class _SyncScreenState extends State<SyncScreen> {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // Create section
                       Text(
                         strings.AppStrings.createUserId,
@@ -865,7 +887,8 @@ class _SyncScreenState extends State<SyncScreen> {
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.blue),
                                   ),
                                 )
                               : Text(
@@ -926,13 +949,15 @@ class _SyncScreenState extends State<SyncScreen> {
                             const SizedBox(height: 16),
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 16),
                               decoration: BoxDecoration(
                                 color: colorScheme.primaryContainer,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                gameStatsProvider.syncService.currentRoomId ?? strings.AppStrings.unknownError,
+                                gameStatsProvider.syncService.currentRoomId ??
+                                    strings.AppStrings.unknownError,
                                 style: theme.textTheme.headlineMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: colorScheme.primary,
@@ -943,7 +968,7 @@ class _SyncScreenState extends State<SyncScreen> {
                           ],
                         ),
                       ),
-                      
+
                       // Username section
                       const SizedBox(height: 24),
                       Container(
@@ -980,21 +1005,25 @@ class _SyncScreenState extends State<SyncScreen> {
                                 prefixIcon: const Icon(Icons.person_outline),
                                 suffixIcon: _usernameController.text.isNotEmpty
                                     ? FutureBuilder<bool>(
-                                        future: _isUsernameTakenByOtherDevices(_usernameController.text.trim()),
+                                        future: _isUsernameTakenByOtherDevices(
+                                            _usernameController.text.trim()),
                                         builder: (context, snapshot) {
-                                          if (snapshot.connectionState == ConnectionState.waiting) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
                                             return const Padding(
                                               padding: EdgeInsets.all(12.0),
                                               child: SizedBox(
                                                 width: 20,
                                                 height: 20,
-                                                child: CircularProgressIndicator(
+                                                child:
+                                                    CircularProgressIndicator(
                                                   strokeWidth: 2,
                                                 ),
                                               ),
                                             );
                                           }
-                                          if (snapshot.hasData && snapshot.data == true) {
+                                          if (snapshot.hasData &&
+                                              snapshot.data == true) {
                                             return const Icon(
                                               Icons.close_rounded,
                                               color: Colors.red,
@@ -1018,7 +1047,8 @@ class _SyncScreenState extends State<SyncScreen> {
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                                  borderSide: BorderSide(
+                                      color: colorScheme.primary, width: 2),
                                 ),
                                 errorText: _usernameError,
                               ),
@@ -1032,11 +1062,12 @@ class _SyncScreenState extends State<SyncScreen> {
                                     _usernameError = null;
                                   });
                                 }
-                                
+
                                 // Check for blacklisted username in real-time
                                 if (_isUsernameBlacklisted(value)) {
                                   setState(() {
-                                    _usernameError = strings.AppStrings.usernameBlacklisted;
+                                    _usernameError =
+                                        strings.AppStrings.usernameBlacklisted;
                                   });
                                 }
                               },
@@ -1056,7 +1087,8 @@ class _SyncScreenState extends State<SyncScreen> {
                               width: double.infinity,
                               height: 45,
                               child: ElevatedButton(
-                                onPressed: _isLoadingUsername ? null : _saveUsername,
+                                onPressed:
+                                    _isLoadingUsername ? null : _saveUsername,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: colorScheme.primary,
                                   foregroundColor: colorScheme.onPrimary,
@@ -1071,7 +1103,9 @@ class _SyncScreenState extends State<SyncScreen> {
                                         height: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.white),
                                         ),
                                       )
                                     : Text(
@@ -1124,65 +1158,82 @@ class _SyncScreenState extends State<SyncScreen> {
                                       ),
                                     ),
                                   )
-                                : _devicesInRoom != null && _devicesInRoom!.isNotEmpty
+                                : _devicesInRoom != null &&
+                                        _devicesInRoom!.isNotEmpty
                                     ? ListView.separated(
                                         shrinkWrap: true,
-                                        physics: const NeverScrollableScrollPhysics(),
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
                                         itemCount: _devicesInRoom!.length,
-                                        separatorBuilder: (context, index) => const Divider(height: 1),
+                                        separatorBuilder: (context, index) =>
+                                            const Divider(height: 1),
                                         itemBuilder: (context, index) {
                                           final device = _devicesInRoom![index];
-                                          final isCurrentDevice = _currentDeviceId != null && device == _currentDeviceId;
-                                          
+                                          final isCurrentDevice =
+                                              _currentDeviceId != null &&
+                                                  device == _currentDeviceId;
+
                                           return FutureBuilder<String?>(
-                                            future: gameStatsProvider.syncService.getUsernameForDevice(device),
-                                            builder: (context, snapshot) {
-                                              final username = snapshot.data;
-                                              final displayName = username != null && username.isNotEmpty
-                                                  ? '$username ($device)'
-                                                  : (isCurrentDevice 
-                                                      ? '${strings.AppStrings.thisDevice} ($device)' 
-                                                      : device);
-                                              
-                                              return ListTile(
-                                                leading: Icon(
-                                                  username != null && username.isNotEmpty
-                                                      ? Icons.person_rounded
-                                                      : Icons.phone_android,
-                                                  color: isCurrentDevice 
-                                                      ? colorScheme.primary 
-                                                      : colorScheme.onSurfaceVariant,
-                                                ),
-                                                title: Text(
-                                                  displayName,
-                                                  style: TextStyle(
-                                                    fontWeight: isCurrentDevice 
-                                                        ? FontWeight.bold 
-                                                        : FontWeight.normal,
+                                              future: gameStatsProvider
+                                                  .syncService
+                                                  .getUsernameForDevice(device),
+                                              builder: (context, snapshot) {
+                                                final username = snapshot.data;
+                                                final displayName = username !=
+                                                            null &&
+                                                        username.isNotEmpty
+                                                    ? '$username ($device)'
+                                                    : (isCurrentDevice
+                                                        ? '${strings.AppStrings.thisDevice} ($device)'
+                                                        : device);
+
+                                                return ListTile(
+                                                  leading: Icon(
+                                                    username != null &&
+                                                            username.isNotEmpty
+                                                        ? Icons.person_rounded
+                                                        : Icons.phone_android,
+                                                    color: isCurrentDevice
+                                                        ? colorScheme.primary
+                                                        : colorScheme
+                                                            .onSurfaceVariant,
                                                   ),
-                                                ),
-                                                trailing: isCurrentDevice
-                                                    ? Icon(
-                                                        Icons.check_circle,
-                                                        color: colorScheme.primary,
-                                                      )
-                                                    : IconButton(
-                                                        icon: Icon(
-                                                          Icons.remove_circle,
-                                                          color: colorScheme.error,
+                                                  title: Text(
+                                                    displayName,
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          isCurrentDevice
+                                                              ? FontWeight.bold
+                                                              : FontWeight
+                                                                  .normal,
+                                                    ),
+                                                  ),
+                                                  trailing: isCurrentDevice
+                                                      ? Icon(
+                                                          Icons.check_circle,
+                                                          color: colorScheme
+                                                              .primary,
+                                                        )
+                                                      : IconButton(
+                                                          icon: Icon(
+                                                            Icons.remove_circle,
+                                                            color: colorScheme
+                                                                .error,
+                                                          ),
+                                                          onPressed: () =>
+                                                              _removeDevice(
+                                                                  device),
                                                         ),
-                                                        onPressed: () => _removeDevice(device),
-                                                      ),
-                                              );
-                                            }
-                                          );
+                                                );
+                                              });
                                         },
                                       )
                                     : Container(
                                         padding: const EdgeInsets.all(12),
                                         child: Text(
                                           strings.AppStrings.noDevicesConnected,
-                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
                                             color: colorScheme.onSurfaceVariant,
                                           ),
                                           textAlign: TextAlign.center,
@@ -1210,7 +1261,8 @@ class _SyncScreenState extends State<SyncScreen> {
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.red),
                                   ),
                                 )
                               : Row(

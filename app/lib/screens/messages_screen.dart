@@ -20,12 +20,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
   List<Message> _activeMessages = [];
   bool _isLoading = true;
   String? _errorMessage;
-  
+
   // Reaction data - maps messageId to list of reaction counts
   final Map<String, List<ReactionCount>> _messageReactions = {};
   // Maps messageId to the current user's reaction emoji
   final Map<String, String?> _userReactions = {};
-  
+
   // Available emojis for reactions
   final List<String> _availableEmojis = ['👍', '❤️', '😊', '😢', '😮', '😡'];
 
@@ -36,7 +36,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
     _analyticsService = Provider.of<AnalyticsService>(context, listen: false);
     _loadMessages();
     _analyticsService.screen(context, 'MessagesScreen');
-    _analyticsService.trackFeatureUsage(context, 'messaging', 'screen_accessed');
+    _analyticsService.trackFeatureUsage(
+        context, 'messaging', 'screen_accessed');
   }
 
   /// Load all active messages from the database
@@ -48,10 +49,10 @@ class _MessagesScreenState extends State<MessagesScreen> {
       });
 
       final messages = await _messagingService.getActiveMessages();
-      
+
       // Load reaction data for all messages
       await _loadReactionsForMessages(messages);
-      
+
       if (mounted) {
         _messagingService.trackMessagesViewed(_analyticsService, context);
         setState(() {
@@ -77,22 +78,24 @@ class _MessagesScreenState extends State<MessagesScreen> {
   Future<void> _loadReactionsForMessages(List<Message> messages) async {
     final newMessageReactions = <String, List<ReactionCount>>{};
     final newUserReactions = <String, String?>{};
-    
+
     for (final message in messages) {
       try {
         // Load reaction counts
-        final reactionCounts = await _messagingService.getMessageReactionCounts(message.id);
+        final reactionCounts =
+            await _messagingService.getMessageReactionCounts(message.id);
         newMessageReactions[message.id] = reactionCounts;
-        
+
         // Load current user's reaction (service handles both authenticated and anonymous users)
-        final userReaction = await _messagingService.getUserMessageReaction(message.id, null);
+        final userReaction =
+            await _messagingService.getUserMessageReaction(message.id, null);
         newUserReactions[message.id] = userReaction;
       } catch (e) {
         // Log error but continue loading other messages
         debugPrint('Error loading reactions for message ${message.id}: $e');
       }
     }
-    
+
     if (mounted) {
       setState(() {
         _messageReactions.addAll(newMessageReactions);
@@ -131,7 +134,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
       }
 
       // Reload reaction counts for this message
-      final updatedCounts = await _messagingService.getMessageReactionCounts(messageId);
+      final updatedCounts =
+          await _messagingService.getMessageReactionCounts(messageId);
       if (mounted) {
         setState(() {
           _messageReactions[messageId] = updatedCounts;
@@ -152,7 +156,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
           },
         );
       }
-
     } catch (e) {
       // Show error feedback
       if (mounted) {
@@ -160,7 +163,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
           SnackBar(content: Text('Failed to update reaction: $e')),
         );
       }
-      
+
       AutomaticErrorReporter.reportStorageError(
         message: 'Error handling message reaction',
         additionalInfo: {
@@ -176,12 +179,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
   int _getReactionCount(String messageId, String emoji) {
     final reactions = _messageReactions[messageId];
     if (reactions == null) return 0;
-    
+
     final reaction = reactions.firstWhere(
       (r) => r.emoji == emoji,
       orElse: () => ReactionCount(emoji: emoji, count: 0),
     );
-    
+
     return reaction.count;
   }
 
@@ -237,7 +240,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
           IconButton(
             icon: Icon(Icons.refresh, color: colorScheme.onSurface),
             onPressed: () {
-              _messagingService.trackMessagesRefreshed(_analyticsService, context);
+              _messagingService.trackMessagesRefreshed(
+                  _analyticsService, context);
               _loadMessages();
             },
           ),
@@ -248,11 +252,13 @@ class _MessagesScreenState extends State<MessagesScreen> {
           builder: (context, constraints) {
             final isLargeScreen = constraints.maxWidth > 600;
             final horizontalPadding = isLargeScreen ? 24.0 : 16.0;
-            final maxContainerWidth = isLargeScreen ? 600.0 : constraints.maxWidth;
+            final maxContainerWidth =
+                isLargeScreen ? 600.0 : constraints.maxWidth;
 
             return RefreshIndicator(
               onRefresh: () {
-                _messagingService.trackMessagesRefreshed(_analyticsService, context);
+                _messagingService.trackMessagesRefreshed(
+                    _analyticsService, context);
                 return _loadMessages();
               },
               child: SingleChildScrollView(
@@ -379,13 +385,15 @@ class _MessagesScreenState extends State<MessagesScreen> {
   Widget _buildMessagesList(ColorScheme colorScheme, TextTheme textTheme) {
     return Column(
       children: [
-        ..._activeMessages.map((message) => _buildMessageCard(message, colorScheme, textTheme)),
+        ..._activeMessages.map(
+            (message) => _buildMessageCard(message, colorScheme, textTheme)),
       ],
     );
   }
 
   /// Builds a card for a single message
-  Widget _buildMessageCard(Message message, ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildMessageCard(
+      Message message, ColorScheme colorScheme, TextTheme textTheme) {
     return Card(
       margin: const EdgeInsets.only(top: 16),
       elevation: 2,
@@ -434,13 +442,14 @@ class _MessagesScreenState extends State<MessagesScreen> {
   }
 
   /// Builds the emoji reactions row
-  Widget _buildEmojiReactionsRow(Message message, ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildEmojiReactionsRow(
+      Message message, ColorScheme colorScheme, TextTheme textTheme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: _availableEmojis.map((emoji) {
         final isReacted = _hasUserReactedWith(message.id, emoji);
         final count = _getReactionCount(message.id, emoji);
-        
+
         return Padding(
           padding: const EdgeInsets.only(right: 16),
           child: InkWell(
@@ -484,6 +493,4 @@ class _MessagesScreenState extends State<MessagesScreen> {
       }).toList(),
     );
   }
-
-
 }

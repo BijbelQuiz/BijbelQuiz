@@ -18,8 +18,10 @@ class StoreService {
           .order('item_name');
 
       final List<dynamic> rawData = response as List<dynamic>;
-      return rawData.map((item) => StoreItem.fromJson(item as Map<String, dynamic>)).toList();
-        } catch (e) {
+      return rawData
+          .map((item) => StoreItem.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
       AppLogger.error('Error fetching store items from Supabase: $e');
       rethrow;
     }
@@ -35,7 +37,7 @@ class StoreService {
           .single();
 
       return StoreItem.fromJson(response);
-        } catch (e) {
+    } catch (e) {
       AppLogger.error('Error fetching store item with key $itemKey: $e');
       return null;
     }
@@ -52,7 +54,7 @@ class StoreService {
 
       AppLogger.info('Store item updated successfully: ${item.itemKey}');
       return true;
-        } catch (e) {
+    } catch (e) {
       AppLogger.error('Error updating store item: $e');
       return false;
     }

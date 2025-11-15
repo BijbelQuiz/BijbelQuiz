@@ -10,16 +10,16 @@ class AppUrls {
   // Bible API
   static final String bibleApiBase = 'https://www.online-bijbel.nl/api.php';
 
-
-
   // AI API
-  static final String geminiApiBase = 'https://generativelanguage.googleapis.com/v1beta';
+  static final String geminiApiBase =
+      'https://generativelanguage.googleapis.com/v1beta';
 
   // ===== APP-SPECIFIC URLs =====
   // App pages
   static final String donateUrl = '$baseDomain/donate';
   static final String updateUrl = '$baseDomain/download';
-  static final String satisfactionSurveyUrl = '$baseDomain/tevredenheidsrapport';
+  static final String satisfactionSurveyUrl =
+      '$baseDomain/tevredenheidsrapport';
   static final String privacyUrl = '$baseDomain/privacy';
   static final String termsUrl = '$baseDomain/algemene-voorwaarden';
   static final String statusPageUrl = '$baseDomain/status';

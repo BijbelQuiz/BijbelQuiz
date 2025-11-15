@@ -70,7 +70,8 @@ class AppErrorDisplay extends StatelessWidget {
               color: colorScheme.onErrorContainer,
             ),
           ),
-          if (showTechnicalDetails && error.technicalMessage != error.userMessage) ...[
+          if (showTechnicalDetails &&
+              error.technicalMessage != error.userMessage) ...[
             const SizedBox(height: 8),
             Text(
               'Technical: ${error.technicalMessage}',
@@ -86,7 +87,8 @@ class AppErrorDisplay extends StatelessWidget {
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.onErrorContainer.withValues(alpha: 0.2),
+                backgroundColor:
+                    colorScheme.onErrorContainer.withValues(alpha: 0.2),
                 foregroundColor: colorScheme.onErrorContainer,
               ),
             ),

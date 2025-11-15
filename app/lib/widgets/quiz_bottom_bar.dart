@@ -51,7 +51,7 @@ class _QuizBottomBarState extends State<QuizBottomBar> {
       });
 
       final priceHelper = QuizActionPriceHelper();
-      
+
       // Load both prices concurrently
       final results = await Future.wait([
         priceHelper.getSkipQuestionPrice(),
@@ -74,16 +74,17 @@ class _QuizBottomBarState extends State<QuizBottomBar> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
-    final canSkip = widget.gameStats.score >= _skipCost && 
-                    !widget.quizState.isAnswering && 
-                    !widget.quizState.isTransitioning;
-    final hasBiblicalReference = widget.quizState.question.biblicalReference != null &&
-                                widget.quizState.question.biblicalReference!.isNotEmpty;
+
+    final canSkip = widget.gameStats.score >= _skipCost &&
+        !widget.quizState.isAnswering &&
+        !widget.quizState.isTransitioning;
+    final hasBiblicalReference =
+        widget.quizState.question.biblicalReference != null &&
+            widget.quizState.question.biblicalReference!.isNotEmpty;
     final canUnlock = widget.gameStats.score >= _biblicalCost &&
-                      !widget.quizState.isAnswering &&
-                      !widget.quizState.isTransitioning &&
-                      hasBiblicalReference;
+        !widget.quizState.isAnswering &&
+        !widget.quizState.isTransitioning &&
+        hasBiblicalReference;
 
     // Show loading indicator while fetching prices
     if (_isLoadingPrices) {
@@ -129,7 +130,9 @@ class _QuizBottomBarState extends State<QuizBottomBar> {
               _buildActionButton(
                 context: context,
                 icon: Icons.skip_next_rounded,
-                label: widget.settings.language == 'en' ? strings.AppStrings.skip : strings.AppStrings.overslaan,
+                label: widget.settings.language == 'en'
+                    ? strings.AppStrings.skip
+                    : strings.AppStrings.overslaan,
                 cost: _skipCost,
                 canUse: canSkip,
                 onPressed: widget.onSkipPressed,
@@ -203,7 +206,9 @@ class _QuizBottomBarState extends State<QuizBottomBar> {
           child: InkWell(
             onTap: canUse ? onPressed : null,
             borderRadius: BorderRadius.circular(12),
-            focusColor: canUse ? colorScheme.primary.withAlpha((0.1 * 255).round()) : null,
+            focusColor: canUse
+                ? colorScheme.primary.withAlpha((0.1 * 255).round())
+                : null,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: Row(

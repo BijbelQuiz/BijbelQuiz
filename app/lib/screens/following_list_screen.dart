@@ -15,7 +15,7 @@ class FollowingListScreen extends StatefulWidget {
 
 class _FollowingListScreenState extends State<FollowingListScreen> {
   late AnalyticsService _analyticsService;
-  
+
   List<String> _followingList = [];
   bool _isLoading = false;
   String? _error;
@@ -31,7 +31,8 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
   /// Track screen access for analytics
   void _trackScreenAccess() {
     _analyticsService.screen(context, 'FollowingListScreen');
-    _analyticsService.trackFeatureUsage(context, 'following_list', 'screen_accessed');
+    _analyticsService.trackFeatureUsage(
+        context, 'following_list', 'screen_accessed');
   }
 
   /// Load the following list
@@ -42,14 +43,16 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
     });
 
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-      final followingList = await gameStatsProvider.syncService.getFollowingList();
-      
+      final gameStatsProvider =
+          Provider.of<GameStatsProvider>(context, listen: false);
+      final followingList =
+          await gameStatsProvider.syncService.getFollowingList();
+
       if (mounted) {
         setState(() {
           _followingList = followingList ?? [];
           _isLoading = false;
-          
+
           // Show warning if not in a room since followers/following requires being in a room
           if (!gameStatsProvider.syncService.isInRoom) {
             _error = strings.AppStrings.joinRoomToViewFollowing;
@@ -67,21 +70,30 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
   }
 
   /// Get usernames for the followed devices
-  Future<List<Map<String, String>>> _getUsernamesForDevices(List<String> deviceIds) async {
-    final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+  Future<List<Map<String, String>>> _getUsernamesForDevices(
+      List<String> deviceIds) async {
+    final gameStatsProvider =
+        Provider.of<GameStatsProvider>(context, listen: false);
     final usernames = <Map<String, String>>[];
 
     for (final deviceId in deviceIds) {
       try {
-        final username = await gameStatsProvider.syncService.getUsernameByDeviceId(deviceId);
+        final username =
+            await gameStatsProvider.syncService.getUsernameByDeviceId(deviceId);
         if (username != null) {
           usernames.add({'deviceId': deviceId, 'username': username});
         } else {
-          usernames.add({'deviceId': deviceId, 'username': 'Unknown User ($deviceId.substring(0, 8))...'});
+          usernames.add({
+            'deviceId': deviceId,
+            'username': 'Unknown User ($deviceId.substring(0, 8))...'
+          });
         }
       } catch (e) {
         AppLogger.error('Error getting username for device $deviceId', e);
-        usernames.add({'deviceId': deviceId, 'username': 'Unknown User ($deviceId.substring(0, 8))...'});
+        usernames.add({
+          'deviceId': deviceId,
+          'username': 'Unknown User ($deviceId.substring(0, 8))...'
+        });
       }
     }
 
@@ -132,7 +144,7 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                     ],
                   ),
                 ),
-              
+
               // Loading indicator
               if (_isLoading)
                 const Padding(
@@ -183,30 +195,34 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                           child: CircularProgressIndicator(),
                         );
                       }
-                      
+
                       if (snapshot.hasError) {
                         return Center(
-                          child: Text('Error loading usernames: ${snapshot.error}'),
+                          child: Text(
+                              'Error loading usernames: ${snapshot.error}'),
                         );
                       }
-                      
+
                       final users = snapshot.data ?? [];
-                      
+
                       return ListView.separated(
                         itemCount: users.length,
-                        separatorBuilder: (context, index) => const Divider(height: 1),
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1),
                         itemBuilder: (context, index) {
                           final user = users[index];
                           final deviceId = user['deviceId']!;
                           final username = user['username']!;
-                          
+
                           return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
                             leading: Container(
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: colorScheme.primary.withValues(alpha: 0.1),
+                                color:
+                                    colorScheme.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Icon(
@@ -222,9 +238,15 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                               ),
                             ),
                             subtitle: Text(
-                              deviceId.substring(0, _min(8, deviceId.length)), // Show partial device ID
+                              deviceId.substring(
+                                  0,
+                                  _min(
+                                      8,
+                                      deviceId
+                                          .length)), // Show partial device ID
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurface.withValues(alpha: 0.6),
+                                color: colorScheme.onSurface
+                                    .withValues(alpha: 0.6),
                               ),
                             ),
                           );

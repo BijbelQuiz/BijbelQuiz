@@ -67,7 +67,8 @@ class TrackingEvent {
       eventType: map['event_type'] ?? '',
       eventName: map['event_name'] ?? '',
       properties: _deserializeProperties(map['properties']),
-      timestamp: DateTime.parse(map['timestamp'] ?? DateTime.now().toIso8601String()),
+      timestamp:
+          DateTime.parse(map['timestamp'] ?? DateTime.now().toIso8601String()),
       screenName: map['screen_name'],
       sessionId: map['session_id'],
       deviceInfo: map['device_info'],
@@ -80,10 +81,11 @@ class TrackingEvent {
   /// Serializes the properties map to a JSON string
   static String? _serializeProperties(Map<String, dynamic>? properties) {
     if (properties == null) return null;
-    
+
     try {
       // Sanitize properties to remove sensitive data before serialization
-      Map<String, dynamic> sanitizedProperties = AppLogger.sanitizeMap(properties);
+      Map<String, dynamic> sanitizedProperties =
+          AppLogger.sanitizeMap(properties);
       return _mapToJson(sanitizedProperties);
     } catch (e) {
       AppLogger.warning('Failed to serialize properties: $e');
@@ -94,10 +96,12 @@ class TrackingEvent {
   /// Deserializes the properties JSON string back to a Map
   static Map<String, dynamic>? _deserializeProperties(String? properties) {
     if (properties == null) return null;
-    
+
     try {
       // Simplified deserialization - in a real implementation you'd want a proper JSON parser
-      return {'deserialized': properties}; // Placeholder for actual implementation
+      return {
+        'deserialized': properties
+      }; // Placeholder for actual implementation
     } catch (e) {
       AppLogger.warning('Failed to deserialize properties: $e');
       return null;
@@ -155,7 +159,7 @@ class TrackingService {
   }
 
   /// Returns a [TrackingObserver] that can be used to automatically track screen views.
-  /// For now, we'll return a placeholder - in a full implementation this would provide 
+  /// For now, we'll return a placeholder - in a full implementation this would provide
   /// automatic screen tracking functionality
   TrackingObserver getObserver() => TrackingObserver();
 
@@ -168,7 +172,8 @@ class TrackingService {
 
     // Skip tracking if analytics are disabled in settings
     if (!settings.analyticsEnabled) {
-      AppLogger.info('Analytics disabled in settings, skipping screen tracking for: $screenName');
+      AppLogger.info(
+          'Analytics disabled in settings, skipping screen tracking for: $screenName');
       return;
     }
 
@@ -181,7 +186,7 @@ class TrackingService {
         properties: {'screen_name': screenName},
         screenName: screenName,
       );
-      
+
       await _sendEvent(event);
       AppLogger.info('Screen view tracked successfully: $screenName');
     } catch (e) {
@@ -193,16 +198,19 @@ class TrackingService {
   ///
   /// The [eventName] is the name of the event.
   /// The [properties] are any additional data to send with the event.
-  Future<void> capture(BuildContext context, String eventName, {Map<String, Object>? properties}) async {
+  Future<void> capture(BuildContext context, String eventName,
+      {Map<String, Object>? properties}) async {
     final settings = Provider.of<SettingsProvider>(context, listen: false);
 
     // Skip tracking if analytics are disabled in settings
     if (!settings.analyticsEnabled) {
-      AppLogger.info('Analytics disabled in settings, skipping event tracking for: $eventName');
+      AppLogger.info(
+          'Analytics disabled in settings, skipping event tracking for: $eventName');
       return;
     }
 
-    AppLogger.info('Tracking event: $eventName${properties != null ? ' with properties: $properties' : ''}');
+    AppLogger.info(
+        'Tracking event: $eventName${properties != null ? ' with properties: $properties' : ''}');
     try {
       final event = await _createTrackingEvent(
         context: context,
@@ -210,7 +218,7 @@ class TrackingService {
         eventName: eventName,
         properties: properties,
       );
-      
+
       await _sendEvent(event);
       AppLogger.info('Event tracked successfully: $eventName');
     } catch (e) {
@@ -233,7 +241,7 @@ class TrackingService {
     // Get app version and build number
     String appVersion = 'unknown';
     String buildNumber = 'unknown';
-    
+
     try {
       final packageInfo = await PackageInfo.fromPlatform();
       appVersion = packageInfo.version;
@@ -247,7 +255,8 @@ class TrackingService {
     try {
       if (Platform.isAndroid) {
         final androidInfo = await DeviceInfoPlugin().androidInfo;
-        deviceInfo = 'Android ${androidInfo.version.release} (${androidInfo.model})';
+        deviceInfo =
+            'Android ${androidInfo.version.release} (${androidInfo.model})';
       } else if (Platform.isIOS) {
         final iosInfo = await DeviceInfoPlugin().iosInfo;
         deviceInfo = 'iOS ${iosInfo.systemVersion} (${iosInfo.model})';
@@ -257,7 +266,7 @@ class TrackingService {
     }
 
     // Sanitize properties to remove any potential PII
-    Map<String, dynamic>? sanitizedProperties = properties != null 
+    Map<String, dynamic>? sanitizedProperties = properties != null
         ? AppLogger.sanitizeMap(Map<String, dynamic>.from(properties))
         : null;
 
@@ -285,7 +294,8 @@ class TrackingService {
           .insert(event.toMap());
 
       if (response.error != null) {
-        _logger.severe('Failed to send tracking event to Supabase: ${response.error?.message}');
+        _logger.severe(
+            'Failed to send tracking event to Supabase: ${response.error?.message}');
       } else {
         _logger.info('Tracking event sent successfully: ${event.eventName}');
       }
@@ -303,10 +313,11 @@ class TrackingService {
   Future<void> _ensurePersistentUserId() async {
     final prefs = await SharedPreferences.getInstance();
     const key = 'tracking_anonymous_user_id';
-    
+
     if (!prefs.containsKey(key)) {
       // Generate a new persistent ID and store it
-      final newId = 'anon_${DateTime.now().millisecondsSinceEpoch}_${_generateRandomString(12)}';
+      final newId =
+          'anon_${DateTime.now().millisecondsSinceEpoch}_${_generateRandomString(12)}';
       await prefs.setString(key, newId);
       AppLogger.info('Created new persistent anonymous user ID: $newId');
     }
@@ -316,7 +327,7 @@ class TrackingService {
   Future<String> _getPersistentUserId() async {
     final prefs = await SharedPreferences.getInstance();
     const key = 'tracking_anonymous_user_id';
-    
+
     // This should not be null since _ensurePersistentUserId is called during init
     String? storedId = prefs.getString(key);
     if (storedId == null) {
@@ -351,9 +362,11 @@ class TrackingService {
 
   /// Generate a random string of specified length
   String _generateRandomString(int length) {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = Random();
-    return List.generate(length, (index) => chars[random.nextInt(chars.length)]).join();
+    return List.generate(length, (index) => chars[random.nextInt(chars.length)])
+        .join();
   }
 
   /// ===== COMPREHENSIVE FEATURE USAGE TRACKING =====
@@ -398,7 +411,9 @@ class TrackingService {
 
   /// Enhanced feature usage tracking with standardized features and actions
   /// This is the primary method for tracking which features users interact with
-  Future<void> trackFeatureUsage(BuildContext context, String feature, String action, {Map<String, Object>? additionalProperties}) async {
+  Future<void> trackFeatureUsage(
+      BuildContext context, String feature, String action,
+      {Map<String, Object>? additionalProperties}) async {
     final properties = Map<String, Object>.from(additionalProperties ?? {});
     properties.addAll({
       'feature': feature,
@@ -412,95 +427,99 @@ class TrackingService {
   }
 
   /// Track when a user starts using a feature (for engagement metrics)
-  Future<void> trackFeatureStart(BuildContext context, String feature, {Map<String, Object>? additionalProperties}) async {
-    await trackFeatureUsage(context, feature, actionStarted, additionalProperties: additionalProperties);
+  Future<void> trackFeatureStart(BuildContext context, String feature,
+      {Map<String, Object>? additionalProperties}) async {
+    await trackFeatureUsage(context, feature, actionStarted,
+        additionalProperties: additionalProperties);
   }
 
   /// Track when a user successfully uses a feature
-  Future<void> trackFeatureSuccess(BuildContext context, String feature, {Map<String, Object>? additionalProperties}) async {
-    await trackFeatureUsage(context, feature, actionUsed, additionalProperties: additionalProperties);
+  Future<void> trackFeatureSuccess(BuildContext context, String feature,
+      {Map<String, Object>? additionalProperties}) async {
+    await trackFeatureUsage(context, feature, actionUsed,
+        additionalProperties: additionalProperties);
   }
 
   /// Track when a user attempts but fails to use a feature
-  Future<void> trackFeatureAttempt(BuildContext context, String feature, {Map<String, Object>? additionalProperties}) async {
-    await trackFeatureUsage(context, feature, actionAttempted, additionalProperties: additionalProperties);
+  Future<void> trackFeatureAttempt(BuildContext context, String feature,
+      {Map<String, Object>? additionalProperties}) async {
+    await trackFeatureUsage(context, feature, actionAttempted,
+        additionalProperties: additionalProperties);
   }
 
   /// Track when a user purchases/unlocks a feature
-  Future<void> trackFeaturePurchase(BuildContext context, String feature, {Map<String, Object>? additionalProperties}) async {
-    await trackFeatureUsage(context, feature, actionPurchased, additionalProperties: additionalProperties);
+  Future<void> trackFeaturePurchase(BuildContext context, String feature,
+      {Map<String, Object>? additionalProperties}) async {
+    await trackFeatureUsage(context, feature, actionPurchased,
+        additionalProperties: additionalProperties);
   }
 
   /// Track when a user completes a feature or flow
-  Future<void> trackFeatureCompletion(BuildContext context, String feature, {Map<String, Object>? additionalProperties}) async {
-    await trackFeatureUsage(context, feature, actionCompleted, additionalProperties: additionalProperties);
+  Future<void> trackFeatureCompletion(BuildContext context, String feature,
+      {Map<String, Object>? additionalProperties}) async {
+    await trackFeatureUsage(context, feature, actionCompleted,
+        additionalProperties: additionalProperties);
   }
 
   /// Track when a user dismisses or cancels a feature
-  Future<void> trackFeatureDismissal(BuildContext context, String feature, {Map<String, Object>? additionalProperties}) async {
-    await trackFeatureUsage(context, feature, actionDismissed, additionalProperties: additionalProperties);
+  Future<void> trackFeatureDismissal(BuildContext context, String feature,
+      {Map<String, Object>? additionalProperties}) async {
+    await trackFeatureUsage(context, feature, actionDismissed,
+        additionalProperties: additionalProperties);
   }
 
   /// Specific app usage events - these are the primary tracked events
   /// All events contain no PII, only anonymous usage patterns
 
   /// Track when user starts a quiz (without question details)
-  Future<void> trackQuizStart(BuildContext context, {String? category, int? difficulty}) async {
+  Future<void> trackQuizStart(BuildContext context,
+      {String? category, int? difficulty}) async {
     final properties = <String, Object>{};
     if (category != null) properties['category'] = category;
     if (difficulty != null) properties['difficulty'] = difficulty;
-    
-    await trackFeatureUsage(context, featureQuizGameplay, actionStarted, additionalProperties: properties);
+
+    await trackFeatureUsage(context, featureQuizGameplay, actionStarted,
+        additionalProperties: properties);
   }
 
   /// Track when user completes a quiz
-  Future<void> trackQuizComplete(BuildContext context, {int? score, int? maxScore, int? questionsAnswered}) async {
+  Future<void> trackQuizComplete(BuildContext context,
+      {int? score, int? maxScore, int? questionsAnswered}) async {
     final properties = <String, Object>{};
     if (score != null) properties['score'] = score;
     if (maxScore != null) properties['max_score'] = maxScore;
-    if (questionsAnswered != null) properties['questions_answered'] = questionsAnswered;
-    
-    await trackFeatureUsage(context, featureQuizGameplay, actionCompleted, additionalProperties: properties);
+    if (questionsAnswered != null) {
+      properties['questions_answered'] = questionsAnswered;
+    }
+
+    await trackFeatureUsage(context, featureQuizGameplay, actionCompleted,
+        additionalProperties: properties);
   }
 
   /// Track when user purchases/unlocks a theme
-  Future<void> trackThemePurchase(BuildContext context, String themeName) async {
-    await trackFeatureUsage(
-      context,
-      featureThemePurchases,
-      actionPurchased,
-      additionalProperties: {'theme_name': themeName}
-    );
+  Future<void> trackThemePurchase(
+      BuildContext context, String themeName) async {
+    await trackFeatureUsage(context, featureThemePurchases, actionPurchased,
+        additionalProperties: {'theme_name': themeName});
   }
 
   /// Track when user changes theme
   Future<void> trackThemeChange(BuildContext context, String themeName) async {
-    await trackFeatureUsage(
-      context,
-      featureThemeSelection,
-      actionChanged,
-      additionalProperties: {'theme_name': themeName}
-    );
+    await trackFeatureUsage(context, featureThemeSelection, actionChanged,
+        additionalProperties: {'theme_name': themeName});
   }
 
   /// Track when user starts a lesson
   Future<void> trackLessonStart(BuildContext context, String lessonId) async {
-    await trackFeatureUsage(
-      context,
-      featureLessonSystem,
-      actionStarted,
-      additionalProperties: {'lesson_id': lessonId}
-    );
+    await trackFeatureUsage(context, featureLessonSystem, actionStarted,
+        additionalProperties: {'lesson_id': lessonId});
   }
 
   /// Track when user completes a lesson
-  Future<void> trackLessonComplete(BuildContext context, String lessonId) async {
-    await trackFeatureUsage(
-      context,
-      featureLessonSystem,
-      actionCompleted,
-      additionalProperties: {'lesson_id': lessonId}
-    );
+  Future<void> trackLessonComplete(
+      BuildContext context, String lessonId) async {
+    await trackFeatureUsage(context, featureLessonSystem, actionCompleted,
+        additionalProperties: {'lesson_id': lessonId});
   }
 
   /// Track when user uses skip feature
@@ -515,21 +534,15 @@ class TrackingService {
 
   /// Track when user enables/disables analytics
   Future<void> trackAnalyticsToggle(BuildContext context, bool enabled) async {
-    await trackFeatureUsage(
-      context,
-      featureAnalyticsSettings,
-      enabled ? actionEnabled : actionDisabled
-    );
+    await trackFeatureUsage(context, featureAnalyticsSettings,
+        enabled ? actionEnabled : actionDisabled);
   }
 
   /// Track when user changes language
-  Future<void> trackLanguageChange(BuildContext context, String languageCode) async {
-    await trackFeatureUsage(
-      context,
-      featureLanguageSettings,
-      actionChanged,
-      additionalProperties: {'language_code': languageCode}
-    );
+  Future<void> trackLanguageChange(
+      BuildContext context, String languageCode) async {
+    await trackFeatureUsage(context, featureLanguageSettings, actionChanged,
+        additionalProperties: {'language_code': languageCode});
   }
 
   /// Track when user accesses settings
@@ -559,30 +572,29 @@ class TrackingService {
 
   /// Track when user accesses satisfaction survey
   Future<void> trackSatisfactionSurveyAccess(BuildContext context) async {
-    await trackFeatureUsage(context, featureSatisfactionSurveys, actionAccessed);
+    await trackFeatureUsage(
+        context, featureSatisfactionSurveys, actionAccessed);
   }
 
   /// Track when user submits satisfaction survey
-  Future<void> trackSatisfactionSurveySubmit(BuildContext context, int rating) async {
+  Future<void> trackSatisfactionSurveySubmit(
+      BuildContext context, int rating) async {
     await trackFeatureUsage(
-      context,
-      featureSatisfactionSurveys,
-      actionCompleted,
-      additionalProperties: {'rating': rating}
-    );
+        context, featureSatisfactionSurveys, actionCompleted,
+        additionalProperties: {'rating': rating});
   }
 
   /// Track when user provides difficulty feedback
-  Future<void> trackDifficultyFeedback(BuildContext context, String feedbackType, {int? difficultyRating}) async {
+  Future<void> trackDifficultyFeedback(
+      BuildContext context, String feedbackType,
+      {int? difficultyRating}) async {
     final properties = <String, Object>{'feedback_type': feedbackType};
-    if (difficultyRating != null) properties['difficulty_rating'] = difficultyRating;
-    
-    await trackFeatureUsage(
-      context,
-      featureDifficultyFeedback,
-      actionUsed,
-      additionalProperties: properties
-    );
+    if (difficultyRating != null) {
+      properties['difficulty_rating'] = difficultyRating;
+    }
+
+    await trackFeatureUsage(context, featureDifficultyFeedback, actionUsed,
+        additionalProperties: properties);
   }
 
   /// Track when user starts multiplayer game
@@ -591,32 +603,28 @@ class TrackingService {
   }
 
   /// Track when user completes multiplayer game
-  Future<void> trackMultiplayerGameComplete(BuildContext context, {int? placement, int? score}) async {
+  Future<void> trackMultiplayerGameComplete(BuildContext context,
+      {int? placement, int? score}) async {
     final properties = <String, Object>{};
     if (placement != null) properties['placement'] = placement;
     if (score != null) properties['score'] = score;
-    
-    await trackFeatureUsage(context, featureMultiplayerGame, actionCompleted, additionalProperties: properties);
+
+    await trackFeatureUsage(context, featureMultiplayerGame, actionCompleted,
+        additionalProperties: properties);
   }
 
   /// Track when user uses power-up
-  Future<void> trackPowerUpUsed(BuildContext context, String powerUpType) async {
-    await trackFeatureUsage(
-      context,
-      featurePowerUps,
-      actionUsed,
-      additionalProperties: {'power_up_type': powerUpType}
-    );
+  Future<void> trackPowerUpUsed(
+      BuildContext context, String powerUpType) async {
+    await trackFeatureUsage(context, featurePowerUps, actionUsed,
+        additionalProperties: {'power_up_type': powerUpType});
   }
 
   /// Track when user views promo cards
-  Future<void> trackPromoCardViewed(BuildContext context, String cardType) async {
-    await trackFeatureUsage(
-      context,
-      featurePromoCards,
-      actionAccessed,
-      additionalProperties: {'card_type': cardType}
-    );
+  Future<void> trackPromoCardViewed(
+      BuildContext context, String cardType) async {
+    await trackFeatureUsage(context, featurePromoCards, actionAccessed,
+        additionalProperties: {'card_type': cardType});
   }
 
   /// Track when user starts using AI theme generator
@@ -625,56 +633,41 @@ class TrackingService {
   }
 
   /// Track when user completes using AI theme generator
-  Future<void> trackAiThemeGeneratorComplete(BuildContext context, {bool success = true}) async {
-    await trackFeatureUsage(
-      context,
-      featureAiThemeGenerator,
-      success ? actionCompleted : actionAttempted,
-      additionalProperties: {'success': success}
-    );
+  Future<void> trackAiThemeGeneratorComplete(BuildContext context,
+      {bool success = true}) async {
+    await trackFeatureUsage(context, featureAiThemeGenerator,
+        success ? actionCompleted : actionAttempted,
+        additionalProperties: {'success': success});
   }
 
   /// Track social feature usage
-  Future<void> trackSocialFeatureUsed(BuildContext context, String socialAction) async {
-    await trackFeatureUsage(
-      context,
-      featureSocialFeatures,
-      actionUsed,
-      additionalProperties: {'social_action': socialAction}
-    );
+  Future<void> trackSocialFeatureUsed(
+      BuildContext context, String socialAction) async {
+    await trackFeatureUsage(context, featureSocialFeatures, actionUsed,
+        additionalProperties: {'social_action': socialAction});
   }
 
   /// Track when user views question categories
   Future<void> trackCategoryView(BuildContext context, String category) async {
-    await trackFeatureUsage(
-      context,
-      featureQuestionCategories,
-      actionAccessed,
-      additionalProperties: {'category': category}
-    );
+    await trackFeatureUsage(context, featureQuestionCategories, actionAccessed,
+        additionalProperties: {'category': category});
   }
 
   /// Track when user views biblical references
-  Future<void> trackBiblicalReferenceView(BuildContext context, String book, {int? chapter}) async {
+  Future<void> trackBiblicalReferenceView(BuildContext context, String book,
+      {int? chapter}) async {
     final properties = <String, Object>{'book': book};
     if (chapter != null) properties['chapter'] = chapter;
-    
-    await trackFeatureUsage(
-      context,
-      featureBiblicalReferences,
-      actionAccessed,
-      additionalProperties: properties
-    );
+
+    await trackFeatureUsage(context, featureBiblicalReferences, actionAccessed,
+        additionalProperties: properties);
   }
 
   /// Track when user uses progressive difficulty feature
-  Future<void> trackProgressiveDifficultyUsed(BuildContext context, int level) async {
-    await trackFeatureUsage(
-      context,
-      featureProgressiveDifficulty,
-      actionUsed,
-      additionalProperties: {'level': level}
-    );
+  Future<void> trackProgressiveDifficultyUsed(
+      BuildContext context, int level) async {
+    await trackFeatureUsage(context, featureProgressiveDifficulty, actionUsed,
+        additionalProperties: {'level': level});
   }
 
   /// Track when user engages with streak tracking
@@ -689,7 +682,8 @@ class TrackingService {
       final response = await SupabaseConfig.getClient()
           .from('tracking_events')
           .select('event_name, properties, timestamp')
-          .gte('timestamp', DateTime.now().subtract(Duration(days: 30)).toIso8601String());
+          .gte('timestamp',
+              DateTime.now().subtract(Duration(days: 30)).toIso8601String());
 
       // The response is actually a List<Map<String, dynamic>> rather than a response object
       // In the Supabase Dart client, some operations might return data directly
@@ -699,7 +693,7 @@ class TrackingService {
       final stats = <String, dynamic>{};
       final featureUsage = <String, int>{};
       final featureUsers = <String, Set<String>>{};
-      
+
       for (final event in events) {
         final eventName = event['event_name'] as String;
         if (eventName == 'feature_usage') {
@@ -707,56 +701,75 @@ class TrackingService {
           if (properties != null) {
             final feature = properties['feature'] as String;
             featureUsage[feature] = (featureUsage[feature] ?? 0) + 1;
-            
+
             final userId = event['user_id'] as String;
             featureUsers.putIfAbsent(feature, () => <String>{}).add(userId);
-                              }
+          }
         }
       }
-      
+
       // Create the stats structure
       stats['total_features_tracked'] = featureUsage.length;
       stats['most_used_features'] = featureUsage.entries
           .map((entry) => {
-            'feature': entry.key,
-            'usage_count': entry.value,
-            'unique_users': featureUsers[entry.key]?.length ?? 0,
-          })
+                'feature': entry.key,
+                'usage_count': entry.value,
+                'unique_users': featureUsers[entry.key]?.length ?? 0,
+              })
           .toList()
-          ..sort((a, b) => (b['usage_count'] as int).compareTo(a['usage_count'] as int));
-      
+        ..sort((a, b) =>
+            (b['usage_count'] as int).compareTo(a['usage_count'] as int));
+
       final allFeatures = [
-        featureQuizGameplay, featureLessonSystem, featureQuestionCategories,
-        featureBiblicalReferences, featureSkipQuestion, featureRetryWithPoints,
-        featureStreakTracking, featureProgressiveDifficulty, featurePowerUps,
-        featureThemePurchases, featureAiThemeGenerator, featureSocialFeatures,
-        featurePromoCards, featureSettings, featureThemeSelection,
-        featureAnalyticsSettings, featureLanguageSettings, featureOnboarding,
-        featureDonationSystem, featureSatisfactionSurveys, featureDifficultyFeedback,
+        featureQuizGameplay,
+        featureLessonSystem,
+        featureQuestionCategories,
+        featureBiblicalReferences,
+        featureSkipQuestion,
+        featureRetryWithPoints,
+        featureStreakTracking,
+        featureProgressiveDifficulty,
+        featurePowerUps,
+        featureThemePurchases,
+        featureAiThemeGenerator,
+        featureSocialFeatures,
+        featurePromoCards,
+        featureSettings,
+        featureThemeSelection,
+        featureAnalyticsSettings,
+        featureLanguageSettings,
+        featureOnboarding,
+        featureDonationSystem,
+        featureSatisfactionSurveys,
+        featureDifficultyFeedback,
         featureMultiplayerGame
       ];
-      
+
       stats['unused_features'] = allFeatures
           .where((feature) => !featureUsage.containsKey(feature))
           .map((feature) => {
-            'feature': feature,
-            'days_since_last_use': 0,
-          })
+                'feature': feature,
+                'days_since_last_use': 0,
+              })
           .toList();
-      
+
       stats['feature_retention'] = {
         'daily_active_features': 0, // Would be calculated from actual data
         'weekly_active_features': 0,
         'monthly_active_features': 0,
       };
-      
+
       return stats;
     } catch (e) {
       // Check if this is a Supabase-related exception by checking message content
-      if (e.toString().contains('Postgrest') || e.toString().contains('supabase')) {
-        AppLogger.error('Failed to fetch feature usage stats: Supabase error - ${e.toString()}', e);
+      if (e.toString().contains('Postgrest') ||
+          e.toString().contains('supabase')) {
+        AppLogger.error(
+            'Failed to fetch feature usage stats: Supabase error - ${e.toString()}',
+            e);
       } else {
-        AppLogger.error('Failed to fetch feature usage stats: ${e.toString()}', e);
+        AppLogger.error(
+            'Failed to fetch feature usage stats: ${e.toString()}', e);
       }
       return {};
     }
@@ -775,7 +788,8 @@ class TrackingService {
     final mostUsed = stats['most_used_features'] as List?;
     if (mostUsed != null) {
       for (var feature in mostUsed) {
-        buffer.writeln('- ${feature['feature']}: ${feature['usage_count']} uses by ${feature['unique_users']} users');
+        buffer.writeln(
+            '- ${feature['feature']}: ${feature['usage_count']} uses by ${feature['unique_users']} users');
       }
     }
     buffer.writeln();
@@ -784,7 +798,8 @@ class TrackingService {
     final unused = stats['unused_features'] as List?;
     if (unused != null) {
       for (var feature in unused) {
-        buffer.writeln('- ${feature['feature']}: Last used ${feature['days_since_last_use']} days ago');
+        buffer.writeln(
+            '- ${feature['feature']}: Last used ${feature['days_since_last_use']} days ago');
       }
     }
     buffer.writeln();
@@ -798,7 +813,8 @@ class TrackingService {
     }
 
     buffer.writeln('- Focus development efforts on most used features');
-    buffer.writeln('- Consider A/B testing improvements for moderately used features');
+    buffer.writeln(
+        '- Consider A/B testing improvements for moderately used features');
 
     return buffer.toString();
   }
@@ -811,16 +827,17 @@ class TrackingService {
           .from('tracking_events')
           .select('user_id, timestamp, properties')
           .ilike('properties', '%$feature%')
-          .gte('timestamp', DateTime.now().subtract(Duration(days: 30)).toIso8601String());
+          .gte('timestamp',
+              DateTime.now().subtract(Duration(days: 30)).toIso8601String());
 
       final events = response as List;
       final userIds = <String>{};
       var totalUsage = 0;
-      
+
       for (final event in events) {
         final userId = event['user_id'] as String;
         userIds.add(userId);
-              totalUsage++;
+        totalUsage++;
       }
 
       return {
@@ -834,10 +851,14 @@ class TrackingService {
       };
     } catch (e) {
       // Check if this is a Supabase-related exception by checking message content
-      if (e.toString().contains('Postgrest') || e.toString().contains('supabase')) {
-        AppLogger.error('Failed to fetch feature insights: Supabase error - ${e.toString()}', e);
+      if (e.toString().contains('Postgrest') ||
+          e.toString().contains('supabase')) {
+        AppLogger.error(
+            'Failed to fetch feature insights: Supabase error - ${e.toString()}',
+            e);
       } else {
-        AppLogger.error('Error getting feature insights for $feature: ${e.toString()}', e);
+        AppLogger.error(
+            'Error getting feature insights for $feature: ${e.toString()}', e);
       }
       return {};
     }
@@ -866,8 +887,8 @@ class TrackingService {
             Text(
               'Feature Usage Analytics',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -876,10 +897,10 @@ class TrackingService {
             ),
             const SizedBox(height: 8),
             ...mostUsed.map((feature) => _buildFeatureUsageItem(
-              context,
-              feature['feature'] as String,
-              '${feature['usage_count']} uses',
-            )),
+                  context,
+                  feature['feature'] as String,
+                  '${feature['usage_count']} uses',
+                )),
             const SizedBox(height: 16),
             Text(
               'Features Needing Attention',
@@ -887,18 +908,20 @@ class TrackingService {
             ),
             const SizedBox(height: 8),
             ...unused.map((feature) => _buildFeatureUsageItem(
-              context,
-              feature['feature'] as String,
-              'Last used ${feature['days_since_last_use']} days ago',
-              isWarning: true,
-            )),
+                  context,
+                  feature['feature'] as String,
+                  'Last used ${feature['days_since_last_use']} days ago',
+                  isWarning: true,
+                )),
           ],
         );
       },
     );
   }
 
-  Widget _buildFeatureUsageItem(BuildContext context, String feature, String usage, {bool isWarning = false}) {
+  Widget _buildFeatureUsageItem(
+      BuildContext context, String feature, String usage,
+      {bool isWarning = false}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -919,17 +942,17 @@ class TrackingService {
             child: Text(
               feature,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
           ),
           Text(
             usage,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: isWarning
-                  ? Theme.of(context).colorScheme.onErrorContainer
-                  : Theme.of(context).colorScheme.onSurface,
-            ),
+                  color: isWarning
+                      ? Theme.of(context).colorScheme.onErrorContainer
+                      : Theme.of(context).colorScheme.onSurface,
+                ),
           ),
         ],
       ),

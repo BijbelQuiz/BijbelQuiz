@@ -233,12 +233,15 @@ class _BibleReferenceWidgetState extends State<BibleReferenceWidget>
   Widget _buildReferenceText(ColorScheme colorScheme) {
     final text = Text(
       widget.reference.shortReference,
-      style: widget.textStyle ?? Theme.of(context).textTheme.bodyLarge?.copyWith(
-        color: colorScheme.primary,
-        fontWeight: FontWeight.w600,
-        decoration: widget.onTap != null ? TextDecoration.underline : null,
-        decorationColor: colorScheme.primary.withAlpha((0.5 * 255).round()),
-      ),
+      style: widget.textStyle ??
+          Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w600,
+                decoration:
+                    widget.onTap != null ? TextDecoration.underline : null,
+                decorationColor:
+                    colorScheme.primary.withAlpha((0.5 * 255).round()),
+              ),
     );
 
     return text;
@@ -254,9 +257,9 @@ class _BibleReferenceWidgetState extends State<BibleReferenceWidget>
       child: Text(
         widget.reference.displayString,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: colorScheme.onSecondaryContainer,
-          fontWeight: FontWeight.w500,
-        ),
+              color: colorScheme.onSecondaryContainer,
+              fontWeight: FontWeight.w500,
+            ),
       ),
     );
   }
@@ -274,7 +277,8 @@ class _BibleReferenceWidgetState extends State<BibleReferenceWidget>
           width: buttonSize,
           height: buttonSize,
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest.withAlpha((0.5 * 255).round()),
+            color: colorScheme.surfaceContainerHighest
+                .withAlpha((0.5 * 255).round()),
             borderRadius: BorderRadius.circular(buttonSize / 2),
           ),
           child: Icon(
@@ -310,7 +314,8 @@ class _BibleReferenceWidgetState extends State<BibleReferenceWidget>
 
   void _shareReference() {
     final referenceText = widget.reference.fullReference;
-    final shareText = 'Bible reference: $referenceText (${widget.reference.displayString})';
+    final shareText =
+        'Bible reference: $referenceText (${widget.reference.displayString})';
 
     // In a real implementation, you would use share_plus package
     AppLogger.info('Sharing Bible reference: $shareText');
@@ -349,13 +354,15 @@ enum BibleReferenceStyle {
 /// Utility class for Bible reference formatting
 class BibleReferenceFormatter {
   /// Formats a Bible reference for display
-  static String formatReference(BibleReference reference, {bool includeTranslation = true}) {
+  static String formatReference(BibleReference reference,
+      {bool includeTranslation = true}) {
     final base = reference.shortReference;
     return includeTranslation ? '$base (${reference.displayString})' : base;
   }
 
   /// Creates a BibleReference from a string (e.g., "Genesis 1:1-3")
-  static BibleReference parseReference(String referenceString, {BibleTranslation? translation}) {
+  static BibleReference parseReference(String referenceString,
+      {BibleTranslation? translation}) {
     return BibleReference.fromString(
       referenceString,
       translation: translation ?? BibleTranslation.statenvertaling,

@@ -42,7 +42,8 @@ class ResponsiveUtils {
   }
 
   /// Gets responsive padding based on device type
-  static EdgeInsets getResponsivePadding(BuildContext context, EdgeInsets basePadding) {
+  static EdgeInsets getResponsivePadding(
+      BuildContext context, EdgeInsets basePadding) {
     if (isDesktop(context)) {
       // More conservative padding scaling for desktop
       return EdgeInsets.symmetric(
@@ -59,7 +60,8 @@ class ResponsiveUtils {
   }
 
   /// Gets responsive margin based on device type
-  static EdgeInsets getResponsiveMargin(BuildContext context, EdgeInsets baseMargin) {
+  static EdgeInsets getResponsiveMargin(
+      BuildContext context, EdgeInsets baseMargin) {
     if (isDesktop(context)) {
       return EdgeInsets.symmetric(
         horizontal: baseMargin.horizontal * 1.1,
@@ -87,7 +89,8 @@ class ResponsiveUtils {
   }
 
   /// Gets responsive border radius based on device type
-  static double getResponsiveBorderRadius(BuildContext context, double baseRadius) {
+  static double getResponsiveBorderRadius(
+      BuildContext context, double baseRadius) {
     if (isDesktop(context)) {
       return baseRadius * 1.1;
     } else if (isTablet(context)) {
@@ -97,7 +100,8 @@ class ResponsiveUtils {
   }
 
   /// Gets responsive elevation based on device type
-  static double getResponsiveElevation(BuildContext context, double baseElevation) {
+  static double getResponsiveElevation(
+      BuildContext context, double baseElevation) {
     if (isDesktop(context)) {
       return baseElevation * 1.2;
     } else if (isTablet(context)) {
@@ -119,7 +123,8 @@ class ResponsiveUtils {
   }
 
   /// Gets responsive max width for content containers
-  static double getResponsiveMaxWidth(BuildContext context, {double? maxWidth}) {
+  static double getResponsiveMaxWidth(BuildContext context,
+      {double? maxWidth}) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     if (maxWidth != null) {
@@ -135,7 +140,8 @@ class ResponsiveUtils {
   }
 
   /// Gets responsive horizontal padding for screens
-  static double getResponsiveHorizontalPadding(BuildContext context, double basePadding) {
+  static double getResponsiveHorizontalPadding(
+      BuildContext context, double basePadding) {
     if (isDesktop(context)) {
       return basePadding * 1.5;
     } else if (isTablet(context)) {
@@ -147,7 +153,8 @@ class ResponsiveUtils {
   }
 
   /// Gets responsive vertical padding for screens
-  static double getResponsiveVerticalPadding(BuildContext context, double basePadding) {
+  static double getResponsiveVerticalPadding(
+      BuildContext context, double basePadding) {
     if (isDesktop(context)) {
       return basePadding * 1.2;
     } else if (isTablet(context)) {
@@ -164,14 +171,24 @@ extension ResponsiveContext on BuildContext {
   bool get isSmallPhone => ResponsiveUtils.isSmallPhone(this);
   bool get isMobile => ResponsiveUtils.isMobile(this);
 
-  double responsiveFontSize(double baseSize) => ResponsiveUtils.getResponsiveFontSize(this, baseSize);
-  EdgeInsets responsivePadding(EdgeInsets basePadding) => ResponsiveUtils.getResponsivePadding(this, basePadding);
-  EdgeInsets responsiveMargin(EdgeInsets baseMargin) => ResponsiveUtils.getResponsiveMargin(this, baseMargin);
-  double responsiveSpacing(double baseSpacing) => ResponsiveUtils.getResponsiveSpacing(this, baseSpacing);
-  double responsiveBorderRadius(double baseRadius) => ResponsiveUtils.getResponsiveBorderRadius(this, baseRadius);
-  double responsiveElevation(double baseElevation) => ResponsiveUtils.getResponsiveElevation(this, baseElevation);
-  double responsiveIconSize(double baseSize) => ResponsiveUtils.getResponsiveIconSize(this, baseSize);
-  double responsiveMaxWidth({double? maxWidth}) => ResponsiveUtils.getResponsiveMaxWidth(this, maxWidth: maxWidth);
-  double responsiveHorizontalPadding(double basePadding) => ResponsiveUtils.getResponsiveHorizontalPadding(this, basePadding);
-  double responsiveVerticalPadding(double basePadding) => ResponsiveUtils.getResponsiveVerticalPadding(this, basePadding);
+  double responsiveFontSize(double baseSize) =>
+      ResponsiveUtils.getResponsiveFontSize(this, baseSize);
+  EdgeInsets responsivePadding(EdgeInsets basePadding) =>
+      ResponsiveUtils.getResponsivePadding(this, basePadding);
+  EdgeInsets responsiveMargin(EdgeInsets baseMargin) =>
+      ResponsiveUtils.getResponsiveMargin(this, baseMargin);
+  double responsiveSpacing(double baseSpacing) =>
+      ResponsiveUtils.getResponsiveSpacing(this, baseSpacing);
+  double responsiveBorderRadius(double baseRadius) =>
+      ResponsiveUtils.getResponsiveBorderRadius(this, baseRadius);
+  double responsiveElevation(double baseElevation) =>
+      ResponsiveUtils.getResponsiveElevation(this, baseElevation);
+  double responsiveIconSize(double baseSize) =>
+      ResponsiveUtils.getResponsiveIconSize(this, baseSize);
+  double responsiveMaxWidth({double? maxWidth}) =>
+      ResponsiveUtils.getResponsiveMaxWidth(this, maxWidth: maxWidth);
+  double responsiveHorizontalPadding(double basePadding) =>
+      ResponsiveUtils.getResponsiveHorizontalPadding(this, basePadding);
+  double responsiveVerticalPadding(double basePadding) =>
+      ResponsiveUtils.getResponsiveVerticalPadding(this, basePadding);
 }

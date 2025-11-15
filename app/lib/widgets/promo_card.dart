@@ -4,27 +4,27 @@ import '../constants/urls.dart';
 import '../l10n/strings_nl.dart' as strings;
 
 class PromoCard extends StatefulWidget {
-   final bool isDonation;
-   final bool isSatisfaction;
-   final bool isDifficulty;
-   final String? socialMediaType;
-   final VoidCallback onDismiss;
-   final Function(String) onAction;
-   final VoidCallback? onView;
+  final bool isDonation;
+  final bool isSatisfaction;
+  final bool isDifficulty;
+  final String? socialMediaType;
+  final VoidCallback onDismiss;
+  final Function(String) onAction;
+  final VoidCallback? onView;
 
-   const PromoCard({
-     super.key,
-     required this.isDonation,
-     required this.isSatisfaction,
-     required this.isDifficulty,
-     this.socialMediaType,
-     required this.onDismiss,
-     required this.onAction,
-     this.onView,
-   });
+  const PromoCard({
+    super.key,
+    required this.isDonation,
+    required this.isSatisfaction,
+    required this.isDifficulty,
+    this.socialMediaType,
+    required this.onDismiss,
+    required this.onAction,
+    this.onView,
+  });
 
-   @override
-   State<PromoCard> createState() => _PromoCardState();
+  @override
+  State<PromoCard> createState() => _PromoCardState();
 }
 
 class _PromoCardState extends State<PromoCard> {
@@ -45,15 +45,30 @@ class _PromoCardState extends State<PromoCard> {
 
     List<Color> gradientColors;
     if (widget.isDonation) {
-      gradientColors = [cs.primary.withValues(alpha: 0.14), cs.primary.withValues(alpha: 0.06)];
+      gradientColors = [
+        cs.primary.withValues(alpha: 0.14),
+        cs.primary.withValues(alpha: 0.06)
+      ];
     } else if (widget.isSatisfaction) {
-      gradientColors = [cs.primary.withValues(alpha: 0.14), cs.primary.withValues(alpha: 0.06)];
+      gradientColors = [
+        cs.primary.withValues(alpha: 0.14),
+        cs.primary.withValues(alpha: 0.06)
+      ];
     } else if (widget.isDifficulty) {
-      gradientColors = [cs.primary.withValues(alpha: 0.14), cs.primary.withValues(alpha: 0.06)];
+      gradientColors = [
+        cs.primary.withValues(alpha: 0.14),
+        cs.primary.withValues(alpha: 0.06)
+      ];
     } else if (widget.socialMediaType != null) {
-      gradientColors = [cs.primary.withValues(alpha: 0.14), cs.primary.withValues(alpha: 0.06)];
+      gradientColors = [
+        cs.primary.withValues(alpha: 0.14),
+        cs.primary.withValues(alpha: 0.06)
+      ];
     } else {
-      gradientColors = [cs.primary.withValues(alpha: 0.14), cs.primary.withValues(alpha: 0.06)];
+      gradientColors = [
+        cs.primary.withValues(alpha: 0.14),
+        cs.primary.withValues(alpha: 0.06)
+      ];
     }
 
     return Container(
@@ -97,13 +112,17 @@ class _PromoCardState extends State<PromoCard> {
                                         ? Icons.group
                                         : widget.socialMediaType == 'signal'
                                             ? Icons.message
-                                            : widget.socialMediaType == 'discord'
+                                            : widget.socialMediaType ==
+                                                    'discord'
                                                 ? Icons.discord
-                                                : widget.socialMediaType == 'bluesky'
+                                                : widget.socialMediaType ==
+                                                        'bluesky'
                                                     ? Icons.cloud
-                                                    : widget.socialMediaType == 'nooki'
+                                                    : widget.socialMediaType ==
+                                                            'nooki'
                                                         ? Icons.group
-                                                        : Icons.group_add_rounded,
+                                                        : Icons
+                                                            .group_add_rounded,
                 color: cs.onSurface.withValues(alpha: 0.7),
                 size: 20,
               ),
@@ -124,13 +143,20 @@ class _PromoCardState extends State<PromoCard> {
                                           ? strings.AppStrings.followKwebler
                                           : widget.socialMediaType == 'signal'
                                               ? strings.AppStrings.followSignal
-                                              : widget.socialMediaType == 'discord'
-                                                  ? strings.AppStrings.followDiscord
-                                                  : widget.socialMediaType == 'bluesky'
-                                                      ? strings.AppStrings.followBluesky
-                                                      : widget.socialMediaType == 'nooki'
-                                                          ? strings.AppStrings.followNooki
-                                                          : strings.AppStrings.followUs,
+                                              : widget.socialMediaType ==
+                                                      'discord'
+                                                  ? strings
+                                                      .AppStrings.followDiscord
+                                                  : widget.socialMediaType ==
+                                                          'bluesky'
+                                                      ? strings.AppStrings
+                                                          .followBluesky
+                                                      : widget.socialMediaType ==
+                                                              'nooki'
+                                                          ? strings.AppStrings
+                                                              .followNooki
+                                                          : strings.AppStrings
+                                                              .followUs,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: cs.onSurface,
@@ -139,7 +165,8 @@ class _PromoCardState extends State<PromoCard> {
               ),
               IconButton(
                 onPressed: widget.onDismiss,
-                icon: Icon(Icons.close, color: cs.onSurface.withValues(alpha: 0.6)),
+                icon: Icon(Icons.close,
+                    color: cs.onSurface.withValues(alpha: 0.6)),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
@@ -167,7 +194,8 @@ class _PromoCardState extends State<PromoCard> {
                       backgroundColor: cs.primary,
                       foregroundColor: cs.onPrimary,
                       minimumSize: const Size.fromHeight(44),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     icon: const Icon(Icons.favorite_rounded),
                     label: Text(strings.AppStrings.donateButton),
@@ -185,7 +213,8 @@ class _PromoCardState extends State<PromoCard> {
                       backgroundColor: cs.primary,
                       foregroundColor: cs.onPrimary,
                       minimumSize: const Size.fromHeight(44),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     icon: const Icon(Icons.feedback_rounded),
                     label: Text(strings.AppStrings.satisfactionSurveyButton),
@@ -203,7 +232,8 @@ class _PromoCardState extends State<PromoCard> {
                       backgroundColor: cs.primary,
                       foregroundColor: cs.onPrimary,
                       minimumSize: const Size.fromHeight(44),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(strings.AppStrings.difficultyTooHard),
                   ),
@@ -216,7 +246,8 @@ class _PromoCardState extends State<PromoCard> {
                       backgroundColor: cs.primary,
                       foregroundColor: cs.onPrimary,
                       minimumSize: const Size.fromHeight(44),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(strings.AppStrings.difficultyGood),
                   ),
@@ -229,7 +260,8 @@ class _PromoCardState extends State<PromoCard> {
                       backgroundColor: cs.primary,
                       foregroundColor: cs.onPrimary,
                       minimumSize: const Size.fromHeight(44),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(strings.AppStrings.difficultyTooEasy),
                   ),
@@ -254,7 +286,8 @@ class _PromoCardState extends State<PromoCard> {
                                           ? strings.AppStrings.discordUrl
                                           : widget.socialMediaType == 'bluesky'
                                               ? strings.AppStrings.blueskyUrl
-                                              : widget.socialMediaType == 'nooki'
+                                              : widget.socialMediaType ==
+                                                      'nooki'
                                                   ? strings.AppStrings.nookiUrl
                                                   : '',
                     ),
@@ -262,7 +295,8 @@ class _PromoCardState extends State<PromoCard> {
                       backgroundColor: cs.primary,
                       foregroundColor: cs.onPrimary,
                       minimumSize: const Size.fromHeight(44),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     icon: Icon(
                       widget.socialMediaType == 'mastodon'
@@ -277,7 +311,8 @@ class _PromoCardState extends State<PromoCard> {
                                           ? Icons.discord
                                           : widget.socialMediaType == 'bluesky'
                                               ? Icons.cloud
-                                              : widget.socialMediaType == 'nooki'
+                                              : widget.socialMediaType ==
+                                                      'nooki'
                                                   ? Icons.group
                                                   : Icons.group_add_rounded,
                     ),
@@ -289,14 +324,16 @@ class _PromoCardState extends State<PromoCard> {
                               : widget.socialMediaType == 'kwebler'
                                   ? strings.AppStrings.followKwebler
                                   : widget.socialMediaType == 'signal'
-                                  ? strings.AppStrings.followSignal
-                                  : widget.socialMediaType == 'discord'
-                                      ? strings.AppStrings.followDiscord
-                                      : widget.socialMediaType == 'bluesky'
-                                          ? strings.AppStrings.followBluesky
-                                          : widget.socialMediaType == 'nooki'
-                                              ? strings.AppStrings.followNooki
-                                              : strings.AppStrings.followUs,
+                                      ? strings.AppStrings.followSignal
+                                      : widget.socialMediaType == 'discord'
+                                          ? strings.AppStrings.followDiscord
+                                          : widget.socialMediaType == 'bluesky'
+                                              ? strings.AppStrings.followBluesky
+                                              : widget.socialMediaType ==
+                                                      'nooki'
+                                                  ? strings
+                                                      .AppStrings.followNooki
+                                                  : strings.AppStrings.followUs,
                     ),
                   ),
                 ),
@@ -310,7 +347,8 @@ class _PromoCardState extends State<PromoCard> {
                 _SocialButton(
                   label: strings.AppStrings.followMastodon,
                   icon: Icons.alternate_email,
-                  onPressed: () => widget.onAction(strings.AppStrings.mastodonUrl),
+                  onPressed: () =>
+                      widget.onAction(strings.AppStrings.mastodonUrl),
                 ),
                 _SocialButton(
                   label: strings.AppStrings.followPixelfed,
@@ -320,22 +358,26 @@ class _PromoCardState extends State<PromoCard> {
                 _SocialButton(
                   label: strings.AppStrings.followKwebler,
                   icon: Icons.group,
-                  onPressed: () => widget.onAction(strings.AppStrings.kweblerUrl),
+                  onPressed: () =>
+                      widget.onAction(strings.AppStrings.kweblerUrl),
                 ),
                 _SocialButton(
                   label: strings.AppStrings.followSignal,
                   icon: Icons.message,
-                  onPressed: () => widget.onAction(strings.AppStrings.signalUrl),
+                  onPressed: () =>
+                      widget.onAction(strings.AppStrings.signalUrl),
                 ),
                 _SocialButton(
                   label: strings.AppStrings.followDiscord,
                   icon: Icons.discord,
-                  onPressed: () => widget.onAction(strings.AppStrings.discordUrl),
+                  onPressed: () =>
+                      widget.onAction(strings.AppStrings.discordUrl),
                 ),
                 _SocialButton(
                   label: strings.AppStrings.followBluesky,
                   icon: Icons.cloud,
-                  onPressed: () => widget.onAction(strings.AppStrings.blueskyUrl),
+                  onPressed: () =>
+                      widget.onAction(strings.AppStrings.blueskyUrl),
                 ),
                 _SocialButton(
                   label: strings.AppStrings.followNooki,

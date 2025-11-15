@@ -39,7 +39,8 @@ class _GuideScreenState extends State<GuideScreen> {
   }
 
   void _onPageChanged(int page) {
-    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'guide_page_viewed', properties: {'page': page});
+    Provider.of<AnalyticsService>(context, listen: false)
+        .capture(context, 'guide_page_viewed', properties: {'page': page});
     setState(() {
       _currentPage = page;
     });
@@ -48,12 +49,14 @@ class _GuideScreenState extends State<GuideScreen> {
   @override
   void initState() {
     super.initState();
-    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    final analyticsService =
+        Provider.of<AnalyticsService>(context, listen: false);
 
     analyticsService.screen(context, 'GuideScreen');
 
     // Track guide screen access and feature usage
-    analyticsService.trackFeatureStart(context, AnalyticsService.featureOnboarding);
+    analyticsService.trackFeatureStart(
+        context, AnalyticsService.featureOnboarding);
 
     AppLogger.info('GuideScreen loaded');
   }
@@ -66,7 +69,6 @@ class _GuideScreenState extends State<GuideScreen> {
     final pages = _pages; // Get the current pages
     final isLastPage = _currentPage == pages.length - 1;
     // Log screen view for analytics
-
 
     return Scaffold(
       body: SafeArea(
@@ -143,7 +145,9 @@ class _GuideScreenState extends State<GuideScreen> {
                       }
                     },
                     child: Text(
-                      isLastPage ? strings.AppStrings.getStarted : strings.AppStrings.next,
+                      isLastPage
+                          ? strings.AppStrings.getStarted
+                          : strings.AppStrings.next,
                     ),
                   ),
                 ],
@@ -156,12 +160,15 @@ class _GuideScreenState extends State<GuideScreen> {
   }
 
   Future<void> _handleGuideCompletion(BuildContext context) async {
-    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    final analyticsService =
+        Provider.of<AnalyticsService>(context, listen: false);
 
     // Track guide completion feature usage
-    analyticsService.trackFeatureCompletion(context, AnalyticsService.featureOnboarding);
+    analyticsService.trackFeatureCompletion(
+        context, AnalyticsService.featureOnboarding);
 
-    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'guide_completed');
+    Provider.of<AnalyticsService>(context, listen: false)
+        .capture(context, 'guide_completed');
     final localContext = context;
     final settings = Provider.of<SettingsProvider>(localContext, listen: false);
     try {
@@ -182,7 +189,8 @@ class _GuideScreenState extends State<GuideScreen> {
       if (!mounted) return;
       final errorMessage = strings.AppStrings.unknownError;
       if (localContext.mounted) {
-        showTopSnackBar(localContext, errorMessage, style: TopSnackBarStyle.error);
+        showTopSnackBar(localContext, errorMessage,
+            style: TopSnackBarStyle.error);
       }
     }
   }
@@ -208,7 +216,8 @@ class GuidePage {
   });
 }
 
-List<GuidePage> buildGuidePages({required bool showNotificationPage, required BuildContext context}) {
+List<GuidePage> buildGuidePages(
+    {required bool showNotificationPage, required BuildContext context}) {
   final pages = <GuidePage>[
     GuidePage(
       title: strings.AppStrings.welcomeTitle,
@@ -279,9 +288,10 @@ class _GuidePageViewState extends State<GuidePageView> {
   bool _isLoading = false;
 
   Future<void> _handleDonation() async {
-    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'guide_donation_button_clicked');
+    Provider.of<AnalyticsService>(context, listen: false)
+        .capture(context, 'guide_donation_button_clicked');
     if (_isLoading) return;
-    
+
     setState(() {
       _isLoading = true;
     });
@@ -296,10 +306,11 @@ class _GuidePageViewState extends State<GuidePageView> {
       if (await canLaunchUrl(url)) {
         // Mark as donated before launching the URL
         if (safeContext != null && safeContext.mounted) {
-          final settings = Provider.of<SettingsProvider>(safeContext, listen: false);
+          final settings =
+              Provider.of<SettingsProvider>(safeContext, listen: false);
           await settings.markAsDonated();
         }
-        
+
         if (safeContext != null && safeContext.mounted) {
           await launchUrl(
             url,
@@ -335,7 +346,8 @@ class _GuidePageViewState extends State<GuidePageView> {
   bool _permissionGranted = true;
 
   bool _isWelcomePage() {
-    return widget.page.title == strings.AppStrings.welcomeTitle && widget.page.icon == Icons.church;
+    return widget.page.title == strings.AppStrings.welcomeTitle &&
+        widget.page.icon == Icons.church;
   }
 
   Widget _buildTermsAgreementText() {
@@ -349,9 +361,9 @@ class _GuidePageViewState extends State<GuidePageView> {
           textAlign: TextAlign.center,
           text: TextSpan(
             style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.7),
-                  height: 1.4,
-                ),
+              color: colorScheme.onSurface.withValues(alpha: 0.7),
+              height: 1.4,
+            ),
             children: [
               const TextSpan(text: 'Als u doorgaat gaat u akkoord met onze '),
               WidgetSpan(
@@ -424,15 +436,19 @@ class _GuidePageViewState extends State<GuidePageView> {
   }
 
   Future<void> _requestPermission() async {
-    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'guide_notification_permission_requested');
-    setState(() { _isLoading = true; });
+    Provider.of<AnalyticsService>(context, listen: false)
+        .capture(context, 'guide_notification_permission_requested');
+    setState(() {
+      _isLoading = true;
+    });
     final granted = await NotificationService.requestNotificationPermission();
     setState(() {
       _isLoading = false;
       _permissionGranted = granted;
     });
     if (!granted && mounted) {
-      showTopSnackBar(context, strings.AppStrings.notificationPermissionDenied, style: TopSnackBarStyle.warning);
+      showTopSnackBar(context, strings.AppStrings.notificationPermissionDenied,
+          style: TopSnackBarStyle.warning);
     }
   }
 
@@ -457,17 +473,17 @@ class _GuidePageViewState extends State<GuidePageView> {
               Text(
                 widget.page.title,
                 style: textTheme.headlineMedium?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 widget.page.description,
                 style: textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurface,
-                    ),
+                  color: colorScheme.onSurface,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -476,7 +492,9 @@ class _GuidePageViewState extends State<GuidePageView> {
                 label: Text(_permissionGranted
                     ? strings.AppStrings.notificationsEnabled
                     : strings.AppStrings.enableNotifications),
-                onPressed: _permissionGranted || _isLoading ? null : _requestPermission,
+                onPressed: _permissionGranted || _isLoading
+                    ? null
+                    : _requestPermission,
               ),
               if (_isLoading)
                 Padding(
@@ -493,10 +511,10 @@ class _GuidePageViewState extends State<GuidePageView> {
         ),
       );
     }
-    
+
     // Check if this is the "Pas Je Ervaring Aan" page
     final isCustomizationPage = widget.page.title == 'Pas Je Ervaring Aan';
-    
+
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: LayoutBuilder(
@@ -519,181 +537,197 @@ class _GuidePageViewState extends State<GuidePageView> {
                     Text(
                       widget.page.title,
                       style: textTheme.headlineMedium?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
                     Text(
                       widget.page.description,
                       style: textTheme.bodyLarge?.copyWith(
-                            color: colorScheme.onSurface,
-                          ),
+                        color: colorScheme.onSurface,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     if (isCustomizationPage) ...[
                       const SizedBox(height: 32),
                       Consumer<SettingsProvider>(
-                        builder: (context, settings, child) {
-                          return Column(
-                            children: [
-                              // Game Speed Dropdown
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      strings.AppStrings.gameSpeed,
-                                      style: textTheme.titleMedium?.copyWith(
+                          builder: (context, settings, child) {
+                        return Column(
+                          children: [
+                            // Game Speed Dropdown
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    strings.AppStrings.gameSpeed,
+                                    style: textTheme.titleMedium?.copyWith(
+                                      color: colorScheme.onSurface,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  DropdownButtonFormField<String>(
+                                    initialValue: settings.gameSpeed,
+                                    items: [
+                                      DropdownMenuItem(
+                                        value: 'slow',
+                                        child: Text(strings.AppStrings.slow),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'medium',
+                                        child: Text(strings.AppStrings.medium),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'fast',
+                                        child: Text(strings.AppStrings.fast),
+                                      ),
+                                    ],
+                                    onChanged: (String? value) {
+                                      if (value != null) {
+                                        settings.setGameSpeed(value);
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      filled: true,
+                                      fillColor: colorScheme.surface,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            // Sound Effects Toggle
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          strings.AppStrings.muteSoundEffects,
+                                          style:
+                                              textTheme.titleMedium?.copyWith(
                                             color: colorScheme.onSurface,
                                             fontWeight: FontWeight.w600,
                                           ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    DropdownButtonFormField<String>(
-                                      initialValue: settings.gameSpeed,
-                                      items: [
-                                        DropdownMenuItem(
-                                          value: 'slow',
-                                          child: Text(strings.AppStrings.slow),
                                         ),
-                                        DropdownMenuItem(
-                                          value: 'medium',
-                                          child: Text(strings.AppStrings.medium),
-                                        ),
-                                        DropdownMenuItem(
-                                          value: 'fast',
-                                          child: Text(strings.AppStrings.fast),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          strings.AppStrings
+                                              .soundEffectsDescription,
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            color: colorScheme.onSurface
+                                                .withValues(alpha: 0.7),
+                                          ),
                                         ),
                                       ],
-                                      onChanged: (String? value) {
-                                        if (value != null) {
-                                          settings.setGameSpeed(value);
-                                        }
-                                      },
-                                      decoration: InputDecoration(
-                                        filled: true,
-                                        fillColor: colorScheme.surface,
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                          borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                  Switch(
+                                    value: settings.mute,
+                                    onChanged: (bool value) {
+                                      settings.setMute(value);
+                                    },
+                                    activeThumbColor: colorScheme.primary,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            // Analytics Toggle
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          strings.AppStrings.analytics,
+                                          style:
+                                              textTheme.titleMedium?.copyWith(
+                                            color: colorScheme.onSurface,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
-                                      ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          strings
+                                              .AppStrings.analyticsDescription,
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            color: colorScheme.onSurface
+                                                .withValues(alpha: 0.7),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  Switch(
+                                    value: settings.analyticsEnabled,
+                                    onChanged: (bool value) {
+                                      // Track analytics setting change
+                                      final analytics =
+                                          Provider.of<AnalyticsService>(context,
+                                              listen: false);
+                                      analytics.trackFeatureSuccess(
+                                          context,
+                                          AnalyticsService
+                                              .featureAnalyticsSettings,
+                                          additionalProperties: {
+                                            'enabled': value,
+                                            'source': 'guide_screen',
+                                          });
+                                      settings.setAnalyticsEnabled(value);
+                                    },
+                                    activeThumbColor: colorScheme.primary,
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 20),
-                              // Sound Effects Toggle
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            strings.AppStrings.muteSoundEffects,
-                                            style: textTheme.titleMedium?.copyWith(
-                                                  color: colorScheme.onSurface,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            strings.AppStrings.soundEffectsDescription,
-                                            style: textTheme.bodyMedium?.copyWith(
-                                                  color: colorScheme.onSurface.withValues(alpha: 0.7),
-                                                ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Switch(
-                                      value: settings.mute,
-                                      onChanged: (bool value) {
-                                        settings.setMute(value);
-                                      },
-                                      activeThumbColor: colorScheme.primary,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              // Analytics Toggle
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            strings.AppStrings.analytics,
-                                            style: textTheme.titleMedium?.copyWith(
-                                                  color: colorScheme.onSurface,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            strings.AppStrings.analyticsDescription,
-                                            style: textTheme.bodyMedium?.copyWith(
-                                                  color: colorScheme.onSurface.withValues(alpha: 0.7),
-                                                ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Switch(
-                                      value: settings.analyticsEnabled,
-                                      onChanged: (bool value) {
-                                        // Track analytics setting change
-                                        final analytics = Provider.of<AnalyticsService>(context, listen: false);
-                                        analytics.trackFeatureSuccess(context, AnalyticsService.featureAnalyticsSettings, additionalProperties: {
-                                          'enabled': value,
-                                          'source': 'guide_screen',
-                                        });
-                                        settings.setAnalyticsEnabled(value);
-                                      },
-                                      activeThumbColor: colorScheme.primary,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-                      ),
+                            ),
+                          ],
+                        );
+                      }),
                     ],
                     if (widget.page.buttonText != null) ...[
                       const SizedBox(height: 32),
                       ElevatedButton.icon(
-                        icon: Icon(widget.page.buttonIcon ?? Icons.arrow_forward),
+                        icon:
+                            Icon(widget.page.buttonIcon ?? Icons.arrow_forward),
                         label: Text(widget.page.buttonText!),
-                        onPressed: widget.page.isDonationPage
-                            ? _handleDonation
-                            : null,
+                        onPressed:
+                            widget.page.isDonationPage ? _handleDonation : null,
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                         ),
                       ),
                     ],
@@ -752,7 +786,8 @@ class _GuideScreenTestHarnessState extends State<GuideScreenTestHarness> {
 
   void goToNextPage() {
     if (_currentPage < _pages.length - 1) {
-      _pageController.nextPage(duration: const Duration(milliseconds: 100), curve: Curves.linear);
+      _pageController.nextPage(
+          duration: const Duration(milliseconds: 100), curve: Curves.linear);
     } else {
       handleGuideCompletion();
     }
@@ -760,7 +795,8 @@ class _GuideScreenTestHarnessState extends State<GuideScreenTestHarness> {
 
   void goToPreviousPage() {
     if (_currentPage > 0) {
-      _pageController.previousPage(duration: const Duration(milliseconds: 100), curve: Curves.linear);
+      _pageController.previousPage(
+          duration: const Duration(milliseconds: 100), curve: Curves.linear);
     }
   }
 
@@ -774,7 +810,7 @@ class _GuideScreenTestHarnessState extends State<GuideScreenTestHarness> {
   Future<void> handleGuideCompletion() async {
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     await settings.markGuideAsSeen();
-    
+
     if (settings.notificationEnabled && !kIsWeb && !Platform.isLinux) {
       await NotificationService.requestNotificationPermission();
     }
@@ -847,7 +883,9 @@ class _GuideScreenTestHarnessState extends State<GuideScreenTestHarness> {
                   ),
                   ElevatedButton(
                     onPressed: goToNextPage,
-                    child: Text(isLastPage ? strings.AppStrings.getStarted : strings.AppStrings.next),
+                    child: Text(isLastPage
+                        ? strings.AppStrings.getStarted
+                        : strings.AppStrings.next),
                   ),
                 ],
               ),

@@ -28,18 +28,16 @@ class QuestionLoadingService {
       final nextBatchStartIndex = questions.length;
       const int batchSize = 50; // Load 50 more questions
 
-      final newQuestions = await _questionCacheService.getQuestions(
-        language,
-        startIndex: nextBatchStartIndex,
-        count: batchSize
-      );
+      final newQuestions = await _questionCacheService.getQuestions(language,
+          startIndex: nextBatchStartIndex, count: batchSize);
 
       if (newQuestions.isNotEmpty) {
         setState(() {
           // Add new questions and shuffle the combined list
           questions.addAll(newQuestions);
           questions.shuffle(Random());
-          AppLogger.info('Loaded additional questions, total now: ${questions.length}');
+          AppLogger.info(
+              'Loaded additional questions, total now: ${questions.length}');
         });
       }
     } catch (e) {
@@ -62,23 +60,22 @@ class QuestionLoadingService {
       final nextBatchStartIndex = questions.length;
       final adaptiveBatchSize = _calculateAdaptiveBatchSize();
 
-      final newQuestions = await _questionCacheService.getQuestions(
-        language,
-        startIndex: nextBatchStartIndex,
-        count: adaptiveBatchSize
-      );
+      final newQuestions = await _questionCacheService.getQuestions(language,
+          startIndex: nextBatchStartIndex, count: adaptiveBatchSize);
 
       if (newQuestions.isNotEmpty) {
         setState(() {
           // Add new questions and shuffle the combined list
           questions.addAll(newQuestions);
           questions.shuffle(Random());
-          AppLogger.info('Loaded additional questions, total now: ${questions.length}');
+          AppLogger.info(
+              'Loaded additional questions, total now: ${questions.length}');
         });
       }
 
       // Continue loading in background if we still have room
-      if (questions.length < 200 && mounted) { // Keep at least 200 questions loaded
+      if (questions.length < 200 && mounted) {
+        // Keep at least 200 questions loaded
         Future.delayed(const Duration(seconds: 2), () {
           if (mounted) {
             // Skip recursive call to avoid context issues across async gaps
@@ -97,7 +94,9 @@ class QuestionLoadingService {
 
     // Get memory usage info from simplified cache
     final memoryInfo = _questionCacheService.getMemoryUsage();
-    final cacheUtilization = double.tryParse(memoryInfo['memoryCache']['cacheUtilizationPercent'] as String) ?? 0.0;
+    final cacheUtilization = double.tryParse(
+            memoryInfo['memoryCache']['cacheUtilizationPercent'] as String) ??
+        0.0;
 
     // Reduce batch size if memory usage is high
     if (cacheUtilization > 80.0) {

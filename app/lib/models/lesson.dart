@@ -112,7 +112,9 @@ class Lesson {
         .where((w) => w.trim().isNotEmpty)
         .toList();
     final cased = words
-        .map((w) => w.substring(0, 1).toUpperCase() + (w.length > 1 ? w.substring(1).toLowerCase() : ''))
+        .map((w) =>
+            w.substring(0, 1).toUpperCase() +
+            (w.length > 1 ? w.substring(1).toLowerCase() : ''))
         .join(' ');
     return cased;
   }

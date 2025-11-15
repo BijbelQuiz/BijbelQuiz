@@ -13,10 +13,11 @@ class ThemeUtils {
       if (aiTheme != null) {
         return aiTheme.lightTheme;
       }
-      
+
       // Use the theme manager for JSON-defined themes
       try {
-        return ThemeManager().getLightThemeData(settings.selectedCustomThemeKey!);
+        return ThemeManager()
+            .getLightThemeData(settings.selectedCustomThemeKey!);
       } catch (e) {
         // Fallback to hardcoded theme if JSON theme is not found
         return _getHardcodedTheme(settings.selectedCustomThemeKey!);
@@ -34,10 +35,11 @@ class ThemeUtils {
         // For AI themes, return the dark version if available, otherwise light
         return aiTheme.darkTheme ?? aiTheme.lightTheme;
       }
-      
+
       // Use the theme manager for JSON-defined themes
       try {
-        return ThemeManager().getDarkThemeData(settings.selectedCustomThemeKey!);
+        return ThemeManager()
+            .getDarkThemeData(settings.selectedCustomThemeKey!);
       } catch (e) {
         // Fallback to hardcoded theme if JSON theme is not found
         return _getHardcodedTheme(settings.selectedCustomThemeKey!);
@@ -52,17 +54,23 @@ class ThemeUtils {
     if (settings.selectedCustomThemeKey != null) {
       // Check if it's an AI theme first
       if (settings.hasAITheme(settings.selectedCustomThemeKey!)) {
-        return settings.getAITheme(settings.selectedCustomThemeKey!)!.darkTheme != null 
-            ? ThemeMode.dark 
+        return settings
+                    .getAITheme(settings.selectedCustomThemeKey!)!
+                    .darkTheme !=
+                null
+            ? ThemeMode.dark
             : ThemeMode.light;
       }
-      
+
       // Use theme manager to determine if theme is dark
-      final themeDef = ThemeManager().getThemeDefinition(settings.selectedCustomThemeKey!);
+      final themeDef =
+          ThemeManager().getThemeDefinition(settings.selectedCustomThemeKey!);
       if (themeDef != null) {
-        return themeDef.type.toLowerCase() == 'dark' ? ThemeMode.dark : ThemeMode.light;
+        return themeDef.type.toLowerCase() == 'dark'
+            ? ThemeMode.dark
+            : ThemeMode.light;
       }
-      
+
       // Fallback to hardcoded theme logic
       switch (settings.selectedCustomThemeKey) {
         case 'grey':
@@ -92,7 +100,7 @@ class ThemeUtils {
   /// Gets all available themes as a map
   static Map<String, ThemeData> getAllThemes({SettingsProvider? settings}) {
     final themes = <String, ThemeData>{};
-    
+
     // Add themes from the centralized theme manager
     final themeDefinitions = ThemeManager().getAvailableThemes();
     for (final entry in themeDefinitions.entries) {
@@ -115,9 +123,10 @@ class ThemeUtils {
   }
 
   /// Gets theme display names
-  static Map<String, String> getThemeDisplayNames({SettingsProvider? settings}) {
+  static Map<String, String> getThemeDisplayNames(
+      {SettingsProvider? settings}) {
     final displayNames = <String, String>{};
-    
+
     // Get names from the theme manager
     final themeDefinitions = ThemeManager().getAvailableThemes();
     for (final entry in themeDefinitions.entries) {
@@ -153,7 +162,8 @@ class ThemeUtils {
   }
 
   /// Gets the current theme data based on context and settings
-  static ThemeData getCurrentTheme(BuildContext context, SettingsProvider settings) {
+  static ThemeData getCurrentTheme(
+      BuildContext context, SettingsProvider settings) {
     final brightness = MediaQuery.of(context).platformBrightness;
     final themeMode = getThemeMode(settings);
 
@@ -163,7 +173,9 @@ class ThemeUtils {
       case ThemeMode.dark:
         return getDarkTheme(settings);
       case ThemeMode.system:
-        return brightness == Brightness.dark ? getDarkTheme(settings) : getLightTheme(settings);
+        return brightness == Brightness.dark
+            ? getDarkTheme(settings)
+            : getLightTheme(settings);
     }
   }
 
@@ -202,16 +214,27 @@ class ThemeUtils {
 
 /// Extension methods for easier theme access
 extension ThemeContext on BuildContext {
-  ThemeData getCurrentTheme(SettingsProvider settings) => ThemeUtils.getCurrentTheme(this, settings);
+  ThemeData getCurrentTheme(SettingsProvider settings) =>
+      ThemeUtils.getCurrentTheme(this, settings);
 
   Color themeAwareColor({required Color light, required Color dark}) =>
-      ThemeUtils.getThemeAwareColor(context: this, lightColor: light, darkColor: dark);
+      ThemeUtils.getThemeAwareColor(
+          context: this, lightColor: light, darkColor: dark);
 
-  TextStyle themeAwareTextStyle({required TextStyle light, required TextStyle dark}) =>
-      ThemeUtils.getThemeAwareTextStyle(context: this, lightStyle: light, darkStyle: dark);
+  TextStyle themeAwareTextStyle(
+          {required TextStyle light, required TextStyle dark}) =>
+      ThemeUtils.getThemeAwareTextStyle(
+          context: this, lightStyle: light, darkStyle: dark);
 
-  Color themeAwareOpacity({required Color color, required double lightOpacity, required double darkOpacity}) =>
-      ThemeUtils.getThemeAwareOpacity(context: this, color: color, lightOpacity: lightOpacity, darkOpacity: darkOpacity);
+  Color themeAwareOpacity(
+          {required Color color,
+          required double lightOpacity,
+          required double darkOpacity}) =>
+      ThemeUtils.getThemeAwareOpacity(
+          context: this,
+          color: color,
+          lightOpacity: lightOpacity,
+          darkOpacity: darkOpacity);
 }
 
 /// Utility function to check if the current theme is dark mode
@@ -223,13 +246,14 @@ extension ThemeModeExtension on SettingsProvider {
       if (hasAITheme(selectedCustomThemeKey!)) {
         return getAITheme(selectedCustomThemeKey!)!.darkTheme != null;
       }
-      
+
       // Use theme manager to determine if theme is dark
-      final themeDef = ThemeManager().getThemeDefinition(selectedCustomThemeKey!);
+      final themeDef =
+          ThemeManager().getThemeDefinition(selectedCustomThemeKey!);
       if (themeDef != null) {
         return themeDef.type.toLowerCase() == 'dark';
       }
-      
+
       // Fallback to hardcoded theme logic
       switch (selectedCustomThemeKey) {
         case 'grey':
@@ -240,7 +264,7 @@ extension ThemeModeExtension on SettingsProvider {
           return false;
       }
     }
-    
+
     // If no custom theme is selected, check the system theme mode
     switch (themeMode) {
       case ThemeMode.dark:

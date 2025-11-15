@@ -57,8 +57,7 @@ class SyncService {
           devices.add(deviceId);
           await _client
               .from(_tableName)
-              .update({'devices': devices})
-              .eq('room_id', code);
+              .update({'devices': devices}).eq('room_id', code);
         }
       }
 
@@ -89,8 +88,7 @@ class SyncService {
       devices.remove(deviceId);
       await _client
           .from(_tableName)
-          .update({'devices': devices})
-          .eq('room_id', _currentRoomId!);
+          .update({'devices': devices}).eq('room_id', _currentRoomId!);
 
       // Clear current room ID before stopping listening to prevent re-subscription attempts
       _currentRoomId = null;
@@ -108,26 +106,28 @@ class SyncService {
 
     try {
       final deviceId = await _getOrCreateDeviceId();
-      
+
       // Get current data to merge with the new data
       final roomResponse = await _client
           .from(_tableName)
           .select('data')
           .eq('room_id', _currentRoomId!)
           .single();
-      
-      final currentData = Map<String, dynamic>.from(roomResponse['data'] as Map<String, dynamic>? ?? {});
-      
+
+      final currentData = Map<String, dynamic>.from(
+          roomResponse['data'] as Map<String, dynamic>? ?? {});
+
       // Handle game stats differently - store for each device separately
       if (key == 'game_stats') {
-        final gameStatsMap = Map<String, dynamic>.from(currentData[key] as Map<String, dynamic>? ?? {});
-        
+        final gameStatsMap = Map<String, dynamic>.from(
+            currentData[key] as Map<String, dynamic>? ?? {});
+
         // Update the stats for this specific device
         gameStatsMap[deviceId] = {
           'value': data,
           'timestamp': DateTime.now().toIso8601String(),
         };
-        
+
         currentData[key] = gameStatsMap;
       } else {
         // For other keys, use the original approach
@@ -140,8 +140,7 @@ class SyncService {
 
       await _client
           .from(_tableName)
-          .update({'data': currentData})
-          .eq('room_id', _currentRoomId!);
+          .update({'data': currentData}).eq('room_id', _currentRoomId!);
       AppLogger.debug('Synced data for key: $key');
     } catch (e) {
       AppLogger.error('Failed to sync data for key: $key', e);
@@ -206,7 +205,7 @@ class SyncService {
 
     final prefs = await SharedPreferences.getInstance();
     String? deviceId = prefs.getString('device_id');
-    
+
     if (deviceId == null) {
       // Generate a new unique device ID if one doesn't exist
       deviceId = 'device_${DateTime.now().millisecondsSinceEpoch}';
@@ -276,13 +275,13 @@ class SyncService {
           .eq('room_id', _currentRoomId!)
           .single();
 
-      final devices = List<String>.from(roomResponse['devices'] as List<dynamic>);
+      final devices =
+          List<String>.from(roomResponse['devices'] as List<dynamic>);
       if (devices.contains(deviceId)) {
         devices.remove(deviceId);
         await _client
             .from(_tableName)
-            .update({'devices': devices})
-            .eq('room_id', _currentRoomId!);
+            .update({'devices': devices}).eq('room_id', _currentRoomId!);
         AppLogger.info('Removed device $deviceId from room $_currentRoomId');
         return true;
       }
@@ -299,14 +298,15 @@ class SyncService {
 
     try {
       final deviceId = await _getOrCreateDeviceId();
-      
+
       // Check if the new username is already taken globally by a different device
       final existingUsernameData = await _getUsernameRecord(username);
       if (existingUsernameData != null) {
         // Check if it's taken by a different device
         final existingDeviceId = existingUsernameData['device_id'] as String?;
         if (existingDeviceId != null && existingDeviceId != deviceId) {
-          AppLogger.warning('Username "$username" is already taken by device: $existingDeviceId');
+          AppLogger.warning(
+              'Username "$username" is already taken by device: $existingDeviceId');
           return false;
         }
       }
@@ -317,12 +317,14 @@ class SyncService {
           .select('data')
           .eq('room_id', _currentRoomId!)
           .single();
-      
-      final currentData = Map<String, dynamic>.from(roomResponse['data'] as Map<String, dynamic>? ?? {});
-      
+
+      final currentData = Map<String, dynamic>.from(
+          roomResponse['data'] as Map<String, dynamic>? ?? {});
+
       // Get current usernames mapping or create new one
-      final usernamesData = Map<String, dynamic>.from(currentData[_usernamesKey] as Map<String, dynamic>? ?? {});
-      
+      final usernamesData = Map<String, dynamic>.from(
+          currentData[_usernamesKey] as Map<String, dynamic>? ?? {});
+
       // Update the username for this device
       usernamesData[deviceId] = {
         'value': username,
@@ -334,9 +336,8 @@ class SyncService {
 
       await _client
           .from(_tableName)
-          .update({'data': currentData})
-          .eq('room_id', _currentRoomId!);
-      
+          .update({'data': currentData}).eq('room_id', _currentRoomId!);
+
       AppLogger.debug('Set username: $username for device: $deviceId');
       return true;
     } catch (e) {
@@ -349,10 +350,8 @@ class SyncService {
   Future<Map<String, dynamic>?> _getUsernameRecord(String username) async {
     try {
       // Get all rooms that have usernames data
-      final response = await _client
-          .from(_tableName)
-          .select('data')
-          .not('data', 'is', null);
+      final response =
+          await _client.from(_tableName).select('data').not('data', 'is', null);
 
       for (final row in response) {
         final data = row['data'] as Map<String, dynamic>?;
@@ -365,7 +364,8 @@ class SyncService {
               final usernameInfo = entry.value as Map<String, dynamic>?;
               if (usernameInfo != null) {
                 final storedUsername = usernameInfo['value'] as String?;
-                if (storedUsername != null && storedUsername.toLowerCase() == username.toLowerCase()) {
+                if (storedUsername != null &&
+                    storedUsername.toLowerCase() == username.toLowerCase()) {
                   return {
                     'value': storedUsername,
                     'device_id': deviceId,
@@ -398,7 +398,8 @@ class SyncService {
       String? targetDeviceId = deviceId;
       targetDeviceId ??= await _getOrCreateDeviceId();
 
-      final usernameInfo = usernamesData[targetDeviceId] as Map<String, dynamic>?;
+      final usernameInfo =
+          usernamesData[targetDeviceId] as Map<String, dynamic>?;
       if (usernameInfo != null) {
         return usernameInfo['value'] as String?;
       }
@@ -420,7 +421,8 @@ class SyncService {
     try {
       final roomData = await getRoomData();
       if (roomData == null) {
-        AppLogger.warning('No room data available when getting username for device: $deviceId');
+        AppLogger.warning(
+            'No room data available when getting username for device: $deviceId');
         return null;
       }
 
@@ -434,7 +436,8 @@ class SyncService {
 
       return null;
     } catch (e) {
-      AppLogger.error('Failed to get username for device: $deviceId, error: ${e.toString()}');
+      AppLogger.error(
+          'Failed to get username for device: $deviceId, error: ${e.toString()}');
       return null;
     }
   }
@@ -451,7 +454,7 @@ class SyncService {
       if (usernamesData == null) return null;
 
       final deviceUsername = <String, String>{};
-      
+
       // Iterate through all device IDs and their usernames
       for (final entry in usernamesData.entries) {
         final deviceId = entry.key;
@@ -471,7 +474,6 @@ class SyncService {
     }
   }
 
-
   /// Adds a username listener for the current device
   void addUsernameListener(Function(String?) callback) {
     addListener(_usernamesKey, (data) async {
@@ -483,17 +485,15 @@ class SyncService {
       } else {
         callback(null);
       }
-        });
+    });
   }
 
   /// Checks if a username already exists across all rooms
   Future<bool> isUsernameTaken(String username) async {
     try {
       // Get all rooms that have usernames data
-      final response = await _client
-          .from(_tableName)
-          .select('data')
-          .not('data', 'is', null);
+      final response =
+          await _client.from(_tableName).select('data').not('data', 'is', null);
 
       for (final row in response) {
         final data = row['data'] as Map<String, dynamic>?;
@@ -505,7 +505,8 @@ class SyncService {
               final usernameInfo = entry.value as Map<String, dynamic>?;
               if (usernameInfo != null) {
                 final storedUsername = usernameInfo['value'] as String?;
-                if (storedUsername != null && storedUsername.toLowerCase() == username.toLowerCase()) {
+                if (storedUsername != null &&
+                    storedUsername.toLowerCase() == username.toLowerCase()) {
                   return true; // Username is already taken
                 }
               }
@@ -523,10 +524,8 @@ class SyncService {
   /// Gets all usernames across all rooms
   Future<Map<String, String>?> getAllUsernamesGlobally() async {
     try {
-      final response = await _client
-          .from(_tableName)
-          .select('data')
-          .not('data', 'is', null);
+      final response =
+          await _client.from(_tableName).select('data').not('data', 'is', null);
 
       final globalUsernames = <String, String>{};
 
@@ -606,7 +605,7 @@ class SyncService {
       AppLogger.info('Search query too short: $query');
       return <Map<String, dynamic>>[];
     }
-    
+
     try {
       // Get all rooms that have usernames data
       final response = await _client
@@ -627,7 +626,7 @@ class SyncService {
               final usernameInfo = entry.value as Map<String, dynamic>?;
               if (usernameInfo != null) {
                 final username = usernameInfo['value'] as String?;
-                if (username != null && 
+                if (username != null &&
                     username.toLowerCase().contains(query.toLowerCase())) {
                   // Only add if not already in the list (to avoid duplicates)
                   bool alreadyAdded = false;
@@ -637,7 +636,7 @@ class SyncService {
                       break;
                     }
                   }
-                  
+
                   if (!alreadyAdded) {
                     matchingUsers.add({
                       'username': username,
@@ -651,7 +650,8 @@ class SyncService {
           }
         }
       }
-      AppLogger.debug('Search completed, found ${matchingUsers.length} users for query: $query');
+      AppLogger.debug(
+          'Search completed, found ${matchingUsers.length} users for query: $query');
       return matchingUsers;
     } catch (e) {
       AppLogger.error('Failed to search users: $query, error: ${e.toString()}');
@@ -663,7 +663,7 @@ class SyncService {
   Future<bool> followUser(String targetDeviceId) async {
     try {
       final currentDeviceId = await _getOrCreateDeviceId();
-      
+
       // Don't allow following yourself
       if (currentDeviceId == targetDeviceId) {
         AppLogger.warning('Cannot follow yourself');
@@ -685,19 +685,22 @@ class SyncService {
             .select('data')
             .eq('room_id', _currentRoomId!)
             .single();
-        
-        final currentData = Map<String, dynamic>.from(roomResponse['data'] as Map<String, dynamic>? ?? {});
+
+        final currentData = Map<String, dynamic>.from(
+            roomResponse['data'] as Map<String, dynamic>? ?? {});
 
         // Update following list
-        final following = List<String>.from(currentData[_followingKey] as List<dynamic>? ?? []);
+        final following = List<String>.from(
+            currentData[_followingKey] as List<dynamic>? ?? []);
         if (following.contains(targetDeviceId)) {
           AppLogger.info('Already following user: $targetDeviceId');
           return true; // Already following, return true
         }
         following.add(targetDeviceId);
-        
+
         // Update followers list for the target user
-        final targetUserFollowers = List<String>.from(currentData[_followersKey] as List<dynamic>? ?? []);
+        final targetUserFollowers = List<String>.from(
+            currentData[_followersKey] as List<dynamic>? ?? []);
         if (!targetUserFollowers.contains(currentDeviceId)) {
           targetUserFollowers.add(currentDeviceId);
         }
@@ -708,9 +711,8 @@ class SyncService {
 
         await _client
             .from(_tableName)
-            .update({'data': currentData})
-            .eq('room_id', _currentRoomId!);
-        
+            .update({'data': currentData}).eq('room_id', _currentRoomId!);
+
         AppLogger.debug('Successfully followed user: $targetDeviceId');
         return true;
       } else {
@@ -745,19 +747,23 @@ class SyncService {
             .select('data')
             .eq('room_id', _currentRoomId!)
             .single();
-        
-        final currentData = Map<String, dynamic>.from(roomResponse['data'] as Map<String, dynamic>? ?? {});
+
+        final currentData = Map<String, dynamic>.from(
+            roomResponse['data'] as Map<String, dynamic>? ?? {});
 
         // Update following list
-        final following = List<String>.from(currentData[_followingKey] as List<dynamic>? ?? []);
+        final following = List<String>.from(
+            currentData[_followingKey] as List<dynamic>? ?? []);
         if (!following.contains(targetDeviceId)) {
-          AppLogger.info('Not following user: $targetDeviceId, nothing to unfollow');
+          AppLogger.info(
+              'Not following user: $targetDeviceId, nothing to unfollow');
           return true; // Not following, return true as desired state is achieved
         }
         following.remove(targetDeviceId);
-        
+
         // Update followers list for the target user
-        final targetUserFollowers = List<String>.from(currentData[_followersKey] as List<dynamic>? ?? []);
+        final targetUserFollowers = List<String>.from(
+            currentData[_followersKey] as List<dynamic>? ?? []);
         targetUserFollowers.remove(currentDeviceId);
 
         // Update the data in the room
@@ -766,15 +772,15 @@ class SyncService {
 
         await _client
             .from(_tableName)
-            .update({'data': currentData})
-            .eq('room_id', _currentRoomId!);
-        
+            .update({'data': currentData}).eq('room_id', _currentRoomId!);
+
         AppLogger.debug('Successfully unfollowed user: $targetDeviceId');
         return true;
       } else {
         // For global unfollowing, we'd need a different approach
         // The current architecture doesn't support global following properly
-        AppLogger.warning('Unfollowing functionality limited when not in a room');
+        AppLogger.warning(
+            'Unfollowing functionality limited when not in a room');
         return false;
       }
     } catch (e) {
@@ -790,11 +796,12 @@ class SyncService {
       if (_currentRoomId != null) {
         final roomData = await getRoomData();
         if (roomData != null) {
-          final following = List<String>.from(roomData[_followingKey] as List<dynamic>? ?? []);
+          final following = List<String>.from(
+              roomData[_followingKey] as List<dynamic>? ?? []);
           return following.contains(targetDeviceId);
         }
       }
-      
+
       // For global check, return false in the current implementation
       // The current architecture doesn't support global following properly
       return false;
@@ -815,7 +822,7 @@ class SyncService {
           return List<String>.from(following.map((e) => e.toString()));
         }
       }
-      
+
       // Return empty list for global following in the current implementation
       // The current data structure doesn't properly support global following
       // A proper implementation would require a separate table for following relationships
@@ -837,7 +844,7 @@ class SyncService {
           return List<String>.from(followers.map((e) => e.toString()));
         }
       }
-      
+
       // Return empty list for global followers in the current implementation
       // The current data structure doesn't properly support global followers
       // A proper implementation would require a separate table for following relationships
@@ -852,10 +859,8 @@ class SyncService {
   Future<String?> getUsernameByDeviceId(String deviceId) async {
     try {
       // Get all rooms that have usernames data
-      final response = await _client
-          .from(_tableName)
-          .select('data')
-          .not('data', 'is', null);
+      final response =
+          await _client.from(_tableName).select('data').not('data', 'is', null);
 
       for (final row in response) {
         final data = row['data'] as Map<String, dynamic>?;
@@ -863,7 +868,8 @@ class SyncService {
           final usernamesData = data[_usernamesKey] as Map<String, dynamic>?;
           if (usernamesData != null) {
             // Check if the target device ID exists in this room's usernames
-            final usernameInfo = usernamesData[deviceId] as Map<String, dynamic>?;
+            final usernameInfo =
+                usernamesData[deviceId] as Map<String, dynamic>?;
             if (usernameInfo != null) {
               final storedUsername = usernameInfo['value'] as String?;
               if (storedUsername != null) {
@@ -875,7 +881,8 @@ class SyncService {
       }
       return null;
     } catch (e) {
-      AppLogger.error('Failed to get username by device ID: $deviceId, error: ${e.toString()}');
+      AppLogger.error(
+          'Failed to get username by device ID: $deviceId, error: ${e.toString()}');
       return null;
     }
   }
@@ -883,7 +890,8 @@ class SyncService {
   /// Adds a following listener
   void addFollowingListener(Function(List<String>) callback) {
     addListener(_followingKey, (data) {
-      final followingList = List<String>.from(data['value'] as List<dynamic>? ?? []);
+      final followingList =
+          List<String>.from(data['value'] as List<dynamic>? ?? []);
       callback(followingList);
     });
   }
@@ -891,7 +899,8 @@ class SyncService {
   /// Adds a followers listener
   void addFollowersListener(Function(List<String>) callback) {
     addListener(_followersKey, (data) {
-      final followersList = List<String>.from(data['value'] as List<dynamic>? ?? []);
+      final followersList =
+          List<String>.from(data['value'] as List<dynamic>? ?? []);
       callback(followersList);
     });
   }
@@ -906,7 +915,8 @@ class SyncService {
     try {
       final roomData = await getRoomData();
       if (roomData == null) {
-        AppLogger.warning('No room data available when getting game stats for device: $deviceId');
+        AppLogger.warning(
+            'No room data available when getting game stats for device: $deviceId');
         return null;
       }
 
@@ -921,7 +931,8 @@ class SyncService {
 
       return null;
     } catch (e) {
-      AppLogger.error('Failed to get game stats for device: $deviceId, error: ${e.toString()}');
+      AppLogger.error(
+          'Failed to get game stats for device: $deviceId, error: ${e.toString()}');
       return null;
     }
   }
@@ -937,12 +948,12 @@ class SyncService {
       final gameStatsMap = roomData['game_stats'] as Map<String, dynamic>?;
       if (gameStatsMap != null) {
         final statsList = <Map<String, dynamic>>[];
-        
+
         // Iterate through all devices' stats
         for (final entry in gameStatsMap.entries) {
           final deviceId = entry.key;
           final deviceStats = entry.value as Map<String, dynamic>?;
-          
+
           if (deviceStats != null) {
             statsList.add({
               'device_id': deviceId,
@@ -951,7 +962,7 @@ class SyncService {
             });
           }
         }
-        
+
         return statsList;
       }
 

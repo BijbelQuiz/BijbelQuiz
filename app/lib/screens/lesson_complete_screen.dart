@@ -36,7 +36,8 @@ class LessonCompleteScreen extends StatefulWidget {
   State<LessonCompleteScreen> createState() => _LessonCompleteScreenState();
 }
 
-class _LessonCompleteScreenState extends State<LessonCompleteScreen> with SingleTickerProviderStateMixin {
+class _LessonCompleteScreenState extends State<LessonCompleteScreen>
+    with SingleTickerProviderStateMixin {
   final AdService _adService = AdService();
   Ad? _currentAd;
 
@@ -50,7 +51,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
     try {
       final ad = await _adService.getDisplayAd();
       if (!mounted) return;
-      
+
       setState(() {
         _currentAd = ad;
       });
@@ -65,13 +66,14 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
 
   @override
   Widget build(BuildContext context) {
-    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    final analyticsService =
+        Provider.of<AnalyticsService>(context, listen: false);
 
     analyticsService.screen(context, 'LessonCompleteScreen');
 
-
     final cs = Theme.of(context).colorScheme;
-    final pctValue = widget.total > 0 ? (widget.correct / widget.total * 100.0) : 0.0;
+    final pctValue =
+        widget.total > 0 ? (widget.correct / widget.total * 100.0) : 0.0;
 
     return PopScope(
       canPop: false,
@@ -124,7 +126,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
                       child: SingleChildScrollView(
-                        child: Column(
+                          child: Column(
                         children: [
                           const SizedBox(height: 8),
                           // Heading + Icon (animated)
@@ -132,7 +134,8 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                             tween: Tween(begin: 0.9, end: 1.0),
                             duration: const Duration(milliseconds: 500),
                             curve: Curves.easeOutBack,
-                            builder: (context, value, child) => Transform.scale(scale: value, child: child),
+                            builder: (context, value, child) =>
+                                Transform.scale(scale: value, child: child),
                             child: Container(
                               padding: const EdgeInsets.all(18),
                               decoration: BoxDecoration(
@@ -151,13 +154,17 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.emoji_events_rounded, color: cs.primary, size: 36),
+                                  Icon(Icons.emoji_events_rounded,
+                                      color: cs.primary, size: 36),
                                   const SizedBox(width: 12),
                                   Text(
                                     strings.AppStrings.lessonComplete,
-                                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -167,7 +174,8 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                           const SizedBox(height: 16),
                           // Lesson title/badge
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
                               color: cs.surface,
                               borderRadius: BorderRadius.circular(14),
@@ -175,7 +183,10 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                             ),
                             child: Text(
                               widget.lesson.title,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -218,21 +229,27 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                               Expanded(
                                 child: OutlinedButton(
                                   onPressed: () {
-                                    Provider.of<AnalyticsService>(context, listen: false);
+                                    Provider.of<AnalyticsService>(context,
+                                        listen: false);
 
-
-                                    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'retry_lesson_from_complete');
+                                    Provider.of<AnalyticsService>(context,
+                                            listen: false)
+                                        .capture(context,
+                                            'retry_lesson_from_complete');
                                     widget.onRetry();
                                   },
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 14),
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Icon(Icons.refresh_rounded, size: 20),
+                                      const Icon(Icons.refresh_rounded,
+                                          size: 20),
                                       const SizedBox(width: 8),
-                                      const Text(strings.AppStrings.retryLesson),
+                                      const Text(
+                                          strings.AppStrings.retryLesson),
                                     ],
                                   ),
                                 ),
@@ -240,22 +257,29 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                               const SizedBox(width: 12),
                               Expanded(
                                 child: ElevatedButton(
-                                  onPressed: widget.stars > 0 ? () {
-                                    Provider.of<AnalyticsService>(context, listen: false);
+                                  onPressed: widget.stars > 0
+                                      ? () {
+                                          Provider.of<AnalyticsService>(context,
+                                              listen: false);
 
-
-                                    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'start_next_lesson_from_complete');
-                                    _startNextQuiz();
-                                  } : null,
+                                          Provider.of<AnalyticsService>(context,
+                                                  listen: false)
+                                              .capture(context,
+                                                  'start_next_lesson_from_complete');
+                                          _startNextQuiz();
+                                        }
+                                      : null,
                                   style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 14),
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       const Text(strings.AppStrings.nextLesson),
                                       const SizedBox(width: 8),
-                                      const Icon(Icons.arrow_forward_rounded, size: 20),
+                                      const Icon(Icons.arrow_forward_rounded,
+                                          size: 20),
                                     ],
                                   ),
                                 ),
@@ -288,7 +312,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
       if (nextIndex < 0 || nextIndex >= lessons.length) return;
       final nextLesson = lessons[nextIndex];
       if (!mounted) return;
-      
+
       // Only show ad if we have one available, otherwise go directly to next lesson
       if (_currentAd != null) {
         // Show ad dialog first
@@ -304,7 +328,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
 
   Future<void> _showAdDialog(Lesson nextLesson) async {
     if (!mounted) return;
-    
+
     final cs = Theme.of(context).colorScheme;
     showDialog(
       context: context,
@@ -331,16 +355,19 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
                   },
                   onView: () {
                     // Track ad view
-                    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
-                    analyticsService.trackFeatureUsage(context, 'custom_ads', 'viewed', additionalProperties: {
-                      'ad_id': _currentAd!.id,
-                      'ad_title': _currentAd!.title,
-                    });
+                    final analyticsService =
+                        Provider.of<AnalyticsService>(context, listen: false);
+                    analyticsService.trackFeatureUsage(
+                        context, 'custom_ads', 'viewed',
+                        additionalProperties: {
+                          'ad_id': _currentAd!.id,
+                          'ad_title': _currentAd!.title,
+                        });
                   },
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Continue button
                 SizedBox(
                   width: double.infinity,
@@ -368,12 +395,13 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> with Single
 
   Future<void> _proceedToNextLesson(Lesson nextLesson) async {
     if (!mounted) return;
-    
+
     final nav = Navigator.of(context);
     nav.pop(); // Close lesson complete screen
     await nav.push(
       MaterialPageRoute(
-        builder: (_) => QuizScreen(lesson: nextLesson, sessionLimit: nextLesson.maxQuestions),
+        builder: (_) => QuizScreen(
+            lesson: nextLesson, sessionLimit: nextLesson.maxQuestions),
       ),
     );
   }
@@ -418,7 +446,10 @@ class _Speedometer extends StatelessWidget {
             child: Center(
               child: Text(
                 '${percentage.round()}%',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w800),
               ),
             ),
           ),
@@ -456,7 +487,8 @@ class _SpeedometerPainter extends CustomPainter {
 
     final rect = Rect.fromCircle(center: center, radius: radius);
     const startAngle = math.pi; // 180 deg (left)
-    const sweepAngleTotal = -math.pi; // sweep counter-clockwise along the top semicircle to 0 deg (right)
+    const sweepAngleTotal = -math
+        .pi; // sweep counter-clockwise along the top semicircle to 0 deg (right)
 
     // Draw arcs (flip vertically to ensure the wheel is oriented correctly)
     canvas.save();
@@ -535,7 +567,10 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 2),
           Text(
@@ -593,7 +628,10 @@ class _AnimatedNumberCard extends StatelessWidget {
               final text = value.round().toString() + (suffix ?? '');
               return Text(
                 text,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w800),
               );
             },
           ),

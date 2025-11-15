@@ -16,7 +16,7 @@ class GameStatsProvider extends ChangeNotifier {
   static const String _currentStreakKey = 'game_current_streak';
   static const String _longestStreakKey = 'game_longest_streak';
   static const String _incorrectAnswersKey = 'game_incorrect_answers';
-  
+
   SharedPreferences? _prefs;
   int _score = 0;
   int _currentStreak = 0;
@@ -37,7 +37,8 @@ class GameStatsProvider extends ChangeNotifier {
   int? get powerupQuestionsLeft => _activePowerup?.questionsRemaining;
   Duration? get powerupTimeLeft {
     if (_activePowerup == null || !_activePowerup!.byQuestions) {
-      if (_powerupActivatedAt != null && _activePowerup?.timeRemaining != null) {
+      if (_powerupActivatedAt != null &&
+          _activePowerup?.timeRemaining != null) {
         final elapsed = DateTime.now().difference(_powerupActivatedAt!);
         final left = _activePowerup!.timeRemaining! - elapsed;
         return left > Duration.zero ? left : Duration.zero;
@@ -46,12 +47,17 @@ class GameStatsProvider extends ChangeNotifier {
     return null;
   }
 
-  void activatePowerup({required int multiplier, int? questions, Duration? time}) {
+  void activatePowerup(
+      {required int multiplier, int? questions, Duration? time}) {
     if (questions != null) {
-      _activePowerup = Powerup(multiplier: multiplier, questionsRemaining: questions, byQuestions: true);
+      _activePowerup = Powerup(
+          multiplier: multiplier,
+          questionsRemaining: questions,
+          byQuestions: true);
       _powerupActivatedAt = null;
     } else if (time != null) {
-      _activePowerup = Powerup(multiplier: multiplier, timeRemaining: time, byQuestions: false);
+      _activePowerup = Powerup(
+          multiplier: multiplier, timeRemaining: time, byQuestions: false);
       _powerupActivatedAt = DateTime.now();
     }
     notifyListeners();
@@ -95,19 +101,19 @@ class GameStatsProvider extends ChangeNotifier {
 
   /// The current game score
   int get score => _score;
-  
+
   /// The current streak of correct answers
   int get currentStreak => _currentStreak;
-  
+
   /// The longest streak achieved
   int get longestStreak => _longestStreak;
 
   /// The number of incorrect answers
   int get incorrectAnswers => _incorrectAnswers;
-  
+
   /// Whether stats are currently being loaded
   bool get isLoading => _isLoading;
-  
+
   /// Any error that occurred while loading stats
   String? get error => _error;
 
@@ -123,7 +129,8 @@ class GameStatsProvider extends ChangeNotifier {
       _currentStreak = _prefs?.getInt(_currentStreakKey) ?? 0;
       _longestStreak = _prefs?.getInt(_longestStreakKey) ?? 0;
       _incorrectAnswers = _prefs?.getInt(_incorrectAnswersKey) ?? 0;
-      AppLogger.info('Game stats loaded: score=$_score, streak=$_currentStreak, longest=$_longestStreak, incorrect=$_incorrectAnswers');
+      AppLogger.info(
+          'Game stats loaded: score=$_score, streak=$_currentStreak, longest=$_longestStreak, incorrect=$_incorrectAnswers');
     } catch (e) {
       // Use the new error handling system
       final appError = ErrorHandler().fromException(
@@ -150,20 +157,29 @@ class GameStatsProvider extends ChangeNotifier {
         // Powerup logic
         if (_activePowerup != null) {
           // Check if time-based powerup expired
-          if (!_activePowerup!.byQuestions && powerupTimeLeft != null && powerupTimeLeft! <= Duration.zero) {
+          if (!_activePowerup!.byQuestions &&
+              powerupTimeLeft != null &&
+              powerupTimeLeft! <= Duration.zero) {
             clearPowerup();
           }
           if (_activePowerup != null) {
             // Track power-up usage
             final context = navigatorKey.currentContext;
             if (context != null) {
-              final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
-              analyticsService.trackFeatureUsage(context, AnalyticsService.featurePowerUps, AnalyticsService.actionUsed, additionalProperties: {
-                'powerup_multiplier': _activePowerup!.multiplier,
-                'powerup_type': _activePowerup!.byQuestions ? 'question_based' : 'time_based',
-                'questions_remaining': _activePowerup!.questionsRemaining ?? 0,
-                'time_remaining_seconds': _activePowerup!.timeRemaining?.inSeconds ?? 0,
-              });
+              final analyticsService =
+                  Provider.of<AnalyticsService>(context, listen: false);
+              analyticsService.trackFeatureUsage(context,
+                  AnalyticsService.featurePowerUps, AnalyticsService.actionUsed,
+                  additionalProperties: {
+                    'powerup_multiplier': _activePowerup!.multiplier,
+                    'powerup_type': _activePowerup!.byQuestions
+                        ? 'question_based'
+                        : 'time_based',
+                    'questions_remaining':
+                        _activePowerup!.questionsRemaining ?? 0,
+                    'time_remaining_seconds':
+                        _activePowerup!.timeRemaining?.inSeconds ?? 0,
+                  });
             }
 
             pointsToAdd = _activePowerup!.multiplier;
@@ -188,12 +204,14 @@ class GameStatsProvider extends ChangeNotifier {
             await Future.delayed(const Duration(milliseconds: 100));
           }
         }
-        AppLogger.info('Stats updated: correct, score=$_score, streak=$_currentStreak, longest=$_longestStreak');
+        AppLogger.info(
+            'Stats updated: correct, score=$_score, streak=$_currentStreak, longest=$_longestStreak');
       } else {
         _currentStreak = 0;
         _incorrectAnswers++;
         await _prefs?.setInt(_incorrectAnswersKey, _incorrectAnswers);
-        AppLogger.info('Stats updated: incorrect, score=$_score, streak=$_currentStreak, incorrect=$_incorrectAnswers');
+        AppLogger.info(
+            'Stats updated: incorrect, score=$_score, streak=$_currentStreak, incorrect=$_incorrectAnswers');
       }
       await _prefs?.setInt(_scoreKey, _score);
       await _prefs?.setInt(_currentStreakKey, _currentStreak);
@@ -225,7 +243,7 @@ class GameStatsProvider extends ChangeNotifier {
       _currentStreak = 0;
       _longestStreak = 0;
       _incorrectAnswers = 0;
-      
+
       await _prefs?.setInt(_scoreKey, _score);
       await _prefs?.setInt(_currentStreakKey, _currentStreak);
       await _prefs?.setInt(_longestStreakKey, _longestStreak);
@@ -274,7 +292,8 @@ class GameStatsProvider extends ChangeNotifier {
     // Define available audio players with their configurations
     final audioPlayers = [
       _AudioPlayerConfig('mpg123', ['-q', assetPath]),
-      _AudioPlayerConfig('ffplay', ['-nodisp', '-autoexit', '-loglevel', 'error', assetPath]),
+      _AudioPlayerConfig(
+          'ffplay', ['-nodisp', '-autoexit', '-loglevel', 'error', assetPath]),
     ];
 
     // Try each player in order
@@ -310,7 +329,8 @@ class GameStatsProvider extends ChangeNotifier {
         AppLogger.info('Sound played successfully with: ${player.command}');
         return true;
       } else {
-        AppLogger.warning('Player ${player.command} failed: ${playResult.stderr}');
+        AppLogger.warning(
+            'Player ${player.command} failed: ${playResult.stderr}');
         return false;
       }
     } catch (e) {
@@ -412,7 +432,8 @@ class GameStatsProvider extends ChangeNotifier {
       }
     } catch (e) {
       // Service not available or not initialized, fall back to direct method
-      AppLogger.debug('StarTransactionService not available, using fallback method: $e');
+      AppLogger.debug(
+          'StarTransactionService not available, using fallback method: $e');
     }
 
     // Fallback to original method
@@ -441,7 +462,8 @@ class GameStatsProvider extends ChangeNotifier {
       }
     } catch (e) {
       // Service not available or not initialized, fall back to direct method
-      AppLogger.debug('StarTransactionService not available, using fallback method: $e');
+      AppLogger.debug(
+          'StarTransactionService not available, using fallback method: $e');
     }
 
     // Fallback to original method
@@ -496,7 +518,8 @@ class GameStatsProvider extends ChangeNotifier {
   Future<String> getCurrentDeviceId() => syncService.getCurrentDeviceId();
 
   /// Removes a specific device from the current room
-  Future<bool> removeDevice(String deviceId) => syncService.removeDevice(deviceId);
+  Future<bool> removeDevice(String deviceId) =>
+      syncService.removeDevice(deviceId);
 }
 
 // Powerup model

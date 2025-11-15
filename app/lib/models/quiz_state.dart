@@ -49,7 +49,9 @@ class QuizState {
   }) {
     return QuizState(
       question: question ?? this.question,
-      selectedAnswerIndex: selectedAnswerIndex == _sentinel ? this.selectedAnswerIndex : selectedAnswerIndex as int?,
+      selectedAnswerIndex: selectedAnswerIndex == _sentinel
+          ? this.selectedAnswerIndex
+          : selectedAnswerIndex as int?,
       isAnswering: isAnswering ?? this.isAnswering,
       isTransitioning: isTransitioning ?? this.isTransitioning,
       timeRemaining: timeRemaining ?? this.timeRemaining,
@@ -58,4 +60,4 @@ class QuizState {
   }
 
   static const _sentinel = Object();
-} 
+}

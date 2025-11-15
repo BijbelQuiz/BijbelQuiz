@@ -37,15 +37,17 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _searchController = TextEditingController();
-  
+
   @override
   void initState() {
     super.initState();
     AppLogger.info('SettingsScreen initialized');
-    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    final analyticsService =
+        Provider.of<AnalyticsService>(context, listen: false);
     analyticsService.screen(context, 'SettingsScreen');
-    analyticsService.trackFeatureStart(context, AnalyticsService.featureSettings);
-    
+    analyticsService.trackFeatureStart(
+        context, AnalyticsService.featureSettings);
+
     NotificationService.onError = (message) {
       AppLogger.error('Notification service error: $message');
       if (mounted) {
@@ -61,33 +63,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _openStatusPage() async {
-    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'open_status_page');
+    Provider.of<AnalyticsService>(context, listen: false)
+        .capture(context, 'open_status_page');
     final Uri url = Uri.parse(AppUrls.statusPageUrl);
     if (!await launchUrl(url)) {
       if (mounted) {
-        showTopSnackBar(context, strings.AppStrings.couldNotOpenStatusPage, style: TopSnackBarStyle.error);
+        showTopSnackBar(context, strings.AppStrings.couldNotOpenStatusPage,
+            style: TopSnackBarStyle.error);
       }
     }
   }
 
-  Future<void> _checkForUpdates(BuildContext context, SettingsProvider settings) async {
-    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'check_for_updates');
+  Future<void> _checkForUpdates(
+      BuildContext context, SettingsProvider settings) async {
+    Provider.of<AnalyticsService>(context, listen: false)
+        .capture(context, 'check_for_updates');
     try {
       final info = await PackageInfo.fromPlatform();
       final version = info.version;
       final platform = kIsWeb ? 'web' : Platform.operatingSystem.toLowerCase();
-      final url = Uri.parse('${AppUrls.updateUrl}?version=$version&platform=$platform');
+      final url =
+          Uri.parse('${AppUrls.updateUrl}?version=$version&platform=$platform');
 
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
         if (context.mounted) {
-          showTopSnackBar(context, strings.AppStrings.couldNotOpenUpdatePage, style: TopSnackBarStyle.error);
+          showTopSnackBar(context, strings.AppStrings.couldNotOpenUpdatePage,
+              style: TopSnackBarStyle.error);
         }
       }
     } catch (e) {
       if (context.mounted) {
-        showTopSnackBar(context, '${strings.AppStrings.errorOpeningUpdatePage}${e.toString()}', style: TopSnackBarStyle.error);
+        showTopSnackBar(context,
+            '${strings.AppStrings.errorOpeningUpdatePage}${e.toString()}',
+            style: TopSnackBarStyle.error);
       }
     }
   }
@@ -139,7 +149,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ? _buildLoadingState(isDesktop, isTablet, isSmallScreen)
           : settings.error != null
               ? _buildErrorState(settings, colorScheme)
-              : _buildMainContent(context, settings, colorScheme, isDesktop, isTablet, isSmallScreen),
+              : _buildMainContent(context, settings, colorScheme, isDesktop,
+                  isTablet, isSmallScreen),
     );
   }
 
@@ -158,10 +169,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(settings.error!, style: TextStyle(color: colorScheme.error), textAlign: TextAlign.center),
+          Text(settings.error!,
+              style: TextStyle(color: colorScheme.error),
+              textAlign: TextAlign.center),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: () { settings.reloadSettings(); },
+            onPressed: () {
+              settings.reloadSettings();
+            },
             icon: Icon(Icons.refresh, color: colorScheme.onPrimary),
             label: Text(strings.AppStrings.retry),
           ),
@@ -170,7 +185,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildMainContent(BuildContext context, SettingsProvider settings, ColorScheme colorScheme, bool isDesktop, bool isTablet, bool isSmallScreen) {
+  Widget _buildMainContent(
+      BuildContext context,
+      SettingsProvider settings,
+      ColorScheme colorScheme,
+      bool isDesktop,
+      bool isTablet,
+      bool isSmallScreen) {
     return ResponsiveLayout(
       isDesktop: isDesktop,
       isTablet: isTablet,
@@ -178,33 +199,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           // Search Bar
           _buildSearchBar(context, colorScheme, isSmallScreen),
-          
+
           // Settings Content
           Expanded(
-            child: _buildSettingsList(context, settings, colorScheme, isSmallScreen),
+            child: _buildSettingsList(
+                context, settings, colorScheme, isSmallScreen),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSearchBar(BuildContext context, ColorScheme colorScheme, bool isSmallScreen) {
+  Widget _buildSearchBar(
+      BuildContext context, ColorScheme colorScheme, bool isSmallScreen) {
     return Padding(
       padding: EdgeInsets.all(isSmallScreen ? 16.0 : 24.0),
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(
           hintText: strings.AppStrings.searchSettings,
-          prefixIcon: Icon(Icons.search, color: colorScheme.onSurface.withValues(alpha: 0.6)),
+          prefixIcon: Icon(Icons.search,
+              color: colorScheme.onSurface.withValues(alpha: 0.6)),
           suffixIcon: _searchController.text.isNotEmpty
-            ? IconButton(
-                icon: Icon(Icons.clear, color: colorScheme.onSurface.withValues(alpha: 0.6)),
-                onPressed: () {
-                  _searchController.clear();
-                  setState(() {});
-                },
-              )
-            : null,
+              ? IconButton(
+                  icon: Icon(Icons.clear,
+                      color: colorScheme.onSurface.withValues(alpha: 0.6)),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {});
+                  },
+                )
+              : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -216,9 +241,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSettingsList(BuildContext context, SettingsProvider settings, ColorScheme colorScheme, bool isSmallScreen) {
+  Widget _buildSettingsList(BuildContext context, SettingsProvider settings,
+      ColorScheme colorScheme, bool isSmallScreen) {
     final searchQuery = _searchController.text.toLowerCase().trim();
-    
+
     return ListView(
       padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16.0 : 24.0),
       children: [
@@ -240,7 +266,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: strings.AppStrings.showNavigationLabelsDesc,
               child: _buildSwitch(
                 settings.showNavigationLabels,
-                (value) => _updateSetting(settings, 'toggle_navigation_labels', () => settings.setShowNavigationLabels(value)),
+                (value) => _updateSetting(settings, 'toggle_navigation_labels',
+                    () => settings.setShowNavigationLabels(value)),
                 colorScheme,
               ),
             ),
@@ -254,7 +281,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: strings.AppStrings.colorfulModeDesc,
               child: _buildSwitch(
                 settings.colorfulMode,
-                (value) => _updateSetting(settings, 'toggle_colorful_mode', () => settings.setColorfulMode(value)),
+                (value) => _updateSetting(settings, 'toggle_colorful_mode',
+                    () => settings.setColorfulMode(value)),
                 colorScheme,
               ),
             ),
@@ -263,7 +291,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: strings.AppStrings.hidePopupDesc,
               child: _buildSwitch(
                 settings.hidePromoCard,
-                (value) => _updateSetting(settings, 'toggle_hide_promo_card', () => settings.setHidePromoCard(value)),
+                (value) => _updateSetting(settings, 'toggle_hide_promo_card',
+                    () => settings.setHidePromoCard(value)),
                 colorScheme,
               ),
             ),
@@ -282,14 +311,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _SettingItem(
               title: strings.AppStrings.gameSpeed,
               subtitle: strings.AppStrings.chooseGameSpeed,
-              child: _buildGameSpeedDropdown(settings, colorScheme, isSmallScreen),
+              child:
+                  _buildGameSpeedDropdown(settings, colorScheme, isSmallScreen),
             ),
             _SettingItem(
               title: strings.AppStrings.muteSoundEffects,
               subtitle: strings.AppStrings.muteSoundEffectsDesc,
               child: _buildSwitch(
                 settings.mute,
-                (value) => _updateSetting(settings, 'toggle_mute', () => settings.setMute(value)),
+                (value) => _updateSetting(
+                    settings, 'toggle_mute', () => settings.setMute(value)),
                 colorScheme,
               ),
             ),
@@ -329,19 +360,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: strings.AppStrings.automaticBugReportsDesc,
               child: _buildSwitch(
                 settings.automaticBugReporting,
-                (value) => _updateSetting(settings, 'toggle_automatic_bug_reporting', () => settings.setAutomaticBugReporting(value)),
+                (value) => _updateSetting(
+                    settings,
+                    'toggle_automatic_bug_reporting',
+                    () => settings.setAutomaticBugReporting(value)),
                 colorScheme,
               ),
             ),
             if (settings.apiEnabled) ...[
               _SettingItem(
                 title: strings.AppStrings.apiKey,
-                subtitle: settings.apiKey.isEmpty ? strings.AppStrings.generateApiKey : _formatApiKey(settings.apiKey),
+                subtitle: settings.apiKey.isEmpty
+                    ? strings.AppStrings.generateApiKey
+                    : _formatApiKey(settings.apiKey),
                 child: _buildApiKeyControls(context, settings, colorScheme),
               ),
               _SettingItem(
                 title: strings.AppStrings.apiPort,
-                subtitle: '${strings.AppStrings.apiPortDesc} (${settings.apiPort})',
+                subtitle:
+                    '${strings.AppStrings.apiPortDesc} (${settings.apiPort})',
                 child: _buildApiPortControl(settings),
               ),
               _SettingItem(
@@ -437,7 +474,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             if (BijbelQuizGenPeriod.isGenPeriod() || kDebugMode)
               _SettingItem(
                 title: strings.AppStrings.bijbelquizGenTitle,
-                subtitle: '${strings.AppStrings.bijbelquizGenSubtitle}${BijbelQuizGenPeriod.getStatsYear()}',
+                subtitle:
+                    '${strings.AppStrings.bijbelquizGenSubtitle}${BijbelQuizGenPeriod.getStatsYear()}',
                 onTap: () => _showBijbelQuizGen(context),
                 child: _buildActionButton(
                   context,
@@ -469,7 +507,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: strings.AppStrings.serverStatus,
               subtitle: strings.AppStrings.checkServiceStatus,
               child: IconButton(
-                icon: Icon(Icons.open_in_new, color: Theme.of(context).colorScheme.primary),
+                icon: Icon(Icons.open_in_new,
+                    color: Theme.of(context).colorScheme.primary),
                 onPressed: _openStatusPage,
                 tooltip: strings.AppStrings.openStatusPage,
                 color: Theme.of(context).colorScheme.primary,
@@ -480,7 +519,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: strings.AppStrings.checkForUpdates,
                 subtitle: strings.AppStrings.checkForUpdatesDescription,
                 child: IconButton(
-                  icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.primary),
+                  icon: Icon(Icons.refresh,
+                      color: Theme.of(context).colorScheme.primary),
                   onPressed: () => _checkForUpdates(context, settings),
                   tooltip: strings.AppStrings.checkForUpdatesTooltip,
                   color: Theme.of(context).colorScheme.primary,
@@ -490,7 +530,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: strings.AppStrings.privacyPolicy,
               subtitle: strings.AppStrings.privacyPolicyDescription,
               child: IconButton(
-                icon: Icon(Icons.open_in_new, color: Theme.of(context).colorScheme.primary),
+                icon: Icon(Icons.open_in_new,
+                    color: Theme.of(context).colorScheme.primary),
                 onPressed: () => _openPrivacyPolicy(context),
                 tooltip: strings.AppStrings.openPrivacyPolicyTooltip,
                 color: Theme.of(context).colorScheme.primary,
@@ -513,18 +554,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSection(BuildContext context, ColorScheme colorScheme, bool isSmallScreen, {
+  Widget _buildSection(
+    BuildContext context,
+    ColorScheme colorScheme,
+    bool isSmallScreen, {
     required String title,
     required IconData icon,
     required List<_SettingItem> items,
     String? searchQuery,
   }) {
-    final filteredItems = searchQuery == null || searchQuery.isEmpty 
-        ? items 
-        : items.where((item) => 
-            item.title.toLowerCase().contains(searchQuery) ||
-            (item.subtitle?.toLowerCase().contains(searchQuery) ?? false)
-          ).toList();
+    final filteredItems = searchQuery == null || searchQuery.isEmpty
+        ? items
+        : items
+            .where((item) =>
+                item.title.toLowerCase().contains(searchQuery) ||
+                (item.subtitle?.toLowerCase().contains(searchQuery) ?? false))
+            .toList();
 
     if (filteredItems.isEmpty) {
       return const SizedBox.shrink();
@@ -550,9 +595,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
-                ),
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
               ),
             ],
           ),
@@ -568,7 +613,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final index = entry.key;
               final item = entry.value;
               final isLast = index == filteredItems.length - 1;
-              
+
               return Column(
                 children: [
                   _buildSettingRow(context, item, colorScheme),
@@ -588,7 +633,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSettingRow(BuildContext context, _SettingItem item, ColorScheme colorScheme) {
+  Widget _buildSettingRow(
+      BuildContext context, _SettingItem item, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: item.onTap != null
@@ -596,7 +642,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: item.onTap,
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                 child: Row(
                   children: [
                     Expanded(
@@ -606,18 +653,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           Text(
                             item.title,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: colorScheme.onSurface,
-                            ),
+                            style:
+                                Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      color: colorScheme.onSurface,
+                                    ),
                           ),
                           if (item.subtitle != null) ...[
                             const SizedBox(height: 4),
                             Text(
                               item.subtitle!,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurface.withValues(alpha: 0.7),
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: colorScheme.onSurface
+                                        .withValues(alpha: 0.7),
+                                  ),
                             ),
                           ],
                         ],
@@ -645,18 +697,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       children: [
                         Text(
                           item.title,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: colorScheme.onSurface,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: colorScheme.onSurface,
+                                  ),
                         ),
                         if (item.subtitle != null) ...[
                           const SizedBox(height: 4),
                           Text(
                             item.subtitle!,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withValues(alpha: 0.7),
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: colorScheme.onSurface
+                                      .withValues(alpha: 0.7),
+                                ),
                           ),
                         ],
                       ],
@@ -675,13 +732,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildThemeDropdown(SettingsProvider settings, ColorScheme colorScheme, bool isSmallScreen) {
+  Widget _buildThemeDropdown(
+      SettingsProvider settings, ColorScheme colorScheme, bool isSmallScreen) {
     final Map<String, String> themeDisplayNames = <String, String>{};
-    
+
     themeDisplayNames[ThemeMode.light.name] = strings.AppStrings.lightTheme;
     themeDisplayNames[ThemeMode.system.name] = strings.AppStrings.systemTheme;
     themeDisplayNames[ThemeMode.dark.name] = strings.AppStrings.darkTheme;
-    
+
     final availableThemes = ThemeManager().getAvailableThemes();
     for (final entry in availableThemes.entries) {
       if (entry.key == 'grey' || settings.unlockedThemes.contains(entry.key)) {
@@ -691,11 +749,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     for (final themeId in settings.getAIThemeIds()) {
       final aiTheme = settings.getAITheme(themeId);
-      themeDisplayNames[themeId] = aiTheme?.name ?? strings.AppStrings.aiThemeFallback;
+      themeDisplayNames[themeId] =
+          aiTheme?.name ?? strings.AppStrings.aiThemeFallback;
     }
 
     String value = _getThemeDropdownValue(settings);
-    
+
     return DropdownButton<String>(
       value: value,
       items: themeDisplayNames.entries.map((entry) {
@@ -718,7 +777,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildLayoutDropdown(SettingsProvider settings, ColorScheme colorScheme, bool isSmallScreen) {
+  Widget _buildLayoutDropdown(
+      SettingsProvider settings, ColorScheme colorScheme, bool isSmallScreen) {
     return DropdownButton<String>(
       value: settings.layoutType,
       items: [
@@ -732,12 +792,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         DropdownMenuItem(
           value: SettingsProvider.layoutCompactGrid,
-          child: Text(strings.AppStrings.compactGrid, overflow: TextOverflow.ellipsis),
+          child: Text(strings.AppStrings.compactGrid,
+              overflow: TextOverflow.ellipsis),
         ),
       ],
       onChanged: (String? value) {
         if (value != null) {
-          _updateSetting(settings, 'change_layout_type', () => settings.setLayoutType(value));
+          _updateSetting(settings, 'change_layout_type',
+              () => settings.setLayoutType(value));
         }
       },
       style: TextStyle(
@@ -749,7 +811,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildGameSpeedDropdown(SettingsProvider settings, ColorScheme colorScheme, bool isSmallScreen) {
+  Widget _buildGameSpeedDropdown(
+      SettingsProvider settings, ColorScheme colorScheme, bool isSmallScreen) {
     return DropdownButton<String>(
       value: settings.gameSpeed,
       items: [
@@ -759,7 +822,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         DropdownMenuItem(
           value: 'medium',
-          child: Text(strings.AppStrings.medium, overflow: TextOverflow.ellipsis),
+          child:
+              Text(strings.AppStrings.medium, overflow: TextOverflow.ellipsis),
         ),
         DropdownMenuItem(
           value: 'fast',
@@ -768,7 +832,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ],
       onChanged: (String? value) {
         if (value != null) {
-          _updateSetting(settings, 'change_game_speed', () => settings.setGameSpeed(value));
+          _updateSetting(settings, 'change_game_speed',
+              () => settings.setGameSpeed(value));
         }
       },
       style: TextStyle(
@@ -780,7 +845,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSwitch(bool value, Function(bool) onChanged, ColorScheme colorScheme) {
+  Widget _buildSwitch(
+      bool value, Function(bool) onChanged, ColorScheme colorScheme) {
     return Switch(
       value: value,
       onChanged: onChanged,
@@ -788,7 +854,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildActionButton(BuildContext context, {
+  Widget _buildActionButton(
+    BuildContext context, {
     required IconData icon,
     VoidCallback? onTap,
     Color? color,
@@ -802,7 +869,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildApiKeyControls(BuildContext context, SettingsProvider settings, ColorScheme colorScheme) {
+  Widget _buildApiKeyControls(BuildContext context, SettingsProvider settings,
+      ColorScheme colorScheme) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.end,
@@ -914,7 +982,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               strings.AppStrings.copyright,
               style: TextStyle(
                 fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.6),
               ),
             ),
             const SizedBox(height: 4),
@@ -922,7 +993,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               '${strings.AppStrings.version} $version',
               style: TextStyle(
                 fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -935,10 +1009,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _changeTheme(SettingsProvider settings, String value) {
     final analytics = Provider.of<AnalyticsService>(context, listen: false);
     analytics.capture(context, 'change_theme', properties: {'theme': value});
-    analytics.trackFeatureSuccess(context, AnalyticsService.featureThemeSelection, additionalProperties: {
-      'theme': value,
-    });
-    
+    analytics.trackFeatureSuccess(
+        context, AnalyticsService.featureThemeSelection,
+        additionalProperties: {
+          'theme': value,
+        });
+
     if (value == ThemeMode.light.name) {
       settings.setCustomTheme(null);
       settings.setThemeMode(ThemeMode.light);
@@ -956,7 +1032,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final themeDef = ThemeManager().getThemeDefinition(value);
         if (themeDef != null) {
           settings.setCustomTheme(value);
-          settings.setThemeMode(themeDef.type.toLowerCase() == 'dark' ? ThemeMode.dark : ThemeMode.light);
+          settings.setThemeMode(themeDef.type.toLowerCase() == 'dark'
+              ? ThemeMode.dark
+              : ThemeMode.light);
         } else {
           settings.setCustomTheme(value);
           settings.setThemeMode(ThemeMode.light);
@@ -965,7 +1043,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  void _updateSetting(SettingsProvider settings, String action, VoidCallback updateFunction) {
+  void _updateSetting(
+      SettingsProvider settings, String action, VoidCallback updateFunction) {
     final analytics = Provider.of<AnalyticsService>(context, listen: false);
     analytics.capture(context, action);
     analytics.trackFeatureSuccess(context, AnalyticsService.featureSettings);
@@ -974,19 +1053,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _updateAnalyticsSetting(SettingsProvider settings, bool value) {
     final analytics = Provider.of<AnalyticsService>(context, listen: false);
-    analytics.trackFeatureSuccess(context, AnalyticsService.featureAnalyticsSettings, additionalProperties: {
-      'enabled': value,
-    });
+    analytics.trackFeatureSuccess(
+        context, AnalyticsService.featureAnalyticsSettings,
+        additionalProperties: {
+          'enabled': value,
+        });
     settings.setAnalyticsEnabled(value);
   }
 
-  Future<void> _toggleNotifications(BuildContext context, SettingsProvider settings, bool value) async {
+  Future<void> _toggleNotifications(
+      BuildContext context, SettingsProvider settings, bool value) async {
     final analytics = Provider.of<AnalyticsService>(context, listen: false);
-    analytics.capture(context, 'toggle_notifications', properties: {'enabled': value});
-    analytics.trackFeatureSuccess(context, AnalyticsService.featureSettings, additionalProperties: {
-      'setting': 'notifications',
-      'value': value,
-    });
+    analytics.capture(context, 'toggle_notifications',
+        properties: {'enabled': value});
+    analytics.trackFeatureSuccess(context, AnalyticsService.featureSettings,
+        additionalProperties: {
+          'setting': 'notifications',
+          'value': value,
+        });
     await settings.setNotificationEnabled(value);
     if (value) {
       final granted = await NotificationService.requestNotificationPermission();
@@ -1001,16 +1085,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // Dialog and navigation methods (simplified implementations)
   void _showDonateDialog(BuildContext context) async {
     final analytics = Provider.of<AnalyticsService>(context, listen: false);
-    analytics.trackFeatureSuccess(context, AnalyticsService.featureDonationSystem);
+    analytics.trackFeatureSuccess(
+        context, AnalyticsService.featureDonationSystem);
     analytics.capture(context, 'donate');
-    
+
     final Uri url = Uri.parse(AppUrls.donateUrl);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     await settings.markAsDonated();
-    
+
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (context.mounted) {
-        showTopSnackBar(context, strings.AppStrings.couldNotOpenDonationPage, style: TopSnackBarStyle.error);
+        showTopSnackBar(context, strings.AppStrings.couldNotOpenDonationPage,
+            style: TopSnackBarStyle.error);
       }
     }
   }
@@ -1018,7 +1104,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showIntroduction(BuildContext context) {
     final analytics = Provider.of<AnalyticsService>(context, listen: false);
     analytics.capture(context, 'show_introduction');
-    
+
     if (widget.onOpenGuide != null) widget.onOpenGuide!();
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -1034,7 +1120,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (context.mounted) {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => const ExportStatsScreen(exportString: 'mock_export'),
+          builder: (context) =>
+              const ExportStatsScreen(exportString: 'mock_export'),
         ),
       );
     }
@@ -1043,7 +1130,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _importStats(BuildContext context) async {
     final analytics = Provider.of<AnalyticsService>(context, listen: false);
     analytics.capture(context, 'import_stats');
-    
+
     if (context.mounted) {
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -1058,14 +1145,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     analytics.capture(context, 'clear_question_cache');
     await QuestionCacheService(ConnectionService()).clearCache();
     if (context.mounted) {
-      showTopSnackBar(context, strings.AppStrings.cacheCleared, style: TopSnackBarStyle.success);
+      showTopSnackBar(context, strings.AppStrings.cacheCleared,
+          style: TopSnackBarStyle.success);
     }
   }
 
   void _showSocialMediaDialog(BuildContext context) {
     final analytics = Provider.of<AnalyticsService>(context, listen: false);
     analytics.capture(context, 'show_social_media_dialog');
-    
+
     final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
@@ -1076,13 +1164,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildSocialMediaButton(context, strings.AppStrings.mastodon, Icons.alternate_email, AppUrls.mastodonUrl, colorScheme),
+                _buildSocialMediaButton(context, strings.AppStrings.mastodon,
+                    Icons.alternate_email, AppUrls.mastodonUrl, colorScheme),
                 const SizedBox(height: 8),
-                _buildSocialMediaButton(context, strings.AppStrings.pixelfed, Icons.camera_alt, AppUrls.pixelfedUrl, colorScheme),
+                _buildSocialMediaButton(context, strings.AppStrings.pixelfed,
+                    Icons.camera_alt, AppUrls.pixelfedUrl, colorScheme),
                 const SizedBox(height: 8),
-                _buildSocialMediaButton(context, strings.AppStrings.discord, Icons.forum, AppUrls.discordUrl, colorScheme),
+                _buildSocialMediaButton(context, strings.AppStrings.discord,
+                    Icons.forum, AppUrls.discordUrl, colorScheme),
                 const SizedBox(height: 8),
-                _buildSocialMediaButton(context, strings.AppStrings.signal, Icons.message, AppUrls.signalUrl, colorScheme),
+                _buildSocialMediaButton(context, strings.AppStrings.signal,
+                    Icons.message, AppUrls.signalUrl, colorScheme),
               ],
             ),
           ),
@@ -1135,20 +1227,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: () async {
                 final yourName = yourNameController.text.trim();
                 final friendName = friendNameController.text.trim();
-                
+
                 String inviteUrl = 'https://bijbelquiz.app/invite.html';
                 final Map<String, String> queryParams = {};
                 if (yourName.isNotEmpty) queryParams['yourName'] = yourName;
-                if (friendName.isNotEmpty) queryParams['friendName'] = friendName;
-                
+                if (friendName.isNotEmpty) {
+                  queryParams['friendName'] = friendName;
+                }
+
                 if (queryParams.isNotEmpty) {
-                  inviteUrl = Uri.parse(inviteUrl).replace(queryParameters: queryParams).toString();
+                  inviteUrl = Uri.parse(inviteUrl)
+                      .replace(queryParameters: queryParams)
+                      .toString();
                 }
 
                 await Clipboard.setData(ClipboardData(text: inviteUrl));
-                
+
                 if (dialogContext.mounted) {
-                  showTopSnackBar(dialogContext, strings.AppStrings.inviteLinkCopied, style: TopSnackBarStyle.success);
+                  showTopSnackBar(
+                      dialogContext, strings.AppStrings.inviteLinkCopied,
+                      style: TopSnackBarStyle.success);
                   Navigator.of(dialogContext).pop();
                 }
               },
@@ -1163,15 +1261,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _shareStats(BuildContext context) async {
     final analytics = Provider.of<AnalyticsService>(context, listen: false);
     analytics.capture(context, 'share_stats');
-    
+
     try {
-      await Clipboard.setData(ClipboardData(text: 'https://bijbelquiz.app/score.html'));
+      await Clipboard.setData(
+          ClipboardData(text: 'https://bijbelquiz.app/score.html'));
       if (context.mounted) {
-        showTopSnackBar(context, strings.AppStrings.statsLinkCopied, style: TopSnackBarStyle.success);
+        showTopSnackBar(context, strings.AppStrings.statsLinkCopied,
+            style: TopSnackBarStyle.success);
       }
     } catch (e) {
       if (context.mounted) {
-        showTopSnackBar(context, 'Error copying link: $e', style: TopSnackBarStyle.error);
+        showTopSnackBar(context, 'Error copying link: $e',
+            style: TopSnackBarStyle.error);
       }
     }
   }
@@ -1188,7 +1289,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _showResetAndLogoutDialog(BuildContext context, SettingsProvider settings) async {
+  Future<void> _showResetAndLogoutDialog(
+      BuildContext context, SettingsProvider settings) async {
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
     showDialog(
       context: context,
@@ -1204,12 +1306,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             TextButton(
               onPressed: () async {
                 AppLogger.info('User initiated reset and logout');
-                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'reset_and_logout');
+                Provider.of<AnalyticsService>(context, listen: false)
+                    .capture(context, 'reset_and_logout');
                 final nav = Navigator.of(dialogContext);
                 try {
                   await gameStats.resetStats();
                   if (context.mounted) {
-                    await Provider.of<LessonProgressProvider>(context, listen: false).resetAll();
+                    await Provider.of<LessonProgressProvider>(context,
+                            listen: false)
+                        .resetAll();
                   }
                   await QuestionCacheService(ConnectionService()).clearCache();
                   await NotificationService().cancelAllNotifications();
@@ -1246,7 +1351,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final Uri url = Uri.parse(AppUrls.privacyUrl);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (context.mounted) {
-        showTopSnackBar(context, strings.AppStrings.couldNotOpenPrivacyPolicy, style: TopSnackBarStyle.error);
+        showTopSnackBar(context, strings.AppStrings.couldNotOpenPrivacyPolicy,
+            style: TopSnackBarStyle.error);
       }
     }
   }
@@ -1256,15 +1362,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return '${apiKey.substring(0, 6)}...${apiKey.substring(apiKey.length - 4)}';
   }
 
-  Future<void> _copyApiKeyToClipboard(BuildContext context, String apiKey) async {
+  Future<void> _copyApiKeyToClipboard(
+      BuildContext context, String apiKey) async {
     try {
       await Clipboard.setData(ClipboardData(text: apiKey));
       if (context.mounted) {
-        showTopSnackBar(context, strings.AppStrings.apiKeyCopied, style: TopSnackBarStyle.success);
+        showTopSnackBar(context, strings.AppStrings.apiKeyCopied,
+            style: TopSnackBarStyle.success);
       }
     } catch (e) {
       if (context.mounted) {
-        showTopSnackBar(context, strings.AppStrings.apiKeyCopyFailed, style: TopSnackBarStyle.error);
+        showTopSnackBar(context, strings.AppStrings.apiKeyCopyFailed,
+            style: TopSnackBarStyle.error);
       }
     }
   }
@@ -1286,7 +1395,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 await settings.generateNewApiKey();
                 if (dialogContext.mounted) {
                   Navigator.of(dialogContext).pop();
-                  showTopSnackBar(dialogContext, strings.AppStrings.apiKeyGenerated, style: TopSnackBarStyle.success);
+                  showTopSnackBar(
+                      dialogContext, strings.AppStrings.apiKeyGenerated,
+                      style: TopSnackBarStyle.success);
                 }
               },
               style: TextButton.styleFrom(
@@ -1300,18 +1411,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSocialMediaButton(BuildContext context, String platform, IconData icon, String url, ColorScheme colorScheme) {
+  Widget _buildSocialMediaButton(BuildContext context, String platform,
+      IconData icon, String url, ColorScheme colorScheme) {
     return ListTile(
       leading: Icon(icon, color: colorScheme.primary),
       title: Text(platform),
       trailing: Icon(Icons.open_in_new, size: 16, color: colorScheme.primary),
       onTap: () async {
         final analytics = Provider.of<AnalyticsService>(context, listen: false);
-        analytics.capture(context, 'follow_social_media', properties: {'platform': platform});
+        analytics.capture(context, 'follow_social_media',
+            properties: {'platform': platform});
         final Uri uri = Uri.parse(url);
         if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
           if (context.mounted) {
-            showTopSnackBar(context, strings.AppStrings.couldNotOpenPlatform.replaceAll('{platform}', platform), style: TopSnackBarStyle.error);
+            showTopSnackBar(
+                context,
+                strings.AppStrings.couldNotOpenPlatform
+                    .replaceAll('{platform}', platform),
+                style: TopSnackBarStyle.error);
           }
         }
       },
@@ -1377,12 +1494,16 @@ String _getThemeDropdownValue(SettingsProvider settings) {
     if (themeDef != null) {
       return custom;
     }
-    if (settings.unlockedThemes.contains(custom) || custom == 'grey' || custom == 'christmas') {
+    if (settings.unlockedThemes.contains(custom) ||
+        custom == 'grey' ||
+        custom == 'christmas') {
       return custom;
     }
   }
   final mode = settings.themeMode;
-  if (mode == ThemeMode.light || mode == ThemeMode.dark || mode == ThemeMode.system) {
+  if (mode == ThemeMode.light ||
+      mode == ThemeMode.dark ||
+      mode == ThemeMode.system) {
     return mode.name;
   }
   return ThemeMode.light.name;
@@ -1469,7 +1590,9 @@ class _ImportStatsScreenState extends State<ImportStatsScreen> {
                     onPressed: () {
                       if (context.mounted) {
                         Navigator.pop(context);
-                        showTopSnackBar(context, strings.AppStrings.statsImportedSuccessfully, style: TopSnackBarStyle.success);
+                        showTopSnackBar(context,
+                            strings.AppStrings.statsImportedSuccessfully,
+                            style: TopSnackBarStyle.success);
                       }
                     },
                     child: Text(strings.AppStrings.importButton),

@@ -38,7 +38,8 @@ class LessonProgressBar extends StatelessWidget {
 
               // Animated fill
               AnimatedContainer(
-                duration: const Duration(milliseconds: 400), // Optimized for better responsiveness
+                duration: const Duration(
+                    milliseconds: 400), // Optimized for better responsiveness
                 curve: Curves.easeOutCubic,
                 width: maxW * value,
                 height: 10,
@@ -68,7 +69,8 @@ class LessonProgressBar extends StatelessWidget {
                 child: IgnorePointer(
                   child: AnimatedOpacity(
                     opacity: value == 0.0 ? 0.0 : 1.0,
-                    duration: const Duration(milliseconds: 200), // Faster opacity transition
+                    duration: const Duration(
+                        milliseconds: 200), // Faster opacity transition
                     child: FractionallySizedBox(
                       widthFactor: value,
                       alignment: Alignment.centerLeft,
@@ -87,7 +89,8 @@ class LessonProgressBar extends StatelessWidget {
                         },
                         blendMode: BlendMode.srcATop,
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 600), // Reduced from 900ms
+                          duration: const Duration(
+                              milliseconds: 600), // Reduced from 900ms
                           curve: Curves.easeInOut,
                           width: maxW * value,
                           height: 10,
@@ -108,7 +111,8 @@ class LessonProgressBar extends StatelessWidget {
                   left: (maxW * value) - 6,
                   top: -2,
                   child: AnimatedScale(
-                    duration: const Duration(milliseconds: 250), // Slightly faster scale animation
+                    duration: const Duration(
+                        milliseconds: 250), // Slightly faster scale animation
                     curve: Curves.easeOutBack,
                     scale: 1.0,
                     child: Container(

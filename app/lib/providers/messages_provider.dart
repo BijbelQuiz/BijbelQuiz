@@ -5,7 +5,7 @@ import '../services/messaging_service.dart';
 /// Provider for managing message state and unread message tracking
 class MessagesProvider with ChangeNotifier {
   final MessagingService _messagingService;
-  
+
   List<Message> _activeMessages = [];
   Set<String> _viewedMessageIds = {};
   bool _isLoading = false;
@@ -33,7 +33,7 @@ class MessagesProvider with ChangeNotifier {
   /// Loads viewed message IDs from persistent storage
   Future<void> _loadViewedMessageIds() async {
     if (_prefs == null) return;
-    
+
     final messageIdsString = _prefs!.getStringList(_viewedMessagesKey);
     if (messageIdsString != null) {
       _viewedMessageIds = messageIdsString.toSet();
@@ -43,7 +43,7 @@ class MessagesProvider with ChangeNotifier {
   /// Saves viewed message IDs to persistent storage
   Future<void> _saveViewedMessageIds() async {
     if (_prefs == null) return;
-    
+
     final messageIdsList = _viewedMessageIds.toList();
     await _prefs!.setStringList(_viewedMessagesKey, messageIdsList);
   }
@@ -56,13 +56,13 @@ class MessagesProvider with ChangeNotifier {
       notifyListeners();
 
       final messages = await _messagingService.getActiveMessages();
-      
+
       // Update messages
       _activeMessages = messages;
-      
+
       // Calculate unread count
       _calculateUnreadCount();
-      
+
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -74,9 +74,9 @@ class MessagesProvider with ChangeNotifier {
 
   /// Calculates the number of unread messages
   void _calculateUnreadCount() {
-    _unreadCount = _activeMessages.where(
-      (message) => !_viewedMessageIds.contains(message.id)
-    ).length;
+    _unreadCount = _activeMessages
+        .where((message) => !_viewedMessageIds.contains(message.id))
+        .length;
   }
 
   /// Marks a specific message as viewed
@@ -101,14 +101,14 @@ class MessagesProvider with ChangeNotifier {
   Future<void> checkForNewMessages() async {
     try {
       final currentMessages = await _messagingService.getActiveMessages();
-      
+
       // Check if we have new messages
       final currentMessageIds = _activeMessages.map((msg) => msg.id).toSet();
       final newMessageIds = currentMessages.map((msg) => msg.id).toSet();
-      
+
       // Find new messages (messages in current but not in previous)
       final trulyNewMessageIds = newMessageIds.difference(currentMessageIds);
-      
+
       if (trulyNewMessageIds.isNotEmpty) {
         // We have new messages, update the list
         _activeMessages = currentMessages;
@@ -133,12 +133,12 @@ class MessagesProvider with ChangeNotifier {
     _isLoading = false;
     _errorMessage = null;
     _unreadCount = 0;
-    
+
     // Clear persisted data
     if (_prefs != null) {
       await _prefs!.remove(_viewedMessagesKey);
     }
-    
+
     notifyListeners();
   }
 }

@@ -9,7 +9,8 @@ class AITheme {
   final DateTime createdAt;
   final ThemeData lightTheme;
   final ThemeData? darkTheme; // Optional dark variant
-  final Map<String, dynamic> colorPalette; // Store original color palette from Gemini
+  final Map<String, dynamic>
+      colorPalette; // Store original color palette from Gemini
   final String? prompt; // Optional prompt used to generate the theme
 
   AITheme({
@@ -60,7 +61,8 @@ class AITheme {
   }
 
   /// Creates an AITheme from JSON data
-  factory AITheme.fromJson(Map<String, dynamic> json, ThemeData lightTheme, {ThemeData? darkTheme}) {
+  factory AITheme.fromJson(Map<String, dynamic> json, ThemeData lightTheme,
+      {ThemeData? darkTheme}) {
     return AITheme(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -117,10 +119,10 @@ class AIThemeBuilder {
         onSurface: onSurface,
       ),
       textTheme: ThemeData.light().textTheme.apply(
-        fontFamily: 'Quicksand',
-        bodyColor: onBackground,
-        displayColor: onBackground,
-      ),
+            fontFamily: 'Quicksand',
+            bodyColor: onBackground,
+            displayColor: onBackground,
+          ),
       scaffoldBackgroundColor: background,
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -159,10 +161,10 @@ class AIThemeBuilder {
         onSurface: onSurface,
       ),
       textTheme: ThemeData.dark().textTheme.apply(
-        fontFamily: 'Quicksand',
-        bodyColor: onBackground,
-        displayColor: onBackground,
-      ),
+            fontFamily: 'Quicksand',
+            bodyColor: onBackground,
+            displayColor: onBackground,
+          ),
       scaffoldBackgroundColor: background,
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -186,10 +188,9 @@ class AIThemeBuilder {
   /// Generates a random string of specified length
   static String _randomString(int length) {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    return String.fromCharCodes(
-      Iterable.generate(length, (_) => chars.codeUnitAt(
-        DateTime.now().microsecondsSinceEpoch % chars.length
-      ))
-    );
+    return String.fromCharCodes(Iterable.generate(
+        length,
+        (_) => chars
+            .codeUnitAt(DateTime.now().microsecondsSinceEpoch % chars.length)));
   }
 }

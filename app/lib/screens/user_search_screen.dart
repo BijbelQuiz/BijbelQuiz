@@ -16,7 +16,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   late AnalyticsService _analyticsService;
-  
+
   List<Map<String, dynamic>> _searchResults = [];
   List<String> _followingList = [];
   bool _isLoading = false;
@@ -34,15 +34,18 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
   void _trackScreenAccess() {
     if (mounted) {
       _analyticsService.screen(context, 'UserSearchScreen');
-      _analyticsService.trackFeatureUsage(context, 'user_search', 'screen_accessed');
+      _analyticsService.trackFeatureUsage(
+          context, 'user_search', 'screen_accessed');
     }
   }
 
   /// Load the current following list
   Future<void> _loadFollowingList() async {
-    final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-    final followingList = await gameStatsProvider.syncService.getFollowingList();
-    
+    final gameStatsProvider =
+        Provider.of<GameStatsProvider>(context, listen: false);
+    final followingList =
+        await gameStatsProvider.syncService.getFollowingList();
+
     if (mounted && followingList != null) {
       setState(() {
         _followingList = followingList;
@@ -66,9 +69,10 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     });
 
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final gameStatsProvider =
+          Provider.of<GameStatsProvider>(context, listen: false);
       final results = await gameStatsProvider.syncService.searchUsers(query);
-      
+
       if (mounted) {
         setState(() {
           _searchResults = results ?? [];
@@ -88,21 +92,24 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
 
   /// Handle follow/unfollow action
   Future<void> _toggleFollow(String targetDeviceId, String username) async {
-    final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+    final gameStatsProvider =
+        Provider.of<GameStatsProvider>(context, listen: false);
     final isFollowing = _followingList.contains(targetDeviceId);
-    
+
     _analyticsService.capture(
       context,
       isFollowing ? 'unfollow_user' : 'follow_user',
       properties: {
-        'target_device_id': targetDeviceId.substring(0, 8), // Only track partial device ID for privacy
+        'target_device_id': targetDeviceId.substring(
+            0, 8), // Only track partial device ID for privacy
         'username': username,
       },
     );
 
     bool success;
     if (isFollowing) {
-      success = await gameStatsProvider.syncService.unfollowUser(targetDeviceId);
+      success =
+          await gameStatsProvider.syncService.unfollowUser(targetDeviceId);
       if (success) {
         setState(() {
           _followingList.remove(targetDeviceId);
@@ -122,8 +129,8 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(isFollowing
-              ? 'Unfollowed $username'
-              : 'Started following $username'),
+                ? 'Unfollowed $username'
+                : 'Started following $username'),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -133,8 +140,8 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(isFollowing
-              ? 'Failed to unfollow user'
-              : 'Failed to follow user'),
+                ? 'Failed to unfollow user'
+                : 'Failed to follow user'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -177,7 +184,8 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                      borderSide:
+                          BorderSide(color: colorScheme.primary, width: 2),
                     ),
                   ),
                   onChanged: (value) {
@@ -191,7 +199,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                   textInputAction: TextInputAction.search,
                 ),
               ),
-              
+
               // Error message
               if (_error != null)
                 Container(
@@ -221,7 +229,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                     ],
                   ),
                 ),
-              
+
               // Loading indicator
               if (_isLoading)
                 const Padding(
@@ -230,9 +238,11 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                     child: CircularProgressIndicator(),
                   ),
                 ),
-              
+
               // Results or empty state
-              if (!_isLoading && _searchResults.isEmpty && _searchController.text.isNotEmpty)
+              if (!_isLoading &&
+                  _searchResults.isEmpty &&
+                  _searchController.text.isNotEmpty)
                 Expanded(
                   child: Center(
                     child: Column(
@@ -260,20 +270,22 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                   child: ListView.separated(
                     controller: _scrollController,
                     itemCount: _searchResults.length,
-                    separatorBuilder: (context, index) => const Divider(height: 1),
+                    separatorBuilder: (context, index) =>
+                        const Divider(height: 1),
                     itemBuilder: (context, index) {
                       final user = _searchResults[index];
                       final username = user['username'] as String?;
                       final deviceId = user['device_id'] as String?;
-                      
+
                       if (username == null || deviceId == null) {
                         return const SizedBox.shrink();
                       }
-                      
+
                       final isFollowing = _followingList.contains(deviceId);
-                      
+
                       return ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         leading: Container(
                           width: 40,
                           height: 40,
@@ -294,29 +306,44 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                           ),
                         ),
                         subtitle: Text(
-                          deviceId.substring(0, _min(8, deviceId.length)), // Show partial device ID
+                          deviceId.substring(
+                              0,
+                              _min(8,
+                                  deviceId.length)), // Show partial device ID
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                         trailing: FutureBuilder<String>(
-                          future: Provider.of<GameStatsProvider>(context, listen: false).syncService.getCurrentDeviceId(),
+                          future: Provider.of<GameStatsProvider>(context,
+                                  listen: false)
+                              .syncService
+                              .getCurrentDeviceId(),
                           builder: (context, snapshot) {
                             final currentDeviceId = snapshot.data;
                             return currentDeviceId != deviceId
                                 ? OutlinedButton(
-                                    onPressed: () => _toggleFollow(deviceId, username),
+                                    onPressed: () =>
+                                        _toggleFollow(deviceId, username),
                                     style: OutlinedButton.styleFrom(
-                                      side: BorderSide(color: isFollowing ? colorScheme.error : colorScheme.primary),
+                                      side: BorderSide(
+                                          color: isFollowing
+                                              ? colorScheme.error
+                                              : colorScheme.primary),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(20),
                                       ),
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 8),
                                     ),
                                     child: Text(
-                                      isFollowing ? strings.AppStrings.unfollow : strings.AppStrings.follow,
+                                      isFollowing
+                                          ? strings.AppStrings.unfollow
+                                          : strings.AppStrings.follow,
                                       style: TextStyle(
-                                        color: isFollowing ? colorScheme.error : colorScheme.primary,
+                                        color: isFollowing
+                                            ? colorScheme.error
+                                            : colorScheme.primary,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
@@ -324,7 +351,8 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                                 : Text(
                                     strings.AppStrings.yourself,
                                     style: theme.textTheme.labelSmall?.copyWith(
-                                      color: colorScheme.onSurface.withValues(alpha: 0.5),
+                                      color: colorScheme.onSurface
+                                          .withValues(alpha: 0.5),
                                     ),
                                   );
                           },

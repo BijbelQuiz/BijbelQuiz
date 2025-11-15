@@ -23,9 +23,11 @@ class SettingsProvider extends ChangeNotifier {
   static const String _lastSatisfactionPopupKey = 'last_satisfaction_popup';
   static const String _hasClickedDonationLinkKey = 'has_clicked_donation_link';
   static const String _hasClickedFollowLinkKey = 'has_clicked_follow_link';
-  static const String _hasClickedSatisfactionLinkKey = 'has_clicked_satisfaction_link';
+  static const String _hasClickedSatisfactionLinkKey =
+      'has_clicked_satisfaction_link';
   static const String _lastDifficultyPopupKey = 'last_difficulty_popup';
-  static const String _hasClickedDifficultyLinkKey = 'has_clicked_difficulty_link';
+  static const String _hasClickedDifficultyLinkKey =
+      'has_clicked_difficulty_link';
   static const String _difficultyPreferenceKey = 'difficulty_preference';
   static const String _analyticsEnabledKey = 'analytics_enabled';
   static const String _aiThemesKey = 'ai_themes';
@@ -67,10 +69,10 @@ class SettingsProvider extends ChangeNotifier {
   bool _apiEnabled = false;
   String _apiKey = '';
   int _apiPort = 7777;
-  
+
   // Navigation settings
   bool _showNavigationLabels = true;
-  
+
   late SyncService syncService;
 
   // Layout type enum
@@ -80,12 +82,14 @@ class SettingsProvider extends ChangeNotifier {
 
   String _layoutType = layoutGrid; // default to grid
   bool _colorfulMode = false; // default to false (single color mode)
-  
+
   // Promo card settings
-  bool _hidePromoCard = false; // default to false (don't hide the promo card, so show it)
+  bool _hidePromoCard =
+      false; // default to false (don't hide the promo card, so show it)
 
   // Bug reporting settings
-  bool _automaticBugReporting = true; // default to true (automatically send bug reports)
+  bool _automaticBugReporting =
+      true; // default to true (automatically send bug reports)
 
   SettingsProvider() {
     syncService = SyncService();
@@ -100,13 +104,13 @@ class SettingsProvider extends ChangeNotifier {
 
   /// De huidige taalinstelling (altijd 'nl')
   String get language => _language;
-  
+
   /// The current theme mode setting
   ThemeMode get themeMode => _themeMode;
-  
+
   /// The current game speed setting
   String get gameSpeed => _gameSpeed;
-  
+
   /// Whether slow mode is enabled (backward compatibility)
   bool get slowMode => _gameSpeed == 'slow';
 
@@ -133,7 +137,7 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Whether settings are currently being loaded
   bool get isLoading => _isLoading;
-  
+
   /// Any error that occurred while loading settings
   String? get error => _error;
 
@@ -150,7 +154,7 @@ class SettingsProvider extends ChangeNotifier {
   bool get hasClickedFollowLink => _hasClickedFollowLink;
   bool get hasClickedSatisfactionLink => _hasClickedSatisfactionLink;
   bool get hasClickedDifficultyLink => _hasClickedDifficultyLink;
-  
+
   /// Whether analytics are enabled
   bool get analyticsEnabled => _analyticsEnabled;
 
@@ -272,16 +276,17 @@ class SettingsProvider extends ChangeNotifier {
 
           // Reconstruct the ThemeData objects from stored color palette
           final lightTheme = AIThemeBuilder.createLightThemeFromPalette(
-            Map<String, dynamic>.from(themeData['colorPalette'] as Map<String, dynamic>? ?? {})
-          );
+              Map<String, dynamic>.from(
+                  themeData['colorPalette'] as Map<String, dynamic>? ?? {}));
 
           final darkTheme = themeData['hasDarkTheme'] == true
-            ? AIThemeBuilder.createDarkThemeFromPalette(
-                Map<String, dynamic>.from(themeData['colorPalette'] as Map<String, dynamic>? ?? {})
-              )
-            : null;
+              ? AIThemeBuilder.createDarkThemeFromPalette(
+                  Map<String, dynamic>.from(
+                      themeData['colorPalette'] as Map<String, dynamic>? ?? {}))
+              : null;
 
-          final aiTheme = AITheme.fromJson(themeData, lightTheme, darkTheme: darkTheme);
+          final aiTheme =
+              AITheme.fromJson(themeData, lightTheme, darkTheme: darkTheme);
           _aiThemes[themeId] = aiTheme;
         }
 
@@ -300,7 +305,8 @@ class SettingsProvider extends ChangeNotifier {
       if (decoded is Map<String, dynamic>) {
         return decoded;
       } else {
-        AppLogger.error('AI themes JSON decode result is not a Map: ${decoded.runtimeType}');
+        AppLogger.error(
+            'AI themes JSON decode result is not a Map: ${decoded.runtimeType}');
         return {};
       }
     } catch (e) {
@@ -381,46 +387,62 @@ class SettingsProvider extends ChangeNotifier {
       // Load old boolean slow mode setting for backward compatibility
       final oldSlowMode = _getBoolSetting(_slowModeKey, defaultValue: false);
       _gameSpeed = oldSlowMode ? 'slow' : 'medium';
-      
+
       // Migrate to new string-based setting if needed
       if (oldSlowMode) {
         await _prefs?.setString(_slowModeKey, 'slow');
       }
-      
+
       // Load new string-based game speed setting if it exists
       final storedGameSpeed = _prefs?.getString(_slowModeKey);
       if (storedGameSpeed != null && storedGameSpeed.isNotEmpty) {
         // Validate the game speed value
-        if (storedGameSpeed == 'slow' || storedGameSpeed == 'medium' || storedGameSpeed == 'fast') {
+        if (storedGameSpeed == 'slow' ||
+            storedGameSpeed == 'medium' ||
+            storedGameSpeed == 'fast') {
           _gameSpeed = storedGameSpeed;
         }
       }
       // Safely load boolean settings with type checking
       _hasSeenGuide = _getBoolSetting(_hasSeenGuideKey, defaultValue: false);
       _mute = _getBoolSetting(_muteKey, defaultValue: false);
-      _notificationEnabled = _getBoolSetting(_notificationEnabledKey, defaultValue: true);
+      _notificationEnabled =
+          _getBoolSetting(_notificationEnabledKey, defaultValue: true);
       _hasDonated = _getBoolSetting(_hasDonatedKey, defaultValue: false);
-      _hasCheckedForUpdate = _getBoolSetting(_hasCheckedForUpdateKey, defaultValue: false);
-      _analyticsEnabled = _getBoolSetting(_analyticsEnabledKey, defaultValue: true); // Default to true
-      
+      _hasCheckedForUpdate =
+          _getBoolSetting(_hasCheckedForUpdateKey, defaultValue: false);
+      _analyticsEnabled = _getBoolSetting(_analyticsEnabledKey,
+          defaultValue: true); // Default to true
+
       // Load popup tracking data
       final lastDonationPopupMs = _prefs?.getInt(_lastDonationPopupKey);
-      _lastDonationPopup = lastDonationPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastDonationPopupMs) : null;
-      
+      _lastDonationPopup = lastDonationPopupMs != null
+          ? DateTime.fromMillisecondsSinceEpoch(lastDonationPopupMs)
+          : null;
+
       final lastFollowPopupMs = _prefs?.getInt(_lastFollowPopupKey);
-      _lastFollowPopup = lastFollowPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastFollowPopupMs) : null;
-      
+      _lastFollowPopup = lastFollowPopupMs != null
+          ? DateTime.fromMillisecondsSinceEpoch(lastFollowPopupMs)
+          : null;
+
       final lastSatisfactionPopupMs = _prefs?.getInt(_lastSatisfactionPopupKey);
-      _lastSatisfactionPopup = lastSatisfactionPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSatisfactionPopupMs) : null;
-      
+      _lastSatisfactionPopup = lastSatisfactionPopupMs != null
+          ? DateTime.fromMillisecondsSinceEpoch(lastSatisfactionPopupMs)
+          : null;
+
       final lastDifficultyPopupMs = _prefs?.getInt(_lastDifficultyPopupKey);
-      _lastDifficultyPopup = lastDifficultyPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastDifficultyPopupMs) : null;
-      
+      _lastDifficultyPopup = lastDifficultyPopupMs != null
+          ? DateTime.fromMillisecondsSinceEpoch(lastDifficultyPopupMs)
+          : null;
+
       _difficultyPreference = _prefs?.getString(_difficultyPreferenceKey);
-      
-      _hasClickedDonationLink = _getBoolSetting(_hasClickedDonationLinkKey, defaultValue: false);
-      _hasClickedFollowLink = _getBoolSetting(_hasClickedFollowLinkKey, defaultValue: false);
-      _hasClickedSatisfactionLink = _getBoolSetting(_hasClickedSatisfactionLinkKey, defaultValue: false);
+
+      _hasClickedDonationLink =
+          _getBoolSetting(_hasClickedDonationLinkKey, defaultValue: false);
+      _hasClickedFollowLink =
+          _getBoolSetting(_hasClickedFollowLinkKey, defaultValue: false);
+      _hasClickedSatisfactionLink =
+          _getBoolSetting(_hasClickedSatisfactionLinkKey, defaultValue: false);
 
       // Load API settings
       _apiEnabled = _getBoolSetting(_apiEnabledKey, defaultValue: false);
@@ -428,7 +450,8 @@ class SettingsProvider extends ChangeNotifier {
       _apiPort = _prefs?.getInt(_apiPortKey) ?? 7777;
 
       // Load navigation settings
-      _showNavigationLabels = _getBoolSetting(_showNavigationLabelsKey, defaultValue: true);
+      _showNavigationLabels =
+          _getBoolSetting(_showNavigationLabelsKey, defaultValue: true);
 
       // Load layout type setting
       _layoutType = _prefs?.getString(_layoutTypeKey) ?? layoutGrid;
@@ -440,7 +463,8 @@ class SettingsProvider extends ChangeNotifier {
       _hidePromoCard = _getBoolSetting(_hidePromoCardKey, defaultValue: false);
 
       // Load automatic bug reporting setting
-      _automaticBugReporting = _getBoolSetting(_automaticBugReportingKey, defaultValue: true);
+      _automaticBugReporting =
+          _getBoolSetting(_automaticBugReportingKey, defaultValue: true);
 
       final unlocked = _prefs?.getStringList(_unlockedThemesKey);
       if (unlocked != null) {
@@ -450,13 +474,17 @@ class SettingsProvider extends ChangeNotifier {
       }
       // Fix: treat empty string as null for custom theme
       final loadedCustomTheme = _prefs?.getString(_customThemeKey);
-      _selectedCustomThemeKey = (loadedCustomTheme == null || loadedCustomTheme.isEmpty) ? null : loadedCustomTheme;
+      _selectedCustomThemeKey =
+          (loadedCustomTheme == null || loadedCustomTheme.isEmpty)
+              ? null
+              : loadedCustomTheme;
 
       // Load AI themes
       await _loadAIThemes();
     } finally {
       _isLoading = false;
-      AppLogger.info('Settings loaded successfully - Theme: $_themeMode, GameSpeed: $_gameSpeed, Mute: $_mute, Analytics: $_analyticsEnabled');
+      AppLogger.info(
+          'Settings loaded successfully - Theme: $_themeMode, GameSpeed: $_gameSpeed, Mute: $_mute, Analytics: $_analyticsEnabled');
       notifyListeners();
     }
   }
@@ -556,7 +584,8 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> markGuideAsSeen() async {
     await _saveSetting(
       action: () async {
-        _prefs ??= await SharedPreferences.getInstance(); // Ensure _prefs is initialized
+        _prefs ??= await SharedPreferences
+            .getInstance(); // Ensure _prefs is initialized
         _hasSeenGuide = true;
         await _prefs!.setBool(_hasSeenGuideKey, true);
       },
@@ -568,15 +597,14 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> resetGuideStatus() async {
     await _saveSetting(
       action: () async {
-        _prefs ??= await SharedPreferences.getInstance(); // Ensure _prefs is initialized
+        _prefs ??= await SharedPreferences
+            .getInstance(); // Ensure _prefs is initialized
         _hasSeenGuide = false;
         await _prefs!.setBool(_hasSeenGuideKey, false);
       },
       errorMessage: 'Failed to reset guide status',
     );
   }
-
-
 
   /// Loads settings from persistent storage
   Future<void> loadSettings() async {
@@ -604,7 +632,8 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _lastDonationPopup = DateTime.now();
-        await _prefs?.setInt(_lastDonationPopupKey, _lastDonationPopup!.millisecondsSinceEpoch);
+        await _prefs?.setInt(
+            _lastDonationPopupKey, _lastDonationPopup!.millisecondsSinceEpoch);
       },
       errorMessage: 'Failed to update donation popup timestamp',
     );
@@ -615,7 +644,8 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _lastFollowPopup = DateTime.now();
-        await _prefs?.setInt(_lastFollowPopupKey, _lastFollowPopup!.millisecondsSinceEpoch);
+        await _prefs?.setInt(
+            _lastFollowPopupKey, _lastFollowPopup!.millisecondsSinceEpoch);
       },
       errorMessage: 'Failed to update follow popup timestamp',
     );
@@ -626,7 +656,8 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _lastSatisfactionPopup = DateTime.now();
-        await _prefs?.setInt(_lastSatisfactionPopupKey, _lastSatisfactionPopup!.millisecondsSinceEpoch);
+        await _prefs?.setInt(_lastSatisfactionPopupKey,
+            _lastSatisfactionPopup!.millisecondsSinceEpoch);
       },
       errorMessage: 'Failed to update satisfaction popup timestamp',
     );
@@ -637,7 +668,8 @@ class SettingsProvider extends ChangeNotifier {
     await _saveSetting(
       action: () async {
         _lastDifficultyPopup = DateTime.now();
-        await _prefs?.setInt(_lastDifficultyPopupKey, _lastDifficultyPopup!.millisecondsSinceEpoch);
+        await _prefs?.setInt(_lastDifficultyPopupKey,
+            _lastDifficultyPopup!.millisecondsSinceEpoch);
       },
       errorMessage: 'Failed to update difficulty popup timestamp',
     );
@@ -762,7 +794,9 @@ class SettingsProvider extends ChangeNotifier {
   /// Generates a new API key
   Future<void> generateNewApiKey() async {
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    final hashString = timestamp.hashCode.toString().replaceAll('-', ''); // Remove negative signs
+    final hashString = timestamp.hashCode
+        .toString()
+        .replaceAll('-', ''); // Remove negative signs
     final paddedHash = hashString.padRight(16, '0'); // Pad with zeros if needed
     final key = 'bq_${paddedHash.substring(0, 16)}';
     await setApiKey(key);
@@ -781,12 +815,16 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Updates the lesson layout type setting
   Future<void> setLayoutType(String layoutType) async {
-    if (layoutType != layoutGrid && layoutType != layoutList && layoutType != layoutCompactGrid) {
+    if (layoutType != layoutGrid &&
+        layoutType != layoutList &&
+        layoutType != layoutCompactGrid) {
       AppLogger.warning('Invalid layout type setting attempted: $layoutType');
-      throw ArgumentError('Layout type must be "grid", "list", or "compact_grid"');
+      throw ArgumentError(
+          'Layout type must be "grid", "list", or "compact_grid"');
     }
 
-    AppLogger.info('Changing lesson layout type from $_layoutType to $layoutType');
+    AppLogger.info(
+        'Changing lesson layout type from $_layoutType to $layoutType');
     await _saveSetting(
       action: () async {
         _layoutType = layoutType;
@@ -812,7 +850,8 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Updates the hide promo card setting
   Future<void> setHidePromoCard(bool hide) async {
-    AppLogger.info('Changing hide promo card setting from $_hidePromoCard to $hide');
+    AppLogger.info(
+        'Changing hide promo card setting from $_hidePromoCard to $hide');
     await _saveSetting(
       action: () async {
         _hidePromoCard = hide;
@@ -825,17 +864,18 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Updates the automatic bug reporting setting
   Future<void> setAutomaticBugReporting(bool enabled) async {
-    AppLogger.info('Changing automatic bug reporting setting from $_automaticBugReporting to $enabled');
+    AppLogger.info(
+        'Changing automatic bug reporting setting from $_automaticBugReporting to $enabled');
     await _saveSetting(
       action: () async {
         _automaticBugReporting = enabled;
         await _prefs?.setBool(_automaticBugReportingKey, enabled);
-        AppLogger.info('Automatic bug reporting setting saved successfully: $enabled');
+        AppLogger.info(
+            'Automatic bug reporting setting saved successfully: $enabled');
       },
       errorMessage: 'Failed to save automatic bug reporting setting',
     );
   }
-
 
   // Helper method to safely get a boolean setting with type checking
   bool _getBoolSetting(String key, {required bool defaultValue}) {
@@ -903,17 +943,23 @@ class SettingsProvider extends ChangeNotifier {
     _analyticsEnabled = data['analyticsEnabled'] ?? true;
     _selectedCustomThemeKey = data['selectedCustomThemeKey'];
     _unlockedThemes = Set<String>.from(data['unlockedThemes'] ?? []);
-    
+
     // Load popup tracking data
     final lastDonationPopupMs = data['lastDonationPopup'];
-    _lastDonationPopup = lastDonationPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastDonationPopupMs) : null;
-    
+    _lastDonationPopup = lastDonationPopupMs != null
+        ? DateTime.fromMillisecondsSinceEpoch(lastDonationPopupMs)
+        : null;
+
     final lastFollowPopupMs = data['lastFollowPopup'];
-    _lastFollowPopup = lastFollowPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastFollowPopupMs) : null;
-    
+    _lastFollowPopup = lastFollowPopupMs != null
+        ? DateTime.fromMillisecondsSinceEpoch(lastFollowPopupMs)
+        : null;
+
     final lastSatisfactionPopupMs = data['lastSatisfactionPopup'];
-    _lastSatisfactionPopup = lastSatisfactionPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSatisfactionPopupMs) : null;
-    
+    _lastSatisfactionPopup = lastSatisfactionPopupMs != null
+        ? DateTime.fromMillisecondsSinceEpoch(lastSatisfactionPopupMs)
+        : null;
+
     _hasClickedDonationLink = data['hasClickedDonationLink'] ?? false;
     _hasClickedFollowLink = data['hasClickedFollowLink'] ?? false;
     _hasClickedSatisfactionLink = data['hasClickedSatisfactionLink'] ?? false;
@@ -936,7 +982,9 @@ class SettingsProvider extends ChangeNotifier {
     _automaticBugReporting = data['automaticBugReporting'] ?? true;
 
     final lastDifficultyPopupMs = data['lastDifficultyPopup'];
-    _lastDifficultyPopup = lastDifficultyPopupMs != null ? DateTime.fromMillisecondsSinceEpoch(lastDifficultyPopupMs) : null;
+    _lastDifficultyPopup = lastDifficultyPopupMs != null
+        ? DateTime.fromMillisecondsSinceEpoch(lastDifficultyPopupMs)
+        : null;
 
     // Load AI themes
     final aiThemesData = data['aiThemes'] as Map<String, dynamic>?;
@@ -947,16 +995,17 @@ class SettingsProvider extends ChangeNotifier {
         final themeData = entry.value as Map<String, dynamic>;
 
         final lightTheme = AIThemeBuilder.createLightThemeFromPalette(
-          Map<String, dynamic>.from(themeData['colorPalette'] as Map<String, dynamic>? ?? {})
-        );
+            Map<String, dynamic>.from(
+                themeData['colorPalette'] as Map<String, dynamic>? ?? {}));
 
         final darkTheme = themeData['hasDarkTheme'] == true
-          ? AIThemeBuilder.createDarkThemeFromPalette(
-              Map<String, dynamic>.from(themeData['colorPalette'] as Map<String, dynamic>? ?? {})
-            )
-          : null;
+            ? AIThemeBuilder.createDarkThemeFromPalette(
+                Map<String, dynamic>.from(
+                    themeData['colorPalette'] as Map<String, dynamic>? ?? {}))
+            : null;
 
-        final aiTheme = AITheme.fromJson(themeData, lightTheme, darkTheme: darkTheme);
+        final aiTheme =
+            AITheme.fromJson(themeData, lightTheme, darkTheme: darkTheme);
         _aiThemes[themeId] = aiTheme;
       }
     }
@@ -971,21 +1020,26 @@ class SettingsProvider extends ChangeNotifier {
     await _prefs?.setBool(_analyticsEnabledKey, _analyticsEnabled);
     await _prefs?.setString(_customThemeKey, _selectedCustomThemeKey ?? '');
     await _prefs?.setStringList(_unlockedThemesKey, _unlockedThemes.toList());
-    
+
     // Save popup tracking data
     if (_lastDonationPopup != null) {
-      await _prefs?.setInt(_lastDonationPopupKey, _lastDonationPopup!.millisecondsSinceEpoch);
+      await _prefs?.setInt(
+          _lastDonationPopupKey, _lastDonationPopup!.millisecondsSinceEpoch);
     }
     if (_lastFollowPopup != null) {
-      await _prefs?.setInt(_lastFollowPopupKey, _lastFollowPopup!.millisecondsSinceEpoch);
+      await _prefs?.setInt(
+          _lastFollowPopupKey, _lastFollowPopup!.millisecondsSinceEpoch);
     }
     if (_lastSatisfactionPopup != null) {
-      await _prefs?.setInt(_lastSatisfactionPopupKey, _lastSatisfactionPopup!.millisecondsSinceEpoch);
+      await _prefs?.setInt(_lastSatisfactionPopupKey,
+          _lastSatisfactionPopup!.millisecondsSinceEpoch);
     }
     await _prefs?.setBool(_hasClickedDonationLinkKey, _hasClickedDonationLink);
     await _prefs?.setBool(_hasClickedFollowLinkKey, _hasClickedFollowLink);
-    await _prefs?.setBool(_hasClickedSatisfactionLinkKey, _hasClickedSatisfactionLink);
-    await _prefs?.setBool(_hasClickedDifficultyLinkKey, _hasClickedDifficultyLink);
+    await _prefs?.setBool(
+        _hasClickedSatisfactionLinkKey, _hasClickedSatisfactionLink);
+    await _prefs?.setBool(
+        _hasClickedDifficultyLinkKey, _hasClickedDifficultyLink);
     if (_difficultyPreference != null) {
       await _prefs?.setString(_difficultyPreferenceKey, _difficultyPreference!);
     }
@@ -1012,7 +1066,8 @@ class SettingsProvider extends ChangeNotifier {
 
     // Save difficulty popup tracking data
     if (_lastDifficultyPopup != null) {
-      await _prefs?.setInt(_lastDifficultyPopupKey, _lastDifficultyPopup!.millisecondsSinceEpoch);
+      await _prefs?.setInt(_lastDifficultyPopupKey,
+          _lastDifficultyPopup!.millisecondsSinceEpoch);
     }
 
     notifyListeners();

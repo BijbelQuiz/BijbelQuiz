@@ -25,7 +25,8 @@ class NotificationService {
   NotificationService._internal();
 
   /// The plugin instance used to manage notifications.
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
 
@@ -39,7 +40,7 @@ class NotificationService {
     if (_initialized) return;
     tz.initializeTimeZones();
     AppLogger.info('Initializing NotificationService');
-    
+
     // Request notification permissions before initializing
     if (Platform.isAndroid) {
       await _setupAndroidNotificationChannel();
@@ -47,20 +48,21 @@ class NotificationService {
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    
+
     // Handle iOS/macOS initialization
     final DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
-          requestAlertPermission: true,
-          requestBadgePermission: true,
-          requestSoundPermission: true,
-          onDidReceiveLocalNotification: _onDidReceiveLocalNotification,
-        );
-        
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+      onDidReceiveLocalNotification: _onDidReceiveLocalNotification,
+    );
+
     const LinuxInitializationSettings initializationSettingsLinux =
         LinuxInitializationSettings(defaultActionName: 'Open notification');
-        
-    final InitializationSettings initializationSettings = InitializationSettings(
+
+    final InitializationSettings initializationSettings =
+        InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsDarwin,
       macOS: initializationSettingsDarwin,
@@ -97,14 +99,15 @@ class NotificationService {
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
           ?.createNotificationChannel(channel);
-      
+
       // Request notification permission on Android 13+
       if (await _isAndroid13OrHigher()) {
         try {
           final bool? granted = await flutterLocalNotificationsPlugin
-              .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+              .resolvePlatformSpecificImplementation<
+                  AndroidFlutterLocalNotificationsPlugin>()
               ?.requestNotificationsPermission();
-              
+
           AppLogger.info('Notification permission granted: $granted');
         } catch (e) {
           AppLogger.error('Error requesting notification permission: $e');
@@ -121,7 +124,6 @@ class NotificationService {
     return deviceInfo.version.sdkInt >= 33; // Android 13 is API level 33
   }
 
-
   // Handle iOS/macOS local notification
   static Future<void> _onDidReceiveLocalNotification(
     int id,
@@ -134,7 +136,8 @@ class NotificationService {
   }
 
   // Handle notification tap/response
-  static Future<void> _onNotificationResponse(NotificationResponse response) async {
+  static Future<void> _onNotificationResponse(
+      NotificationResponse response) async {
     // Handle when the user taps on a notification
     AppLogger.info('Notification tapped: ${response.id}, ${response.payload}');
   }
@@ -149,37 +152,41 @@ class NotificationService {
 
     // Genereer 3 tijden gelijkmatig verspreid over de dag met wat willekeur
     final now = DateTime.now();
-    final random = Random(now.year * 10000 + now.month * 100 + now.day); // Seed voor reproduceerbaarheid per dag
+    final random = Random(now.year * 10000 +
+        now.month * 100 +
+        now.day); // Seed voor reproduceerbaarheid per dag
     final List<TimeOfDay> times = [];
-    
+
     // Verdeel de dag in 3 gelijke blokken tussen 8:00 en 22:00 (14 uur = 840 minuten)
     // Blokken: 8:00-12:40, 12:40-17:20, 17:20-22:00
     const int startHour = 8;
     const int endHour = 22;
-    const int totalMinutes = (endHour - startHour) * 60; // 14 * 60 = 840 minuten
+    const int totalMinutes =
+        (endHour - startHour) * 60; // 14 * 60 = 840 minuten
     const int blockDuration = totalMinutes ~/ 3; // ~280 minuten per blok
-    
+
     for (int i = 0; i < 3; i++) {
       // Berekent begin van dit blok
       int blockStartMinutes = i * blockDuration;
-      
+
       // Voeg wat willekeur toe binnen het blok
-      int randomMinutesInBlock = blockStartMinutes + random.nextInt(blockDuration ~/ 2);
-      
+      int randomMinutesInBlock =
+          blockStartMinutes + random.nextInt(blockDuration ~/ 2);
+
       // Zorg dat we binnen de toegestane uren blijven
       int totalMinutesOfDay = 8 * 60 + randomMinutesInBlock;
       int hour = totalMinutesOfDay ~/ 60;
       int minute = totalMinutesOfDay % 60;
-      
+
       // Zorg dat het resultaat binnen bereik is
       if (hour >= endHour) {
         hour = endHour - 1;
         minute = 59;
       }
-      
+
       times.add(TimeOfDay(hour: hour, minute: minute));
     }
-    
+
     // Shuffle de tijden om de volgorde te willekeurigeren
     times.shuffle(random);
 
@@ -203,8 +210,10 @@ class NotificationService {
     if (Platform.isLinux) {
       for (int i = 0; i < times.length; i++) {
         final now = DateTime.now();
-        final target = DateTime(now.year, now.month, now.day, times[i].hour, times[i].minute);
-        final delay = target.isAfter(now) ? target.difference(now) : Duration.zero;
+        final target = DateTime(
+            now.year, now.month, now.day, times[i].hour, times[i].minute);
+        final delay =
+            target.isAfter(now) ? target.difference(now) : Duration.zero;
         Future.delayed(delay, () {
           flutterLocalNotificationsPlugin.show(
             200 + i,
@@ -232,15 +241,20 @@ class NotificationService {
           AppLogger.error('Failed to schedule notification $i: $e');
         }
       }
-      AppLogger.info('Successfully scheduled $successCount out of ${times.length} notifications');
+      AppLogger.info(
+          'Successfully scheduled $successCount out of ${times.length} notifications');
       if (successCount == 0 && times.isNotEmpty) {
         onError?.call(strings.AppStrings.couldNotScheduleAnyNotifications);
       } else if (successCount < times.length) {
-        onError?.call(strings.AppStrings.couldNotScheduleSomeNotificationsTemplate.replaceAll('{successCount}', successCount.toString()).replaceAll('{total}', times.length.toString()));
+        onError?.call(strings
+            .AppStrings.couldNotScheduleSomeNotificationsTemplate
+            .replaceAll('{successCount}', successCount.toString())
+            .replaceAll('{total}', times.length.toString()));
       }
     } catch (e) {
       AppLogger.error('Error scheduling notifications: $e');
-      onError?.call('${strings.AppStrings.couldNotScheduleNotificationsError}${e.toString()}');
+      onError?.call(
+          '${strings.AppStrings.couldNotScheduleNotificationsError}${e.toString()}');
     }
   }
 
@@ -254,10 +268,10 @@ class NotificationService {
     try {
       // Ensure timezone is initialized
       tz.initializeTimeZones();
-      
+
       // Get current time in local timezone
       final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-      
+
       // Create scheduled date with the specified time
       tz.TZDateTime scheduledDate = tz.TZDateTime(
         tz.local,
@@ -267,18 +281,18 @@ class NotificationService {
         timeOfDay.hour,
         timeOfDay.minute,
       );
-      
+
       // If the time has already passed today, schedule for tomorrow
       if (scheduledDate.isBefore(now)) {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
-      
+
       // Log the scheduling attempt
       AppLogger.info('Scheduling notification for ${scheduledDate.toString()}');
-      
+
       // Use inexact scheduling to avoid exact alarm restrictions
       AndroidScheduleMode scheduleMode = AndroidScheduleMode.inexact;
-      
+
       // Schedule the notification with updated parameters for Android 12+
       await flutterLocalNotificationsPlugin.zonedSchedule(
         id,
@@ -289,7 +303,8 @@ class NotificationService {
           android: AndroidNotificationDetails(
             'motivation_channel',
             'Motivation Notifications',
-            channelDescription: 'Daily motivational reminders to play BijbelQuiz',
+            channelDescription:
+                'Daily motivational reminders to play BijbelQuiz',
             importance: Importance.max,
             priority: Priority.high,
             enableVibration: true,
@@ -312,12 +327,14 @@ class NotificationService {
           ),
         ),
         androidScheduleMode: scheduleMode,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
         payload: 'notification_$id',
       );
-      
-      AppLogger.info('Successfully scheduled notification with id: $id using schedule mode: $scheduleMode');
+
+      AppLogger.info(
+          'Successfully scheduled notification with id: $id using schedule mode: $scheduleMode');
     } catch (e, stackTrace) {
       AppLogger.error('Error scheduling notification: $e\n$stackTrace');
       rethrow;
@@ -338,21 +355,28 @@ class NotificationService {
     try {
       final plugin = NotificationService().flutterLocalNotificationsPlugin;
       if (Platform.isAndroid) {
-        final androidImplementation = plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        final androidImplementation =
+            plugin.resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>();
         if (androidImplementation != null) {
-          final granted = await androidImplementation.requestNotificationsPermission();
+          final granted =
+              await androidImplementation.requestNotificationsPermission();
           return granted ?? true;
         }
       } else if (Platform.isIOS) {
-        final iosImplementation = plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+        final iosImplementation = plugin.resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>();
         if (iosImplementation != null) {
-          final granted = await iosImplementation.requestPermissions(alert: true, badge: true, sound: true);
+          final granted = await iosImplementation.requestPermissions(
+              alert: true, badge: true, sound: true);
           return granted ?? true;
         }
       } else if (Platform.isMacOS) {
-        final macImplementation = plugin.resolvePlatformSpecificImplementation<MacOSFlutterLocalNotificationsPlugin>();
+        final macImplementation = plugin.resolvePlatformSpecificImplementation<
+            MacOSFlutterLocalNotificationsPlugin>();
         if (macImplementation != null) {
-          final granted = await macImplementation.requestPermissions(alert: true, badge: true, sound: true);
+          final granted = await macImplementation.requestPermissions(
+              alert: true, badge: true, sound: true);
           return granted ?? true;
         }
       }
@@ -362,6 +386,6 @@ class NotificationService {
       return true;
     }
   }
-  
+
   /// Checks if exact alarms are allowed on Android 12+ devices
-  } 
+}

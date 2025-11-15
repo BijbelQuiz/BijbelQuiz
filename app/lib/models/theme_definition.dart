@@ -29,12 +29,14 @@ class ThemeDefinition {
       id: json['id'] as String,
       name: json['name'] as String,
       type: json['type'] as String,
-      colors: Map<String, String>.from(json['colors'] as Map<String, dynamic>? ?? {}),
+      colors: Map<String, String>.from(
+          json['colors'] as Map<String, dynamic>? ?? {}),
       textStyles: json['textTheme'] as Map<String, dynamic>? ?? {},
       buttonStyles: json['buttonTheme'] as Map<String, dynamic>? ?? {},
       cardStyles: json['cardTheme'] as Map<String, dynamic>? ?? {},
       appBarStyles: json['appBarTheme'] as Map<String, dynamic>? ?? {},
-      pageTransitions: json['pageTransitionsTheme'] as Map<String, dynamic>? ?? {},
+      pageTransitions:
+          json['pageTransitionsTheme'] as Map<String, dynamic>? ?? {},
     );
   }
 

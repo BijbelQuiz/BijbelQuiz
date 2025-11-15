@@ -73,7 +73,8 @@ class ErrorReport {
       context: map['context'],
       questionId: map['question_id'],
       additionalInfo: map['additional_info'],
-      timestamp: DateTime.parse(map['timestamp'] ?? DateTime.now().toIso8601String()),
+      timestamp:
+          DateTime.parse(map['timestamp'] ?? DateTime.now().toIso8601String()),
       deviceInfo: map['device_info'],
       appVersion: map['app_version'],
       buildNumber: map['build_number'],
@@ -84,13 +85,13 @@ class ErrorReport {
 /// Centralized error reporting service that allows reporting bugs from anywhere in the app
 /// The reported errors get stored in a Supabase database for debugging and monitoring
 class ErrorReportingService {
-  static final ErrorReportingService _instance = ErrorReportingService._internal();
+  static final ErrorReportingService _instance =
+      ErrorReportingService._internal();
   factory ErrorReportingService() => _instance;
   ErrorReportingService._internal();
 
-
   /// Reports an error to the Supabase database
-  /// 
+  ///
   /// [appError] The AppError object to report
   /// [questionId] Optional question ID associated with the error
   /// [additionalInfo] Additional context about the error
@@ -113,17 +114,19 @@ class ErrorReportingService {
       if (context != null) {
         final settings = Provider.of<SettingsProvider>(context, listen: false);
         if (!settings.automaticBugReporting) {
-          AppLogger.info('Automatic bug reporting is disabled, skipping error report');
+          AppLogger.info(
+              'Automatic bug reporting is disabled, skipping error report');
           return;
         }
       }
 
-      AppLogger.info('Attempting to report error to Supabase: ${appError.userMessage}');
+      AppLogger.info(
+          'Attempting to report error to Supabase: ${appError.userMessage}');
 
       // Get app version and build number if not provided
       String actualAppVersion = appVersion ?? '';
       String actualBuildNumber = buildNumber ?? '';
-      
+
       if (appVersion == null || buildNumber == null) {
         try {
           final packageInfo = await PackageInfo.fromPlatform();
@@ -138,7 +141,9 @@ class ErrorReportingService {
 
       // Create error report object with sanitized sensitive data
       final errorReport = ErrorReport(
-        id: DateTime.now().millisecondsSinceEpoch.toString(), // Using timestamp as ID
+        id: DateTime.now()
+            .millisecondsSinceEpoch
+            .toString(), // Using timestamp as ID
         userId: userId, // This should be an anonymous user ID, not PII
         errorType: appError.type.toString(),
         errorMessage: _sanitizeErrorMessage(appError.technicalMessage),
@@ -160,11 +165,14 @@ class ErrorReportingService {
           .insert(errorReport.toMap());
 
       if (response.error != null) {
-        AppLogger.severe('Failed to report error to Supabase: ${response.error?.message}');
+        AppLogger.severe(
+            'Failed to report error to Supabase: ${response.error?.message}');
         // Even if Supabase fails, we still log locally
-        AppLogger.warning('Error saved locally but failed to send to database: ${appError.userMessage}');
+        AppLogger.warning(
+            'Error saved locally but failed to send to database: ${appError.userMessage}');
       } else {
-        AppLogger.info('Error successfully reported to Supabase: ${appError.userMessage}');
+        AppLogger.info(
+            'Error successfully reported to Supabase: ${appError.userMessage}');
       }
     } catch (e) {
       AppLogger.severe('Failed to report error due to exception: $e');
@@ -172,7 +180,7 @@ class ErrorReportingService {
   }
 
   /// Reports a simple error message to the Supabase database
-  /// 
+  ///
   /// [message] The error message to report
   /// [type] The type of error
   /// [questionId] Optional question ID associated with the error
@@ -221,24 +229,26 @@ class ErrorReportingService {
   /// Sanitizes stack trace to remove sensitive information
   String? _sanitizeStackTrace(String? stackTrace) {
     if (stackTrace == null) return null;
-    
+
     // In production, we might want to avoid sending full stack traces
     // For now, we'll sanitize them by removing potential file paths and sensitive data
     String sanitized = stackTrace;
-    
+
     // Remove file paths that might contain sensitive information
-    sanitized = sanitized.replaceAll(RegExp(r'/[a-zA-Z0-9_/\-.]+/[a-zA-Z0-9_\-]+\.dart'), '[FILE PATH REDACTED]');
-    
+    sanitized = sanitized.replaceAll(
+        RegExp(r'/[a-zA-Z0-9_/\-.]+/[a-zA-Z0-9_\-]+\.dart'),
+        '[FILE PATH REDACTED]');
+
     // Sanitize any additional sensitive patterns
     sanitized = AppLogger.sanitizeLogMessage(sanitized);
-    
+
     return sanitized;
   }
 
   /// Serializes and sanitizes the context map to remove sensitive information
   String? _serializeAndSanitizeContext(Map<String, dynamic>? context) {
     if (context == null) return null;
-    
+
     try {
       // Sanitize the context map to remove sensitive information
       Map<String, dynamic> sanitizedContext = AppLogger.sanitizeMap(context);
@@ -250,12 +260,14 @@ class ErrorReportingService {
   }
 
   /// Serializes and sanitizes additional info to remove sensitive information
-  String? _serializeAndSanitizeAdditionalInfo(Map<String, dynamic>? additionalInfo) {
+  String? _serializeAndSanitizeAdditionalInfo(
+      Map<String, dynamic>? additionalInfo) {
     if (additionalInfo == null) return null;
-    
+
     try {
       // Sanitize the additional info map to remove sensitive information
-      Map<String, dynamic> sanitizedAdditionalInfo = AppLogger.sanitizeMap(additionalInfo);
+      Map<String, dynamic> sanitizedAdditionalInfo =
+          AppLogger.sanitizeMap(additionalInfo);
       return _mapToJson(sanitizedAdditionalInfo);
     } catch (e) {
       AppLogger.warning('Failed to serialize additional info: $e');

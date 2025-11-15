@@ -25,7 +25,14 @@ class ProgressHeader extends StatefulWidget {
   final List<DayIndicator> dayWindow;
   final VoidCallback? onMultiplayerPressed;
 
-  const ProgressHeader({super.key, required this.lessons, this.continueLesson, this.onAfterQuizReturn, this.streakDays = 0, this.dayWindow = const [], this.onMultiplayerPressed});
+  const ProgressHeader(
+      {super.key,
+      required this.lessons,
+      this.continueLesson,
+      this.onAfterQuizReturn,
+      this.streakDays = 0,
+      this.dayWindow = const [],
+      this.onMultiplayerPressed});
 
   @override
   State<ProgressHeader> createState() => _ProgressHeaderState();
@@ -55,7 +62,7 @@ class _ProgressHeaderState extends State<ProgressHeader>
     });
   }
 
-Future<void> _loadGreeting() async {
+  Future<void> _loadGreeting() async {
     try {
       final greeting = await _greetingService.getTimeBasedGreeting();
       if (mounted) {
@@ -108,7 +115,11 @@ Future<void> _loadGreeting() async {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(_greeting, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+            Text(_greeting,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 8),
             Semantics(
               label: 'Lesson completion progress',
@@ -125,14 +136,16 @@ Future<void> _loadGreeting() async {
                             minHeight: 10,
                             value: percent * _progressAnimation.value,
                             backgroundColor: cs.surfaceContainerHighest,
-                            valueColor: AlwaysStoppedAnimation<Color>(cs.primary),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(cs.primary),
                           );
                         },
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text('$unlocked/$total', style: Theme.of(context).textTheme.labelLarge),
+                  Text('$unlocked/$total',
+                      style: Theme.of(context).textTheme.labelLarge),
                 ],
               ),
             ),
@@ -170,14 +183,20 @@ Future<void> _loadGreeting() async {
                             children: [
                               Text(
                                 strings.AppStrings.dailyStreak,
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
                                       fontWeight: FontWeight.w700,
                                       color: cs.primary,
                                     ),
                               ),
                               Text(
                                 'Je gebruikt ${strings.AppStrings.appName} al ${widget.streakDays} ${widget.streakDays == 1 ? "dag" : "dagen"} op rij',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
                                       fontWeight: FontWeight.w500,
                                       color: cs.onSurfaceVariant,
                                     ),
@@ -198,9 +217,15 @@ Future<void> _loadGreeting() async {
                               children: [
                                 Text(
                                   _getDayAbbreviation(widget.dayWindow[i].date),
-                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                        color: _getDayTextColor(context, widget.dayWindow[i]),
-                                        fontWeight: i == 2 ? FontWeight.w700 : FontWeight.w500,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: _getDayTextColor(
+                                            context, widget.dayWindow[i]),
+                                        fontWeight: i == 2
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
                                       ),
                                 ),
                                 const SizedBox(height: 6),
@@ -208,16 +233,22 @@ Future<void> _loadGreeting() async {
                                   width: 32,
                                   height: 32,
                                   decoration: BoxDecoration(
-                                    color: _getDayBackgroundColor(context, widget.dayWindow[i]),
+                                    color: _getDayBackgroundColor(
+                                        context, widget.dayWindow[i]),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: _getDayBorderColor(context, widget.dayWindow[i]),
+                                      color: _getDayBorderColor(
+                                          context, widget.dayWindow[i]),
                                       width: i == 2 ? 2.5 : 1.8,
                                     ),
-                                    boxShadow: i == 2 && widget.dayWindow[i].state == DayState.success
+                                    boxShadow: i == 2 &&
+                                            widget.dayWindow[i].state ==
+                                                DayState.success
                                         ? [
                                             BoxShadow(
-                                              color: _getDayBorderColor(context, widget.dayWindow[i]).withValues(alpha: 0.35),
+                                              color: _getDayBorderColor(context,
+                                                      widget.dayWindow[i])
+                                                  .withValues(alpha: 0.35),
                                               blurRadius: 8,
                                               spreadRadius: 0,
                                               offset: const Offset(0, 2),
@@ -225,29 +256,36 @@ Future<void> _loadGreeting() async {
                                           ]
                                         : null,
                                   ),
-                                  child: widget.dayWindow[i].state == DayState.freeze
+                                  child: widget.dayWindow[i].state ==
+                                          DayState.freeze
                                       ? Icon(
                                           Icons.local_cafe,
                                           size: 16,
                                           color: cs.onSurfaceVariant,
                                         )
-                                      : widget.dayWindow[i].state == DayState.success
+                                      : widget.dayWindow[i].state ==
+                                              DayState.success
                                           ? Icon(
                                               Icons.check,
                                               size: 18,
                                               color: cs.onPrimary,
                                             )
-                                          : widget.dayWindow[i].state == DayState.fail
-                                              ? _isCurrentDayNotCompleted(widget.dayWindow[i])
+                                          : widget.dayWindow[i].state ==
+                                                  DayState.fail
+                                              ? _isCurrentDayNotCompleted(
+                                                      widget.dayWindow[i])
                                                   ? Icon(
-                                                      Icons.pending_actions, // Using a more squiggle-like icon
+                                                      Icons
+                                                          .pending_actions, // Using a more squiggle-like icon
                                                       size: 18,
-                                                      color: cs.onSecondaryContainer, // Use appropriate color for orange background
+                                                      color: cs
+                                                          .onSecondaryContainer, // Use appropriate color for orange background
                                                     )
                                                   : Icon(
                                                       Icons.close,
                                                       size: 18,
-                                                      color: cs.onErrorContainer,
+                                                      color:
+                                                          cs.onErrorContainer,
                                                     )
                                               : null,
                                 ),
@@ -266,13 +304,16 @@ Future<void> _loadGreeting() async {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Semantics(
-                    label: 'Continue with lesson: ${widget.continueLesson!.title}',
+                    label:
+                        'Continue with lesson: ${widget.continueLesson!.title}',
                     hint: 'Start the next recommended lesson in your progress',
                     button: true,
                     child: _AnimatedButton(
                       onPressed: () async {
-                        Provider.of<AnalyticsService>(context, listen: false).capture(context, 'start_quiz', properties: {
-                          if (widget.continueLesson?.id != null) 'lesson_id': widget.continueLesson!.id,
+                        Provider.of<AnalyticsService>(context, listen: false)
+                            .capture(context, 'start_quiz', properties: {
+                          if (widget.continueLesson?.id != null)
+                            'lesson_id': widget.continueLesson!.id,
                         });
                         await Navigator.of(context).push(
                           MaterialPageRoute(
@@ -284,7 +325,8 @@ Future<void> _loadGreeting() async {
                         );
                         widget.onAfterQuizReturn?.call();
                       },
-                      label: '${strings.AppStrings.continueWith}: ${widget.continueLesson!.title}',
+                      label:
+                          '${strings.AppStrings.continueWith}: ${widget.continueLesson!.title}',
                       icon: Icons.play_arrow_rounded,
                       color: cs.primary,
                       textColor: cs.onPrimary,
@@ -293,12 +335,15 @@ Future<void> _loadGreeting() async {
                   const SizedBox(height: 8),
                   Semantics(
                     label: 'Practice mode',
-                    hint: 'Start a random practice quiz without affecting progress',
+                    hint:
+                        'Start a random practice quiz without affecting progress',
                     button: true,
                     child: _AnimatedButton(
                       onPressed: () {
-                        Provider.of<AnalyticsService>(context, listen: false).capture(context, 'start_practice_quiz');
-                        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QuizScreen()));
+                        Provider.of<AnalyticsService>(context, listen: false)
+                            .capture(context, 'start_practice_quiz');
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => const QuizScreen()));
                       },
                       label: strings.AppStrings.freePractice,
                       icon: Icons.flash_on_rounded,
@@ -315,7 +360,8 @@ Future<void> _loadGreeting() async {
                       button: true,
                       child: _AnimatedButton(
                         onPressed: () {
-                          Provider.of<AnalyticsService>(context, listen: false).capture(context, 'start_multiplayer_quiz');
+                          Provider.of<AnalyticsService>(context, listen: false)
+                              .capture(context, 'start_multiplayer_quiz');
                           widget.onMultiplayerPressed!();
                         },
                         label: strings.AppStrings.multiplayerQuiz,
@@ -335,7 +381,8 @@ Future<void> _loadGreeting() async {
                 button: true,
                 child: _AnimatedButton(
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QuizScreen()));
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const QuizScreen()));
                   },
                   label: strings.AppStrings.freePractice,
                   icon: Icons.flash_on_rounded,
@@ -352,7 +399,8 @@ Future<void> _loadGreeting() async {
                   button: true,
                   child: _AnimatedButton(
                     onPressed: () {
-                      Provider.of<AnalyticsService>(context, listen: false).capture(context, 'start_multiplayer_quiz');
+                      Provider.of<AnalyticsService>(context, listen: false)
+                          .capture(context, 'start_multiplayer_quiz');
                       widget.onMultiplayerPressed!();
                     },
                     label: strings.AppStrings.multiplayerQuiz,
@@ -409,7 +457,8 @@ Color _getDayTextColor(BuildContext context, DayIndicator indicator) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     if (indicator.date.isAtSameMomentAs(today)) {
-      return cs.primary; // Use primary color to match the orange background intention
+      return cs
+          .primary; // Use primary color to match the orange background intention
     }
     return cs.error;
   } else {
@@ -532,7 +581,8 @@ class _AnimatedButtonState extends State<_AnimatedButton>
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1 * (_elevationAnimation.value / 6)),
+                  color: Colors.black
+                      .withValues(alpha: 0.1 * (_elevationAnimation.value / 6)),
                   blurRadius: _elevationAnimation.value,
                   offset: Offset(0, _elevationAnimation.value / 2),
                 ),

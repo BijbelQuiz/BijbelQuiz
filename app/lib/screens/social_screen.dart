@@ -37,7 +37,8 @@ class _SocialScreenState extends State<SocialScreen> {
   /// Track screen access and feature usage.
   void _trackScreenAccess() {
     _analyticsService.screen(context, 'SocialScreen');
-    _analyticsService.trackFeatureUsage(context, 'social_features', 'screen_accessed');
+    _analyticsService.trackFeatureUsage(
+        context, 'social_features', 'screen_accessed');
   }
 
   @override
@@ -55,8 +56,9 @@ class _SocialScreenState extends State<SocialScreen> {
             // Calculate responsive values based on available width
             final isLargeScreen = constraints.maxWidth > 600;
             final horizontalPadding = isLargeScreen ? 24.0 : 16.0;
-            final maxContainerWidth = isLargeScreen ? 600.0 : constraints.maxWidth;
-            
+            final maxContainerWidth =
+                isLargeScreen ? 600.0 : constraints.maxWidth;
+
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
@@ -128,7 +130,8 @@ class _SocialScreenState extends State<SocialScreen> {
   }
 
   /// Builds the BQID management card.
-  Widget _buildBqidManagementCard(ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildBqidManagementCard(
+      ColorScheme colorScheme, TextTheme textTheme) {
     return Container(
       width: double.infinity,
       margin: EdgeInsets.zero,
@@ -211,9 +214,9 @@ class _SocialScreenState extends State<SocialScreen> {
 
   /// Builds the social features content section.
   Widget _buildSocialFeaturesContent(
-    ColorScheme colorScheme, 
+    ColorScheme colorScheme,
     TextTheme textTheme,
-    bool isLargeScreen, 
+    bool isLargeScreen,
     bool featuresEnabled,
   ) {
     return Column(
@@ -226,7 +229,8 @@ class _SocialScreenState extends State<SocialScreen> {
   }
 
   /// Builds responsive buttons for social features
-  Widget _buildSocialFeatureButtons(ColorScheme colorScheme, TextTheme textTheme, bool isLargeScreen) {
+  Widget _buildSocialFeatureButtons(
+      ColorScheme colorScheme, TextTheme textTheme, bool isLargeScreen) {
     if (isLargeScreen) {
       // Arrange all buttons in a single row for large screens
       return Row(
@@ -341,7 +345,8 @@ class _SocialScreenState extends State<SocialScreen> {
   }
 
   /// Builds the followed users scores section
-  Widget _buildFollowedUsersScores(ColorScheme colorScheme, TextTheme textTheme, bool isLargeScreen) {
+  Widget _buildFollowedUsersScores(
+      ColorScheme colorScheme, TextTheme textTheme, bool isLargeScreen) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -366,7 +371,8 @@ class _SocialScreenState extends State<SocialScreen> {
                     ),
                     Container(
                       margin: const EdgeInsets.only(left: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: colorScheme.secondaryContainer,
                         borderRadius: BorderRadius.circular(8),
@@ -404,17 +410,19 @@ class _SocialScreenState extends State<SocialScreen> {
                 ),
               );
             }
-            
-            if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+
+            if (snapshot.hasError ||
+                !snapshot.hasData ||
+                snapshot.data!.isEmpty) {
               return Container();
             }
-            
+
             final followedUsers = snapshot.data!;
-            
+
             return Column(
               children: [
-                ...followedUsers.map((user) => 
-                  Card(
+                ...followedUsers.map(
+                  (user) => Card(
                     color: colorScheme.surface,
                     elevation: 1,
                     margin: const EdgeInsets.only(bottom: 8),
@@ -427,7 +435,8 @@ class _SocialScreenState extends State<SocialScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  user['username'] ?? strings.AppStrings.unknownUser,
+                                  user['username'] ??
+                                      strings.AppStrings.unknownUser,
                                   style: textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w500,
                                     color: colorScheme.onSurface,
@@ -444,7 +453,8 @@ class _SocialScreenState extends State<SocialScreen> {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
                               color: colorScheme.primaryContainer,
                               borderRadius: BorderRadius.circular(20),
@@ -484,14 +494,15 @@ class _SocialScreenState extends State<SocialScreen> {
   /// Gets followed users and their scores
   Future<List<Map<String, dynamic>>> _getFollowedUsersScores() async {
     try {
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final gameStatsProvider =
+          Provider.of<GameStatsProvider>(context, listen: false);
       final syncService = gameStatsProvider.syncService;
-      
+
       final followingList = await syncService.getFollowingList();
       if (followingList == null || followingList.isEmpty) {
         return [];
       }
-      
+
       // Use cached scores if available, otherwise fetch fresh data
       Map<String, Map<String, dynamic>> userScores;
       if (_cachedUserScores != null) {
@@ -499,9 +510,9 @@ class _SocialScreenState extends State<SocialScreen> {
       } else {
         userScores = <String, Map<String, dynamic>>{};
       }
-      
+
       final usersWithScores = <Map<String, dynamic>>[];
-      
+
       for (final deviceId in followingList) {
         // Get username
         String? username;
@@ -511,11 +522,11 @@ class _SocialScreenState extends State<SocialScreen> {
           AppLogger.error('Error getting username for device $deviceId', e);
           username = null;
         }
-        
+
         if (username == null) {
           continue; // Skip users without usernames
         }
-        
+
         // Check if we have cached data for this user
         Map<String, dynamic>? stats;
         if (userScores.containsKey(deviceId)) {
@@ -525,24 +536,25 @@ class _SocialScreenState extends State<SocialScreen> {
           try {
             // First try the regular room-based lookup
             stats = await syncService.getGameStatsForDevice(deviceId);
-            
+
             // If that returns null or empty, try to get stats from all rooms globally
             if (stats == null || stats.isEmpty) {
               stats = await _getGameStatsForDeviceGlobally(deviceId);
             }
-            
+
             // Cache the result
             userScores[deviceId] = stats ?? <String, dynamic>{};
           } catch (e) {
-            AppLogger.error('Error fetching game stats for device $deviceId', e);
+            AppLogger.error(
+                'Error fetching game stats for device $deviceId', e);
             // Use empty stats on error
             stats = <String, dynamic>{};
           }
         }
-        
+
         // Extract score and stars from fetched stats
         final score = stats?['score'] ?? 0;
-        
+
         usersWithScores.add({
           'username': username,
           'deviceId': deviceId,
@@ -550,10 +562,10 @@ class _SocialScreenState extends State<SocialScreen> {
           'stars': score, // Stars are represented by the score field
         });
       }
-      
+
       // Update cache with the latest fetched data
       _cachedUserScores = userScores;
-      
+
       return usersWithScores;
     } catch (e) {
       AppLogger.error('Error getting followed users scores', e);
@@ -562,17 +574,16 @@ class _SocialScreenState extends State<SocialScreen> {
   }
 
   /// Gets game stats for a specific device from all rooms globally
-  Future<Map<String, dynamic>?> _getGameStatsForDeviceGlobally(String deviceId) async {
+  Future<Map<String, dynamic>?> _getGameStatsForDeviceGlobally(
+      String deviceId) async {
     try {
       // Use the Supabase client directly to search across all rooms for game stats
       final client = SupabaseConfig.client;
       const tableName = 'sync_rooms'; // Same table used by sync service
 
       // Get all rooms that have game stats data
-      final response = await client
-          .from(tableName)
-          .select('data')
-          .not('data', 'is', null);
+      final response =
+          await client.from(tableName).select('data').not('data', 'is', null);
 
       for (final row in response) {
         final data = row['data'] as Map<String, dynamic>?;
@@ -589,7 +600,8 @@ class _SocialScreenState extends State<SocialScreen> {
       }
       return null;
     } catch (e) {
-      AppLogger.error('Failed to get game stats globally for device: $deviceId', e);
+      AppLogger.error(
+          'Failed to get game stats globally for device: $deviceId', e);
       return null;
     }
   }
@@ -692,7 +704,6 @@ class _SocialScreenState extends State<SocialScreen> {
     );
   }
 
-
   /// Navigate to user search screen
   void _navigateToUserSearchScreen() {
     _analyticsService.capture(context, 'user_search_screen_opened');
@@ -726,11 +737,12 @@ class _SocialScreenState extends State<SocialScreen> {
   /// Navigate to messages screen
   Future<void> _navigateToMessagesScreen() async {
     _analyticsService.capture(context, 'messages_screen_opened');
-    
+
     // Mark messages as viewed when navigating to messages screen
-    final messagesProvider = Provider.of<MessagesProvider>(context, listen: false);
+    final messagesProvider =
+        Provider.of<MessagesProvider>(context, listen: false);
     await messagesProvider.markAllMessagesAsViewed();
-    
+
     if (mounted) {
       Navigator.of(context).push(
         MaterialPageRoute(

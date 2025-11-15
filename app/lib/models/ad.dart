@@ -1,4 +1,3 @@
-
 /// Model representing an advertisement in the database
 class Ad {
   final String id;
@@ -52,9 +51,7 @@ class Ad {
   /// Check if the ad is currently valid based on date range
   bool get isCurrentlyValid {
     final now = DateTime.now();
-    return isActive && 
-           now.isAfter(startDate) && 
-           now.isBefore(expiryDate);
+    return isActive && now.isAfter(startDate) && now.isBefore(expiryDate);
   }
 
   @override

@@ -648,13 +648,14 @@ class AppStrings {
 
   // Messages
   static const String noActiveMessages = 'Geen actieve berichten';
-  static const String noActiveMessagesSubtitle = 'Er zijn momenteel geen berichten om weer te geven';
+  static const String noActiveMessagesSubtitle =
+      'Er zijn momenteel geen berichten om weer te geven';
   static const String errorLoadingMessages = 'Fout bij laden van berichten';
   static const String expiresIn = 'Verloopt over';
   static const String expiringSoon = 'Verloopt binnenkort';
   static const String days = 'dagen';
   static const String noExpirationDate = 'Geen vervaldatum';
-  static const String hoursMessage = 'uren';  // Rename to avoid conflict
+  static const String hoursMessage = 'uren'; // Rename to avoid conflict
   static const String minutes = 'minuten';
   static const String lessThanAMinute = 'minder dan een minuut';
   static const String created = 'Aangemaakt';
@@ -674,10 +675,11 @@ class AppStrings {
 
   // Beta
   static const String beta = 'Bèta';
-  
+
   // Share functionality
   static const String shareStatsTitle = 'Deel je statistieken';
-  static const String shareYourBijbelQuizStats = 'Deel je BijbelQuiz statistieken';
+  static const String shareYourBijbelQuizStats =
+      'Deel je BijbelQuiz statistieken';
   static const String correctAnswersShare = 'Correcte antwoorden';
   static const String currentStreakShare = 'Huidige reeks';
   static const String bestStreakShare = 'Beste reeks';
@@ -686,13 +688,16 @@ class AppStrings {
   static const String timeSpentShare = 'Tijd besteed';
   static const String shareResults = 'Deel je resultaten';
   static const String copyLink = 'Kopieer link';
-  
+
   // Error Reporting Strings
   static const String success = 'Succes';
-  static const String reportSubmittedSuccessfully = 'Je melding is succesvol verstuurd!';
-  static const String reportSubmissionFailed = 'Melding kon niet worden verstuurd. Probeer het later opnieuw.';
+  static const String reportSubmittedSuccessfully =
+      'Je melding is succesvol verstuurd!';
+  static const String reportSubmissionFailed =
+      'Melding kon niet worden verstuurd. Probeer het later opnieuw.';
   static const String reportBug = 'Meld een bug';
-  static const String reportBugDescription = 'Meld een bug of probleem met de app';
+  static const String reportBugDescription =
+      'Meld een bug of probleem met de app';
   static const String subject = 'Onderwerp';
   static const String pleaseEnterSubject = 'Voer een onderwerp in';
   static const String description = 'Beschrijving';
@@ -713,33 +718,41 @@ class AppStrings {
   static const String sharedStats = 'Gedeelde Statistieken';
   static const String newGame = 'Nieuw spel';
   static const String loadingMessages = 'Berichten laden...';
-  static const String errorLoadingUsernames = 'Fout bij laden gebruikersnamen: ';
+  static const String errorLoadingUsernames =
+      'Fout bij laden gebruikersnamen: ';
   static const String urlCopiedToClipboard = 'URL gekopieerd naar klembord!';
   static const String tryAgainButton = 'Probeer Opnieuw';
   static const String checkConnection = 'Controleer Verbinding';
   static const String goToQuiz = 'Naar de Quiz';
   static const String errorLoadingAnalytics = 'Fout bij laden analytics';
   static const String bibleReferenceCopied = 'Bijbelverwijzing gekopieerd: ';
-  static const String bibleReferenceCopiedForSharing = 'Bijbelverwijzing gekopieerd voor delen';
+  static const String bibleReferenceCopiedForSharing =
+      'Bijbelverwijzing gekopieerd voor delen';
   static const String errorHandlingTest = 'Foutafhandeling Test';
-  static const String errorHandlingTestDescription = 'Dit scherm demonstreert het nieuwe foutafhandelingssysteem';
+  static const String errorHandlingTestDescription =
+      'Dit scherm demonstreert het nieuwe foutafhandelingssysteem';
   static const String testErrorHandling = 'Test Foutafhandeling';
   static const String testErrorDialog = 'Test Foutdialoog';
   static const String retryButton = 'Opnieuw Proberen';
 
- // Settings Screen - Additional hardcoded strings
- static const String searchSettings = 'Zoek instellingen...';
- static const String lessonLayoutSettings = 'Leslay-out';
- static const String chooseLessonLayoutDesc = 'Kies hoe lessen worden weergegeven';
- static const String showIntroductionDesc = 'Bekijk de app-introductie en tutorial';
- static const String clearQuestionCacheDesc = 'Verwijder gecachte vragen om opslagruimte vrij te maken';
- static const String followOnSocialMediaDesc = 'Verbind met ons op social media platforms';
- static const String inviteFriendDesc = 'Deel een gepersonaliseerde uitnodigingslink met vrienden';
- static const String bugReport = 'Bug Rapport';
- static const String bugReportDesc = 'Rapporteer bugs en problemen met de app';
+  // Settings Screen - Additional hardcoded strings
+  static const String searchSettings = 'Zoek instellingen...';
+  static const String lessonLayoutSettings = 'Leslay-out';
+  static const String chooseLessonLayoutDesc =
+      'Kies hoe lessen worden weergegeven';
+  static const String showIntroductionDesc =
+      'Bekijk de app-introductie en tutorial';
+  static const String clearQuestionCacheDesc =
+      'Verwijder gecachte vragen om opslagruimte vrij te maken';
+  static const String followOnSocialMediaDesc =
+      'Verbind met ons op social media platforms';
+  static const String inviteFriendDesc =
+      'Deel een gepersonaliseerde uitnodigingslink met vrienden';
+  static const String bugReport = 'Bug Rapport';
+  static const String bugReportDesc = 'Rapporteer bugs en problemen met de app';
 
- // Automatic Bug Reporting
- static const String automaticBugReports = 'Automatisch problemen melden';
- static const String automaticBugReportsDesc =
-     'Automatisch bug rapporten verzenden wanneer er fouten optreden (aanbevolen)';
+  // Automatic Bug Reporting
+  static const String automaticBugReports = 'Automatisch problemen melden';
+  static const String automaticBugReportsDesc =
+      'Automatisch bug rapporten verzenden wanneer er fouten optreden (aanbevolen)';
 }

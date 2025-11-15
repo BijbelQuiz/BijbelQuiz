@@ -45,7 +45,7 @@ class ServiceContainer {
   /// Initialize critical services that are required for app startup
   Future<void> initializeCriticalServices() async {
     AppLogger.info('Initializing critical services...');
-    
+
     try {
       // Analytics service (high priority)
       await _initializeService('analytics', () async {
@@ -109,7 +109,8 @@ class ServiceContainer {
       _geminiService = GeminiService.instance;
       // Don't wait for Gemini - it can fail gracefully
       _geminiService!.initialize().catchError((e) {
-        AppLogger.warning('Gemini service initialization failed (API key may be missing): $e');
+        AppLogger.warning(
+            'Gemini service initialization failed (API key may be missing): $e');
         _failedServices.add('gemini');
       });
     }));
@@ -122,7 +123,7 @@ class ServiceContainer {
     unawaited(_initializeService('star_transaction', () async {
       await _waitForService('settings_provider');
       await _waitForService('game_stats_provider');
-      
+
       _starTransactionService = StarTransactionService.instance;
       // This will be initialized properly later when providers are available
     }));
@@ -143,7 +144,8 @@ class ServiceContainer {
     required GameStatsProvider gameStatsProvider,
     required LessonProgressProvider lessonProgressProvider,
   }) async {
-    if (_starTransactionService != null && !_isServiceInitialized('star_transaction')) {
+    if (_starTransactionService != null &&
+        !_isServiceInitialized('star_transaction')) {
       try {
         await _starTransactionService!.initialize(
           gameStatsProvider: gameStatsProvider,
@@ -158,9 +160,10 @@ class ServiceContainer {
   }
 
   /// Generic service initialization with error handling
-  Future<void> _initializeService(String serviceName, Future<void> Function() initializer) async {
+  Future<void> _initializeService(
+      String serviceName, Future<void> Function() initializer) async {
     if (_isServiceInitialized(serviceName)) return;
-    
+
     final completer = Completer<void>();
     _initializationCompleters[serviceName] = completer;
 
@@ -178,7 +181,7 @@ class ServiceContainer {
   /// Wait for a service to be initialized
   Future<void> _waitForService(String serviceName) async {
     if (_isServiceInitialized(serviceName)) return;
-    
+
     final completer = _initializationCompleters[serviceName];
     if (completer != null) {
       await completer.future;
@@ -187,8 +190,8 @@ class ServiceContainer {
 
   /// Check if a service is initialized
   bool _isServiceInitialized(String serviceName) {
-    return !_failedServices.contains(serviceName) && 
-           _initializationCompleters[serviceName]?.isCompleted == true;
+    return !_failedServices.contains(serviceName) &&
+        _initializationCompleters[serviceName]?.isCompleted == true;
   }
 
   /// Mark service as completed (for services that don't use the generic initializer)
@@ -242,7 +245,8 @@ class ServiceContainer {
 
   QuestionCacheService? get questionCacheService => _questionCacheService;
 
-  GeminiService? get geminiService => _failedServices.contains('gemini') ? null : _geminiService;
+  GeminiService? get geminiService =>
+      _failedServices.contains('gemini') ? null : _geminiService;
 
   StarTransactionService? get starTransactionService => _starTransactionService;
 
@@ -253,16 +257,16 @@ class ServiceContainer {
   /// Check if all critical services are ready
   bool get areCriticalServicesReady {
     return _analyticsService != null &&
-           _themeManager != null &&
-           _settingsProvider != null &&
-           _gameStatsProvider != null &&
-           _timeTrackingService != null;
+        _themeManager != null &&
+        _settingsProvider != null &&
+        _gameStatsProvider != null &&
+        _timeTrackingService != null;
   }
 
   /// Check if a specific service is available and working
   bool isServiceAvailable(String serviceName) {
     if (_failedServices.contains(serviceName)) return false;
-    
+
     switch (serviceName) {
       case 'analytics':
         return _analyticsService != null;
@@ -275,7 +279,8 @@ class ServiceContainer {
       case 'gemini':
         return _geminiService != null && !_failedServices.contains('gemini');
       case 'star_transaction':
-        return _starTransactionService != null && _isServiceInitialized('star_transaction');
+        return _starTransactionService != null &&
+            _isServiceInitialized('star_transaction');
       case 'messaging':
         return _messagingService != null;
       case 'notification':
@@ -300,7 +305,8 @@ class ServiceContainer {
         'connection': _connectionService != null,
         'question_cache': _questionCacheService != null,
         'gemini': _geminiService != null && !_failedServices.contains('gemini'),
-        'star_transaction': _starTransactionService != null && _isServiceInitialized('star_transaction'),
+        'star_transaction': _starTransactionService != null &&
+            _isServiceInitialized('star_transaction'),
         'messaging': _messagingService != null,
         'notification': _notificationService != null,
       },
@@ -315,11 +321,11 @@ class ServiceContainer {
     _connectionService?.dispose();
     _questionCacheService?.dispose();
     _timeTrackingService?.dispose();
-    
+
     // Clear state
     _initializationCompleters.clear();
     _failedServices.clear();
-    
+
     AppLogger.info('Service container disposed');
   }
 }

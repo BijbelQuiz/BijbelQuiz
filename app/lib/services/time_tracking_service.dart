@@ -9,26 +9,26 @@ class TimeTrackingService {
   static const String _sessionStartTimeKey = 'session_start_time';
   static const String _lastSessionDateKey = 'last_session_date';
   static const String _genShownThisPeriodKey = 'gen_shown_this_period';
-  
+
   SharedPreferences? _prefs;
   DateTime? _sessionStartTime;
   int _totalTimeSpent = 0; // in seconds
   Timer? _timer;
   static TimeTrackingService? _instance;
   bool _genShownThisPeriod = false;
-  
+
   TimeTrackingService._privateConstructor();
-  
+
   static TimeTrackingService get instance {
     _instance ??= TimeTrackingService._privateConstructor();
     return _instance!;
   }
-  
+
   Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
     _totalTimeSpent = _prefs?.getInt(_totalTimeKey) ?? 0;
     _loadSessionData();
-    
+
     // Start tracking if we have an active session from before
     if (_sessionStartTime != null) {
       _startTracking();
@@ -41,13 +41,13 @@ class TimeTrackingService {
     if (sessionStartMs != null) {
       _sessionStartTime = DateTime.fromMillisecondsSinceEpoch(sessionStartMs);
     }
-    
+
     // Load last session date to check if it's a new day
     final lastSessionDateStr = _prefs?.getString(_lastSessionDateKey);
     if (lastSessionDateStr != null) {
       // We can use this for daily statistics if needed in the future
     }
-    
+
     // Load whether Gen was shown during the current period
     _genShownThisPeriod = _prefs?.getBool(_genShownThisPeriodKey) ?? false;
   }
@@ -59,27 +59,29 @@ class TimeTrackingService {
       AppLogger.info('Session already active, not starting a new one');
       return;
     }
-    
+
     _sessionStartTime = DateTime.now();
-    _prefs?.setInt(_sessionStartTimeKey, _sessionStartTime!.millisecondsSinceEpoch);
-    
+    _prefs?.setInt(
+        _sessionStartTimeKey, _sessionStartTime!.millisecondsSinceEpoch);
+
     // Update last session date
-    _prefs?.setString(_lastSessionDateKey, DateTime.now().toIso8601String().split('T')[0]);
-    
+    _prefs?.setString(
+        _lastSessionDateKey, DateTime.now().toIso8601String().split('T')[0]);
+
     // Check if we're entering a new Gen period and reset the flag if needed
     _checkAndResetGenShownFlagForNewPeriod();
-    
+
     _startTracking();
     AppLogger.info('Time tracking session started at $_sessionStartTime');
   }
-  
+
   /// Check if we're in a new Gen period and reset the flag if needed
   void _checkAndResetGenShownFlagForNewPeriod() {
     if (_prefs != null) {
       // Get the year associated with the flag from shared preferences
       final lastGenYear = _prefs?.getInt('gen_year') ?? 0;
       final currentGenYear = BijbelQuizGenPeriod.getStatsYear();
-      
+
       // If we're now in a different Gen year, reset the flag
       if (currentGenYear != lastGenYear) {
         _genShownThisPeriod = false;
@@ -95,20 +97,22 @@ class TimeTrackingService {
     if (_sessionStartTime != null) {
       final sessionDuration = DateTime.now().difference(_sessionStartTime!);
       final sessionDurationSeconds = sessionDuration.inSeconds;
-      
+
       // Only add significant session time (ignore sessions less than 10 seconds)
       if (sessionDurationSeconds >= 10) {
         _totalTimeSpent += sessionDurationSeconds;
         _prefs?.setInt(_totalTimeKey, _totalTimeSpent);
-        AppLogger.info('Valid session ended. Added ${sessionDurationSeconds}s. Total time now: $_totalTimeSpent seconds');
+        AppLogger.info(
+            'Valid session ended. Added ${sessionDurationSeconds}s. Total time now: $_totalTimeSpent seconds');
       } else {
-        AppLogger.info('Short session (${sessionDurationSeconds}s) ignored to prevent noise in tracking');
+        AppLogger.info(
+            'Short session (${sessionDurationSeconds}s) ignored to prevent noise in tracking');
       }
-      
+
       // Clear session start time
       _prefs?.remove(_sessionStartTimeKey);
       _sessionStartTime = null;
-      
+
       _stopTracking();
     }
   }
@@ -118,7 +122,8 @@ class TimeTrackingService {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 30), (timer) {
       if (_sessionStartTime != null) {
-        final currentSessionTime = DateTime.now().difference(_sessionStartTime!);
+        final currentSessionTime =
+            DateTime.now().difference(_sessionStartTime!);
         final totalWithCurrent = _totalTimeSpent + currentSessionTime.inSeconds;
         _prefs?.setInt(_totalTimeKey, totalWithCurrent);
       }

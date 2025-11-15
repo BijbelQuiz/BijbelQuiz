@@ -87,7 +87,9 @@ class BibleReference {
     String? fullReference,
     this.context,
   }) : fullReference = fullReference ??
-            (endVerse != null ? '$bookName $chapter:$verse-$endVerse' : '$bookName $chapter:$verse');
+            (endVerse != null
+                ? '$bookName $chapter:$verse-$endVerse'
+                : '$bookName $chapter:$verse');
 
   /// Creates a [BibleReference] from a JSON map.
   ///
@@ -103,7 +105,9 @@ class BibleReference {
           : int.tryParse(json['verse']?.toString() ?? '') ?? 1,
       endVerse: (json['endVerse'] is int)
           ? json['endVerse'] as int
-          : (json['endVerse'] != null ? int.tryParse(json['endVerse'].toString()) : null),
+          : (json['endVerse'] != null
+              ? int.tryParse(json['endVerse'].toString())
+              : null),
       translation: _parseBibleTranslation(json['translation']?.toString()),
       language: json['language']?.toString() ?? 'nl',
       fullReference: json['fullReference']?.toString(),
@@ -151,7 +155,8 @@ class BibleReference {
   }
 
   /// Creates a BibleReference from a formatted string (e.g., "Genesis 1:1-3").
-  factory BibleReference.fromString(String referenceString, {BibleTranslation? translation, String? language}) {
+  factory BibleReference.fromString(String referenceString,
+      {BibleTranslation? translation, String? language}) {
     // Simple parsing logic for common Bible reference formats
     final regex = RegExp(r'(\w+)\s+(\d+):(\d+)(?:-(\d+))?');
     final match = regex.firstMatch(referenceString.trim());
@@ -160,7 +165,8 @@ class BibleReference {
       final book = match.group(1) ?? '';
       final chapter = int.tryParse(match.group(2) ?? '') ?? 1;
       final verse = int.tryParse(match.group(3) ?? '') ?? 1;
-      final endVerse = match.group(4) != null ? int.tryParse(match.group(4)!) : null;
+      final endVerse =
+          match.group(4) != null ? int.tryParse(match.group(4)!) : null;
 
       return BibleReference(
         bookName: book,
@@ -190,7 +196,9 @@ class BibleReference {
   int get verseCount => isVerseRange ? (endVerse! - verse) + 1 : 1;
 
   /// Gets a short display string for this reference.
-  String get shortReference => isVerseRange ? '$bookName $chapter:$verse-$endVerse' : '$bookName $chapter:$verse';
+  String get shortReference => isVerseRange
+      ? '$bookName $chapter:$verse-$endVerse'
+      : '$bookName $chapter:$verse';
 
   /// Gets a formatted string suitable for UI display.
   String get displayString {
@@ -198,7 +206,8 @@ class BibleReference {
     return '$fullReference ($translationName)';
   }
 
-  String _getTranslationDisplayName(BibleTranslation translation, String language) {
+  String _getTranslationDisplayName(
+      BibleTranslation translation, String language) {
     if (language.toLowerCase() == 'nl') {
       switch (translation) {
         case BibleTranslation.statenvertaling:

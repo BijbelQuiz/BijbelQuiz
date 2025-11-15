@@ -22,15 +22,17 @@ class QuestionCardAnimationController {
   QuestionCardAnimationController({
     required TickerProvider vsync,
     PerformanceService? performanceService,
-  }) : _vsync = vsync,
-       _performanceService = performanceService {
+  })  : _vsync = vsync,
+        _performanceService = performanceService {
     _initializeAnimations();
   }
 
   void _initializeAnimations() {
     // Use performance service to get optimal duration if available
     final baseDuration = const Duration(milliseconds: 250);
-    final optimalDuration = _performanceService?.getOptimalAnimationDuration(baseDuration) ?? baseDuration;
+    final optimalDuration =
+        _performanceService?.getOptimalAnimationDuration(baseDuration) ??
+            baseDuration;
 
     _controller = AnimationController(
       duration: optimalDuration,
@@ -65,7 +67,8 @@ class QuestionCardAnimationController {
   // Getters for animations
   Animation<double> get fadeAnimation => _fadeAnimation;
   Animation<Offset> get slideAnimation => _slideAnimation;
-  Animation<double> get answerButtonScaleAnimation => _answerButtonScaleAnimation;
+  Animation<double> get answerButtonScaleAnimation =>
+      _answerButtonScaleAnimation;
 
   // Controller methods
   void forward() => _controller.forward(from: 0.0);
@@ -105,13 +108,15 @@ class QuestionCard extends StatefulWidget {
   State<QuestionCard> createState() => _QuestionCardState();
 }
 
-class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderStateMixin {
+class _QuestionCardState extends State<QuestionCard>
+    with SingleTickerProviderStateMixin {
   late QuestionCardAnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
-    AppLogger.info('QuestionCard initialized for question type: ${widget.question.type}, category: ${widget.question.category}');
+    AppLogger.info(
+        'QuestionCard initialized for question type: ${widget.question.type}, category: ${widget.question.category}');
     _animationController = QuestionCardAnimationController(
       vsync: this,
       performanceService: widget.performanceService,
@@ -133,13 +138,16 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
     _animationController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDesktop = context.isDesktop;
-    final bool isPowerActive = context.watch<GameStatsProvider>().isPowerupActive;
+    final bool isPowerActive =
+        context.watch<GameStatsProvider>().isPowerupActive;
 
-    Widget content = _buildQuestionContent(context, colorScheme, isDesktop, isPowerActive);
+    Widget content =
+        _buildQuestionContent(context, colorScheme, isDesktop, isPowerActive);
 
     return AnimatedBuilder(
       animation: _animationController.fadeAnimation,
@@ -155,9 +163,9 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
       child: content,
     );
   }
-  
-  Widget _buildQuestionContent(BuildContext context, ColorScheme colorScheme, bool isDesktop, bool isPowerActive) {
 
+  Widget _buildQuestionContent(BuildContext context, ColorScheme colorScheme,
+      bool isDesktop, bool isPowerActive) {
     Widget content;
     switch (widget.question.type) {
       case QuestionType.mc:
@@ -181,13 +189,15 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: colorScheme.shadow.withAlpha((0.08 * 255).round()),
+                        color:
+                            colorScheme.shadow.withAlpha((0.08 * 255).round()),
                         blurRadius: 24,
                         offset: const Offset(0, 8),
                         spreadRadius: 0,
                       ),
                       BoxShadow(
-                        color: colorScheme.shadow.withAlpha((0.04 * 255).round()),
+                        color:
+                            colorScheme.shadow.withAlpha((0.04 * 255).round()),
                         blurRadius: 48,
                         offset: const Offset(0, 16),
                         spreadRadius: 0,
@@ -209,27 +219,42 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                         // Responsive question text with better overflow handling
                         ConstrainedBox(
                           constraints: BoxConstraints(
-                            maxHeight: MediaQuery.of(context).size.height * 0.3, // Limit height to 30% of screen
+                            maxHeight: MediaQuery.of(context).size.height *
+                                0.3, // Limit height to 30% of screen
                           ),
                           child: SingleChildScrollView(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4.0),
                               child: Semantics(
                                 label: 'Question: ${widget.question.question}',
                                 child: Text(
                                   widget.question.question,
                                   textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurface,
-                                    height: 1.4,
-                                    letterSpacing: -0.1,
-                                    fontSize: isDesktop
-                                      ? 24
-                                      : MediaQuery.of(context).size.shortestSide < 360 ? 18 : 20,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: colorScheme.onSurface,
+                                        height: 1.4,
+                                        letterSpacing: -0.1,
+                                        fontSize: isDesktop
+                                            ? 24
+                                            : MediaQuery.of(context)
+                                                        .size
+                                                        .shortestSide <
+                                                    360
+                                                ? 18
+                                                : 20,
+                                      ),
                                   overflow: TextOverflow.visible,
-                                  textScaler: TextScaler.linear(MediaQuery.of(context).textScaler.scale(1.0).clamp(0.8, 1.2)), // Limit text scaling
+                                  textScaler: TextScaler.linear(
+                                      MediaQuery.of(context)
+                                          .textScaler
+                                          .scale(1.0)
+                                          .clamp(
+                                              0.8, 1.2)), // Limit text scaling
                                 ),
                               ),
                             ),
@@ -246,25 +271,35 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                               (index) {
                                 AnswerFeedback feedback = AnswerFeedback.none;
                                 if (widget.selectedAnswerIndex != null) {
-                                  if (index == widget.selectedAnswerIndex && index == correctIndex) {
+                                  if (index == widget.selectedAnswerIndex &&
+                                      index == correctIndex) {
                                     feedback = AnswerFeedback.correct;
-                                  } else if (index == widget.selectedAnswerIndex && index != correctIndex) {
+                                  } else if (index ==
+                                          widget.selectedAnswerIndex &&
+                                      index != correctIndex) {
                                     feedback = AnswerFeedback.incorrect;
                                   } else if (index == correctIndex) {
                                     feedback = AnswerFeedback.revealedCorrect;
                                   }
                                 }
                                 return Padding(
-                                  padding: EdgeInsets.only(bottom: isDesktop ? 14.0 : 12.0),
+                                  padding: EdgeInsets.only(
+                                      bottom: isDesktop ? 14.0 : 12.0),
                                   child: AnswerButton(
-                                    onPressed: widget.isAnswering || widget.selectedAnswerIndex != null ? null : () => widget.onAnswerSelected(index),
+                                    onPressed: widget.isAnswering ||
+                                            widget.selectedAnswerIndex != null
+                                        ? null
+                                        : () => widget.onAnswerSelected(index),
                                     feedback: feedback,
                                     label: options[index],
                                     colorScheme: colorScheme,
-                                    letter: widget.customLetters?[index] ?? String.fromCharCode(65 + index),
-                                    isDisabled: widget.isAnswering || widget.selectedAnswerIndex != null,
+                                    letter: widget.customLetters?[index] ??
+                                        String.fromCharCode(65 + index),
+                                    isDisabled: widget.isAnswering ||
+                                        widget.selectedAnswerIndex != null,
                                     isCompact: widget.isCompact,
-                                    externalScaleAnimation: _animationController.answerButtonScaleAnimation,
+                                    externalScaleAnimation: _animationController
+                                        .answerButtonScaleAnimation,
                                   ),
                                 );
                               },
@@ -300,13 +335,15 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: colorScheme.shadow.withAlpha((0.08 * 255).round()),
+                        color:
+                            colorScheme.shadow.withAlpha((0.08 * 255).round()),
                         blurRadius: 24,
                         offset: const Offset(0, 8),
                         spreadRadius: 0,
                       ),
                       BoxShadow(
-                        color: colorScheme.shadow.withAlpha((0.04 * 255).round()),
+                        color:
+                            colorScheme.shadow.withAlpha((0.04 * 255).round()),
                         blurRadius: 48,
                         offset: const Offset(0, 16),
                         spreadRadius: 0,
@@ -327,7 +364,8 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                       children: [
                         // Animated blank in question (like MC question text)
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 12 : 8),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: isDesktop ? 12 : 8),
                           child: _FitbAnimatedBlankRow(
                             question: widget.question,
                             options: options,
@@ -349,25 +387,35 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                               (index) {
                                 AnswerFeedback feedback = AnswerFeedback.none;
                                 if (widget.selectedAnswerIndex != null) {
-                                  if (index == widget.selectedAnswerIndex && index == correctIndex) {
+                                  if (index == widget.selectedAnswerIndex &&
+                                      index == correctIndex) {
                                     feedback = AnswerFeedback.correct;
-                                  } else if (index == widget.selectedAnswerIndex && index != correctIndex) {
+                                  } else if (index ==
+                                          widget.selectedAnswerIndex &&
+                                      index != correctIndex) {
                                     feedback = AnswerFeedback.incorrect;
                                   } else if (index == correctIndex) {
                                     feedback = AnswerFeedback.revealedCorrect;
                                   }
                                 }
                                 return Padding(
-                                  padding: EdgeInsets.only(bottom: isDesktop ? 14.0 : 12.0),
+                                  padding: EdgeInsets.only(
+                                      bottom: isDesktop ? 14.0 : 12.0),
                                   child: AnswerButton(
-                                    onPressed: widget.isAnswering || widget.selectedAnswerIndex != null ? null : () => widget.onAnswerSelected(index),
+                                    onPressed: widget.isAnswering ||
+                                            widget.selectedAnswerIndex != null
+                                        ? null
+                                        : () => widget.onAnswerSelected(index),
                                     feedback: feedback,
                                     label: options[index],
                                     colorScheme: colorScheme,
-                                    letter: widget.customLetters?[index] ?? String.fromCharCode(65 + index),
-                                    isDisabled: widget.isAnswering || widget.selectedAnswerIndex != null,
+                                    letter: widget.customLetters?[index] ??
+                                        String.fromCharCode(65 + index),
+                                    isDisabled: widget.isAnswering ||
+                                        widget.selectedAnswerIndex != null,
                                     isCompact: widget.isCompact,
-                                    externalScaleAnimation: _animationController.answerButtonScaleAnimation,
+                                    externalScaleAnimation: _animationController
+                                        .answerButtonScaleAnimation,
                                   ),
                                 );
                               },
@@ -390,9 +438,14 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
         ];
         // Determine correct index based on the actual correct answer
         final lcCorrect = widget.question.correctAnswer.toLowerCase();
-        final correctIndex = (lcCorrect == 'waar' || lcCorrect == 'true' || lcCorrect == 'goed') ? 0 : 1;
+        final correctIndex =
+            (lcCorrect == 'waar' || lcCorrect == 'true' || lcCorrect == 'goed')
+                ? 0
+                : 1;
         content = Container(
-          margin: EdgeInsets.symmetric(horizontal: context.responsiveHorizontalPadding(isDesktop ? 20 : 16)),
+          margin: EdgeInsets.symmetric(
+              horizontal:
+                  context.responsiveHorizontalPadding(isDesktop ? 20 : 16)),
           child: Column(
             children: [
               Semantics(
@@ -408,13 +461,15 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: colorScheme.shadow.withAlpha((0.08 * 255).round()),
+                        color:
+                            colorScheme.shadow.withAlpha((0.08 * 255).round()),
                         blurRadius: 24,
                         offset: const Offset(0, 8),
                         spreadRadius: 0,
                       ),
                       BoxShadow(
-                        color: colorScheme.shadow.withAlpha((0.04 * 255).round()),
+                        color:
+                            colorScheme.shadow.withAlpha((0.04 * 255).round()),
                         blurRadius: 48,
                         offset: const Offset(0, 16),
                         spreadRadius: 0,
@@ -429,25 +484,35 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                     ],
                   ),
                   child: Padding(
-                    padding: EdgeInsets.all(context.responsiveHorizontalPadding(isDesktop ? 28.0 : 28.0)),
+                    padding: EdgeInsets.all(context
+                        .responsiveHorizontalPadding(isDesktop ? 28.0 : 28.0)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 12 : 8),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: isDesktop ? 12 : 8),
                           child: Semantics(
                             label: 'Question: ${widget.question.question}',
                             child: Text(
                               widget.question.question,
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: colorScheme.onSurface,
-                                height: 1.5,
-                                letterSpacing: -0.2,
-                                fontSize: getResponsiveFontSize(context, 28),
-                              ),
-                              textScaler: TextScaler.linear(MediaQuery.of(context).textScaler.scale(1.0).clamp(0.8, 1.2)), // Limit text scaling
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurface,
+                                    height: 1.5,
+                                    letterSpacing: -0.2,
+                                    fontSize:
+                                        getResponsiveFontSize(context, 28),
+                                  ),
+                              textScaler: TextScaler.linear(
+                                  MediaQuery.of(context)
+                                      .textScaler
+                                      .scale(1.0)
+                                      .clamp(0.8, 1.2)), // Limit text scaling
                             ),
                           ),
                         ),
@@ -460,9 +525,12 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                             children: List.generate(2, (index) {
                               AnswerFeedback feedback = AnswerFeedback.none;
                               if (widget.selectedAnswerIndex != null) {
-                                if (index == widget.selectedAnswerIndex && index == correctIndex) {
+                                if (index == widget.selectedAnswerIndex &&
+                                    index == correctIndex) {
                                   feedback = AnswerFeedback.correct;
-                                } else if (index == widget.selectedAnswerIndex && index != correctIndex) {
+                                } else if (index ==
+                                        widget.selectedAnswerIndex &&
+                                    index != correctIndex) {
                                   feedback = AnswerFeedback.incorrect;
                                 } else if (index == correctIndex) {
                                   feedback = AnswerFeedback.revealedCorrect;
@@ -470,17 +538,24 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
                               }
                               return Expanded(
                                 child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 8.0),
                                   child: AnswerButton(
-                                    onPressed: widget.isAnswering || widget.selectedAnswerIndex != null ? null : () => widget.onAnswerSelected(index),
+                                    onPressed: widget.isAnswering ||
+                                            widget.selectedAnswerIndex != null
+                                        ? null
+                                        : () => widget.onAnswerSelected(index),
                                     feedback: feedback,
                                     label: tfOptions[index],
                                     colorScheme: colorScheme,
-                                    letter: widget.customLetters?[index] ?? String.fromCharCode(65 + index),
+                                    letter: widget.customLetters?[index] ??
+                                        String.fromCharCode(65 + index),
                                     isLarge: true,
-                                    isDisabled: widget.isAnswering || widget.selectedAnswerIndex != null,
+                                    isDisabled: widget.isAnswering ||
+                                        widget.selectedAnswerIndex != null,
                                     isCompact: widget.isCompact,
-                                    externalScaleAnimation: _animationController.answerButtonScaleAnimation,
+                                    externalScaleAnimation: _animationController
+                                        .answerButtonScaleAnimation,
                                   ),
                                 ),
                               );
@@ -501,12 +576,16 @@ class _QuestionCardState extends State<QuestionCard> with SingleTickerProviderSt
 
     if (isDesktop && !widget.isCompact) {
       // All question types support keyboard shortcuts (except in compact multiplayer mode)
-      if (widget.question.type == QuestionType.mc || widget.question.type == QuestionType.fitb || widget.question.type == QuestionType.tf) {
+      if (widget.question.type == QuestionType.mc ||
+          widget.question.type == QuestionType.fitb ||
+          widget.question.type == QuestionType.tf) {
         final options = widget.question.allOptions;
         content = Focus(
           autofocus: true,
           onKeyEvent: (FocusNode node, KeyEvent event) {
-            if (event is KeyDownEvent && !widget.isAnswering && !widget.isTransitioning) {
+            if (event is KeyDownEvent &&
+                !widget.isAnswering &&
+                !widget.isTransitioning) {
               String key = event.logicalKey.keyLabel.toLowerCase();
               if (key == 'a' && options.isNotEmpty) {
                 AppLogger.info('Keyboard answer selected: A (index 0)');
@@ -560,7 +639,8 @@ class _FitbAnimatedBlankRow extends StatefulWidget {
   State<_FitbAnimatedBlankRow> createState() => _FitbAnimatedBlankRowState();
 }
 
-class _FitbAnimatedBlankRowState extends State<_FitbAnimatedBlankRow> with SingleTickerProviderStateMixin {
+class _FitbAnimatedBlankRowState extends State<_FitbAnimatedBlankRow>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<Color?> _colorAnimation;
@@ -569,10 +649,11 @@ class _FitbAnimatedBlankRowState extends State<_FitbAnimatedBlankRow> with Singl
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 250), // Optimized for better responsiveness
+      duration: const Duration(
+          milliseconds: 250), // Optimized for better responsiveness
       vsync: this,
     );
-    
+
     _scaleAnimation = TweenSequence<double>([
       TweenSequenceItem(
         tween: Tween(begin: 1.0, end: 1.1),
@@ -588,7 +669,7 @@ class _FitbAnimatedBlankRowState extends State<_FitbAnimatedBlankRow> with Singl
         curve: Curves.easeInOut,
       ),
     );
-    
+
     _colorAnimation = ColorTween(
       begin: widget.colorScheme.outlineVariant,
       end: const Color(0xFF10B981),
@@ -598,7 +679,7 @@ class _FitbAnimatedBlankRowState extends State<_FitbAnimatedBlankRow> with Singl
         curve: Curves.easeInOut,
       ),
     );
-    
+
     // If we already have a selected answer, run the animation
     if (widget.selectedAnswerIndex != null) {
       _controller.forward();
@@ -628,7 +709,9 @@ class _FitbAnimatedBlankRowState extends State<_FitbAnimatedBlankRow> with Singl
   Widget build(BuildContext context) {
     final blankColor = widget.selectedAnswerIndex == null
         ? widget.colorScheme.outlineVariant
-        : (widget.selectedAnswerIndex != null && widget.options[widget.selectedAnswerIndex!] == widget.question.correctAnswer)
+        : (widget.selectedAnswerIndex != null &&
+                widget.options[widget.selectedAnswerIndex!] ==
+                    widget.question.correctAnswer)
             ? const Color(0xFF10B981)
             : const Color(0xFFEF4444);
     final blankText = widget.selectedAnswerIndex == null
@@ -638,33 +721,32 @@ class _FitbAnimatedBlankRowState extends State<_FitbAnimatedBlankRow> with Singl
     final questionText = widget.question.question;
     final hasEllipsis = questionText.contains('...');
     final hasUnderscore = questionText.contains('_____');
-    
+
     // If using ellipsis, replace them with underscores for consistent processing
-    final processedText = hasEllipsis 
-        ? questionText.replaceAll('...', '_____')
-        : questionText;
-        
+    final processedText =
+        hasEllipsis ? questionText.replaceAll('...', '_____') : questionText;
+
     final questionParts = processedText.split('_____');
     final hasBlank = hasEllipsis || hasUnderscore;
-    
+
     // If no blanks found, just return the question text
     if (!hasBlank) {
       return Text(
         questionText,
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: widget.colorScheme.onSurface,
-          height: 1.5,
-          letterSpacing: -0.2,
-          fontSize: getResponsiveFontSize(context, 24),
-        ),
+              fontWeight: FontWeight.w600,
+              color: widget.colorScheme.onSurface,
+              height: 1.5,
+              letterSpacing: -0.2,
+              fontSize: getResponsiveFontSize(context, 24),
+            ),
       );
     }
 
     // Build a list of widgets for each part of the question
     final List<Widget> children = [];
-    
+
     for (int i = 0; i < questionParts.length; i++) {
       // Add the text part
       if (questionParts[i].isNotEmpty) {
@@ -673,21 +755,22 @@ class _FitbAnimatedBlankRowState extends State<_FitbAnimatedBlankRow> with Singl
             questionParts[i],
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: widget.colorScheme.onSurface,
-              height: 1.5,
-              letterSpacing: -0.2,
-              fontSize: getResponsiveFontSize(context, 24),
-            ),
+                  fontWeight: FontWeight.w600,
+                  color: widget.colorScheme.onSurface,
+                  height: 1.5,
+                  letterSpacing: -0.2,
+                  fontSize: getResponsiveFontSize(context, 24),
+                ),
           ),
         );
       }
-      
+
       // Add the blank if we're not at the last part
       if (i < questionParts.length - 1) {
         children.add(
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250), // Optimized for better responsiveness
+            duration: const Duration(
+                milliseconds: 250), // Optimized for better responsiveness
             switchInCurve: Curves.easeOutBack,
             switchOutCurve: Curves.easeInBack,
             transitionBuilder: (Widget child, Animation<double> animation) {
@@ -704,12 +787,12 @@ class _FitbAnimatedBlankRowState extends State<_FitbAnimatedBlankRow> with Singl
               margin: const EdgeInsets.symmetric(horizontal: 4),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: widget.selectedAnswerIndex != null 
+                color: widget.selectedAnswerIndex != null
                     ? _colorAnimation.value?.withValues(alpha: 0.1)
                     : blankColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: widget.selectedAnswerIndex != null 
+                  color: widget.selectedAnswerIndex != null
                       ? _colorAnimation.value ?? blankColor
                       : blankColor,
                   width: 3,
@@ -717,7 +800,8 @@ class _FitbAnimatedBlankRowState extends State<_FitbAnimatedBlankRow> with Singl
                 boxShadow: widget.selectedAnswerIndex != null
                     ? [
                         BoxShadow(
-                          color: (_colorAnimation.value ?? blankColor).withValues(alpha: 0.3),
+                          color: (_colorAnimation.value ?? blankColor)
+                              .withValues(alpha: 0.3),
                           blurRadius: 8,
                           spreadRadius: 0,
                           offset: const Offset(0, 2),
@@ -734,15 +818,17 @@ class _FitbAnimatedBlankRowState extends State<_FitbAnimatedBlankRow> with Singl
                       i == 0 ? blankText : '______',
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: i == 0 
-                            ? (widget.selectedAnswerIndex != null 
-                                ? blankColor 
-                                : blankColor)
-                            : widget.colorScheme.outlineVariant,
-                        fontSize: getResponsiveFontSize(context, 20), // Slightly reduced font size
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: i == 0
+                                    ? (widget.selectedAnswerIndex != null
+                                        ? blankColor
+                                        : blankColor)
+                                    : widget.colorScheme.outlineVariant,
+                                fontSize: getResponsiveFontSize(
+                                    context, 20), // Slightly reduced font size
+                              ),
                     ),
                   );
                 },
@@ -769,4 +855,4 @@ class _FitbAnimatedBlankRowState extends State<_FitbAnimatedBlankRow> with Singl
       ),
     );
   }
-} 
+}

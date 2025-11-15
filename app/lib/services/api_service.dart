@@ -78,9 +78,12 @@ class ApiService {
 
       final app = shelf_router.Router()
         ..get('/$_apiVersion/health', _handleHealth)
-        ..get('/$_apiVersion/questions', _handleGetQuestions(questionCacheService))
-        ..get('/$_apiVersion/questions/<category>', _handleGetQuestionsByCategory(questionCacheService))
-        ..get('/$_apiVersion/progress', _handleGetProgress(lessonProgressProvider))
+        ..get('/$_apiVersion/questions',
+            _handleGetQuestions(questionCacheService))
+        ..get('/$_apiVersion/questions/<category>',
+            _handleGetQuestionsByCategory(questionCacheService))
+        ..get('/$_apiVersion/progress',
+            _handleGetProgress(lessonProgressProvider))
         ..get('/$_apiVersion/stats', _handleGetStats(gameStatsProvider))
         ..get('/$_apiVersion/settings', _handleGetSettings(settingsProvider))
         ..get('/$_apiVersion/stars/balance', _handleGetStarBalance())
@@ -102,8 +105,10 @@ class ApiService {
       _isRunning = true;
       _startCleanupTimer();
 
-      AppLogger.info('API server started successfully on ${_server!.address.host}:${_server!.port}');
-      AppLogger.info('API server is accessible at http://localhost:$port/$_apiVersion and http://${_server!.address.host}:$port/$_apiVersion');
+      AppLogger.info(
+          'API server started successfully on ${_server!.address.host}:${_server!.port}');
+      AppLogger.info(
+          'API server is accessible at http://localhost:$port/$_apiVersion and http://${_server!.address.host}:$port/$_apiVersion');
     } catch (e) {
       AppLogger.error('Failed to start API server: $e');
       _isRunning = false;
@@ -158,12 +163,16 @@ class ApiService {
         }
 
         if (providedKey == null || providedKey != expectedApiKey) {
-          AppLogger.warning('API authentication failed from ${request.headers['x-forwarded-for'] ?? request.headers['x-real-ip'] ?? 'unknown IP'}');
-          return Response.forbidden(json.encode({
-            'error': 'Invalid or missing API key',
-            'message': 'Please provide a valid API key via Authorization header (Bearer token) or X-API-Key header',
-            'timestamp': DateTime.now().toIso8601String(),
-          }), headers: {'Content-Type': 'application/json'});
+          AppLogger.warning(
+              'API authentication failed from ${request.headers['x-forwarded-for'] ?? request.headers['x-real-ip'] ?? 'unknown IP'}');
+          return Response.forbidden(
+              json.encode({
+                'error': 'Invalid or missing API key',
+                'message':
+                    'Please provide a valid API key via Authorization header (Bearer token) or X-API-Key header',
+                'timestamp': DateTime.now().toIso8601String(),
+              }),
+              headers: {'Content-Type': 'application/json'});
         }
 
         return await innerHandler(request);
@@ -185,7 +194,8 @@ class ApiService {
 
         // Clean up old requests for this IP
         if (_requestLog.containsKey(clientIp)) {
-          _requestLog[clientIp]!.removeWhere((timestamp) => now.difference(timestamp) > _rateLimitWindow);
+          _requestLog[clientIp]!.removeWhere(
+              (timestamp) => now.difference(timestamp) > _rateLimitWindow);
         } else {
           _requestLog[clientIp] = [];
         }
@@ -193,12 +203,15 @@ class ApiService {
         // Check rate limit
         if (_requestLog[clientIp]!.length >= _maxRequestsPerMinute) {
           AppLogger.warning('Rate limit exceeded for IP: $clientIp');
-          return Response(429, body: json.encode({
-            'error': 'Rate limit exceeded',
-            'message': 'Too many requests. Maximum $_maxRequestsPerMinute requests per minute allowed.',
-            'retry_after': _rateLimitWindow.inSeconds,
-            'timestamp': now.toIso8601String(),
-          }), headers: {'Content-Type': 'application/json'});
+          return Response(429,
+              body: json.encode({
+                'error': 'Rate limit exceeded',
+                'message':
+                    'Too many requests. Maximum $_maxRequestsPerMinute requests per minute allowed.',
+                'retry_after': _rateLimitWindow.inSeconds,
+                'timestamp': now.toIso8601String(),
+              }),
+              headers: {'Content-Type': 'application/json'});
         }
 
         // Add current request to log
@@ -233,12 +246,16 @@ class ApiService {
       return (Request request) async {
         // Validate request size (prevent large payloads)
         final contentLength = request.contentLength;
-        if (contentLength != null && contentLength > 1024 * 1024) { // 1MB limit
-          return Response(413, body: json.encode({
-            'error': 'Request too large',
-            'message': 'Request payload exceeds maximum allowed size of 1MB',
-            'timestamp': DateTime.now().toIso8601String(),
-          }), headers: {'Content-Type': 'application/json'});
+        if (contentLength != null && contentLength > 1024 * 1024) {
+          // 1MB limit
+          return Response(413,
+              body: json.encode({
+                'error': 'Request too large',
+                'message':
+                    'Request payload exceeds maximum allowed size of 1MB',
+                'timestamp': DateTime.now().toIso8601String(),
+              }),
+              headers: {'Content-Type': 'application/json'});
         }
 
         return await innerHandler(request);
@@ -252,20 +269,24 @@ class ApiService {
       return (Request request) async {
         final startTime = DateTime.now();
         final clientIp = _getClientIp(request);
-        final userAgent = _sanitizeHeader(request.headers['user-agent'] ?? 'Unknown');
+        final userAgent =
+            _sanitizeHeader(request.headers['user-agent'] ?? 'Unknown');
 
         // Only log non-sensitive information
-        AppLogger.info('API Request: ${request.method} ${request.url.path} from $clientIp (UA: ${userAgent.length > 100 ? '${userAgent.substring(0, 100)}...' : userAgent})');
+        AppLogger.info(
+            'API Request: ${request.method} ${request.url.path} from $clientIp (UA: ${userAgent.length > 100 ? '${userAgent.substring(0, 100)}...' : userAgent})');
 
         try {
           final response = await innerHandler(request);
           final duration = DateTime.now().difference(startTime);
 
-          AppLogger.info('API Response: ${response.statusCode} for ${request.method} ${request.url.path} (${duration.inMilliseconds}ms)');
+          AppLogger.info(
+              'API Response: ${response.statusCode} for ${request.method} ${request.url.path} (${duration.inMilliseconds}ms)');
           return response;
         } catch (e) {
           final duration = DateTime.now().difference(startTime);
-          AppLogger.error('API Error: ${request.method} ${request.url.path} failed after ${duration.inMilliseconds}ms - ${e.toString()}');
+          AppLogger.error(
+              'API Error: ${request.method} ${request.url.path} failed after ${duration.inMilliseconds}ms - ${e.toString()}');
           rethrow;
         }
       };
@@ -276,11 +297,11 @@ class ApiService {
   String _sanitizeHeader(String headerValue) {
     // Remove potential sensitive data from headers
     String sanitized = headerValue;
-    
+
     // Remove API keys, tokens, etc. from headers
     // Sanitize using the centralized AppLogger method
     sanitized = AppLogger.sanitizeLogMessage(sanitized);
-    
+
     return sanitized;
   }
 
@@ -321,7 +342,8 @@ class ApiService {
         return response.change(headers: {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
+          'Access-Control-Allow-Headers':
+              'Content-Type, Authorization, X-API-Key',
           'Access-Control-Max-Age': '86400', // 24 hours
         });
       };
@@ -331,26 +353,31 @@ class ApiService {
   /// Health check endpoint
   Future<Response> _handleHealth(Request request) async {
     try {
-      return Response.ok(json.encode({
-        'status': 'healthy',
-        'timestamp': DateTime.now().toIso8601String(),
-        'service': 'BijbelQuiz API',
-        'version': _apiVersion,
-        'uptime': _isRunning ? 'running' : 'stopped',
-      }), headers: {'Content-Type': 'application/json'});
+      return Response.ok(
+          json.encode({
+            'status': 'healthy',
+            'timestamp': DateTime.now().toIso8601String(),
+            'service': 'BijbelQuiz API',
+            'version': _apiVersion,
+            'uptime': _isRunning ? 'running' : 'stopped',
+          }),
+          headers: {'Content-Type': 'application/json'});
     } catch (e) {
       AppLogger.error('Health check failed: $e');
-      return Response.internalServerError(body: json.encode({
-        'status': 'unhealthy',
-        'timestamp': DateTime.now().toIso8601String(),
-        'error': 'Health check failed',
-        'message': 'An internal error occurred during health check',
-      }), headers: {'Content-Type': 'application/json'});
+      return Response.internalServerError(
+          body: json.encode({
+            'status': 'unhealthy',
+            'timestamp': DateTime.now().toIso8601String(),
+            'error': 'Health check failed',
+            'message': 'An internal error occurred during health check',
+          }),
+          headers: {'Content-Type': 'application/json'});
     }
   }
 
   /// Get questions endpoint
-  Future<Response> Function(Request) _handleGetQuestions(QuestionCacheService questionCacheService) {
+  Future<Response> Function(Request) _handleGetQuestions(
+      QuestionCacheService questionCacheService) {
     return (Request request) async {
       final startTime = DateTime.now();
 
@@ -362,51 +389,62 @@ class ApiService {
         // Validate and parse limit parameter
         final limit = int.tryParse(limitParam);
         if (limit == null || limit < 1 || limit > 50) {
-          return Response.badRequest(body: json.encode({
-            'error': 'Invalid limit parameter',
-            'message': 'Limit must be a number between 1 and 50',
-            'timestamp': DateTime.now().toIso8601String(),
-            'valid_range': '1-50',
-          }), headers: {'Content-Type': 'application/json'});
+          return Response.badRequest(
+              body: json.encode({
+                'error': 'Invalid limit parameter',
+                'message': 'Limit must be a number between 1 and 50',
+                'timestamp': DateTime.now().toIso8601String(),
+                'valid_range': '1-50',
+              }),
+              headers: {'Content-Type': 'application/json'});
         }
 
         // Validate difficulty parameter if provided
         if (difficulty != null && difficulty.isNotEmpty) {
           final validDifficulties = ['1', '2', '3', '4', '5'];
           if (!validDifficulties.contains(difficulty.toLowerCase())) {
-            return Response.badRequest(body: json.encode({
-              'error': 'Invalid difficulty parameter',
-              'message': 'Difficulty must be a number between 1 and 5',
-              'timestamp': DateTime.now().toIso8601String(),
-              'valid_values': validDifficulties,
-            }), headers: {'Content-Type': 'application/json'});
+            return Response.badRequest(
+                body: json.encode({
+                  'error': 'Invalid difficulty parameter',
+                  'message': 'Difficulty must be a number between 1 and 5',
+                  'timestamp': DateTime.now().toIso8601String(),
+                  'valid_values': validDifficulties,
+                }),
+                headers: {'Content-Type': 'application/json'});
           }
         }
 
         List<QuizQuestion> questions;
 
         if (category != null && category.isNotEmpty) {
-          questions = await questionCacheService.getQuestionsByCategory('nl', category, count: limit);
+          questions = await questionCacheService
+              .getQuestionsByCategory('nl', category, count: limit);
         } else {
-          questions = await questionCacheService.getQuestions('nl', count: limit);
+          questions =
+              await questionCacheService.getQuestions('nl', count: limit);
         }
 
         // Filter by difficulty if specified
         if (difficulty != null && difficulty.isNotEmpty) {
-          questions = questions.where((q) => q.difficulty.toLowerCase() == difficulty.toLowerCase()).toList();
+          questions = questions
+              .where(
+                  (q) => q.difficulty.toLowerCase() == difficulty.toLowerCase())
+              .toList();
         }
 
-        final questionsData = questions.map((q) => {
-          'question': q.question,
-          'correctAnswer': q.correctAnswer,
-          'incorrectAnswers': q.incorrectAnswers,
-          'difficulty': q.difficulty,
-          'type': q.type.name,
-          'categories': q.categories,
-          'biblicalReference': q.biblicalReference,
-          'allOptions': q.allOptions,
-          'correctAnswerIndex': q.correctAnswerIndex,
-        }).toList();
+        final questionsData = questions
+            .map((q) => {
+                  'question': q.question,
+                  'correctAnswer': q.correctAnswer,
+                  'incorrectAnswers': q.incorrectAnswers,
+                  'difficulty': q.difficulty,
+                  'type': q.type.name,
+                  'categories': q.categories,
+                  'biblicalReference': q.biblicalReference,
+                  'allOptions': q.allOptions,
+                  'correctAnswerIndex': q.correctAnswerIndex,
+                })
+            .toList();
 
         final response = {
           'questions': questionsData,
@@ -414,37 +452,47 @@ class ApiService {
           'category': category,
           'difficulty': difficulty,
           'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+          'processing_time_ms':
+              DateTime.now().difference(startTime).inMilliseconds,
         };
 
-        AppLogger.info('Questions endpoint: Retrieved ${questions.length} questions in ${DateTime.now().difference(startTime).inMilliseconds}ms');
-        return Response.ok(json.encode(response), headers: {'Content-Type': 'application/json'});
+        AppLogger.info(
+            'Questions endpoint: Retrieved ${questions.length} questions in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(response),
+            headers: {'Content-Type': 'application/json'});
       } catch (e) {
         final duration = DateTime.now().difference(startTime);
-        AppLogger.error('Error in questions endpoint after ${duration.inMilliseconds}ms: $e');
-        return Response.internalServerError(body: json.encode({
-          'error': 'Failed to load questions',
-          'message': 'An internal error occurred while processing your request',
-          'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': duration.inMilliseconds,
-        }), headers: {'Content-Type': 'application/json'});
+        AppLogger.error(
+            'Error in questions endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(
+            body: json.encode({
+              'error': 'Failed to load questions',
+              'message':
+                  'An internal error occurred while processing your request',
+              'timestamp': DateTime.now().toIso8601String(),
+              'processing_time_ms': duration.inMilliseconds,
+            }),
+            headers: {'Content-Type': 'application/json'});
       }
     };
   }
 
   /// Get questions by category endpoint
-  Future<Response> Function(Request) _handleGetQuestionsByCategory(QuestionCacheService questionCacheService) {
+  Future<Response> Function(Request) _handleGetQuestionsByCategory(
+      QuestionCacheService questionCacheService) {
     return (Request request) async {
       final startTime = DateTime.now();
 
       try {
         final category = request.params['category'];
         if (category == null || category.isEmpty) {
-          return Response.badRequest(body: json.encode({
-            'error': 'Missing category parameter',
-            'message': 'Category parameter is required in the URL path',
-            'timestamp': DateTime.now().toIso8601String(),
-          }), headers: {'Content-Type': 'application/json'});
+          return Response.badRequest(
+              body: json.encode({
+                'error': 'Missing category parameter',
+                'message': 'Category parameter is required in the URL path',
+                'timestamp': DateTime.now().toIso8601String(),
+              }),
+              headers: {'Content-Type': 'application/json'});
         }
 
         final limitParam = request.url.queryParameters['limit'] ?? '10';
@@ -453,45 +501,55 @@ class ApiService {
         // Validate and parse limit parameter
         final limit = int.tryParse(limitParam);
         if (limit == null || limit < 1 || limit > 50) {
-          return Response.badRequest(body: json.encode({
-            'error': 'Invalid limit parameter',
-            'message': 'Limit must be a number between 1 and 50',
-            'timestamp': DateTime.now().toIso8601String(),
-            'valid_range': '1-50',
-          }), headers: {'Content-Type': 'application/json'});
+          return Response.badRequest(
+              body: json.encode({
+                'error': 'Invalid limit parameter',
+                'message': 'Limit must be a number between 1 and 50',
+                'timestamp': DateTime.now().toIso8601String(),
+                'valid_range': '1-50',
+              }),
+              headers: {'Content-Type': 'application/json'});
         }
 
         // Validate difficulty parameter if provided
         if (difficulty != null && difficulty.isNotEmpty) {
           final validDifficulties = ['1', '2', '3', '4', '5'];
           if (!validDifficulties.contains(difficulty.toLowerCase())) {
-            return Response.badRequest(body: json.encode({
-              'error': 'Invalid difficulty parameter',
-              'message': 'Difficulty must be a number between 1 and 5',
-              'timestamp': DateTime.now().toIso8601String(),
-              'valid_values': validDifficulties,
-            }), headers: {'Content-Type': 'application/json'});
+            return Response.badRequest(
+                body: json.encode({
+                  'error': 'Invalid difficulty parameter',
+                  'message': 'Difficulty must be a number between 1 and 5',
+                  'timestamp': DateTime.now().toIso8601String(),
+                  'valid_values': validDifficulties,
+                }),
+                headers: {'Content-Type': 'application/json'});
           }
         }
 
-        final questions = await questionCacheService.getQuestionsByCategory('nl', category, count: limit);
+        final questions = await questionCacheService
+            .getQuestionsByCategory('nl', category, count: limit);
 
         // Filter by difficulty if specified
         final filteredQuestions = difficulty != null && difficulty.isNotEmpty
-            ? questions.where((q) => q.difficulty.toLowerCase() == difficulty.toLowerCase()).toList()
+            ? questions
+                .where((q) =>
+                    q.difficulty.toLowerCase() == difficulty.toLowerCase())
+                .toList()
             : questions;
 
-        final questionsData = filteredQuestions.map((q) => {
-          'question': q.question,
-          'correctAnswer': q.correctAnswer,
-          'incorrectAnswers': q.incorrectAnswers,
-          'difficulty': q.difficulty,
-          'type': q.type.name,
-          'categories': q.categories,
-          'biblicalReference': q.biblicalReference,
-          'allOptions': q.allOptions,
-          'correctAnswerIndex': q.correctAnswerIndex,
-        }).toList();
+        final questionsData = filteredQuestions
+            .map((q) => {
+                  'question': q.question,
+                  'correctAnswer': q.correctAnswer,
+                  'incorrectAnswers': q.incorrectAnswers,
+                  'difficulty': q.difficulty,
+                  'type': q.type.name,
+                  'categories': q.categories,
+                  'biblicalReference': q.biblicalReference,
+                  'allOptions': q.allOptions,
+                  'correctAnswerIndex': q.correctAnswerIndex,
+                })
+            .toList();
 
         final response = {
           'questions': questionsData,
@@ -499,26 +557,34 @@ class ApiService {
           'category': category,
           'difficulty': difficulty,
           'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+          'processing_time_ms':
+              DateTime.now().difference(startTime).inMilliseconds,
         };
 
-        AppLogger.info('Questions by category endpoint: Retrieved ${filteredQuestions.length} questions for category "$category" in ${DateTime.now().difference(startTime).inMilliseconds}ms');
-        return Response.ok(json.encode(response), headers: {'Content-Type': 'application/json'});
+        AppLogger.info(
+            'Questions by category endpoint: Retrieved ${filteredQuestions.length} questions for category "$category" in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(response),
+            headers: {'Content-Type': 'application/json'});
       } catch (e) {
         final duration = DateTime.now().difference(startTime);
-        AppLogger.error('Error in questions by category endpoint after ${duration.inMilliseconds}ms: $e');
-        return Response.internalServerError(body: json.encode({
-          'error': 'Failed to load questions for category',
-          'message': 'An internal error occurred while processing your request',
-          'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': duration.inMilliseconds,
-        }), headers: {'Content-Type': 'application/json'});
+        AppLogger.error(
+            'Error in questions by category endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(
+            body: json.encode({
+              'error': 'Failed to load questions for category',
+              'message':
+                  'An internal error occurred while processing your request',
+              'timestamp': DateTime.now().toIso8601String(),
+              'processing_time_ms': duration.inMilliseconds,
+            }),
+            headers: {'Content-Type': 'application/json'});
       }
     };
   }
 
   /// Get user progress endpoint
-  Future<Response> Function(Request) _handleGetProgress(LessonProgressProvider progressProvider) {
+  Future<Response> Function(Request) _handleGetProgress(
+      LessonProgressProvider progressProvider) {
     return (Request request) async {
       final startTime = DateTime.now();
 
@@ -528,26 +594,34 @@ class ApiService {
           'unlockedCount': progressProvider.unlockedCount,
           'bestStarsByLesson': exportData['bestStarsByLesson'],
           'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+          'processing_time_ms':
+              DateTime.now().difference(startTime).inMilliseconds,
         };
 
-        AppLogger.info('Progress endpoint: Retrieved progress data in ${DateTime.now().difference(startTime).inMilliseconds}ms');
-        return Response.ok(json.encode(progressData), headers: {'Content-Type': 'application/json'});
+        AppLogger.info(
+            'Progress endpoint: Retrieved progress data in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(progressData),
+            headers: {'Content-Type': 'application/json'});
       } catch (e) {
         final duration = DateTime.now().difference(startTime);
-        AppLogger.error('Error in progress endpoint after ${duration.inMilliseconds}ms: $e');
-        return Response.internalServerError(body: json.encode({
-          'error': 'Failed to get progress data',
-          'message': 'An internal error occurred while retrieving progress data',
-          'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': duration.inMilliseconds,
-        }), headers: {'Content-Type': 'application/json'});
+        AppLogger.error(
+            'Error in progress endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(
+            body: json.encode({
+              'error': 'Failed to get progress data',
+              'message':
+                  'An internal error occurred while retrieving progress data',
+              'timestamp': DateTime.now().toIso8601String(),
+              'processing_time_ms': duration.inMilliseconds,
+            }),
+            headers: {'Content-Type': 'application/json'});
       }
     };
   }
 
   /// Get game stats endpoint
-  Future<Response> Function(Request) _handleGetStats(GameStatsProvider statsProvider) {
+  Future<Response> Function(Request) _handleGetStats(
+      GameStatsProvider statsProvider) {
     return (Request request) async {
       final startTime = DateTime.now();
 
@@ -558,26 +632,34 @@ class ApiService {
           'longestStreak': statsProvider.longestStreak,
           'incorrectAnswers': statsProvider.incorrectAnswers,
           'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+          'processing_time_ms':
+              DateTime.now().difference(startTime).inMilliseconds,
         };
 
-        AppLogger.info('Stats endpoint: Retrieved stats data in ${DateTime.now().difference(startTime).inMilliseconds}ms');
-        return Response.ok(json.encode(statsData), headers: {'Content-Type': 'application/json'});
+        AppLogger.info(
+            'Stats endpoint: Retrieved stats data in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(statsData),
+            headers: {'Content-Type': 'application/json'});
       } catch (e) {
         final duration = DateTime.now().difference(startTime);
-        AppLogger.error('Error in stats endpoint after ${duration.inMilliseconds}ms: $e');
-        return Response.internalServerError(body: json.encode({
-          'error': 'Failed to get stats data',
-          'message': 'An internal error occurred while retrieving statistics',
-          'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': duration.inMilliseconds,
-        }), headers: {'Content-Type': 'application/json'});
+        AppLogger.error(
+            'Error in stats endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(
+            body: json.encode({
+              'error': 'Failed to get stats data',
+              'message':
+                  'An internal error occurred while retrieving statistics',
+              'timestamp': DateTime.now().toIso8601String(),
+              'processing_time_ms': duration.inMilliseconds,
+            }),
+            headers: {'Content-Type': 'application/json'});
       }
     };
   }
 
   /// Get settings endpoint
-  Future<Response> Function(Request) _handleGetSettings(SettingsProvider settingsProvider) {
+  Future<Response> Function(Request) _handleGetSettings(
+      SettingsProvider settingsProvider) {
     return (Request request) async {
       final startTime = DateTime.now();
 
@@ -589,20 +671,26 @@ class ApiService {
           'analyticsEnabled': settingsProvider.analyticsEnabled,
           'notificationEnabled': settingsProvider.notificationEnabled,
           'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+          'processing_time_ms':
+              DateTime.now().difference(startTime).inMilliseconds,
         };
 
-        AppLogger.info('Settings endpoint: Retrieved settings data in ${DateTime.now().difference(startTime).inMilliseconds}ms');
-        return Response.ok(json.encode(settingsData), headers: {'Content-Type': 'application/json'});
+        AppLogger.info(
+            'Settings endpoint: Retrieved settings data in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(settingsData),
+            headers: {'Content-Type': 'application/json'});
       } catch (e) {
         final duration = DateTime.now().difference(startTime);
-        AppLogger.error('Error in settings endpoint after ${duration.inMilliseconds}ms: $e');
-        return Response.internalServerError(body: json.encode({
-          'error': 'Failed to get settings data',
-          'message': 'An internal error occurred while retrieving settings',
-          'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': duration.inMilliseconds,
-        }), headers: {'Content-Type': 'application/json'});
+        AppLogger.error(
+            'Error in settings endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(
+            body: json.encode({
+              'error': 'Failed to get settings data',
+              'message': 'An internal error occurred while retrieving settings',
+              'timestamp': DateTime.now().toIso8601String(),
+              'processing_time_ms': duration.inMilliseconds,
+            }),
+            headers: {'Content-Type': 'application/json'});
       }
     };
   }
@@ -619,20 +707,27 @@ class ApiService {
         final response = {
           'balance': balance,
           'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+          'processing_time_ms':
+              DateTime.now().difference(startTime).inMilliseconds,
         };
 
-        AppLogger.info('Star balance endpoint: Retrieved balance $balance in ${DateTime.now().difference(startTime).inMilliseconds}ms');
-        return Response.ok(json.encode(response), headers: {'Content-Type': 'application/json'});
+        AppLogger.info(
+            'Star balance endpoint: Retrieved balance $balance in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(response),
+            headers: {'Content-Type': 'application/json'});
       } catch (e) {
         final duration = DateTime.now().difference(startTime);
-        AppLogger.error('Error in star balance endpoint after ${duration.inMilliseconds}ms: $e');
-        return Response.internalServerError(body: json.encode({
-          'error': 'Failed to get star balance',
-          'message': 'An internal error occurred while retrieving star balance',
-          'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': duration.inMilliseconds,
-        }), headers: {'Content-Type': 'application/json'});
+        AppLogger.error(
+            'Error in star balance endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(
+            body: json.encode({
+              'error': 'Failed to get star balance',
+              'message':
+                  'An internal error occurred while retrieving star balance',
+              'timestamp': DateTime.now().toIso8601String(),
+              'processing_time_ms': duration.inMilliseconds,
+            }),
+            headers: {'Content-Type': 'application/json'});
       }
     };
   }
@@ -643,26 +738,31 @@ class ApiService {
       final startTime = DateTime.now();
 
       try {
-        final payload = json.decode(await request.readAsString()) as Map<String, dynamic>;
+        final payload =
+            json.decode(await request.readAsString()) as Map<String, dynamic>;
         final amount = payload['amount'] as int?;
         final reason = payload['reason'] as String?;
         final lessonId = payload['lessonId'] as String?;
 
         // Validate required fields
         if (amount == null || amount <= 0) {
-          return Response.badRequest(body: json.encode({
-            'error': 'Invalid amount',
-            'message': 'Amount must be a positive integer',
-            'timestamp': DateTime.now().toIso8601String(),
-          }), headers: {'Content-Type': 'application/json'});
+          return Response.badRequest(
+              body: json.encode({
+                'error': 'Invalid amount',
+                'message': 'Amount must be a positive integer',
+                'timestamp': DateTime.now().toIso8601String(),
+              }),
+              headers: {'Content-Type': 'application/json'});
         }
 
         if (reason == null || reason.isEmpty) {
-          return Response.badRequest(body: json.encode({
-            'error': 'Invalid reason',
-            'message': 'Reason is required and cannot be empty',
-            'timestamp': DateTime.now().toIso8601String(),
-          }), headers: {'Content-Type': 'application/json'});
+          return Response.badRequest(
+              body: json.encode({
+                'error': 'Invalid reason',
+                'message': 'Reason is required and cannot be empty',
+                'timestamp': DateTime.now().toIso8601String(),
+              }),
+              headers: {'Content-Type': 'application/json'});
         }
 
         final starService = StarTransactionService.instance;
@@ -673,11 +773,13 @@ class ApiService {
         );
 
         if (!success) {
-          return Response.badRequest(body: json.encode({
-            'error': 'Failed to add stars',
-            'message': 'Could not add stars to balance',
-            'timestamp': DateTime.now().toIso8601String(),
-          }), headers: {'Content-Type': 'application/json'});
+          return Response.badRequest(
+              body: json.encode({
+                'error': 'Failed to add stars',
+                'message': 'Could not add stars to balance',
+                'timestamp': DateTime.now().toIso8601String(),
+              }),
+              headers: {'Content-Type': 'application/json'});
         }
 
         final response = {
@@ -686,20 +788,26 @@ class ApiService {
           'amount_added': amount,
           'reason': reason,
           'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+          'processing_time_ms':
+              DateTime.now().difference(startTime).inMilliseconds,
         };
 
-        AppLogger.info('Add stars endpoint: Added $amount stars in ${DateTime.now().difference(startTime).inMilliseconds}ms');
-        return Response.ok(json.encode(response), headers: {'Content-Type': 'application/json'});
+        AppLogger.info(
+            'Add stars endpoint: Added $amount stars in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(response),
+            headers: {'Content-Type': 'application/json'});
       } catch (e) {
         final duration = DateTime.now().difference(startTime);
-        AppLogger.error('Error in add stars endpoint after ${duration.inMilliseconds}ms: $e');
-        return Response.internalServerError(body: json.encode({
-          'error': 'Failed to add stars',
-          'message': 'An internal error occurred while adding stars',
-          'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': duration.inMilliseconds,
-        }), headers: {'Content-Type': 'application/json'});
+        AppLogger.error(
+            'Error in add stars endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(
+            body: json.encode({
+              'error': 'Failed to add stars',
+              'message': 'An internal error occurred while adding stars',
+              'timestamp': DateTime.now().toIso8601String(),
+              'processing_time_ms': duration.inMilliseconds,
+            }),
+            headers: {'Content-Type': 'application/json'});
       }
     };
   }
@@ -710,26 +818,31 @@ class ApiService {
       final startTime = DateTime.now();
 
       try {
-        final payload = json.decode(await request.readAsString()) as Map<String, dynamic>;
+        final payload =
+            json.decode(await request.readAsString()) as Map<String, dynamic>;
         final amount = payload['amount'] as int?;
         final reason = payload['reason'] as String?;
         final lessonId = payload['lessonId'] as String?;
 
         // Validate required fields
         if (amount == null || amount <= 0) {
-          return Response.badRequest(body: json.encode({
-            'error': 'Invalid amount',
-            'message': 'Amount must be a positive integer',
-            'timestamp': DateTime.now().toIso8601String(),
-          }), headers: {'Content-Type': 'application/json'});
+          return Response.badRequest(
+              body: json.encode({
+                'error': 'Invalid amount',
+                'message': 'Amount must be a positive integer',
+                'timestamp': DateTime.now().toIso8601String(),
+              }),
+              headers: {'Content-Type': 'application/json'});
         }
 
         if (reason == null || reason.isEmpty) {
-          return Response.badRequest(body: json.encode({
-            'error': 'Invalid reason',
-            'message': 'Reason is required and cannot be empty',
-            'timestamp': DateTime.now().toIso8601String(),
-          }), headers: {'Content-Type': 'application/json'});
+          return Response.badRequest(
+              body: json.encode({
+                'error': 'Invalid reason',
+                'message': 'Reason is required and cannot be empty',
+                'timestamp': DateTime.now().toIso8601String(),
+              }),
+              headers: {'Content-Type': 'application/json'});
         }
 
         final starService = StarTransactionService.instance;
@@ -740,13 +853,15 @@ class ApiService {
         );
 
         if (!success) {
-          return Response.badRequest(body: json.encode({
-            'error': 'Insufficient stars',
-            'message': 'Not enough stars in balance for this transaction',
-            'current_balance': starService.currentBalance,
-            'requested_amount': amount,
-            'timestamp': DateTime.now().toIso8601String(),
-          }), headers: {'Content-Type': 'application/json'});
+          return Response.badRequest(
+              body: json.encode({
+                'error': 'Insufficient stars',
+                'message': 'Not enough stars in balance for this transaction',
+                'current_balance': starService.currentBalance,
+                'requested_amount': amount,
+                'timestamp': DateTime.now().toIso8601String(),
+              }),
+              headers: {'Content-Type': 'application/json'});
         }
 
         final response = {
@@ -755,20 +870,26 @@ class ApiService {
           'amount_spent': amount,
           'reason': reason,
           'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+          'processing_time_ms':
+              DateTime.now().difference(startTime).inMilliseconds,
         };
 
-        AppLogger.info('Spend stars endpoint: Spent $amount stars in ${DateTime.now().difference(startTime).inMilliseconds}ms');
-        return Response.ok(json.encode(response), headers: {'Content-Type': 'application/json'});
+        AppLogger.info(
+            'Spend stars endpoint: Spent $amount stars in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(response),
+            headers: {'Content-Type': 'application/json'});
       } catch (e) {
         final duration = DateTime.now().difference(startTime);
-        AppLogger.error('Error in spend stars endpoint after ${duration.inMilliseconds}ms: $e');
-        return Response.internalServerError(body: json.encode({
-          'error': 'Failed to spend stars',
-          'message': 'An internal error occurred while spending stars',
-          'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': duration.inMilliseconds,
-        }), headers: {'Content-Type': 'application/json'});
+        AppLogger.error(
+            'Error in spend stars endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(
+            body: json.encode({
+              'error': 'Failed to spend stars',
+              'message': 'An internal error occurred while spending stars',
+              'timestamp': DateTime.now().toIso8601String(),
+              'processing_time_ms': duration.inMilliseconds,
+            }),
+            headers: {'Content-Type': 'application/json'});
       }
     };
   }
@@ -786,21 +907,27 @@ class ApiService {
         // Validate and parse limit parameter
         final limit = int.tryParse(limitParam);
         if (limit == null || limit < 1 || limit > 1000) {
-          return Response.badRequest(body: json.encode({
-            'error': 'Invalid limit parameter',
-            'message': 'Limit must be a number between 1 and 1000',
-            'timestamp': DateTime.now().toIso8601String(),
-            'valid_range': '1-1000',
-          }), headers: {'Content-Type': 'application/json'});
+          return Response.badRequest(
+              body: json.encode({
+                'error': 'Invalid limit parameter',
+                'message': 'Limit must be a number between 1 and 1000',
+                'timestamp': DateTime.now().toIso8601String(),
+                'valid_range': '1-1000',
+              }),
+              headers: {'Content-Type': 'application/json'});
         }
 
         final starService = StarTransactionService.instance;
         List<StarTransaction> transactions;
 
         if (type != null && type.isNotEmpty) {
-          transactions = starService.getTransactionsByType(type).take(limit).toList();
+          transactions =
+              starService.getTransactionsByType(type).take(limit).toList();
         } else if (lessonId != null && lessonId.isNotEmpty) {
-          transactions = starService.getTransactionsForLesson(lessonId).take(limit).toList();
+          transactions = starService
+              .getTransactionsForLesson(lessonId)
+              .take(limit)
+              .toList();
         } else {
           transactions = starService.getRecentTransactions(count: limit);
         }
@@ -813,20 +940,27 @@ class ApiService {
           'type_filter': type,
           'lesson_filter': lessonId,
           'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+          'processing_time_ms':
+              DateTime.now().difference(startTime).inMilliseconds,
         };
 
-        AppLogger.info('Star transactions endpoint: Retrieved ${transactions.length} transactions in ${DateTime.now().difference(startTime).inMilliseconds}ms');
-        return Response.ok(json.encode(response), headers: {'Content-Type': 'application/json'});
+        AppLogger.info(
+            'Star transactions endpoint: Retrieved ${transactions.length} transactions in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(response),
+            headers: {'Content-Type': 'application/json'});
       } catch (e) {
         final duration = DateTime.now().difference(startTime);
-        AppLogger.error('Error in star transactions endpoint after ${duration.inMilliseconds}ms: $e');
-        return Response.internalServerError(body: json.encode({
-          'error': 'Failed to get star transactions',
-          'message': 'An internal error occurred while retrieving star transactions',
-          'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': duration.inMilliseconds,
-        }), headers: {'Content-Type': 'application/json'});
+        AppLogger.error(
+            'Error in star transactions endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(
+            body: json.encode({
+              'error': 'Failed to get star transactions',
+              'message':
+                  'An internal error occurred while retrieving star transactions',
+              'timestamp': DateTime.now().toIso8601String(),
+              'processing_time_ms': duration.inMilliseconds,
+            }),
+            headers: {'Content-Type': 'application/json'});
       }
     };
   }
@@ -843,20 +977,27 @@ class ApiService {
         final response = {
           'stats': stats,
           'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': DateTime.now().difference(startTime).inMilliseconds,
+          'processing_time_ms':
+              DateTime.now().difference(startTime).inMilliseconds,
         };
 
-        AppLogger.info('Star stats endpoint: Retrieved stats in ${DateTime.now().difference(startTime).inMilliseconds}ms');
-        return Response.ok(json.encode(response), headers: {'Content-Type': 'application/json'});
+        AppLogger.info(
+            'Star stats endpoint: Retrieved stats in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+        return Response.ok(json.encode(response),
+            headers: {'Content-Type': 'application/json'});
       } catch (e) {
         final duration = DateTime.now().difference(startTime);
-        AppLogger.error('Error in star stats endpoint after ${duration.inMilliseconds}ms: $e');
-        return Response.internalServerError(body: json.encode({
-          'error': 'Failed to get star statistics',
-          'message': 'An internal error occurred while retrieving star statistics',
-          'timestamp': DateTime.now().toIso8601String(),
-          'processing_time_ms': duration.inMilliseconds,
-        }), headers: {'Content-Type': 'application/json'});
+        AppLogger.error(
+            'Error in star stats endpoint after ${duration.inMilliseconds}ms: $e');
+        return Response.internalServerError(
+            body: json.encode({
+              'error': 'Failed to get star statistics',
+              'message':
+                  'An internal error occurred while retrieving star statistics',
+              'timestamp': DateTime.now().toIso8601String(),
+              'processing_time_ms': duration.inMilliseconds,
+            }),
+            headers: {'Content-Type': 'application/json'});
       }
     };
   }

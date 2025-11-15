@@ -18,7 +18,8 @@ QuestionType _parseQuestionType(String? type) {
 }
 
 /// Parses incorrect answers from JSON data
-List<String> _parseIncorrectAnswers(dynamic rawIncorrect, QuestionType type, String correctAnswer) {
+List<String> _parseIncorrectAnswers(
+    dynamic rawIncorrect, QuestionType type, String correctAnswer) {
   if (rawIncorrect is List && rawIncorrect.isNotEmpty) {
     return rawIncorrect.map((e) => e.toString()).toList();
   }
@@ -99,7 +100,8 @@ class QuizQuestion {
     required this.type,
     this.categories = const [],
     this.biblicalReference,
-  }) : _shuffledOptions = _createShuffledOptions(correctAnswer, incorrectAnswers);
+  }) : _shuffledOptions =
+            _createShuffledOptions(correctAnswer, incorrectAnswers);
 
   /// Creates a [QuizQuestion] from a JSON map.
   ///
@@ -108,7 +110,8 @@ class QuizQuestion {
   factory QuizQuestion.fromJson(Map<String, dynamic> json) {
     final type = _parseQuestionType(json['type']?.toString());
     final correctAnswer = json['juisteAntwoord']?.toString() ?? '';
-    final incorrectAnswers = _parseIncorrectAnswers(json['fouteAntwoorden'], type, correctAnswer);
+    final incorrectAnswers =
+        _parseIncorrectAnswers(json['fouteAntwoorden'], type, correctAnswer);
     final categories = _parseCategories(json['categories']);
     final biblicalReference = json['biblicalReference'] as String?;
     final id = json['id']?.toString() ?? '';
@@ -142,7 +145,8 @@ class QuizQuestion {
   }
 
   /// A private helper method to create a shuffled list of answer options.
-  static List<String> _createShuffledOptions(String correctAnswer, List<String> incorrectAnswers) {
+  static List<String> _createShuffledOptions(
+      String correctAnswer, List<String> incorrectAnswers) {
     final List<String> options = List.from(incorrectAnswers);
     options.add(correctAnswer);
     options.shuffle();
@@ -157,4 +161,4 @@ class QuizQuestion {
 
   /// Returns the primary category (first category) or empty string if none
   String get category => categories.isNotEmpty ? categories.first : '';
-} 
+}

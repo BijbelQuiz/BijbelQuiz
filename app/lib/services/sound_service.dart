@@ -11,7 +11,7 @@ class SoundService {
   SoundService._internal();
   static final SoundService _instance = SoundService._internal();
   factory SoundService() => _instance;
-  
+
   // Check if the current platform is supported by just_audio
   bool _isPlatformSupported() {
     try {
@@ -22,7 +22,8 @@ class SoundService {
 
       // just_audio has limited support on desktop platforms
       // Return false for other unsupported platforms
-      return !(identical(0, 0.0)); // This is a simple way to check if we're in a VM
+      return !(identical(
+          0, 0.0)); // This is a simple way to check if we're in a VM
     } catch (e) {
       return false;
     }
@@ -46,19 +47,21 @@ class SoundService {
   /// Initialize the sound service (idempotent)
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     // Skip initialization on unsupported platforms
     if (!_isPlatformSupported()) {
       _isInitialized = true;
       _isEnabled = false;
       if (Platform.isLinux) {
-        AppLogger.info('SoundService: Linux platform detected. just_audio does not support Linux. Running without sound.');
+        AppLogger.info(
+            'SoundService: Linux platform detected. just_audio does not support Linux. Running without sound.');
       } else {
-        AppLogger.info('SoundService: Platform not supported. Running without sound.');
+        AppLogger.info(
+            'SoundService: Platform not supported. Running without sound.');
       }
       return;
     }
-    
+
     try {
       // Check if the audio plugin is available
       try {
@@ -66,17 +69,21 @@ class SoundService {
         final session = await AudioSession.instance;
         await session.configure(const AudioSessionConfiguration.music());
         await session.setActive(true);
-        
+
         _isInitialized = true;
         AppLogger.info('SoundService initialized (just_audio)');
       } on MissingPluginException {
         // Handle missing plugin (e.g., when running on Linux/Windows)
-        AppLogger.warning('Audio plugin not available on this platform. Running without sound.');
-        _isInitialized = true; // Mark as initialized to prevent repeated attempts
+        AppLogger.warning(
+            'Audio plugin not available on this platform. Running without sound.');
+        _isInitialized =
+            true; // Mark as initialized to prevent repeated attempts
         _isEnabled = false;
       } on PlatformException catch (e) {
-        AppLogger.error('Failed to initialize SoundService (PlatformException)', e);
-        _isInitialized = true; // Mark as initialized to prevent repeated attempts
+        AppLogger.error(
+            'Failed to initialize SoundService (PlatformException)', e);
+        _isInitialized =
+            true; // Mark as initialized to prevent repeated attempts
         _isEnabled = false;
       }
     } catch (e) {
@@ -99,9 +106,11 @@ class SoundService {
     // Check platform support first
     if (!_isPlatformSupported()) {
       if (Platform.isLinux) {
-        AppLogger.info('SoundService: Cannot play sound on Linux (just_audio not supported)');
+        AppLogger.info(
+            'SoundService: Cannot play sound on Linux (just_audio not supported)');
       } else {
-        AppLogger.info('SoundService: Cannot play sound on unsupported platform');
+        AppLogger.info(
+            'SoundService: Cannot play sound on unsupported platform');
       }
       return;
     }
@@ -119,16 +128,16 @@ class SoundService {
         return;
       }
     }
-    
+
     if (!_soundFiles.containsKey(soundName)) {
       AppLogger.warning('Unknown sound: $soundName');
       return;
     }
-    
+
     try {
       final assetPath = _soundFiles[soundName]!;
       AppLogger.info('SoundService: Preparing to play $soundName ($assetPath)');
-      
+
       try {
         // Stop any currently playing sound
         await _audioPlayer.stop();
@@ -136,11 +145,11 @@ class SoundService {
         AppLogger.warning('Error stopping previous sound: $e');
         // Continue with playback even if stop fails
       }
-      
+
       // Set up completion listener
       final completer = Completer<void>();
       late final StreamSubscription sub;
-      
+
       sub = _audioPlayer.playerStateStream.listen(
         (state) {
           if (state.processingState == ProcessingState.completed) {
@@ -164,29 +173,29 @@ class SoundService {
         },
         cancelOnError: true,
       );
-      
+
       // Load the audio file
       await _audioPlayer.setAsset(assetPath);
-      
+
       // Wait for playback to complete or timeout
       AppLogger.info('SoundService: Awaiting completion for $soundName');
       await completer.future.timeout(
         const Duration(seconds: 10),
         onTimeout: () {
-          AppLogger.warning('SoundService: Timeout waiting for $soundName to complete');
+          AppLogger.warning(
+              'SoundService: Timeout waiting for $soundName to complete');
           _audioPlayer.stop();
         },
       );
-      
+
       AppLogger.info('SoundService: Playback complete for $soundName');
-      
+
       // Clean up
       await sub.cancel();
-      
     } catch (e) {
       AppLogger.error('Error playing sound: $soundName', e);
       onError?.call('Failed to play sound: $soundName');
-      
+
       // Try to recover by stopping any ongoing playback
       try {
         await _audioPlayer.stop();
@@ -212,6 +221,7 @@ class SoundService {
 
   /// Play the 'correct' sound
   Future<void> playCorrect() => play('correct');
+
   /// Play the 'incorrect' sound
   Future<void> playIncorrect() => play('incorrect');
 
@@ -237,7 +247,8 @@ class SoundService {
       _isInitialized = false;
       _isEnabled = false;
       if (Platform.isLinux) {
-        AppLogger.info('SoundService: Skipping dispose on Linux (just_audio not supported)');
+        AppLogger.info(
+            'SoundService: Skipping dispose on Linux (just_audio not supported)');
       }
       return;
     }
@@ -254,4 +265,4 @@ class SoundService {
       _isEnabled = false;
     }
   }
-} 
+}

@@ -174,7 +174,7 @@ class BugReportWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return IconButton(
       onPressed: () {
         Navigator.of(context).push(
@@ -243,7 +243,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
           // Change button to green to indicate success
           _isSubmitted = true;
         });
-        
+
         // Automatically reset the button state after 5 seconds
         Future.delayed(const Duration(seconds: 5), () {
           if (mounted) {
@@ -274,8 +274,6 @@ class _BugReportScreenState extends State<BugReportScreen> {
       }
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -338,18 +336,22 @@ class _BugReportScreenState extends State<BugReportScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isSubmitting || _isSubmitted ? null : _submitReport,
+                  onPressed:
+                      _isSubmitting || _isSubmitted ? null : _submitReport,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isSubmitted 
-                      ? Colors.green[600] 
-                      : (isDarkMode ? Colors.red[900] : Colors.red[600]),
+                    backgroundColor: _isSubmitted
+                        ? Colors.green[600]
+                        : (isDarkMode ? Colors.red[900] : Colors.red[600]),
                     foregroundColor: Colors.white,
                   ),
                   child: _isSubmitting
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white)),
                         )
                       : _isSubmitted
                           ? Row(

@@ -17,7 +17,8 @@ class ErrorHandlingTestWidget extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const Text('This screen demonstrates the new error handling system'),
+            const Text(
+                'This screen demonstrates the new error handling system'),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => _testErrorHandling(context),
@@ -38,11 +39,12 @@ class ErrorHandlingTestWidget extends StatelessWidget {
     final error = ErrorHandler().fromException(
       'This is a test network error',
       type: AppErrorType.network,
-      userMessage: 'Could not connect to the server. Please check your internet connection.',
+      userMessage:
+          'Could not connect to the server. Please check your internet connection.',
       errorCode: 'NET_001',
       context: {'screen': 'QuizScreen', 'operation': 'loadQuestions'},
     );
-    
+
     ErrorHandler().showError(context: context, error: error);
   }
 
@@ -54,7 +56,7 @@ class ErrorHandlingTestWidget extends StatelessWidget {
       errorCode: 'STORAGE_002',
       context: {'operation': 'saveProgress'},
     );
-    
+
     ErrorHandler().showErrorDialog(
       context: context,
       error: error,
@@ -71,19 +73,19 @@ void testErrorHandlingSystem() {
     type: AppErrorType.network,
     userMessage: 'Could not connect to the server',
   );
-  
+
   final dataLoadError = ErrorHandler().fromException(
     'Invalid data format',
     type: AppErrorType.dataLoading,
     userMessage: 'Error loading questions',
   );
-  
+
   final storageError = ErrorHandler().fromException(
     'Permission denied',
     type: AppErrorType.storage,
     userMessage: 'Could not save settings',
   );
-  
+
   AppLogger.info('Error handling system test completed. Created errors:');
   AppLogger.info('- Network Error: ${networkError.userMessage}');
   AppLogger.info('- Data Load Error: ${dataLoadError.userMessage}');

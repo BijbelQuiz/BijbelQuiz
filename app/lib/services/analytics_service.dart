@@ -11,7 +11,7 @@ import 'tracking_service.dart';
 /// This service is a singleton and can be accessed using `Provider.of<AnalyticsService>(context)`.
 class AnalyticsService {
   final TrackingService _trackingService = TrackingService();
-  
+
   /// Initializes the in-house tracking service.
   ///
   /// This should be called once when the app starts.
@@ -38,7 +38,8 @@ class AnalyticsService {
 
     // Skip tracking if analytics are disabled in settings
     if (!settings.analyticsEnabled) {
-      AppLogger.info('Analytics disabled in settings, skipping screen tracking for: $screenName');
+      AppLogger.info(
+          'Analytics disabled in settings, skipping screen tracking for: $screenName');
       return;
     }
 
@@ -61,12 +62,14 @@ class AnalyticsService {
   ///
   /// The [eventName] is the name of the event.
   /// The [properties] are any additional data to send with the event.
-  Future<void> capture(BuildContext context, String eventName, {Map<String, Object>? properties}) async {
+  Future<void> capture(BuildContext context, String eventName,
+      {Map<String, Object>? properties}) async {
     final settings = Provider.of<SettingsProvider>(context, listen: false);
 
     // Skip tracking if analytics are disabled in settings
     if (!settings.analyticsEnabled) {
-      AppLogger.info('Analytics disabled in settings, skipping event tracking for: $eventName');
+      AppLogger.info(
+          'Analytics disabled in settings, skipping event tracking for: $eventName');
       return;
     }
 
@@ -76,9 +79,11 @@ class AnalyticsService {
       return;
     }
 
-    AppLogger.info('Tracking event: $eventName${properties != null ? ' with properties: $properties' : ''}');
+    AppLogger.info(
+        'Tracking event: $eventName${properties != null ? ' with properties: $properties' : ''}');
     try {
-      await _trackingService.capture(context, eventName, properties: properties);
+      await _trackingService.capture(context, eventName,
+          properties: properties);
       AppLogger.info('Event tracked successfully: $eventName');
     } catch (e) {
       AppLogger.error('Failed to track event: $eventName', e);
@@ -125,7 +130,9 @@ class AnalyticsService {
 
   /// Enhanced feature usage tracking with standardized features and actions
   /// This is the primary method for tracking which features users interact with
-  Future<void> trackFeatureUsage(BuildContext context, String feature, String action, {Map<String, Object>? additionalProperties}) async {
+  Future<void> trackFeatureUsage(
+      BuildContext context, String feature, String action,
+      {Map<String, Object>? additionalProperties}) async {
     final properties = Map<String, Object>.from(additionalProperties ?? {});
     properties.addAll({
       'feature': feature,
@@ -139,33 +146,45 @@ class AnalyticsService {
   }
 
   /// Track when a user starts using a feature (for engagement metrics)
-  Future<void> trackFeatureStart(BuildContext context, String feature, {Map<String, Object>? additionalProperties}) async {
-    await trackFeatureUsage(context, feature, actionAccessed, additionalProperties: additionalProperties);
+  Future<void> trackFeatureStart(BuildContext context, String feature,
+      {Map<String, Object>? additionalProperties}) async {
+    await trackFeatureUsage(context, feature, actionAccessed,
+        additionalProperties: additionalProperties);
   }
 
   /// Track when a user successfully uses a feature
-  Future<void> trackFeatureSuccess(BuildContext context, String feature, {Map<String, Object>? additionalProperties}) async {
-    await trackFeatureUsage(context, feature, actionUsed, additionalProperties: additionalProperties);
+  Future<void> trackFeatureSuccess(BuildContext context, String feature,
+      {Map<String, Object>? additionalProperties}) async {
+    await trackFeatureUsage(context, feature, actionUsed,
+        additionalProperties: additionalProperties);
   }
 
   /// Track when a user attempts but fails to use a feature
-  Future<void> trackFeatureAttempt(BuildContext context, String feature, {Map<String, Object>? additionalProperties}) async {
-    await trackFeatureUsage(context, feature, actionAttempted, additionalProperties: additionalProperties);
+  Future<void> trackFeatureAttempt(BuildContext context, String feature,
+      {Map<String, Object>? additionalProperties}) async {
+    await trackFeatureUsage(context, feature, actionAttempted,
+        additionalProperties: additionalProperties);
   }
 
   /// Track when a user purchases/unlocks a feature
-  Future<void> trackFeaturePurchase(BuildContext context, String feature, {Map<String, Object>? additionalProperties}) async {
-    await trackFeatureUsage(context, feature, actionPurchased, additionalProperties: additionalProperties);
+  Future<void> trackFeaturePurchase(BuildContext context, String feature,
+      {Map<String, Object>? additionalProperties}) async {
+    await trackFeatureUsage(context, feature, actionPurchased,
+        additionalProperties: additionalProperties);
   }
 
   /// Track when a user completes a feature or flow
-  Future<void> trackFeatureCompletion(BuildContext context, String feature, {Map<String, Object>? additionalProperties}) async {
-    await trackFeatureUsage(context, feature, actionCompleted, additionalProperties: additionalProperties);
+  Future<void> trackFeatureCompletion(BuildContext context, String feature,
+      {Map<String, Object>? additionalProperties}) async {
+    await trackFeatureUsage(context, feature, actionCompleted,
+        additionalProperties: additionalProperties);
   }
 
   /// Track when a user dismisses or cancels a feature
-  Future<void> trackFeatureDismissal(BuildContext context, String feature, {Map<String, Object>? additionalProperties}) async {
-    await trackFeatureUsage(context, feature, actionDismissed, additionalProperties: additionalProperties);
+  Future<void> trackFeatureDismissal(BuildContext context, String feature,
+      {Map<String, Object>? additionalProperties}) async {
+    await trackFeatureUsage(context, feature, actionDismissed,
+        additionalProperties: additionalProperties);
   }
 
   /// Get or create a session ID for tracking user sessions
@@ -186,7 +205,8 @@ class AnalyticsService {
   }
 
   /// Get comprehensive feature usage statistics (for reporting)
-  Future<Map<String, dynamic>> getFeatureUsageStats(BuildContext context) async {
+  Future<Map<String, dynamic>> getFeatureUsageStats(
+      BuildContext context) async {
     return _trackingService.getFeatureUsageStats();
   }
 
@@ -196,7 +216,8 @@ class AnalyticsService {
   }
 
   /// Get feature usage insights for a specific feature
-  Future<Map<String, dynamic>> getFeatureInsights(BuildContext context, String feature) async {
+  Future<Map<String, dynamic>> getFeatureInsights(
+      BuildContext context, String feature) async {
     return _trackingService.getFeatureInsights(feature);
   }
 

@@ -12,9 +12,9 @@ import 'connection_service.dart';
 class QuestionCacheEntry {
   final QuizQuestion question;
   late DateTime accessTime;
-  
+
   QuestionCacheEntry(this.question) : accessTime = DateTime.now();
-  
+
   void touch() {
     accessTime = DateTime.now();
   }
@@ -38,7 +38,7 @@ class QuestionCacheService {
 
   // SIMPLIFIED: Single LRU cache structure instead of multiple tracking structures
   final Map<String, QuestionCacheEntry> _memoryCache = {};
-  
+
   // SIMPLIFIED: Single list for LRU order (keys only)
   final List<String> _lruList = [];
 
@@ -49,10 +49,10 @@ class QuestionCacheService {
   final ConnectionService _connectionService;
 
   QuestionCacheService(this._connectionService);
-  
+
   // Track loading state per language
   final Map<String, Completer<void>> _loadingCompleters = {};
-  
+
   // Track question metadata (simplified - no extra tracking)
   final Map<String, List<Map<String, dynamic>>> _questionMetadata = {};
 
@@ -71,18 +71,18 @@ class QuestionCacheService {
         AppLogger.error('Error in deferred cache clear', e);
       });
       final initDuration = DateTime.now().difference(initStartTime);
-      AppLogger.info('QuestionCacheService initialized in ${initDuration.inMilliseconds}ms');
+      AppLogger.info(
+          'QuestionCacheService initialized in ${initDuration.inMilliseconds}ms');
 
       // Log memory usage after initialization
       final memoryUsage = getMemoryUsage();
-      AppLogger.info('QuestionCacheService memory usage after init: $memoryUsage');
-      
+      AppLogger.info(
+          'QuestionCacheService memory usage after init: $memoryUsage');
     } catch (e) {
       AppLogger.error('Failed to initialize QuestionCacheService', e);
       // Continue without persistent cache if SharedPreferences fails
     }
   }
-  
 
   /// Clear cache if app version has changed
   Future<void> _clearCacheOnAppUpdate() async {
@@ -100,7 +100,6 @@ class QuestionCacheService {
       // Ignore version check errors
     }
   }
-  
 
   /// Get questions for a specific language with lazy loading
   Future<List<QuizQuestion>> getQuestions(
@@ -109,10 +108,10 @@ class QuestionCacheService {
     int? count,
   }) async {
     await initialize();
-    
+
     // Ensure we have metadata loaded first
     await _ensureMetadataLoaded(language);
-    
+
     // Determine the end index
     final int endIndex;
     if (count != null) {
@@ -120,14 +119,14 @@ class QuestionCacheService {
     } else {
       endIndex = _questionMetadata[language]?.length ?? 0;
     }
-    
+
     // Check which questions need to be loaded
     final questionsToLoad = <int>[];
     final loadedQuestions = <QuizQuestion>[];
-    
+
     for (int i = startIndex; i < endIndex; i++) {
       if (i >= (_questionMetadata[language]?.length ?? 0)) break;
-      
+
       final question = _getQuestionFromMemory(language, i);
       if (question != null) {
         loadedQuestions.add(question);
@@ -135,20 +134,20 @@ class QuestionCacheService {
         questionsToLoad.add(i);
       }
     }
-    
+
     // Load any missing questions
     if (questionsToLoad.isNotEmpty) {
       final loaded = await _loadQuestionsByIndices(language, questionsToLoad);
       loadedQuestions.addAll(loaded);
     }
-    
+
     return loadedQuestions;
   }
 
   /// Get a batch of questions for a specific language
   Future<List<QuizQuestion>> getQuestionBatch(
-    String language, 
-    int batchSize, 
+    String language,
+    int batchSize,
     int offset,
   ) async {
     return getQuestions(
@@ -186,15 +185,19 @@ class QuestionCacheService {
         final isOnline = _connectionService.isConnected;
         if (isOnline) {
           metadata = await _loadMetadataFromDatabase(language);
-          AppLogger.info('Loaded ${metadata.length} metadata entries from database for language: $language');
+          AppLogger.info(
+              'Loaded ${metadata.length} metadata entries from database for language: $language');
         } else {
           metadata = await _loadMetadataFromJson(language);
-          AppLogger.info('Loaded ${metadata.length} metadata entries from JSON (offline) for language: $language');
+          AppLogger.info(
+              'Loaded ${metadata.length} metadata entries from JSON (offline) for language: $language');
         }
       } catch (e) {
-        AppLogger.warning('Failed to load metadata from database, falling back to JSON: $e');
+        AppLogger.warning(
+            'Failed to load metadata from database, falling back to JSON: $e');
         metadata = await _loadMetadataFromJson(language);
-        AppLogger.info('Loaded ${metadata.length} metadata entries from JSON (fallback) for language: $language');
+        AppLogger.info(
+            'Loaded ${metadata.length} metadata entries from JSON (fallback) for language: $language');
       }
 
       if (metadata.isEmpty) {
@@ -221,8 +224,7 @@ class QuestionCacheService {
       _loadingCompleters.remove(language);
     }
   }
-  
-  
+
   /// Load specific questions by their indices
   Future<List<QuizQuestion>> _loadQuestionsByIndices(
     String language,
@@ -233,7 +235,8 @@ class QuestionCacheService {
     try {
       // Try to load from cache if available and valid
       if (await _isCacheValid(language)) {
-        final cachedQuestions = await _loadQuestionsFromCache(language, indices);
+        final cachedQuestions =
+            await _loadQuestionsFromCache(language, indices);
         if (cachedQuestions != null) {
           return cachedQuestions;
         }
@@ -244,16 +247,23 @@ class QuestionCacheService {
       try {
         final isOnline = _connectionService.isConnected;
         if (isOnline) {
-          loadedQuestions = await _loadQuestionsFromDatabaseByIndices(language, indices);
-          AppLogger.info('Loaded ${loadedQuestions.length} questions from database for indices: $indices');
+          loadedQuestions =
+              await _loadQuestionsFromDatabaseByIndices(language, indices);
+          AppLogger.info(
+              'Loaded ${loadedQuestions.length} questions from database for indices: $indices');
         } else {
-          loadedQuestions = await _loadQuestionsFromJsonByIndices(language, indices);
-          AppLogger.info('Loaded ${loadedQuestions.length} questions from JSON (offline) for indices: $indices');
+          loadedQuestions =
+              await _loadQuestionsFromJsonByIndices(language, indices);
+          AppLogger.info(
+              'Loaded ${loadedQuestions.length} questions from JSON (offline) for indices: $indices');
         }
       } catch (e) {
-        AppLogger.warning('Failed to load from database, falling back to JSON: $e');
-        loadedQuestions = await _loadQuestionsFromJsonByIndices(language, indices);
-        AppLogger.info('Loaded ${loadedQuestions.length} questions from JSON (fallback) for indices: $indices');
+        AppLogger.warning(
+            'Failed to load from database, falling back to JSON: $e');
+        loadedQuestions =
+            await _loadQuestionsFromJsonByIndices(language, indices);
+        AppLogger.info(
+            'Loaded ${loadedQuestions.length} questions from JSON (fallback) for indices: $indices');
       }
 
       // Add loaded questions to memory cache with LRU tracking
@@ -269,25 +279,25 @@ class QuestionCacheService {
       rethrow;
     }
   }
-  
-  
+
   /// Load questions from offline cache
-  Future<List<QuizQuestion>?> _loadQuestionsFromCache(String language, List<int> indices) async {
+  Future<List<QuizQuestion>?> _loadQuestionsFromCache(
+      String language, List<int> indices) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final cacheKey = '${_cacheKey}_$language';
-      
+
       final cachedData = prefs.getString(cacheKey);
       if (cachedData == null) return null;
-      
+
       final List<dynamic> data = json.decode(cachedData);
       if (data.isEmpty) return null;
-      
+
       final loadedQuestions = <QuizQuestion>[];
-      
+
       for (final index in indices) {
         if (index < 0 || index >= data.length) continue;
-        
+
         try {
           final questionData = data[index] as Map<String, dynamic>;
           final question = QuizQuestion.fromJson(questionData);
@@ -297,7 +307,7 @@ class QuestionCacheService {
           AppLogger.error('Error parsing cached question at index $index', e);
         }
       }
-      
+
       AppLogger.info('Loaded ${loadedQuestions.length} questions from cache');
       return loadedQuestions;
     } catch (e) {
@@ -305,34 +315,34 @@ class QuestionCacheService {
       return null;
     }
   }
-  
-  
+
   /// Check if cached questions are still valid
   Future<bool> _isCacheValid(String language) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final timestampKey = '${_cacheTimestampKey}_$language';
-      
+
       final timestamp = prefs.getInt(timestampKey);
       if (timestamp == null) return false;
-      
+
       final cacheTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
-      final isExpired = DateTime.now().difference(cacheTime) > QuestionCacheConfig.cacheExpiry;
-      
+      final isExpired = DateTime.now().difference(cacheTime) >
+          QuestionCacheConfig.cacheExpiry;
+
       return !isExpired;
     } catch (e) {
       AppLogger.error('Error checking cache validity', e);
       return false;
     }
   }
-  
 
   /// SIMPLIFIED: Add question to memory cache with LRU eviction
   void _addToMemoryCache(String language, int index, QuizQuestion question) {
     final cacheKey = _getQuestionCacheKey(language, index);
 
     // Check if we need to evict oldest entries
-    if (_memoryCache.length >= QuestionCacheConfig.maxMemoryCacheSize && !_memoryCache.containsKey(cacheKey)) {
+    if (_memoryCache.length >= QuestionCacheConfig.maxMemoryCacheSize &&
+        !_memoryCache.containsKey(cacheKey)) {
       _evictOldestEntry();
     }
 
@@ -356,7 +366,7 @@ class QuestionCacheService {
 
     final oldestKey = _lruList.removeAt(0);
     _memoryCache.remove(oldestKey);
-    
+
     AppLogger.debug('Evicted cache entry: $oldestKey');
   }
 
@@ -374,40 +384,41 @@ class QuestionCacheService {
     }
     return null;
   }
-  
-  
+
   /// Generate a unique cache key for a question
   String _getQuestionCacheKey(String language, int index) {
     return '${language}_$index';
   }
 
   /// Public method to load questions by indices (used by ProgressiveQuestionSelector)
-  Future<List<QuizQuestion>> loadQuestionsByIndices(String language, List<int> indices) async {
+  Future<List<QuizQuestion>> loadQuestionsByIndices(
+      String language, List<int> indices) async {
     return _loadQuestionsByIndices(language, indices);
   }
-  
 
   /// Get cached metadata for a language
-  Future<List<Map<String, dynamic>>?> _getCachedMetadata(String language) async {
+  Future<List<Map<String, dynamic>>?> _getCachedMetadata(
+      String language) async {
     if (!_isInitialized) return null;
-    
+
     try {
       final cacheKey = '${_metadataCacheKey}_$language';
       final timestampKey = '${_cacheTimestampKey}_$language';
-      
+
       final cachedData = _prefs.getString(cacheKey);
       final timestamp = _prefs.getInt(timestampKey);
-      
+
       if (cachedData == null || timestamp == null) {
         return null;
       }
-      
+
       // Check if cache is expired
       final cacheTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
-      if (DateTime.now().difference(cacheTime) > QuestionCacheConfig.cacheExpiry) {
+      if (DateTime.now().difference(cacheTime) >
+          QuestionCacheConfig.cacheExpiry) {
         return null;
       }
-      
+
       final List<dynamic> data = json.decode(cachedData);
       return data.cast<Map<String, dynamic>>();
     } catch (e) {
@@ -415,28 +426,27 @@ class QuestionCacheService {
       return null;
     }
   }
-  
+
   /// Cache metadata for a language
   Future<void> _cacheMetadata(
-    String language, 
+    String language,
     List<Map<String, dynamic>> metadata,
   ) async {
     if (!_isInitialized) return;
-    
+
     try {
       final cacheKey = '${_metadataCacheKey}_$language';
       final timestampKey = '${_cacheTimestampKey}_$language';
-      
+
       final jsonData = json.encode(metadata);
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      
+
       await _prefs.setString(cacheKey, jsonData);
       await _prefs.setInt(timestampKey, timestamp);
     } catch (e) {
       AppLogger.error('Error caching metadata', e);
     }
   }
-
 
   /// Clear all cached data
   Future<void> clearCache() async {
@@ -449,10 +459,9 @@ class QuestionCacheService {
 
       // Clear persistent caches
       final keys = _prefs.getKeys().where((key) =>
-        key.startsWith(_cacheKey) ||
-        key.startsWith(_cacheTimestampKey) ||
-        key.startsWith(_metadataCacheKey)
-      );
+          key.startsWith(_cacheKey) ||
+          key.startsWith(_cacheTimestampKey) ||
+          key.startsWith(_metadataCacheKey));
 
       for (final key in keys) {
         await _prefs.remove(key);
@@ -465,14 +474,18 @@ class QuestionCacheService {
   }
 
   /// Load questions from database by indices
-  Future<List<QuizQuestion>> _loadQuestionsFromDatabaseByIndices(String language, List<int> indices) async {
+  Future<List<QuizQuestion>> _loadQuestionsFromDatabaseByIndices(
+      String language, List<int> indices) async {
     try {
       final client = SupabaseConfig.getClient();
-      final ids = indices.map((index) => '000${(index + 1).toString().padLeft(3, '0')}').toList();
+      final ids = indices
+          .map((index) => '000${(index + 1).toString().padLeft(3, '0')}')
+          .toList();
 
       final response = await client
           .from('questions')
-          .select('id, vraag, juiste_antwoord, foute_antwoorden, moeilijkheidsgraad, type, categories, biblical_reference')
+          .select(
+              'id, vraag, juiste_antwoord, foute_antwoorden, moeilijkheidsgraad, type, categories, biblical_reference')
           .inFilter('id', ids);
 
       final questions = <QuizQuestion>[];
@@ -502,8 +515,10 @@ class QuestionCacheService {
   }
 
   /// Load questions from JSON by indices
-  Future<List<QuizQuestion>> _loadQuestionsFromJsonByIndices(String language, List<int> indices) async {
-    final String response = await rootBundle.loadString('assets/questions-nl-sv.json');
+  Future<List<QuizQuestion>> _loadQuestionsFromJsonByIndices(
+      String language, List<int> indices) async {
+    final String response =
+        await rootBundle.loadString('assets/questions-nl-sv.json');
     final List<dynamic> data = json.decode(response) as List;
 
     if (data.isEmpty) {
@@ -528,12 +543,14 @@ class QuestionCacheService {
   }
 
   /// Load metadata from database
-  Future<List<Map<String, dynamic>>> _loadMetadataFromDatabase(String language) async {
+  Future<List<Map<String, dynamic>>> _loadMetadataFromDatabase(
+      String language) async {
     try {
       final client = SupabaseConfig.getClient();
       final response = await client
           .from('questions')
-          .select('id, moeilijkheidsgraad, categories, type, biblical_reference')
+          .select(
+              'id, moeilijkheidsgraad, categories, type, biblical_reference')
           .order('moeilijkheidsgraad');
 
       final metadata = <Map<String, dynamic>>[];
@@ -541,9 +558,12 @@ class QuestionCacheService {
         metadata.add({
           'id': row['id'],
           'difficulty': row['moeilijkheidsgraad']?.toString() ?? '',
-          'categories': (row['categories'] as List<dynamic>?)?.cast<String>() ?? [],
+          'categories':
+              (row['categories'] as List<dynamic>?)?.cast<String>() ?? [],
           'type': row['type']?.toString() ?? 'mc',
-          'biblicalReference': row['biblical_reference'] is String ? row['biblical_reference'] as String : null,
+          'biblicalReference': row['biblical_reference'] is String
+              ? row['biblical_reference'] as String
+              : null,
         });
       }
 
@@ -555,8 +575,10 @@ class QuestionCacheService {
   }
 
   /// Load metadata from JSON
-  Future<List<Map<String, dynamic>>> _loadMetadataFromJson(String language) async {
-    final String response = await rootBundle.loadString('assets/questions-nl-sv.json');
+  Future<List<Map<String, dynamic>>> _loadMetadataFromJson(
+      String language) async {
+    final String response =
+        await rootBundle.loadString('assets/questions-nl-sv.json');
     final List<dynamic> data = json.decode(response);
 
     if (data.isEmpty) {
@@ -569,9 +591,12 @@ class QuestionCacheService {
         return {
           'id': json['id'] ?? '',
           'difficulty': json['moeilijkheidsgraad']?.toString() ?? '',
-          'categories': (json['categories'] as List<dynamic>?)?.cast<String>() ?? [],
+          'categories':
+              (json['categories'] as List<dynamic>?)?.cast<String>() ?? [],
           'type': json['type']?.toString() ?? 'mc',
-          'biblicalReference': json['biblicalReference'] is String ? json['biblicalReference'] as String : null,
+          'biblicalReference': json['biblicalReference'] is String
+              ? json['biblicalReference'] as String
+              : null,
         };
       } catch (e) {
         throw Exception('Invalid question format: $e');
@@ -601,8 +626,8 @@ class QuestionCacheService {
         final question = entry.question;
         totalQuestionSize += question.question.length * 2; // UTF-16 chars
         totalQuestionSize += question.correctAnswer.length * 2;
-        totalQuestionSize += question.incorrectAnswers.fold<int>(
-          0, (sum, ans) => sum + ans.length * 2);
+        totalQuestionSize += question.incorrectAnswers
+            .fold<int>(0, (sum, ans) => sum + ans.length * 2);
       } catch (e) {
         AppLogger.error('Error calculating question size', e);
       }
@@ -626,7 +651,8 @@ class QuestionCacheService {
 
     // Extrapolate metadata size
     if (metadataCount > 10) {
-      totalMetadataSize = (totalMetadataSize * metadataCount) ~/ (metadataCount ~/ 10 + 1);
+      totalMetadataSize =
+          (totalMetadataSize * metadataCount) ~/ (metadataCount ~/ 10 + 1);
     }
 
     return <String, dynamic>{
@@ -634,7 +660,9 @@ class QuestionCacheService {
         'questionCount': questionCount,
         'totalSizeKB': (totalQuestionSize / 1024).toStringAsFixed(2),
         'maxSize': QuestionCacheConfig.maxMemoryCacheSize,
-        'cacheUtilizationPercent': ((questionCount / QuestionCacheConfig.maxMemoryCacheSize) * 100).toStringAsFixed(1),
+        'cacheUtilizationPercent':
+            ((questionCount / QuestionCacheConfig.maxMemoryCacheSize) * 100)
+                .toStringAsFixed(1),
       },
       'metadata': <String, dynamic>{
         'languageCount': _questionMetadata.length,
@@ -650,7 +678,9 @@ class QuestionCacheService {
   /// Clear memory cache if memory usage is too high - simplified eviction
   void optimizeMemoryUsage() {
     final memoryInfo = getMemoryUsage();
-    final cacheUtilization = double.tryParse(memoryInfo['memoryCache']['cacheUtilizationPercent'] as String) ?? 0.0;
+    final cacheUtilization = double.tryParse(
+            memoryInfo['memoryCache']['cacheUtilizationPercent'] as String) ??
+        0.0;
 
     if (cacheUtilization > 90.0) {
       // Clear 30% of the cache to free up memory using simple LRU
@@ -658,7 +688,8 @@ class QuestionCacheService {
       for (int i = 0; i < itemsToRemove && _lruList.isNotEmpty; i++) {
         _evictOldestEntry();
       }
-      AppLogger.info('Optimized memory usage by clearing $itemsToRemove cached questions');
+      AppLogger.info(
+          'Optimized memory usage by clearing $itemsToRemove cached questions');
     }
   }
 
@@ -668,11 +699,14 @@ class QuestionCacheService {
     await _ensureMetadataLoaded(language);
 
     final Map<String, int> counts = {};
-    final metadata = _questionMetadata[language] ?? const <Map<String, dynamic>>[];
+    final metadata =
+        _questionMetadata[language] ?? const <Map<String, dynamic>>[];
     for (int i = 0; i < metadata.length; i++) {
       final item = metadata[i];
       try {
-        final cats = (item['categories'] as List?)?.map((e) => e.toString()).toList() ?? const <String>[];
+        final cats =
+            (item['categories'] as List?)?.map((e) => e.toString()).toList() ??
+                const <String>[];
         for (final c in cats) {
           if (c.isEmpty) continue;
           counts[c] = (counts[c] ?? 0) + 1;
@@ -708,15 +742,20 @@ class QuestionCacheService {
     await _ensureMetadataLoaded(language);
 
     final List<int> indices = [];
-    final metadata = _questionMetadata[language] ?? const <Map<String, dynamic>>[];
+    final metadata =
+        _questionMetadata[language] ?? const <Map<String, dynamic>>[];
     for (int i = 0; i < metadata.length; i++) {
       try {
-        final cats = (metadata[i]['categories'] as List?)?.map((e) => e.toString()).toList() ?? const <String>[];
+        final cats = (metadata[i]['categories'] as List?)
+                ?.map((e) => e.toString())
+                .toList() ??
+            const <String>[];
         if (cats.contains(category)) {
           indices.add(i);
         }
       } catch (e) {
-        AppLogger.error('Error processing metadata at $i for category filter', e);
+        AppLogger.error(
+            'Error processing metadata at $i for category filter', e);
       }
     }
 

@@ -33,16 +33,15 @@ class QuizTimerManager {
     required TickerProvider vsync,
     this.onTimeTick,
     this.onTimeUp,
-  }) : _performanceService = performanceService,
-       _vsync = vsync {
+  })  : _performanceService = performanceService,
+        _vsync = vsync {
     _initializeAnimations();
   }
 
   void _initializeAnimations() {
     // Get optimal durations based on device capabilities
-    final fastDuration = _performanceService.getOptimalAnimationDuration(
-      const Duration(milliseconds: 300)
-    );
+    final fastDuration = _performanceService
+        .getOptimalAnimationDuration(const Duration(milliseconds: 300));
 
     // Initialize animation controller
     _timeAnimationController = AnimationController(
@@ -107,9 +106,8 @@ class QuizTimerManager {
   void restartTimer(BuildContext context, int currentTimeRemaining) {
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     final baseTimerDuration = settings.gameSpeedTimerDuration;
-    final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
-      Duration(seconds: baseTimerDuration)
-    );
+    final optimalTimerDuration = _performanceService
+        .getOptimalTimerDuration(Duration(seconds: baseTimerDuration));
 
     _timer?.cancel();
     _timeAnimationController.duration = optimalTimerDuration;
@@ -128,12 +126,12 @@ class QuizTimerManager {
     });
   }
 
-  void startTimer({required BuildContext context, bool reset = false, int? timeRemaining}) {
+  void startTimer(
+      {required BuildContext context, bool reset = false, int? timeRemaining}) {
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     final baseTimerDuration = settings.gameSpeedTimerDuration;
-    final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
-      Duration(seconds: baseTimerDuration)
-    );
+    final optimalTimerDuration = _performanceService
+        .getOptimalTimerDuration(Duration(seconds: baseTimerDuration));
 
     _timer?.cancel();
     _timeAnimationController.duration = optimalTimerDuration;
@@ -163,7 +161,8 @@ class QuizTimerManager {
       if (_lastActiveTime != null) {
         final timeSinceLastActive = DateTime.now().difference(_lastActiveTime!);
         if (timeSinceLastActive > _gracePeriod) {
-          final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
+          final gameStats =
+              Provider.of<GameStatsProvider>(context, listen: false);
           gameStats.updateStats(isCorrect: false);
           // Trigger animations - handled by caller
         }

@@ -69,8 +69,8 @@ class QuizErrorDisplay extends StatelessWidget {
                     Text(
                       appError.userMessage,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: colorScheme.onErrorContainer,
-                      ),
+                            color: colorScheme.onErrorContainer,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -79,9 +79,11 @@ class QuizErrorDisplay extends StatelessWidget {
                       icon: const Icon(Icons.refresh_rounded),
                       label: Text(strings.AppStrings.tryAgain),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.onErrorContainer.withValues(alpha: 0.2),
+                        backgroundColor:
+                            colorScheme.onErrorContainer.withValues(alpha: 0.2),
                         foregroundColor: colorScheme.onErrorContainer,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
                       ),
                     ),
                   ],

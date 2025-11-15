@@ -10,18 +10,19 @@ import '../utils/automatic_error_reporter.dart';
 
 class BiblicalReferenceDialog extends StatefulWidget {
   final String reference;
-  
+
   const BiblicalReferenceDialog({super.key, required this.reference});
 
   @override
-  State<BiblicalReferenceDialog> createState() => _BiblicalReferenceDialogState();
+  State<BiblicalReferenceDialog> createState() =>
+      _BiblicalReferenceDialogState();
 }
 
 class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
   bool _isLoading = true;
   String _content = '';
   String _error = '';
-  
+
   // Create a secure HTTP client with timeout and validation
   final http.Client _client = http.Client();
 
@@ -30,7 +31,7 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
     super.initState();
     _loadBiblicalReference();
   }
-  
+
   @override
   void dispose() {
     _client.close();
@@ -68,18 +69,21 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
           reference: widget.reference,
           additionalInfo: {
             'book': book,
-            'available_books': BibleBookMapper.getAllBookNames().take(10).join(", "),
+            'available_books':
+                BibleBookMapper.getAllBookNames().take(10).join(", "),
           },
         );
         // Debug: show what book name was received and what valid names are available
         final validBooks = BibleBookMapper.getAllBookNames();
-        throw Exception('Ongeldig boeknaam: "$book". Geldige boeken: ${validBooks.take(10).join(", ")}...');
+        throw Exception(
+            'Ongeldig boeknaam: "$book". Geldige boeken: ${validBooks.take(10).join(", ")}...');
       }
 
       String url;
       if (startVerse != null && endVerse != null) {
         // Multiple verses - format as "startVerse-endVerse"
-        url = '${AppUrls.bibleApiBase}?b=$bookNumber&h=$chapter&v=$startVerse-$endVerse';
+        url =
+            '${AppUrls.bibleApiBase}?b=$bookNumber&h=$chapter&v=$startVerse-$endVerse';
       } else if (startVerse != null) {
         // Single verse
         url = '${AppUrls.bibleApiBase}?b=$bookNumber&h=$chapter&v=$startVerse';
@@ -123,14 +127,16 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
           throw Exception('Time-out bij het laden van de bijbeltekst');
         },
       );
-      
+
       if (response.statusCode == 200) {
         // Validate content type - be more flexible
         final contentType = response.headers['content-type'];
-        if (contentType == null || (!contentType.contains('xml') && !contentType.contains('text'))) {
+        if (contentType == null ||
+            (!contentType.contains('xml') && !contentType.contains('text'))) {
           // Auto-report content type errors
           AutomaticErrorReporter.reportBiblicalReferenceError(
-            message: 'Ongeldig antwoord van de server. Content-Type: $contentType',
+            message:
+                'Ongeldig antwoord van de server. Content-Type: $contentType',
             userMessage: 'Invalid response from biblical text API',
             reference: widget.reference,
             additionalInfo: {
@@ -142,7 +148,8 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
           ).catchError((e) {
             // Don't let reporting errors affect the main functionality
           });
-          throw Exception('Ongeldig antwoord van de server. Content-Type: $contentType. Response: ${response.body.substring(0, 300)}...');
+          throw Exception(
+              'Ongeldig antwoord van de server. Content-Type: $contentType. Response: ${response.body.substring(0, 300)}...');
         }
 
         // Parse XML response
@@ -174,7 +181,8 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
           if (content.isEmpty) {
             final alternativeVerseElements = document.findAllElements('verse');
             for (final verse in alternativeVerseElements) {
-              final verseNumber = verse.getAttribute('name') ?? verse.getAttribute('number');
+              final verseNumber =
+                  verse.getAttribute('name') ?? verse.getAttribute('number');
               final verseText = verse.innerText.trim();
 
               if (verseNumber != null && verseText.isNotEmpty) {
@@ -217,7 +225,8 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
             ).catchError((e) {
               // Don't let reporting errors affect the main functionality
             });
-            throw Exception('Geen tekst gevonden in XML na parsing. XML length: ${response.body.length}, First 300 chars: ${response.body.substring(0, 300)}');
+            throw Exception(
+                'Geen tekst gevonden in XML na parsing. XML length: ${response.body.length}, First 300 chars: ${response.body.substring(0, 300)}');
           }
         } catch (e) {
           // If XML parsing fails, try to extract text directly from response
@@ -241,7 +250,7 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
             throw Exception('XML parsing mislukt en geen tekst gevonden: $e');
           }
         }
-        
+
         if (mounted) {
           setState(() {
             _content = content;
@@ -265,7 +274,8 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
       } else {
         // Report other HTTP errors
         AutomaticErrorReporter.reportBiblicalReferenceError(
-          message: 'Fout bij het laden van de bijbeltekst (status: ${response.statusCode})',
+          message:
+              'Fout bij het laden van de bijbeltekst (status: ${response.statusCode})',
           userMessage: 'HTTP error loading biblical text',
           reference: widget.reference,
           additionalInfo: {
@@ -275,7 +285,8 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
         ).catchError((e) {
           // Don't let reporting errors affect the main functionality
         });
-        throw Exception('Fout bij het laden van de bijbeltekst (status: ${response.statusCode})');
+        throw Exception(
+            'Fout bij het laden van de bijbeltekst (status: ${response.statusCode})');
       }
     } on SocketException {
       // Report network errors
@@ -298,7 +309,8 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
         // Time-out was already handled above, but in case it bubbles up
         if (mounted) {
           setState(() {
-            _error = 'Time-out bij het laden van de bijbeltekst. Probeer het later opnieuw.';
+            _error =
+                'Time-out bij het laden van de bijbeltekst. Probeer het later opnieuw.';
             _isLoading = false;
           });
         }
@@ -341,13 +353,12 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
       }
     }
   }
-  
-  
+
   // Simple text sanitization to prevent XSS
   String _sanitizeText(String text) {
     // First decode Unicode escape sequences
     String decodedText = _decodeUnicodeEscapes(text);
-    
+
     return decodedText
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
@@ -355,7 +366,7 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#x27;');
   }
-  
+
   // Decode Unicode escape sequences like \u00ebl
   String _decodeUnicodeEscapes(String text) {
     final RegExp unicodeRegex = RegExp(r'\u([0-9a-fA-F]{4})');
@@ -366,7 +377,8 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
     });
   }
 
-  void _collectAllElements(xml.XmlElement element, List<xml.XmlElement> collection) {
+  void _collectAllElements(
+      xml.XmlElement element, List<xml.XmlElement> collection) {
     collection.add(element);
     for (final child in element.childElements) {
       _collectAllElements(child, collection);
@@ -513,10 +525,13 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
                       ? Center(
                           child: Text(
                             _error,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.error,
-                              fontSize: 16,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.error,
+                                  fontSize: 16,
+                                ),
                             textAlign: TextAlign.center,
                           ),
                         )
@@ -525,12 +540,16 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
                             padding: const EdgeInsets.all(16),
                             child: Text(
                               _content,
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                fontSize: 16,
-                                height: 1.6,
-                                letterSpacing: 0.2,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.copyWith(
+                                    fontSize: 16,
+                                    height: 1.6,
+                                    letterSpacing: 0.2,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                  ),
                             ),
                           ),
                         ),
@@ -546,7 +565,10 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.08),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .shadow
+                          .withValues(alpha: 0.08),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                       spreadRadius: 0,
@@ -560,11 +582,15 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
                       Navigator.of(context).pop();
                     },
                     borderRadius: BorderRadius.circular(16),
-                    focusColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    focusColor: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.1),
                     child: Container(
                       width: double.infinity,
                       height: 48,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primary,
                         borderRadius: BorderRadius.circular(16),
@@ -576,13 +602,16 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
                       child: Center(
                         child: Text(
                           strings.AppStrings.resumeToGame,
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            height: 1.4,
-                            letterSpacing: 0.1,
-                            fontSize: 16,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                height: 1.4,
+                                letterSpacing: 0.1,
+                                fontSize: 16,
+                              ),
                         ),
                       ),
                     ),

@@ -42,11 +42,11 @@ class StoreItem {
       discountPercentage: json['discount_percentage']?.toInt() ?? 0,
       isActive: json['is_active'] ?? true,
       category: json['category'],
-      discountStart: json['discount_start'] != null 
-          ? DateTime.parse(json['discount_start']) 
+      discountStart: json['discount_start'] != null
+          ? DateTime.parse(json['discount_start'])
           : null,
-      discountEnd: json['discount_end'] != null 
-          ? DateTime.parse(json['discount_end']) 
+      discountEnd: json['discount_end'] != null
+          ? DateTime.parse(json['discount_end'])
           : null,
     );
   }
@@ -78,13 +78,13 @@ class StoreItem {
   /// Checks if the item is currently discounted
   bool get isCurrentlyDiscounted {
     if (!isDiscounted) return false;
-    
+
     // If discount start and end are set, check if we're in the active period
     if (discountStart != null && discountEnd != null) {
       final now = DateTime.now();
       return now.isAfter(discountStart!) && now.isBefore(discountEnd!);
     }
-    
+
     // If no dates are set but discount is active, it's always discounted
     return isDiscounted;
   }

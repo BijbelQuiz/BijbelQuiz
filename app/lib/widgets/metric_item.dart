@@ -63,9 +63,9 @@ class _MetricItemState extends State<MetricItem>
   @override
   Widget build(BuildContext context) {
     final baseStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
-      color: widget.colorScheme.onSurface.withAlpha((0.7 * 255).round()),
-      fontWeight: FontWeight.w500,
-    );
+          color: widget.colorScheme.onSurface.withAlpha((0.7 * 255).round()),
+          fontWeight: FontWeight.w500,
+        );
     int currentValue = int.parse(widget.value);
     final metricColor = widget.color ?? widget.colorScheme.primary;
     final size = MediaQuery.of(context).size;
@@ -85,7 +85,8 @@ class _MetricItemState extends State<MetricItem>
           ),
           decoration: BoxDecoration(
             color: widget.colorScheme.surface,
-            borderRadius: BorderRadius.circular((widget.isSmallPhone ? 10 : 14) * widget.scale),
+            borderRadius: BorderRadius.circular(
+                (widget.isSmallPhone ? 10 : 14) * widget.scale),
             border: Border.all(
               color: widget.highlight
                   ? Colors.deepOrange.withAlpha((0.85 * 255).round())
@@ -118,15 +119,16 @@ class _MetricItemState extends State<MetricItem>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular((widget.isSmallPhone ? 5 : 8) * widget.scale),
+                  borderRadius: BorderRadius.circular(
+                      (widget.isSmallPhone ? 5 : 8) * widget.scale),
                   border: Border.all(
                     color: metricColor.withAlpha((0.2 * 255).round()),
                     width: 1 * widget.scale,
                   ),
                 ),
                 child: Icon(
-                  widget.icon, 
-                  color: metricColor, 
+                  widget.icon,
+                  color: metricColor,
                   size: (widget.isSmallPhone ? 10 : 16) * widget.scale,
                 ),
               ),
@@ -136,16 +138,20 @@ class _MetricItemState extends State<MetricItem>
                 child: AnimatedBuilder(
                   animation: widget.animation,
                   builder: (context, child) {
-                    double animationValue = widget.animation.value.clamp(0.0, 1.0);
-                    if (animationValue >= 1.0 && widget.onAnimationComplete != null) {
+                    double animationValue =
+                        widget.animation.value.clamp(0.0, 1.0);
+                    if (animationValue >= 1.0 &&
+                        widget.onAnimationComplete != null) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         widget.onAnimationComplete?.call();
                       });
                     }
                     return ConstrainedBox(
                       constraints: BoxConstraints(
-                        minWidth: (widget.isSmallPhone ? 20 : 30) * widget.scale,
-                        maxWidth: (widget.isSmallPhone ? 60 : 80) * widget.scale,
+                        minWidth:
+                            (widget.isSmallPhone ? 20 : 30) * widget.scale,
+                        maxWidth:
+                            (widget.isSmallPhone ? 60 : 80) * widget.scale,
                       ),
                       child: SizedBox(
                         height: (widget.isSmallPhone ? 18 : 22) * widget.scale,
@@ -153,45 +159,64 @@ class _MetricItemState extends State<MetricItem>
                           alignment: Alignment.center,
                           children: [
                             Transform.translate(
-                              offset: Offset(0, -16 * widget.scale * animationValue),
+                              offset: Offset(
+                                  0, -16 * widget.scale * animationValue),
                               child: Opacity(
                                 opacity: (1 - animationValue).clamp(0.0, 1.0),
                                 child: Text(
                                   widget.previousValue.toString(),
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    color: (widget.label == 'Time' || widget.label == 'Tijd') && widget.previousValue <= 5 
-                                        ? widget.timeColor 
-                                        : metricColor,
-                                    letterSpacing: -0.3,
-                                    fontSize: (widget.isSmallPhone ? 12 : 16) * widget.scale,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        color: (widget.label == 'Time' ||
+                                                    widget.label == 'Tijd') &&
+                                                widget.previousValue <= 5
+                                            ? widget.timeColor
+                                            : metricColor,
+                                        letterSpacing: -0.3,
+                                        fontSize:
+                                            (widget.isSmallPhone ? 12 : 16) *
+                                                widget.scale,
+                                      ),
                                   overflow: TextOverflow.visible,
                                   maxLines: 1,
                                 ),
                               ),
                             ),
                             Transform.translate(
-                              offset: Offset(0, 16 * widget.scale * (1 - animationValue)),
+                              offset: Offset(
+                                  0, 16 * widget.scale * (1 - animationValue)),
                               child: Opacity(
                                 opacity: animationValue.clamp(0.0, 1.0),
                                 child: AnimatedBuilder(
                                   animation: _pulseController,
                                   builder: (context, child) {
                                     return Transform.scale(
-                                      scale: animationValue > 0.8 && animationValue < 1.0 
-                                          ? _pulseAnimation.value 
+                                      scale: animationValue > 0.8 &&
+                                              animationValue < 1.0
+                                          ? _pulseAnimation.value
                                           : 1.0,
                                       child: Text(
                                         currentValue.toString(),
-                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.w800,
-                                          color: (widget.label == 'Time' || widget.label == 'Tijd') && currentValue <= 5 
-                                              ? widget.timeColor 
-                                              : metricColor,
-                                          letterSpacing: -0.3,
-                                          fontSize: (widget.isSmallPhone ? 12 : 16) * widget.scale,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w800,
+                                              color: (widget.label == 'Time' ||
+                                                          widget.label ==
+                                                              'Tijd') &&
+                                                      currentValue <= 5
+                                                  ? widget.timeColor
+                                                  : metricColor,
+                                              letterSpacing: -0.3,
+                                              fontSize: (widget.isSmallPhone
+                                                      ? 12
+                                                      : 16) *
+                                                  widget.scale,
+                                            ),
                                         overflow: TextOverflow.visible,
                                         maxLines: 1,
                                       ),
@@ -262,8 +287,8 @@ class _MetricItemState extends State<MetricItem>
                 ),
               ),
               child: Icon(
-                widget.icon, 
-                color: metricColor, 
+                widget.icon,
+                color: metricColor,
                 size: (isDesktop ? 20 : 16) * widget.scale,
               ),
             ),
@@ -275,7 +300,8 @@ class _MetricItemState extends State<MetricItem>
               animation: widget.animation,
               builder: (context, child) {
                 double animationValue = widget.animation.value.clamp(0.0, 1.0);
-                if (animationValue >= 1.0 && widget.onAnimationComplete != null) {
+                if (animationValue >= 1.0 &&
+                    widget.onAnimationComplete != null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     widget.onAnimationComplete?.call();
                   });
@@ -286,43 +312,62 @@ class _MetricItemState extends State<MetricItem>
                     alignment: Alignment.center,
                     children: [
                       Transform.translate(
-                        offset: Offset(0, -((isDesktop ? 22 : 16) * widget.scale) * animationValue),
+                        offset: Offset(
+                            0,
+                            -((isDesktop ? 22 : 16) * widget.scale) *
+                                animationValue),
                         child: Opacity(
                           opacity: (1 - animationValue).clamp(0.0, 1.0),
                           child: Text(
                             widget.previousValue.toString(),
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: (widget.label == 'Time' || widget.label == 'Tijd') && widget.previousValue <= 5 
-                                  ? widget.timeColor 
-                                  : metricColor,
-                              letterSpacing: -0.3,
-                              fontSize: (isDesktop ? 20 : 16) * widget.scale,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: (widget.label == 'Time' ||
+                                              widget.label == 'Tijd') &&
+                                          widget.previousValue <= 5
+                                      ? widget.timeColor
+                                      : metricColor,
+                                  letterSpacing: -0.3,
+                                  fontSize:
+                                      (isDesktop ? 20 : 16) * widget.scale,
+                                ),
                           ),
                         ),
                       ),
                       Transform.translate(
-                        offset: Offset(0, ((isDesktop ? 22 : 16) * widget.scale) * (1 - animationValue)),
+                        offset: Offset(
+                            0,
+                            ((isDesktop ? 22 : 16) * widget.scale) *
+                                (1 - animationValue)),
                         child: Opacity(
                           opacity: animationValue.clamp(0.0, 1.0),
                           child: AnimatedBuilder(
                             animation: _pulseController,
                             builder: (context, child) {
                               return Transform.scale(
-                                scale: animationValue > 0.8 && animationValue < 1.0 
-                                    ? _pulseAnimation.value 
-                                    : 1.0,
+                                scale:
+                                    animationValue > 0.8 && animationValue < 1.0
+                                        ? _pulseAnimation.value
+                                        : 1.0,
                                 child: Text(
                                   currentValue.toString(),
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    color: (widget.label == 'Time' || widget.label == 'Tijd') && currentValue <= 5 
-                                        ? widget.timeColor 
-                                        : metricColor,
-                                    letterSpacing: -0.3,
-                                    fontSize: (isDesktop ? 20 : 16) * widget.scale,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        color: (widget.label == 'Time' ||
+                                                    widget.label == 'Tijd') &&
+                                                currentValue <= 5
+                                            ? widget.timeColor
+                                            : metricColor,
+                                        letterSpacing: -0.3,
+                                        fontSize: (isDesktop ? 20 : 16) *
+                                            widget.scale,
+                                      ),
                                 ),
                               );
                             },
@@ -354,16 +399,19 @@ class _MetricItemState extends State<MetricItem>
     return content;
   }
 
-  void _showMetricPopup(BuildContext context, int currentValue, Color metricColor) {
+  void _showMetricPopup(
+      BuildContext context, int currentValue, Color metricColor) {
     final RenderBox renderBox = context.findRenderObject() as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero);
-    
+
     OverlayEntry? overlayEntry;
-    
+
     overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
         left: position.dx, // Position at the same x as the icon
-        top: position.dy + renderBox.size.height + 8, // Position below the icon with 8px gap
+        top: position.dy +
+            renderBox.size.height +
+            8, // Position below the icon with 8px gap
         child: Material(
           color: Colors.transparent,
           child: Container(
@@ -386,21 +434,21 @@ class _MetricItemState extends State<MetricItem>
             child: Text(
               widget.label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 12,
-              ),
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 12,
+                  ),
             ),
           ),
         ),
       ),
     );
-    
+
     Overlay.of(context).insert(overlayEntry);
-    
+
     // Auto-remove after 2 seconds
     Future.delayed(const Duration(seconds: 2), () {
       overlayEntry?.remove();
     });
   }
-} 
+}

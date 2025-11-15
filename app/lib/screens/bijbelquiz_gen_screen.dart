@@ -69,13 +69,13 @@ class _AnimatedCounterState extends State<AnimatedCounter>
         begin: _currentValue,
         end: widget.endNumber.toDouble(),
       ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-      
+
       _animation.addListener(() {
         setState(() {
           _currentValue = _animation.value;
         });
       });
-      
+
       _controller.forward();
     }
   }
@@ -92,7 +92,8 @@ class _AnimatedCounterState extends State<AnimatedCounter>
     if (widget.decimalPlaces == 0) {
       displayValue = '${widget.prefix}${_currentValue.toInt()}${widget.suffix}';
     } else {
-      displayValue = '${widget.prefix}${_currentValue.toStringAsFixed(widget.decimalPlaces)}${widget.suffix}';
+      displayValue =
+          '${widget.prefix}${_currentValue.toStringAsFixed(widget.decimalPlaces)}${widget.suffix}';
     }
 
     return Text(
@@ -536,32 +537,34 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
             ),
             child: Column(
               children: [
-                _buildStatRow(context, 
-                  AnimatedCounter(
-                    endNumber: gameStats.score,
-                    duration: const Duration(milliseconds: 1500),
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                _buildStatRow(
+                    context,
+                    AnimatedCounter(
+                      endNumber: gameStats.score,
+                      duration: const Duration(milliseconds: 1500),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                     ),
-                  ),
-                  strings.AppStrings.correctAnswers, 
-                  Colors.black
-                ),
+                    strings.AppStrings.correctAnswers,
+                    Colors.black),
                 const Divider(height: 16, thickness: 1),
-                _buildStatRow(context, 
-                  AnimatedCounter(
-                    endNumber: correctPercentage,
-                    duration: const Duration(milliseconds: 1500),
-                    suffix: '%',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                _buildStatRow(
+                    context,
+                    AnimatedCounter(
+                      endNumber: correctPercentage,
+                      duration: const Duration(milliseconds: 1500),
+                      suffix: '%',
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                     ),
-                  ),
-                  strings.AppStrings.accuracy, 
-                  Colors.black
-                ),
+                    strings.AppStrings.accuracy,
+                    Colors.black),
                 const Divider(height: 16, thickness: 1),
                 _buildStatRow(
                     context,
@@ -570,26 +573,28 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
                       duration: const Duration(milliseconds: 1500),
                       decimalPlaces: 1,
                       suffix: ' ${strings.AppStrings.hours}',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                     ),
                     strings.AppStrings.hours,
                     Colors.black),
                 const Divider(height: 16, thickness: 1),
-                _buildStatRow(context,
-                  AnimatedCounter(
-                    endNumber: gameStats.currentStreak,
-                    duration: const Duration(milliseconds: 1500),
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                _buildStatRow(
+                    context,
+                    AnimatedCounter(
+                      endNumber: gameStats.currentStreak,
+                      duration: const Duration(milliseconds: 1500),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                     ),
-                  ),
-                  strings.AppStrings.currentStreak, 
-                  Colors.black
-                ),
+                    strings.AppStrings.currentStreak,
+                    Colors.black),
               ],
             ),
           ),
@@ -616,7 +621,8 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
                     color: Colors.black,
                     width: 2,
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
               ),
               OutlinedButton.icon(
@@ -638,7 +644,8 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
                     color: Colors.black,
                     width: 2,
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
               ),
             ],
@@ -762,7 +769,8 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
   }
 
   // Method to encode user stats into a shareable URL
-  String _encodeStatsToUrl(GameStatsProvider gameStats, TimeTrackingService timeTracking) {
+  String _encodeStatsToUrl(
+      GameStatsProvider gameStats, TimeTrackingService timeTracking) {
     final totalQuestions = gameStats.score + gameStats.incorrectAnswers;
     final correctPercentage = totalQuestions > 0
         ? (gameStats.score / totalQuestions * 100).round()
@@ -770,7 +778,7 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
 
     // Create a base URL (you may want to use your actual domain)
     final baseUrl = 'https://bijbelquiz.app/gen.html';
-    
+
     // Encode stats as query parameters
     final encodedStats = {
       'score': gameStats.score.toString(),
@@ -784,20 +792,23 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
 
     // Build query string
     final queryString = encodedStats.entries
-        .map((entry) => '${Uri.encodeComponent(entry.key)}=${Uri.encodeComponent(entry.value)}')
+        .map((entry) =>
+            '${Uri.encodeComponent(entry.key)}=${Uri.encodeComponent(entry.value)}')
         .join('&');
 
     return '$baseUrl?$queryString';
   }
 
   // Method to handle sharing stats
-  void _shareStats(BuildContext context, GameStatsProvider gameStats, TimeTrackingService timeTracking) async {
+  void _shareStats(BuildContext context, GameStatsProvider gameStats,
+      TimeTrackingService timeTracking) async {
     final totalQuestions = gameStats.score + gameStats.incorrectAnswers;
     final correctPercentage = totalQuestions > 0
         ? (gameStats.score / totalQuestions * 100).round()
         : 0;
 
-    final shareText = '''Dit is mijn BijbelQuiz Gen van ${BijbelQuizGenPeriod.getStatsYear()}:
+    final shareText =
+        '''Dit is mijn BijbelQuiz Gen van ${BijbelQuizGenPeriod.getStatsYear()}:
 ✅ ${strings.AppStrings.correctAnswersShare}: ${gameStats.score}
 🎯 ${strings.AppStrings.currentStreakShare}: ${gameStats.currentStreak}
 🔥 ${strings.AppStrings.bestStreakShare}: ${gameStats.longestStreak}
@@ -812,12 +823,13 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
   }
 
   // Method to copy the stats link to clipboard
-  void _copyLink(BuildContext context, GameStatsProvider gameStats, TimeTrackingService timeTracking) async {
+  void _copyLink(BuildContext context, GameStatsProvider gameStats,
+      TimeTrackingService timeTracking) async {
     final shareUrl = _encodeStatsToUrl(gameStats, timeTracking);
-    
+
     // Copy the URL to clipboard
     await Clipboard.setData(ClipboardData(text: shareUrl));
-    
+
     // Show a snackbar to indicate the URL has been copied
     final localContext = context;
     if (localContext.mounted) {

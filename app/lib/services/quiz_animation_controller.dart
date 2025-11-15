@@ -18,16 +18,15 @@ class QuizAnimationController {
   QuizAnimationController({
     required PerformanceService performanceService,
     required TickerProvider vsync,
-  }) : _performanceService = performanceService,
+  })  : _performanceService = performanceService,
         _vsync = vsync {
     _initializeAnimations();
   }
 
   void _initializeAnimations() {
     // Get optimal durations based on device capabilities
-    final optimalDuration = _performanceService.getOptimalAnimationDuration(
-      const Duration(milliseconds: 800)
-    );
+    final optimalDuration = _performanceService
+        .getOptimalAnimationDuration(const Duration(milliseconds: 800));
 
     // Initialize single animation controller
     _statsAnimationController = AnimationController(
@@ -43,21 +42,24 @@ class QuizAnimationController {
     _scoreAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _statsAnimationController,
-        curve: Interval(0.0, 0.6, curve: animationCurve), // First 60% of animation
+        curve:
+            Interval(0.0, 0.6, curve: animationCurve), // First 60% of animation
       ),
     );
 
     _streakAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _statsAnimationController,
-        curve: Interval(0.2, 0.8, curve: animationCurve), // 20% offset, 60% duration
+        curve: Interval(0.2, 0.8,
+            curve: animationCurve), // 20% offset, 60% duration
       ),
     );
 
     _longestStreakAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _statsAnimationController,
-        curve: Interval(0.4, 1.0, curve: animationCurve), // 40% offset, 60% duration
+        curve: Interval(0.4, 1.0,
+            curve: animationCurve), // 40% offset, 60% duration
       ),
     );
 

@@ -10,19 +10,24 @@ class StatsShareScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Extract stats from the URL parameters
     final int score = int.tryParse(statsData['score'] ?? '0') ?? 0;
-    final int currentStreak = int.tryParse(statsData['currentStreak'] ?? '0') ?? 0;
-    final int longestStreak = int.tryParse(statsData['longestStreak'] ?? '0') ?? 0;
+    final int currentStreak =
+        int.tryParse(statsData['currentStreak'] ?? '0') ?? 0;
+    final int longestStreak =
+        int.tryParse(statsData['longestStreak'] ?? '0') ?? 0;
     final int incorrect = int.tryParse(statsData['incorrect'] ?? '0') ?? 0;
-    final int totalQuestions = int.tryParse(statsData['totalQuestions'] ?? '0') ?? 0;
+    final int totalQuestions =
+        int.tryParse(statsData['totalQuestions'] ?? '0') ?? 0;
     final int accuracy = int.tryParse(statsData['accuracy'] ?? '0') ?? 0;
-    final double hoursSpent = double.tryParse(statsData['hoursSpent'] ?? '0.0') ?? 0.0;
-    
+    final double hoursSpent =
+        double.tryParse(statsData['hoursSpent'] ?? '0.0') ?? 0.0;
+
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Gedeelde Statistieken'),
-        backgroundColor: Colors.amber.shade200, // Similar to year-in-review page color
+        backgroundColor:
+            Colors.amber.shade200, // Similar to year-in-review page color
         foregroundColor: Colors.black,
       ),
       body: Container(
@@ -199,7 +204,8 @@ class StatsShareScreen extends StatelessWidget {
                     color: Colors.black,
                     width: 2,
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 ),
               ),
             ],

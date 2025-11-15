@@ -18,7 +18,8 @@ class ThemeManager {
     AppLogger.info('Initializing theme manager...');
     try {
       await _loadThemesFromJson();
-      AppLogger.info('Theme manager initialized successfully with ${_themeConfiguration?.themes.length ?? 0} themes');
+      AppLogger.info(
+          'Theme manager initialized successfully with ${_themeConfiguration?.themes.length ?? 0} themes');
     } catch (e) {
       AppLogger.error('Failed to initialize theme manager', e);
       // Fallback to empty configuration
@@ -29,14 +30,16 @@ class ThemeManager {
   /// Loads themes from the JSON file
   Future<void> _loadThemesFromJson() async {
     try {
-      final String jsonString = await rootBundle.loadString('assets/themes/themes.json');
+      final String jsonString =
+          await rootBundle.loadString('assets/themes/themes.json');
       final Map<String, dynamic> json = jsonDecode(jsonString);
       _themeConfiguration = ThemeConfiguration.fromJson(json);
-      
+
       // Clear cache to rebuild themes with new configuration
       _themeDataCache = null;
-      
-      AppLogger.info('Loaded themes from JSON: ${_themeConfiguration?.themes.keys.join(', ')}');
+
+      AppLogger.info(
+          'Loaded themes from JSON: ${_themeConfiguration?.themes.keys.join(', ')}');
     } catch (e) {
       AppLogger.error('Failed to load themes from JSON', e);
       rethrow;
@@ -63,8 +66,9 @@ class ThemeManager {
 
     // Parse colors from hex strings
     final colorScheme = _buildColorScheme(themeDef, brightness);
-    final scaffoldBackgroundColor = _parseColor(themeDef.colors['scaffoldBackgroundColor']) ?? 
-        (isDark ? Colors.grey[900] : Colors.grey[50]);
+    final scaffoldBackgroundColor =
+        _parseColor(themeDef.colors['scaffoldBackgroundColor']) ??
+            (isDark ? Colors.grey[900] : Colors.grey[50]);
 
     // Build text theme
     final textTheme = _buildTextTheme(brightness, themeDef.textStyles);
@@ -78,85 +82,96 @@ class ThemeManager {
       elevatedButtonTheme: _buildButtonTheme(themeDef.buttonStyles),
       cardTheme: _buildCardTheme(themeDef.cardStyles),
       appBarTheme: _buildAppBarTheme(themeDef.appBarStyles),
-      pageTransitionsTheme: _buildPageTransitionsTheme(themeDef.pageTransitions),
+      pageTransitionsTheme:
+          _buildPageTransitionsTheme(themeDef.pageTransitions),
     );
   }
 
   /// Builds ColorScheme from theme definition
-  ColorScheme _buildColorScheme(ThemeDefinition themeDef, Brightness brightness) {
-    final seedColor = _parseColor(themeDef.colors['primary']) ?? (brightness == Brightness.dark ? Colors.blue.shade200 : Colors.blue.shade600);
-    
+  ColorScheme _buildColorScheme(
+      ThemeDefinition themeDef, Brightness brightness) {
+    final seedColor = _parseColor(themeDef.colors['primary']) ??
+        (brightness == Brightness.dark
+            ? Colors.blue.shade200
+            : Colors.blue.shade600);
+
     ColorScheme baseScheme;
     baseScheme = ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: brightness,
     );
-  
+
     // Override with specific colors from the theme definition
     return baseScheme.copyWith(
       primary: _parseColor(themeDef.colors['primary']) ?? baseScheme.primary,
-      secondary: _parseColor(themeDef.colors['secondary']) ?? baseScheme.secondary,
+      secondary:
+          _parseColor(themeDef.colors['secondary']) ?? baseScheme.secondary,
       tertiary: _parseColor(themeDef.colors['tertiary']) ?? baseScheme.tertiary,
       surface: _parseColor(themeDef.colors['surface']) ?? baseScheme.surface,
-      surfaceContainerHighest: _parseColor(themeDef.colors['surfaceContainerHighest']) ?? baseScheme.surfaceContainerHighest,
-      onSurface: _parseColor(themeDef.colors['onSurface']) ?? baseScheme.onSurface,
+      surfaceContainerHighest:
+          _parseColor(themeDef.colors['surfaceContainerHighest']) ??
+              baseScheme.surfaceContainerHighest,
+      onSurface:
+          _parseColor(themeDef.colors['onSurface']) ?? baseScheme.onSurface,
       outline: _parseColor(themeDef.colors['outline']) ?? baseScheme.outline,
-      outlineVariant: _parseColor(themeDef.colors['outlineVariant']) ?? baseScheme.outlineVariant,
+      outlineVariant: _parseColor(themeDef.colors['outlineVariant']) ??
+          baseScheme.outlineVariant,
       shadow: _parseColor(themeDef.colors['shadow']) ?? baseScheme.shadow,
     );
   }
 
   /// Builds TextTheme from theme definition
-  TextTheme _buildTextTheme(Brightness brightness, Map<String, dynamic> textStyles) {
-    final baseTheme = brightness == Brightness.dark 
-        ? ThemeData.dark().textTheme 
+  TextTheme _buildTextTheme(
+      Brightness brightness, Map<String, dynamic> textStyles) {
+    final baseTheme = brightness == Brightness.dark
+        ? ThemeData.dark().textTheme
         : ThemeData.light().textTheme;
 
     final baseTextTheme = baseTheme.apply(
       fontFamily: 'Quicksand',
-      bodyColor: brightness == Brightness.dark 
-          ? const Color(0xFFF8FAFC) 
+      bodyColor: brightness == Brightness.dark
+          ? const Color(0xFFF8FAFC)
           : const Color(0xFF0F172A),
-      displayColor: brightness == Brightness.dark 
-          ? const Color(0xFFF8FAFC) 
+      displayColor: brightness == Brightness.dark
+          ? const Color(0xFFF8FAFC)
           : const Color(0xFF0F172A),
     );
 
     return baseTextTheme.copyWith(
       headlineLarge: _parseTextStyle(
-        textStyles['headlineLarge'], 
+        textStyles['headlineLarge'],
         baseTextTheme.headlineLarge,
       ),
       headlineMedium: _parseTextStyle(
-        textStyles['headlineMedium'], 
+        textStyles['headlineMedium'],
         baseTextTheme.headlineMedium,
       ),
       headlineSmall: _parseTextStyle(
-        textStyles['headlineSmall'], 
+        textStyles['headlineSmall'],
         baseTextTheme.headlineSmall,
       ),
       titleLarge: _parseTextStyle(
-        textStyles['titleLarge'], 
+        textStyles['titleLarge'],
         baseTextTheme.titleLarge,
       ),
       titleMedium: _parseTextStyle(
-        textStyles['titleMedium'], 
+        textStyles['titleMedium'],
         baseTextTheme.titleMedium,
       ),
       titleSmall: _parseTextStyle(
-        textStyles['titleSmall'], 
+        textStyles['titleSmall'],
         baseTextTheme.titleSmall,
       ),
       bodyLarge: _parseTextStyle(
-        textStyles['bodyLarge'], 
+        textStyles['bodyLarge'],
         baseTextTheme.bodyLarge,
       ),
       bodyMedium: _parseTextStyle(
-        textStyles['bodyMedium'], 
+        textStyles['bodyMedium'],
         baseTextTheme.bodyMedium,
       ),
       labelLarge: _parseTextStyle(
-        textStyles['labelLarge'], 
+        textStyles['labelLarge'],
         baseTextTheme.labelLarge,
       ),
     );
@@ -165,11 +180,12 @@ class ThemeManager {
   /// Builds ElevatedButtonThemeData from theme definition
   ElevatedButtonThemeData _buildButtonTheme(Map<String, dynamic> buttonStyles) {
     final paddingData = buttonStyles['padding'] as Map<String, dynamic>? ?? {};
-    final borderRadius = (buttonStyles['borderRadius'] as num?)?.toDouble() ?? 16;
+    final borderRadius =
+        (buttonStyles['borderRadius'] as num?)?.toDouble() ?? 16;
     final elevation = (buttonStyles['elevation'] as num?)?.toDouble() ?? 2;
     final backgroundColor = _parseColor(buttonStyles['backgroundColor']);
     final foregroundColor = _parseColor(buttonStyles['foregroundColor']);
-    
+
     return ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         padding: EdgeInsets.symmetric(
@@ -183,7 +199,7 @@ class ThemeManager {
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
         textStyle: _parseTextStyle(
-          buttonStyles['textStyle'], 
+          buttonStyles['textStyle'],
           const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -199,7 +215,7 @@ class ThemeManager {
     final borderRadius = (cardStyles['borderRadius'] as num?)?.toDouble() ?? 20;
     final elevation = (cardStyles['elevation'] as num?)?.toDouble() ?? 2;
     final color = _parseColor(cardStyles['color']);
-    
+
     return CardThemeData(
       elevation: elevation,
       shape: RoundedRectangleBorder(
@@ -216,8 +232,9 @@ class ThemeManager {
     final backgroundColor = _parseColor(appBarStyles['backgroundColor']);
     final foregroundColor = _parseColor(appBarStyles['foregroundColor']);
     final elevation = (appBarStyles['elevation'] as num?)?.toDouble();
-    final scrolledUnderElevation = (appBarStyles['scrolledUnderElevation'] as num?)?.toDouble();
-    
+    final scrolledUnderElevation =
+        (appBarStyles['scrolledUnderElevation'] as num?)?.toDouble();
+
     return AppBarTheme(
       centerTitle: appBarStyles['centerTitle'] as bool? ?? true,
       elevation: elevation,
@@ -226,7 +243,7 @@ class ThemeManager {
       foregroundColor: foregroundColor,
       surfaceTintColor: Colors.transparent,
       titleTextStyle: _parseTextStyle(
-        appBarStyles['titleTextStyle'], 
+        appBarStyles['titleTextStyle'],
         const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
@@ -238,7 +255,8 @@ class ThemeManager {
   }
 
   /// Builds PageTransitionsTheme from theme definition
-  PageTransitionsTheme _buildPageTransitionsTheme(Map<String, dynamic> pageTransitions) {
+  PageTransitionsTheme _buildPageTransitionsTheme(
+      Map<String, dynamic> pageTransitions) {
     // Currently using default page transitions
     return const PageTransitionsTheme(
       builders: {
@@ -251,11 +269,11 @@ class ThemeManager {
   /// Parses a hex color string to Color
   Color? _parseColor(String? colorString) {
     if (colorString == null) return null;
-    
+
     try {
       // Remove the # if present
       var color = colorString.replaceAll('#', '');
-      
+
       // Handle both 6-digit (#RRGGBB) and 8-digit (#AARRGGBB) formats
       if (color.length == 6) {
         color = 'FF$color'; // Add full opacity
@@ -265,7 +283,7 @@ class ThemeManager {
         AppLogger.warning('Invalid color format: $colorString');
         return null;
       }
-      
+
       return Color(int.parse(color, radix: 16));
     } catch (e) {
       AppLogger.error('Failed to parse color: $colorString', e);
@@ -276,15 +294,15 @@ class ThemeManager {
   /// Parses text style from theme definition
   TextStyle? _parseTextStyle(dynamic styleData, TextStyle? defaultStyle) {
     if (styleData == null) return defaultStyle;
-    
+
     final styleMap = styleData as Map<String, dynamic>;
-    
+
     final fontSize = (styleMap['fontSize'] as num?)?.toDouble();
     final fontWeight = styleMap['fontWeight'] as String?;
     final letterSpacing = (styleMap['letterSpacing'] as num?)?.toDouble();
     final color = _parseColor(styleMap['color'] as String?);
     final decoration = styleMap['decoration'] as String?;
-    
+
     // Convert font weight string to FontWeight
     FontWeight? fontWeightEnum;
     if (fontWeight != null) {
@@ -359,7 +377,9 @@ class ThemeManager {
     if (themeDef == null) {
       AppLogger.warning('Theme not found: $themeId, returning default theme');
       // Return default theme based on whether it should be dark or light
-      return themeId.contains('dark') || themeId.contains('oled') || themeId.contains('grey')
+      return themeId.contains('dark') ||
+              themeId.contains('oled') ||
+              themeId.contains('grey')
           ? _getDefaultDarkTheme()
           : _getDefaultLightTheme();
     }
@@ -367,7 +387,7 @@ class ThemeManager {
     // Build and cache the theme
     final themeData = _buildThemeData(themeDef);
     _themeDataCache![themeId] = themeData;
-    
+
     return themeData;
   }
 
@@ -377,7 +397,7 @@ class ThemeManager {
     if (themeDef == null) {
       return _getDefaultLightTheme();
     }
-    
+
     // Create a light variant if the theme is dark
     if (themeDef.type.toLowerCase() == 'dark') {
       // Return the theme with light brightness but keep the same colors
@@ -392,10 +412,10 @@ class ThemeManager {
         appBarStyles: themeDef.appBarStyles,
         pageTransitions: themeDef.pageTransitions,
       );
-      
+
       return _buildThemeData(modifiedDef);
     }
-    
+
     return getThemeData(themeId);
   }
 
@@ -405,7 +425,7 @@ class ThemeManager {
     if (themeDef == null) {
       return _getDefaultDarkTheme();
     }
-    
+
     // Create a dark variant if the theme is light
     if (themeDef.type.toLowerCase() != 'dark') {
       // Return the theme with dark brightness but keep the same colors
@@ -420,10 +440,10 @@ class ThemeManager {
         appBarStyles: themeDef.appBarStyles,
         pageTransitions: themeDef.pageTransitions,
       );
-      
+
       return _buildThemeData(modifiedDef);
     }
-    
+
     return getThemeData(themeId);
   }
 
@@ -437,10 +457,10 @@ class ThemeManager {
         brightness: Brightness.light,
       ),
       textTheme: ThemeData.light().textTheme.apply(
-        fontFamily: 'Quicksand',
-        bodyColor: const Color(0xFF0F172A),
-        displayColor: const Color(0xFF0F172A),
-      ),
+            fontFamily: 'Quicksand',
+            bodyColor: const Color(0xFF0F172A),
+            displayColor: const Color(0xFF0F172A),
+          ),
       scaffoldBackgroundColor: const Color(0xFFFAFAFA),
     );
   }
@@ -455,10 +475,10 @@ class ThemeManager {
         brightness: Brightness.dark,
       ),
       textTheme: ThemeData.dark().textTheme.apply(
-        fontFamily: 'Quicksand',
-        bodyColor: const Color(0xFFF8FAFC),
-        displayColor: const Color(0xFFF8FAFC),
-      ),
+            fontFamily: 'Quicksand',
+            bodyColor: const Color(0xFFF8FAFC),
+            displayColor: const Color(0xFFF8FAFC),
+          ),
       scaffoldBackgroundColor: const Color(0xFF0F172A),
     );
   }

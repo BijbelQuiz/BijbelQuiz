@@ -32,15 +32,14 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
   void initState() {
     super.initState();
     AppLogger.info('AIThemeDesignerScreen initialized');
-    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    final analyticsService =
+        Provider.of<AnalyticsService>(context, listen: false);
     analyticsService.screen(context, 'AIThemeDesignerScreen');
-    
+
     // Track AI theme designer access
     analyticsService.trackFeatureStart(
-      context, 
-      AnalyticsService.featureAiThemeGenerator
-    );
-    
+        context, AnalyticsService.featureAiThemeGenerator);
+
     // Load the current price from store
     _loadCost();
   }
@@ -63,17 +62,19 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
           isActive: true,
         ),
       );
-      
+
       setState(() {
         _cost = aiThemeItem.currentPrice;
         _isLoadingCost = false;
       });
-      
-      AppLogger.info('Loaded AI theme generator cost: ${aiThemeItem.currentPrice}, isDiscounted: ${aiThemeItem.isDiscounted}');
+
+      AppLogger.info(
+          'Loaded AI theme generator cost: ${aiThemeItem.currentPrice}, isDiscounted: ${aiThemeItem.isDiscounted}');
     } catch (e) {
       AppLogger.error('Failed to load AI theme generator cost: $e');
       setState(() {
-        _isLoadingCost = false; // Still set to false to show the UI with default cost
+        _isLoadingCost =
+            false; // Still set to false to show the UI with default cost
       });
     }
   }
@@ -112,9 +113,9 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
             Text(
               strings.AppStrings.aiThemeGenerator,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: colorScheme.onSurface,
-              ),
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurface,
+                  ),
             ),
           ],
         ),
@@ -144,7 +145,8 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
                             end: Alignment.bottomRight,
                             colors: [
                               colorScheme.primaryContainer,
-                              colorScheme.primaryContainer.withValues(alpha: 0.6),
+                              colorScheme.primaryContainer
+                                  .withValues(alpha: 0.6),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(20),
@@ -166,27 +168,33 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
                                 const SizedBox(width: 8),
                                 Text(
                                   '${gameStats.score}',
-                                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: colorScheme.primary,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: colorScheme.primary,
+                                      ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 8),
                             Text(
                               strings.AppStrings.availableStars,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: colorScheme.onPrimaryContainer,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color: colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                             ),
                           ],
                         ),
                       ),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Cost information
                       Container(
                         width: double.infinity,
@@ -211,42 +219,49 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
                               child: _isLoadingCost
                                   ? Text(
                                       'Laden...',
-                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        color: colorScheme.primary,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: colorScheme.primary,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                     )
                                   : Text(
                                       'AI thema generatie kost ${isDev ? '0' : _cost} sterren',
-                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        color: colorScheme.primary,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: colorScheme.primary,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                     ),
                             ),
                           ],
                         ),
                       ),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Instruction text
                       Text(
                         'Beschrijf het thema dat je wilt laten maken door AI:',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Bijvoorbeeld: "Een blauw thema met gouden accenten, geïnspireerd op de oceaan..."',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                       ),
-                      
+
                       const SizedBox(height: 16),
-                      
+
                       // Text input field
                       TextField(
                         controller: _themeController,
@@ -254,7 +269,8 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
                         enabled: !_isGenerating,
                         decoration: InputDecoration(
                           hintText: 'Beschrijf hier jouw gewenste thema...',
-                          hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                          hintStyle:
+                              TextStyle(color: colorScheme.onSurfaceVariant),
                           filled: true,
                           fillColor: colorScheme.surfaceContainerHighest,
                           border: OutlineInputBorder(
@@ -263,18 +279,20 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                            borderSide: BorderSide(
+                                color: colorScheme.primary, width: 2),
                           ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 16),
-                      
+
                       // Generation status
                       if (_isGenerating) ...[
                         LinearProgressIndicator(
                           backgroundColor: colorScheme.surfaceContainerHighest,
-                          valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              colorScheme.primary),
                         ),
                         const SizedBox(height: 12),
                         Container(
@@ -290,10 +308,11 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
                           ),
                           child: Text(
                             _generationStatus,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurface,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurface,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -302,23 +321,18 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
                   ),
                 ),
               ),
-              
+
               // Generate button
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.only(bottom: 16),
                 child: ElevatedButton(
                   onPressed: _isGenerating || _isLoadingCost
-                    ? null 
-                    : () async {
-                        await _generateAITheme(
-                          context, 
-                          _themeController, 
-                          gameStats, 
-                          _cost, 
-                          isDev
-                        );
-                      },
+                      ? null
+                      : () async {
+                          await _generateAITheme(context, _themeController,
+                              gameStats, _cost, isDev);
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorScheme.primary,
                     foregroundColor: colorScheme.onPrimary,
@@ -328,22 +342,24 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
                     ),
                   ),
                   child: _isLoadingCost
-                    ? Text(
-                        'Laden...',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onPrimary.withValues(alpha: 0.7),
+                      ? Text(
+                          'Laden...',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onPrimary.withValues(alpha: 0.7),
+                          ),
+                        )
+                      : Text(
+                          _isGenerating
+                              ? 'Aan het genereren...'
+                              : 'Genereer Thema',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onPrimary,
+                          ),
                         ),
-                      )
-                    : Text(
-                        _isGenerating ? 'Aan het genereren...' : 'Genereer Thema',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onPrimary,
-                        ),
-                      ),
                 ),
               ),
             ],
@@ -362,33 +378,34 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
   ) async {
     final description = themeController.text.trim();
     if (description.isEmpty) {
-      showTopSnackBar(context, 'Beschrijf eerst je gewenste thema!', style: TopSnackBarStyle.error);
+      showTopSnackBar(context, 'Beschrijf eerst je gewenste thema!',
+          style: TopSnackBarStyle.error);
       return;
     }
 
     AppLogger.info('AI Theme generation requested: $description');
 
     // Get all providers before any async operations to avoid context issues
-    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    final analyticsService =
+        Provider.of<AnalyticsService>(context, listen: false);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
-    
-    analyticsService.capture(
-      context,
-      'ai_theme_generated',
-      properties: {'description': description}
-    );
+
+    analyticsService.capture(context, 'ai_theme_generated',
+        properties: {'description': description});
 
     // Spend stars first
     bool transactionSuccess = false;
     try {
-      transactionSuccess = isDev ? true : await gameStats.spendStarsWithTransaction(
-        amount: cost,
-        reason: 'AI thema generatie',
-        metadata: {
-          'description': description,
-          'feature': 'ai_theme_generator',
-        },
-      );
+      transactionSuccess = isDev
+          ? true
+          : await gameStats.spendStarsWithTransaction(
+              amount: cost,
+              reason: 'AI thema generatie',
+              metadata: {
+                'description': description,
+                'feature': 'ai_theme_generator',
+              },
+            );
       if (!transactionSuccess) {
         await AutomaticErrorReporter.reportStorageError(
           message: 'Failed to process AI theme generation payment',
@@ -401,13 +418,15 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
           },
         );
         if (context.mounted) {
-          showTopSnackBar(context, 'Niet genoeg sterren!', style: TopSnackBarStyle.error);
+          showTopSnackBar(context, 'Niet genoeg sterren!',
+              style: TopSnackBarStyle.error);
         }
         return;
       }
     } catch (e) {
       await AutomaticErrorReporter.reportStorageError(
-        message: 'Error processing AI theme generation payment: ${e.toString()}',
+        message:
+            'Error processing AI theme generation payment: ${e.toString()}',
         userMessage: 'Error processing AI theme generation payment',
         operation: 'spend_stars',
         additionalInfo: {
@@ -418,7 +437,8 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
         },
       );
       if (context.mounted) {
-        showTopSnackBar(context, 'Fout bij betaling: ${e.toString()}', style: TopSnackBarStyle.error);
+        showTopSnackBar(context, 'Fout bij betaling: ${e.toString()}',
+            style: TopSnackBarStyle.error);
       }
       return;
     }
@@ -430,16 +450,17 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
     });
 
     try {
-       // AI theme generation enabled since feature flags removed
+      // AI theme generation enabled since feature flags removed
 
-       // Update status
-       setState(() {
-         _generationStatus = 'Kleuren aan het genereren...';
-       });
+      // Update status
+      setState(() {
+        _generationStatus = 'Kleuren aan het genereren...';
+      });
 
-       // Call Gemini API
-       final geminiService = GeminiService.instance;
-       final colorPalette = await geminiService.generateColorsFromText(description);
+      // Call Gemini API
+      final geminiService = GeminiService.instance;
+      final colorPalette =
+          await geminiService.generateColorsFromText(description);
 
       // Update status
       setState(() {
@@ -449,10 +470,13 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
       // Create theme from color palette
       final themeId = AIThemeBuilder.generateThemeId();
       final themeName = _generateThemeName(description);
-      final themeDescription = 'AI-gegenereerd thema gebaseerd op: $description';
+      final themeDescription =
+          'AI-gegenereerd thema gebaseerd op: $description';
 
-      final lightTheme = AIThemeBuilder.createLightThemeFromPalette(colorPalette.toJson());
-      final darkTheme = AIThemeBuilder.createDarkThemeFromPalette(colorPalette.toJson());
+      final lightTheme =
+          AIThemeBuilder.createLightThemeFromPalette(colorPalette.toJson());
+      final darkTheme =
+          AIThemeBuilder.createDarkThemeFromPalette(colorPalette.toJson());
 
       final aiTheme = AITheme(
         id: themeId,
@@ -480,31 +504,30 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
       // Show success message and theme preview dialog after a short delay
       await Future.delayed(const Duration(milliseconds: 500));
       if (context.mounted) {
-        showTopSnackBar(
-          context,
-          'AI thema "$themeName" succesvol aangemaakt!',
-          style: TopSnackBarStyle.success
-        );
+        showTopSnackBar(context, 'AI thema "$themeName" succesvol aangemaakt!',
+            style: TopSnackBarStyle.success);
 
-        analyticsService.trackFeatureSuccess(context, AnalyticsService.featureAiThemeGenerator, additionalProperties: {
-          'theme_name': themeName,
-          'description': description,
-          'cost': cost,
-        });
+        analyticsService.trackFeatureSuccess(
+            context, AnalyticsService.featureAiThemeGenerator,
+            additionalProperties: {
+              'theme_name': themeName,
+              'description': description,
+              'cost': cost,
+            });
 
         // Show theme preview dialog
         await _showThemePreviewDialog(context, aiTheme);
       }
-
     } catch (e) {
       AppLogger.error('AI theme generation failed', e);
 
       // Auto-report the error
       String userMessage = 'Er ging iets fout bij het genereren van het thema.';
-      
+
       if (e is GeminiError) {
         userMessage = 'AI fout: ${e.message}';
-        await AutomaticErrorReporter.reportStorageError(  // Using storage error since it's related to data processing
+        await AutomaticErrorReporter.reportStorageError(
+          // Using storage error since it's related to data processing
           message: 'AI theme generation failed: ${e.message}',
           userMessage: 'AI generation error',
           operation: 'ai_theme_generation',
@@ -544,7 +567,8 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
           } catch (refundError) {
             // Report the refund error as well
             await AutomaticErrorReporter.reportStorageError(
-              message: 'Failed to refund stars after AI theme generation error: ${refundError.toString()}',
+              message:
+                  'Failed to refund stars after AI theme generation error: ${refundError.toString()}',
               userMessage: 'Failed to refund stars after error',
               operation: 'add_stars',
               additionalInfo: {
@@ -567,7 +591,8 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
 
   String _generateThemeName(String description) {
     // Extract key words from description for theme name
-    final words = description.toLowerCase()
+    final words = description
+        .toLowerCase()
         .replaceAll(RegExp(r'[^\w\s]'), '')
         .split(' ')
         .where((word) => word.length > 3)
@@ -581,7 +606,8 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
     return '${words[0].capitalize()} ${words.length > 1 ? words[1].capitalize() : 'Thema'}';
   }
 
-  Future<void> _showThemePreviewDialog(BuildContext context, AITheme theme) async {
+  Future<void> _showThemePreviewDialog(
+      BuildContext context, AITheme theme) async {
     final colorScheme = Theme.of(context).colorScheme;
 
     return showDialog(
@@ -594,14 +620,15 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
           ),
           title: Row(
             children: [
-              Icon(Icons.palette_rounded, color: theme.lightTheme.colorScheme.primary, size: 24),
+              Icon(Icons.palette_rounded,
+                  color: theme.lightTheme.colorScheme.primary, size: 24),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   theme.name,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ),
             ],
@@ -618,17 +645,20 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
               Text(
                 'Kleurenschema:',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  _buildColorPreview(context, theme.lightTheme.colorScheme.primary, 'Primair'),
+                  _buildColorPreview(
+                      context, theme.lightTheme.colorScheme.primary, 'Primair'),
                   const SizedBox(width: 8),
-                  _buildColorPreview(context, theme.lightTheme.colorScheme.secondary, 'Secundair'),
+                  _buildColorPreview(context,
+                      theme.lightTheme.colorScheme.secondary, 'Secundair'),
                   const SizedBox(width: 8),
-                  _buildColorPreview(context, theme.lightTheme.colorScheme.tertiary, 'Tertiair'),
+                  _buildColorPreview(context,
+                      theme.lightTheme.colorScheme.tertiary, 'Tertiair'),
                 ],
               ),
             ],
@@ -641,24 +671,23 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
               child: Text(
                 'Sluiten',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: colorScheme.primary,
-                ),
+                      color: colorScheme.primary,
+                    ),
               ),
             ),
             ElevatedButton(
               onPressed: () async {
                 try {
                   // Apply the theme
-                  final settings = Provider.of<SettingsProvider>(context, listen: false);
+                  final settings =
+                      Provider.of<SettingsProvider>(context, listen: false);
                   await settings.setCustomTheme(theme.id);
 
                   if (context.mounted) {
                     Navigator.of(context).pop();
                     showTopSnackBar(
-                      context,
-                      'Thema "${theme.name}" is nu actief!',
-                      style: TopSnackBarStyle.success
-                    );
+                        context, 'Thema "${theme.name}" is nu actief!',
+                        style: TopSnackBarStyle.success);
                   }
                 } catch (e) {
                   // Auto-report the error
@@ -673,14 +702,12 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
                       'feature': 'ai_theme_generator',
                     },
                   );
-                  
+
                   if (context.mounted) {
                     Navigator.of(context).pop();
-                    showTopSnackBar(
-                      context,
-                      'Fout bij toepassen van thema: ${e.toString()}',
-                      style: TopSnackBarStyle.error
-                    );
+                    showTopSnackBar(context,
+                        'Fout bij toepassen van thema: ${e.toString()}',
+                        style: TopSnackBarStyle.error);
                   }
                 }
               },
@@ -701,7 +728,7 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
 
   Widget _buildColorPreview(BuildContext context, Color color, String label) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Expanded(
       child: Column(
         children: [
@@ -721,8 +748,8 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontSize: 10,
-            ),
+                  fontSize: 10,
+                ),
             textAlign: TextAlign.center,
           ),
         ],

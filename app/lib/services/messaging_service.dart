@@ -29,7 +29,7 @@ class Message {
     if (map['expiration_date'] != null) {
       expirationDate = DateTime.parse(map['expiration_date'] as String);
     }
-    
+
     return Message(
       id: map['id'] as String,
       title: map['title'] as String,
@@ -142,7 +142,7 @@ class MessagingService {
   Future<List<Message>> getActiveMessages() async {
     try {
       final now = DateTime.now().toIso8601String();
-      
+
       final response = await _client
           .from('messages')
           .select('*')
@@ -162,11 +162,8 @@ class MessagingService {
   /// Gets a specific message by ID
   Future<Message?> getMessageById(String id) async {
     try {
-      final response = await _client
-          .from('messages')
-          .select('*')
-          .eq('id', id)
-          .single();
+      final response =
+          await _client.from('messages').select('*').eq('id', id).single();
 
       return Message.fromMap(response);
     } catch (e) {
@@ -174,7 +171,7 @@ class MessagingService {
       if (e is PostgrestException && e.code == 'PGRST116') {
         return null;
       }
-      
+
       AutomaticErrorReporter.reportStorageError(
         message: 'Error fetching message by ID',
         additionalInfo: {'message_id': id, 'error': e.toString()},
@@ -205,24 +202,22 @@ class MessagingService {
       final newMessage = {
         'title': title,
         'content': content,
-        'expiration_date': expirationDate?.toIso8601String(), // Optional expiration date
+        'expiration_date':
+            expirationDate?.toIso8601String(), // Optional expiration date
         'created_at': DateTime.now().toIso8601String(),
         'created_by': createdBy,
       };
 
-      final response = await _client
-          .from('messages')
-          .insert(newMessage)
-          .select()
-          .single();
+      final response =
+          await _client.from('messages').insert(newMessage).select().single();
 
       return Message.fromMap(response);
     } catch (e) {
       AutomaticErrorReporter.reportStorageError(
         message: 'Error creating message',
         additionalInfo: {
-          'title': title, 
-          'expiration_date': expirationDate?.toIso8601String(), 
+          'title': title,
+          'expiration_date': expirationDate?.toIso8601String(),
           'error': e.toString()
         },
       );
@@ -242,7 +237,9 @@ class MessagingService {
       final updateData = <String, dynamic>{};
       if (title != null) updateData['title'] = title;
       if (content != null) updateData['content'] = content;
-      if (expirationDate != null) updateData['expiration_date'] = expirationDate.toIso8601String();
+      if (expirationDate != null) {
+        updateData['expiration_date'] = expirationDate.toIso8601String();
+      }
 
       final response = await _client
           .from('messages')
@@ -265,10 +262,7 @@ class MessagingService {
   /// This function would typically only be called by admin users
   Future<void> deleteMessage(String id) async {
     try {
-      await _client
-          .from('messages')
-          .delete()
-          .eq('id', id);
+      await _client.from('messages').delete().eq('id', id);
     } catch (e) {
       AutomaticErrorReporter.reportStorageError(
         message: 'Error deleting message',
@@ -288,7 +282,10 @@ class MessagingService {
     if (title.trim().isEmpty || content.trim().isEmpty) {
       AutomaticErrorReporter.reportStorageError(
         message: 'Message validation failed: title or content is empty',
-        additionalInfo: {'title_length': title.length, 'content_length': content.length},
+        additionalInfo: {
+          'title_length': title.length,
+          'content_length': content.length
+        },
       );
       return false;
     }
@@ -296,8 +293,12 @@ class MessagingService {
     // Expiration date should be in the future
     if (!expirationDate.isAfter(DateTime.now())) {
       AutomaticErrorReporter.reportStorageError(
-        message: 'Message validation failed: expiration date is not in the future',
-        additionalInfo: {'expiration_date': expirationDate.toIso8601String(), 'current_time': DateTime.now().toIso8601String()},
+        message:
+            'Message validation failed: expiration date is not in the future',
+        additionalInfo: {
+          'expiration_date': expirationDate.toIso8601String(),
+          'current_time': DateTime.now().toIso8601String()
+        },
       );
       return false;
     }
@@ -324,37 +325,42 @@ class MessagingService {
   }
 
   /// Tracks when a user views messages
-  void trackMessagesViewed(AnalyticsService analyticsService, BuildContext? context) {
+  void trackMessagesViewed(
+      AnalyticsService analyticsService, BuildContext? context) {
     if (context != null) {
-      analyticsService.trackFeatureUsage(context, 'messaging', 'messages_viewed');
+      analyticsService.trackFeatureUsage(
+          context, 'messaging', 'messages_viewed');
     }
   }
 
   /// Tracks when a user refreshes messages
-  void trackMessagesRefreshed(AnalyticsService analyticsService, BuildContext? context) {
+  void trackMessagesRefreshed(
+      AnalyticsService analyticsService, BuildContext? context) {
     if (context != null) {
-      analyticsService.trackFeatureUsage(context, 'messaging', 'refresh_triggered');
+      analyticsService.trackFeatureUsage(
+          context, 'messaging', 'refresh_triggered');
     }
   }
 
   /// Tracks when a message is viewed in detail
-  void trackMessageDetailView(AnalyticsService analyticsService, BuildContext? context, String messageId) {
+  void trackMessageDetailView(AnalyticsService analyticsService,
+      BuildContext? context, String messageId) {
     if (context != null) {
       analyticsService.trackFeatureUsage(
-        context, 
-        'messaging', 
-        'message_detail_viewed',
-        additionalProperties: {'message_id': messageId}
-      );
+          context, 'messaging', 'message_detail_viewed',
+          additionalProperties: {'message_id': messageId});
     }
   }
+
   /// Gets reaction counts for a specific message
   Future<List<ReactionCount>> getMessageReactionCounts(String messageId) async {
     try {
-      final response = await _client
-          .rpc('get_message_reaction_counts', params: {'message_uuid': messageId});
+      final response = await _client.rpc('get_message_reaction_counts',
+          params: {'message_uuid': messageId});
 
-      return response.map<ReactionCount>((map) => ReactionCount.fromMap(map)).toList();
+      return response
+          .map<ReactionCount>((map) => ReactionCount.fromMap(map))
+          .toList();
     } catch (e) {
       AutomaticErrorReporter.reportStorageError(
         message: 'Error fetching message reaction counts',
@@ -365,16 +371,14 @@ class MessagingService {
   }
 
   /// Gets the current user's reaction for a specific message
-  Future<String?> getUserMessageReaction(String messageId, String? userId) async {
+  Future<String?> getUserMessageReaction(
+      String messageId, String? userId) async {
     try {
       // Use effective user ID to ensure consistency with toggleMessageReaction
       final effectiveUserId = await getEffectiveUserIdForReaction();
-      
-      final response = await _client
-          .rpc('get_user_message_reaction', params: {
-            'message_uuid': messageId,
-            'user_uuid': effectiveUserId
-          });
+
+      final response = await _client.rpc('get_user_message_reaction',
+          params: {'message_uuid': messageId, 'user_uuid': effectiveUserId});
 
       return response as String?;
     } catch (e) {
@@ -382,10 +386,14 @@ class MessagingService {
       if (e is PostgrestException && e.code == 'PGRST116') {
         return null;
       }
-      
+
       AutomaticErrorReporter.reportStorageError(
         message: 'Error fetching user message reaction',
-        additionalInfo: {'message_id': messageId, 'user_id': userId ?? 'anonymous', 'error': e.toString()},
+        additionalInfo: {
+          'message_id': messageId,
+          'user_id': userId ?? 'anonymous',
+          'error': e.toString()
+        },
       );
       rethrow;
     }
@@ -400,13 +408,12 @@ class MessagingService {
     try {
       // Get effective user ID - this ensures each user has a unique identity
       final effectiveUserId = await getEffectiveUserIdForReaction();
-      
-      final response = await _client
-          .rpc('toggle_message_reaction', params: {
-            'message_uuid': messageId,
-            'user_uuid': effectiveUserId,
-            'emoji_char': emoji,
-          });
+
+      final response = await _client.rpc('toggle_message_reaction', params: {
+        'message_uuid': messageId,
+        'user_uuid': effectiveUserId,
+        'emoji_char': emoji,
+      });
 
       return ReactionResult.fromMap(response as Map<String, dynamic>);
     } catch (e) {
@@ -453,7 +460,11 @@ class MessagingService {
     } catch (e) {
       AutomaticErrorReporter.reportStorageError(
         message: 'Error removing message reaction',
-        additionalInfo: {'message_id': messageId, 'user_id': userId, 'error': e.toString()},
+        additionalInfo: {
+          'message_id': messageId,
+          'user_id': userId,
+          'error': e.toString()
+        },
       );
       rethrow;
     }
@@ -469,11 +480,11 @@ class MessagingService {
   /// This ensures each user has a unique identity for emoji reactions
   Future<String> getEffectiveUserIdForReaction() async {
     final authenticatedUserId = getCurrentUserId();
-    
+
     if (authenticatedUserId != null) {
       return authenticatedUserId;
     }
-    
+
     // For anonymous users, get a unique persistent ID
     final anonymousUserService = AnonymousUserService();
     return await anonymousUserService.getAnonymousUserId();

@@ -16,7 +16,8 @@ class GreetingService {
     if (_isLoaded) return;
 
     try {
-      final String jsonString = await rootBundle.loadString('assets/greetings.json');
+      final String jsonString =
+          await rootBundle.loadString('assets/greetings.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       _greetingsData = jsonData['greetings'] as Map<String, dynamic>;
       _isLoaded = true;
@@ -32,15 +33,16 @@ class GreetingService {
   /// Get a random greeting based on the time of day
   Future<String> getTimeBasedGreeting() async {
     await _loadGreetings();
-    
+
     final String timeGreeting = _getTimeOfDayGreeting();
-    final List<dynamic>? greetings = _greetingsData?[timeGreeting] as List<dynamic>?;
-    
+    final List<dynamic>? greetings =
+        _greetingsData?[timeGreeting] as List<dynamic>?;
+
     if (greetings != null && greetings.isNotEmpty) {
       final List<String> stringGreetings = greetings.cast<String>();
       return stringGreetings[_getRandomIndex(stringGreetings.length)];
     }
-    
+
     // Fallback to general greeting if time-based ones fail
     return getGeneralGreeting();
   }
@@ -48,14 +50,15 @@ class GreetingService {
   /// Get a random general greeting
   Future<String> getGeneralGreeting() async {
     await _loadGreetings();
-    
-    final List<dynamic>? greetings = _greetingsData?['general'] as List<dynamic>?;
-    
+
+    final List<dynamic>? greetings =
+        _greetingsData?['general'] as List<dynamic>?;
+
     if (greetings != null && greetings.isNotEmpty) {
       final List<String> stringGreetings = greetings.cast<String>();
       return stringGreetings[_getRandomIndex(stringGreetings.length)];
     }
-    
+
     // Ultimate fallback
     return 'Jouw voortgang';
   }

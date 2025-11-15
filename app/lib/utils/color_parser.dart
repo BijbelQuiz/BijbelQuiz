@@ -190,7 +190,8 @@ class ColorParser {
 
       throw const FormatException('Unsupported color format');
     } catch (e) {
-      AppLogger.warning('Failed to parse color for $component: $e. Using fallback.');
+      AppLogger.warning(
+          'Failed to parse color for $component: $e. Using fallback.');
       return _getFallbackColor(component);
     }
   }
@@ -269,7 +270,8 @@ class ColorParser {
 
     if (match == null) {
       // Try with more flexible pattern that allows spaces
-      final flexibleMatch = RegExp(r'rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)')
+      final flexibleMatch = RegExp(
+              r'rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)')
           .firstMatch(rgb);
       if (flexibleMatch == null) {
         throw const FormatException('Invalid RGB format');
@@ -295,7 +297,8 @@ class ColorParser {
 
   /// Parses HSL color strings (hsl() and hsla() formats)
   static Color _parseHslColor(String hsl) {
-    final match = RegExp(r'hsla?\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%(?:\s*,\s*([\d.]+))?\s*\)')
+    final match = RegExp(
+            r'hsla?\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%(?:\s*,\s*([\d.]+))?\s*\)')
         .firstMatch(hsl);
 
     if (match == null) {
@@ -320,17 +323,17 @@ class ColorParser {
       double hue2rgb(double p, double q, double t) {
         if (t < 0) t += 1;
         if (t > 1) t -= 1;
-        if (t < 1/6) return p + (q - p) * 6 * t;
-        if (t < 1/2) return q;
-        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
         return p;
       }
 
       final q = l < 0.5 ? l * (1 + s) : l + s - l * s;
       final p = 2 * l - q;
-      r = hue2rgb(p, q, h + 1/3);
+      r = hue2rgb(p, q, h + 1 / 3);
       g = hue2rgb(p, q, h);
-      b = hue2rgb(p, q, h - 1/3);
+      b = hue2rgb(p, q, h - 1 / 3);
     }
 
     return Color.fromARGB(
@@ -353,7 +356,8 @@ class ColorParser {
   }
 
   /// Validates if a color meets accessibility contrast requirements
-  static bool validateContrast(Color foreground, Color background, {double minRatio = 4.5}) {
+  static bool validateContrast(Color foreground, Color background,
+      {double minRatio = 4.5}) {
     final luminance1 = _calculateLuminance(foreground);
     final luminance2 = _calculateLuminance(background);
 
@@ -371,18 +375,26 @@ class ColorParser {
     double gsRGB = (color.g * 255.0).round() / 255;
     double bsRGB = (color.b * 255.0).round() / 255;
 
-    double r = rsRGB <= 0.03928 ? rsRGB / 12.92 : pow((rsRGB + 0.055) / 1.055, 2.4).toDouble();
-    double g = gsRGB <= 0.03928 ? gsRGB / 12.92 : pow((gsRGB + 0.055) / 1.055, 2.4).toDouble();
-    double b = bsRGB <= 0.03928 ? bsRGB / 12.92 : pow((bsRGB + 0.055) / 1.055, 2.4).toDouble();
+    double r = rsRGB <= 0.03928
+        ? rsRGB / 12.92
+        : pow((rsRGB + 0.055) / 1.055, 2.4).toDouble();
+    double g = gsRGB <= 0.03928
+        ? gsRGB / 12.92
+        : pow((gsRGB + 0.055) / 1.055, 2.4).toDouble();
+    double b = bsRGB <= 0.03928
+        ? bsRGB / 12.92
+        : pow((bsRGB + 0.055) / 1.055, 2.4).toDouble();
 
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
 
   /// Extracts and parses colors from Gemini API response
-  static Map<String, Color> extractColorsFromGeminiResponse(String responseText) {
+  static Map<String, Color> extractColorsFromGeminiResponse(
+      String responseText) {
     try {
       // Try to extract JSON from the response - look for content between curly braces
-      final jsonMatch = RegExp(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', dotAll: true).firstMatch(responseText);
+      final jsonMatch = RegExp(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', dotAll: true)
+          .firstMatch(responseText);
       if (jsonMatch == null) {
         throw const FormatException('No JSON found in response');
       }
@@ -392,7 +404,8 @@ class ColorParser {
 
       return _parseColorPalette(colorData);
     } catch (e) {
-      AppLogger.warning('Failed to parse Gemini response: $e. Using fallback colors.');
+      AppLogger.warning(
+          'Failed to parse Gemini response: $e. Using fallback colors.');
       return getFallbackColorPalette();
     }
   }
@@ -431,7 +444,8 @@ class ColorParser {
     }
 
     // Also try to match "key": "value" patterns with single quotes
-    final singleQuoteMatches = RegExp(r"'([^']+)':\s*'([^']+)'").allMatches(cleaned);
+    final singleQuoteMatches =
+        RegExp(r"'([^']+)':\s*'([^']+)'").allMatches(cleaned);
     for (final match in singleQuoteMatches) {
       final key = match.group(1);
       final value = match.group(2);
@@ -449,14 +463,22 @@ class ColorParser {
 
     // Define expected color components in order of priority
     final components = [
-      'primary', 'secondary', 'tertiary', 'accent',
-      'background', 'surface',
-      'onPrimary', 'onSecondary', 'onBackground', 'onSurface'
+      'primary',
+      'secondary',
+      'tertiary',
+      'accent',
+      'background',
+      'surface',
+      'onPrimary',
+      'onSecondary',
+      'onBackground',
+      'onSurface'
     ];
 
     for (final component in components) {
       if (colorData.containsKey(component)) {
-        colors[component] = parseColor(colorData[component], component: component);
+        colors[component] =
+            parseColor(colorData[component], component: component);
       }
     }
 

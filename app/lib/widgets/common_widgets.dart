@@ -29,31 +29,38 @@ class AppCard extends StatelessWidget {
     final isDesktop = context.isDesktop;
 
     return Container(
-      margin: margin ?? EdgeInsets.symmetric(horizontal: context.responsiveHorizontalPadding(16)),
+      margin: margin ??
+          EdgeInsets.symmetric(
+              horizontal: context.responsiveHorizontalPadding(16)),
       decoration: BoxDecoration(
         color: backgroundColor ?? colorScheme.surface,
-        borderRadius: BorderRadius.circular(borderRadius ?? context.responsiveBorderRadius(24)),
-        border: border ?? Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.1),
-          width: 1,
-        ),
-        boxShadow: boxShadow ?? [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.08),
-            blurRadius: context.responsiveElevation(24),
-            offset: const Offset(0, 8),
-            spreadRadius: 0,
-          ),
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.04),
-            blurRadius: context.responsiveElevation(48),
-            offset: const Offset(0, 16),
-            spreadRadius: 0,
-          ),
-        ],
+        borderRadius: BorderRadius.circular(
+            borderRadius ?? context.responsiveBorderRadius(24)),
+        border: border ??
+            Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.1),
+              width: 1,
+            ),
+        boxShadow: boxShadow ??
+            [
+              BoxShadow(
+                color: colorScheme.shadow.withValues(alpha: 0.08),
+                blurRadius: context.responsiveElevation(24),
+                offset: const Offset(0, 8),
+                spreadRadius: 0,
+              ),
+              BoxShadow(
+                color: colorScheme.shadow.withValues(alpha: 0.04),
+                blurRadius: context.responsiveElevation(48),
+                offset: const Offset(0, 16),
+                spreadRadius: 0,
+              ),
+            ],
       ),
       child: Padding(
-        padding: padding ?? EdgeInsets.all(context.responsiveHorizontalPadding(isDesktop ? 28 : 24)),
+        padding: padding ??
+            EdgeInsets.all(
+                context.responsiveHorizontalPadding(isDesktop ? 28 : 24)),
         child: child,
       ),
     );
@@ -85,10 +92,11 @@ class ResponsiveContainer extends StatelessWidget {
       constraints: BoxConstraints(
         maxWidth: responsiveMaxWidth,
       ),
-      padding: padding ?? EdgeInsets.symmetric(
-        horizontal: context.responsiveHorizontalPadding(16),
-        vertical: context.responsiveVerticalPadding(20),
-      ),
+      padding: padding ??
+          EdgeInsets.symmetric(
+            horizontal: context.responsiveHorizontalPadding(16),
+            vertical: context.responsiveVerticalPadding(20),
+          ),
       margin: margin,
       alignment: alignment,
       child: child,
@@ -162,7 +170,9 @@ class AppText extends StatelessWidget {
       maxLines: maxLines,
       overflow: overflow,
       softWrap: softWrap,
-      textScaler: textScaler ?? TextScaler.linear(MediaQuery.of(context).textScaler.scale(1.0).clamp(0.8, 1.2)),
+      textScaler: textScaler ??
+          TextScaler.linear(
+              MediaQuery.of(context).textScaler.scale(1.0).clamp(0.8, 1.2)),
     );
   }
 }
@@ -251,8 +261,12 @@ class AppSkeleton extends StatelessWidget {
       height: height != null ? context.responsiveSpacing(height!) : null,
       margin: margin,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(context.responsiveBorderRadius(borderRadius)),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.3),
+        borderRadius:
+            BorderRadius.circular(context.responsiveBorderRadius(borderRadius)),
       ),
     );
   }

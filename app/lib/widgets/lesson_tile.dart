@@ -83,9 +83,12 @@ class _LessonTileState extends State<LessonTile>
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final settings = Provider.of<SettingsProvider>(context, listen: false);
-    final gradient = settings.colorfulMode ? _tileGradientForIndex(cs, widget.index) : _singleColorGradient(cs);
+    final gradient = settings.colorfulMode
+        ? _tileGradientForIndex(cs, widget.index)
+        : _singleColorGradient(cs);
 
-    String semanticLabel = 'Lesson ${widget.lesson.index + 1}: ${widget.lesson.title}';
+    String semanticLabel =
+        'Lesson ${widget.lesson.index + 1}: ${widget.lesson.title}';
     String hint = '';
 
     if (!widget.unlocked) {
@@ -93,7 +96,8 @@ class _LessonTileState extends State<LessonTile>
       hint = 'This lesson is locked. Complete previous lessons to unlock it.';
     } else if (!widget.playable) {
       semanticLabel = '$semanticLabel (unlocked but not playable)';
-      hint = 'This lesson is unlocked but you can only play the most recent unlocked lesson.';
+      hint =
+          'This lesson is unlocked but you can only play the most recent unlocked lesson.';
     } else {
       hint = 'Tap to start this lesson';
     }
@@ -117,7 +121,8 @@ class _LessonTileState extends State<LessonTile>
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.12 * _shadowAnimation.value),
+                    color: Colors.black
+                        .withValues(alpha: 0.12 * _shadowAnimation.value),
                     blurRadius: 16 * _shadowAnimation.value,
                     offset: Offset(0, 6 * _shadowAnimation.value),
                   ),
@@ -133,7 +138,9 @@ class _LessonTileState extends State<LessonTile>
           onTapUp: widget.playable ? _onTapUp : null,
           onTapCancel: widget.playable ? _onTapCancel : null,
           borderRadius: BorderRadius.circular(18),
-          focusColor: widget.playable ? cs.primary.withAlpha((0.1 * 255).round()) : null,
+          focusColor: widget.playable
+              ? cs.primary.withAlpha((0.1 * 255).round())
+              : null,
           child: Opacity(
             opacity: widget.unlocked && !widget.playable ? 0.55 : 1.0,
             child: Ink(
@@ -142,7 +149,9 @@ class _LessonTileState extends State<LessonTile>
                 color: widget.unlocked ? null : cs.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: widget.recommended ? cs.primary : cs.outlineVariant.withValues(alpha: 0.7),
+                  color: widget.recommended
+                      ? cs.primary
+                      : cs.outlineVariant.withValues(alpha: 0.7),
                   width: widget.recommended ? 2.0 : 1.0,
                 ),
               ),
@@ -153,15 +162,22 @@ class _LessonTileState extends State<LessonTile>
                       top: 12,
                       left: 12,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: (widget.unlocked ? cs.surface : cs.surfaceContainerHigh).withValues(alpha: 0.85),
+                          color: (widget.unlocked
+                                  ? cs.surface
+                                  : cs.surfaceContainerHigh)
+                              .withValues(alpha: 0.85),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: cs.outlineVariant),
                         ),
                         child: Text(
                           'Les ${widget.lesson.index + 1}',
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge
+                              ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                       ),
                     ),
@@ -175,7 +191,8 @@ class _LessonTileState extends State<LessonTile>
                             Icons.menu_book,
                             color: cs.primary,
                             size: 36,
-                            semanticLabel: 'Book icon representing lesson content',
+                            semanticLabel:
+                                'Book icon representing lesson content',
                           ),
                         ),
                       ),
@@ -219,12 +236,30 @@ class _LessonTileState extends State<LessonTile>
 
   LinearGradient _tileGradientForIndex(ColorScheme cs, int i) {
     final palettes = <List<Color>>[
-      [cs.primaryContainer.withValues(alpha: 0.7), cs.primary.withValues(alpha: 0.3)],
-      [const Color(0xFF10B981).withValues(alpha: 0.6), const Color(0xFF34D399).withValues(alpha: 0.3)],
-      [const Color(0xFF6366F1).withValues(alpha: 0.6), const Color(0xFFA78BFA).withValues(alpha: 0.32)],
-      [const Color(0xFFF59E0B).withValues(alpha: 0.6), const Color(0xFFFCD34D).withValues(alpha: 0.32)],
-      [const Color(0xFFEF4444).withValues(alpha: 0.6), const Color(0xFFF87171).withValues(alpha: 0.32)],
-      [const Color(0xFF06B6D4).withValues(alpha: 0.6), const Color(0xFF67E8F9).withValues(alpha: 0.32)],
+      [
+        cs.primaryContainer.withValues(alpha: 0.7),
+        cs.primary.withValues(alpha: 0.3)
+      ],
+      [
+        const Color(0xFF10B981).withValues(alpha: 0.6),
+        const Color(0xFF34D399).withValues(alpha: 0.3)
+      ],
+      [
+        const Color(0xFF6366F1).withValues(alpha: 0.6),
+        const Color(0xFFA78BFA).withValues(alpha: 0.32)
+      ],
+      [
+        const Color(0xFFF59E0B).withValues(alpha: 0.6),
+        const Color(0xFFFCD34D).withValues(alpha: 0.32)
+      ],
+      [
+        const Color(0xFFEF4444).withValues(alpha: 0.6),
+        const Color(0xFFF87171).withValues(alpha: 0.32)
+      ],
+      [
+        const Color(0xFF06B6D4).withValues(alpha: 0.6),
+        const Color(0xFF67E8F9).withValues(alpha: 0.32)
+      ],
     ];
     final colors = palettes[i % palettes.length];
     return LinearGradient(

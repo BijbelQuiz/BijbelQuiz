@@ -17,7 +17,6 @@ class LessonService {
     int maxQuestionsPerLesson = 10,
   }) async {
     try {
-
       final lessons = List<Lesson>.generate(maxLessons, (i) {
         final id = 'lesson_${i.toString().padLeft(4, '0')}';
         final title = 'Les ${i + 1}';

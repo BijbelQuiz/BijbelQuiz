@@ -13,7 +13,8 @@ class AnswerButton extends StatefulWidget {
   final bool isLarge;
   final bool isDisabled;
   final bool isCompact; // New parameter for compact multiplayer layout
-  final Animation<double>? externalScaleAnimation; // Optional external animation controller
+  final Animation<double>?
+      externalScaleAnimation; // Optional external animation controller
 
   const AnswerButton({
     super.key,
@@ -70,19 +71,22 @@ class _AnswerButtonState extends State<AnswerButton>
   void _setColors() {
     switch (widget.feedback) {
       case AnswerFeedback.correct:
-        _backgroundColor = const Color(0xFF059669); // Darker green for better contrast
+        _backgroundColor =
+            const Color(0xFF059669); // Darker green for better contrast
         _borderColor = const Color(0xFF059669);
         _textColor = Colors.white;
         _iconColor = Colors.white;
         break;
       case AnswerFeedback.incorrect:
-        _backgroundColor = const Color(0xFFDC2626); // Solid red for better contrast
+        _backgroundColor =
+            const Color(0xFFDC2626); // Solid red for better contrast
         _borderColor = const Color(0xFFDC2626);
         _textColor = Colors.white;
         _iconColor = Colors.white;
         break;
       case AnswerFeedback.revealedCorrect:
-        _backgroundColor = const Color(0xFF059669).withAlpha((0.15 * 255).round());
+        _backgroundColor =
+            const Color(0xFF059669).withAlpha((0.15 * 255).round());
         _borderColor = const Color(0xFF059669);
         _textColor = widget.colorScheme.onSurface;
         _iconColor = const Color(0xFF059669);
@@ -142,17 +146,23 @@ class _AnswerButtonState extends State<AnswerButton>
             ? (isDesktop ? 36 : 28)
             : (isDesktop ? 18 : 16);
     final double fontSize = widget.isCompact
-        ? (isDesktop ? 16 : 12) // Less cramped font size on desktop for multiplayer
+        ? (isDesktop
+            ? 16
+            : 12) // Less cramped font size on desktop for multiplayer
         : widget.isLarge
             ? (isDesktop ? 32 : 24)
             : getResponsiveFontSize(context, 16);
     final double iconSize = widget.isCompact
-        ? (isDesktop ? 20 : 14) // Less cramped icon size on desktop for multiplayer
+        ? (isDesktop
+            ? 20
+            : 14) // Less cramped icon size on desktop for multiplayer
         : widget.isLarge
             ? (isDesktop ? 48 : 36)
             : getResponsiveFontSize(context, 16);
     final double indicatorSize = widget.isCompact
-        ? (isDesktop ? 32 : 24) // Less cramped indicator size on desktop for multiplayer
+        ? (isDesktop
+            ? 32
+            : 24) // Less cramped indicator size on desktop for multiplayer
         : widget.isLarge
             ? (isDesktop ? 56 : 48)
             : (isDesktop ? 40 : 36);
@@ -224,7 +234,9 @@ class _AnswerButtonState extends State<AnswerButton>
                   child: Container(
                     width: double.infinity,
                     padding: EdgeInsets.symmetric(
-                      horizontal: widget.isCompact ? (isDesktop ? 16 : 8) : (isDesktop ? 24 : 20),
+                      horizontal: widget.isCompact
+                          ? (isDesktop ? 16 : 8)
+                          : (isDesktop ? 24 : 20),
                       vertical: verticalPadding,
                     ),
                     decoration: BoxDecoration(
@@ -252,16 +264,20 @@ class _AnswerButtonState extends State<AnswerButton>
                                     width: indicatorSize,
                                     height: indicatorSize,
                                     decoration: BoxDecoration(
-                                      color: widget.feedback == AnswerFeedback.none
+                                      color: widget.feedback ==
+                                              AnswerFeedback.none
                                           ? widget.colorScheme.primary
                                               .withAlpha((0.1 * 255).round())
-                                          : Colors.white.withAlpha((0.2 * 255).round()),
+                                          : Colors.white
+                                              .withAlpha((0.2 * 255).round()),
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: widget.feedback == AnswerFeedback.none
+                                        color: widget.feedback ==
+                                                AnswerFeedback.none
                                             ? widget.colorScheme.primary
                                                 .withAlpha((0.2 * 255).round())
-                                            : Colors.white.withAlpha((0.3 * 255).round()),
+                                            : Colors.white
+                                                .withAlpha((0.3 * 255).round()),
                                         width: 1,
                                       ),
                                     ),
@@ -274,8 +290,8 @@ class _AnswerButtonState extends State<AnswerButton>
                                             ?.copyWith(
                                               fontWeight: FontWeight.w700,
                                               color: _iconColor,
-                                              fontSize:
-                                                  getResponsiveFontSize(context, 16),
+                                              fontSize: getResponsiveFontSize(
+                                                  context, 16),
                                             ),
                                       ),
                                     ),
@@ -298,15 +314,18 @@ class _AnswerButtonState extends State<AnswerButton>
                                 textAlign: TextAlign.center,
                               ),
                               if (widget.feedback == AnswerFeedback.correct ||
-                                  widget.feedback == AnswerFeedback.revealedCorrect) ...[
+                                  widget.feedback ==
+                                      AnswerFeedback.revealedCorrect) ...[
                                 const SizedBox(height: 4),
                                 Align(
                                   alignment: Alignment.center,
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
-                                      color: widget.feedback == AnswerFeedback.correct
-                                          ? Colors.white.withAlpha((0.2 * 255).round())
+                                      color: widget.feedback ==
+                                              AnswerFeedback.correct
+                                          ? Colors.white
+                                              .withAlpha((0.2 * 255).round())
                                           : widget.colorScheme.primary
                                               .withAlpha((0.1 * 255).round()),
                                       borderRadius: BorderRadius.circular(8),
@@ -314,37 +333,44 @@ class _AnswerButtonState extends State<AnswerButton>
                                               AnswerFeedback.revealedCorrect
                                           ? Border.all(
                                               color: widget.colorScheme.primary
-                                                  .withAlpha((0.3 * 255).round()),
+                                                  .withAlpha(
+                                                      (0.3 * 255).round()),
                                               width: 1,
                                             )
                                           : null,
                                     ),
                                     child: Icon(
                                       Icons.check_rounded,
-                                      color: widget.feedback == AnswerFeedback.correct
+                                      color: widget.feedback ==
+                                              AnswerFeedback.correct
                                           ? Colors.white
                                           : widget.colorScheme.primary,
-                                      size: iconSize / 1.5, // Smaller icons for vertical layout
+                                      size: iconSize /
+                                          1.5, // Smaller icons for vertical layout
                                       semanticLabel: 'Correct answer indicator',
                                     ),
                                   ),
                                 ),
                               ],
-                              if (widget.feedback == AnswerFeedback.incorrect) ...[
+                              if (widget.feedback ==
+                                  AnswerFeedback.incorrect) ...[
                                 const SizedBox(height: 4),
                                 Align(
                                   alignment: Alignment.center,
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withAlpha((0.2 * 255).round()),
+                                      color: Colors.white
+                                          .withAlpha((0.2 * 255).round()),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Icon(
                                       Icons.close_rounded,
                                       color: Colors.white,
-                                      size: iconSize / 1.5, // Smaller icons for vertical layout
-                                      semanticLabel: 'Incorrect answer indicator',
+                                      size: iconSize /
+                                          1.5, // Smaller icons for vertical layout
+                                      semanticLabel:
+                                          'Incorrect answer indicator',
                                     ),
                                   ),
                                 ),
@@ -360,16 +386,20 @@ class _AnswerButtonState extends State<AnswerButton>
                                   width: indicatorSize,
                                   height: indicatorSize,
                                   decoration: BoxDecoration(
-                                    color: widget.feedback == AnswerFeedback.none
-                                        ? widget.colorScheme.primary
-                                            .withAlpha((0.1 * 255).round())
-                                        : Colors.white.withAlpha((0.2 * 255).round()),
+                                    color:
+                                        widget.feedback == AnswerFeedback.none
+                                            ? widget.colorScheme.primary
+                                                .withAlpha((0.1 * 255).round())
+                                            : Colors.white
+                                                .withAlpha((0.2 * 255).round()),
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
-                                      color: widget.feedback == AnswerFeedback.none
+                                      color: widget.feedback ==
+                                              AnswerFeedback.none
                                           ? widget.colorScheme.primary
                                               .withAlpha((0.2 * 255).round())
-                                          : Colors.white.withAlpha((0.3 * 255).round()),
+                                          : Colors.white
+                                              .withAlpha((0.3 * 255).round()),
                                       width: 1,
                                     ),
                                   ),
@@ -382,14 +412,17 @@ class _AnswerButtonState extends State<AnswerButton>
                                           ?.copyWith(
                                             fontWeight: FontWeight.w700,
                                             color: _iconColor,
-                                            fontSize:
-                                                getResponsiveFontSize(context, 16),
+                                            fontSize: getResponsiveFontSize(
+                                                context, 16),
                                           ),
                                     ),
                                   ),
                                 ),
                               if (widget.letter != null)
-                                SizedBox(width: widget.isCompact ? (isDesktop ? 12 : 8) : (isDesktop ? 18 : 16)),
+                                SizedBox(
+                                    width: widget.isCompact
+                                        ? (isDesktop ? 12 : 8)
+                                        : (isDesktop ? 18 : 16)),
                               Expanded(
                                 child: Text(
                                   widget.label,
@@ -406,12 +439,15 @@ class _AnswerButtonState extends State<AnswerButton>
                                 ),
                               ),
                               if (widget.feedback == AnswerFeedback.correct ||
-                                  widget.feedback == AnswerFeedback.revealedCorrect)
+                                  widget.feedback ==
+                                      AnswerFeedback.revealedCorrect)
                                 Container(
                                   padding: const EdgeInsets.all(4),
                                   decoration: BoxDecoration(
-                                    color: widget.feedback == AnswerFeedback.correct
-                                        ? Colors.white.withAlpha((0.2 * 255).round())
+                                    color: widget.feedback ==
+                                            AnswerFeedback.correct
+                                        ? Colors.white
+                                            .withAlpha((0.2 * 255).round())
                                         : widget.colorScheme.primary
                                             .withAlpha((0.1 * 255).round()),
                                     borderRadius: BorderRadius.circular(8),
@@ -426,7 +462,8 @@ class _AnswerButtonState extends State<AnswerButton>
                                   ),
                                   child: Icon(
                                     Icons.check_rounded,
-                                    color: widget.feedback == AnswerFeedback.correct
+                                    color: widget.feedback ==
+                                            AnswerFeedback.correct
                                         ? Colors.white
                                         : widget.colorScheme.primary,
                                     size: iconSize,
@@ -437,7 +474,8 @@ class _AnswerButtonState extends State<AnswerButton>
                                 Container(
                                   padding: const EdgeInsets.all(4),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withAlpha((0.2 * 255).round()),
+                                    color: Colors.white
+                                        .withAlpha((0.2 * 255).round()),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(
@@ -461,4 +499,4 @@ class _AnswerButtonState extends State<AnswerButton>
       },
     );
   }
-} 
+}

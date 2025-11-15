@@ -58,7 +58,8 @@ class StarTransactionService {
   static const String _totalSpentKey = 'stars_total_spent';
 
   static StarTransactionService? _instance;
-  static StarTransactionService get instance => _instance ??= StarTransactionService._internal();
+  static StarTransactionService get instance =>
+      _instance ??= StarTransactionService._internal();
 
   SharedPreferences? _prefs;
   final List<StarTransaction> _transactions = [];
@@ -80,7 +81,8 @@ class StarTransactionService {
     try {
       _prefs = await SharedPreferences.getInstance();
       await _loadTransactionHistory();
-      AppLogger.info('StarTransactionService initialized with ${_transactions.length} transactions');
+      AppLogger.info(
+          'StarTransactionService initialized with ${_transactions.length} transactions');
     } catch (e) {
       // Use the new error handling system
       ErrorHandler().fromException(
@@ -89,7 +91,7 @@ class StarTransactionService {
         userMessage: 'Failed to initialize transaction service',
         context: {'operation': 'initialize'},
       );
-      
+
       AppLogger.error('Failed to initialize StarTransactionService: $e');
       throw Exception('Failed to initialize star transaction service: $e');
     }
@@ -133,7 +135,8 @@ class StarTransactionService {
         _transactions.removeRange(1000, _transactions.length);
       }
 
-      final rawTransactions = _transactions.map((t) => jsonEncode(t.toJson())).toList();
+      final rawTransactions =
+          _transactions.map((t) => jsonEncode(t.toJson())).toList();
       await _prefs?.setStringList(_transactionsKey, rawTransactions);
 
       // Update totals
@@ -145,7 +148,8 @@ class StarTransactionService {
         await _prefs?.setInt(_totalSpentKey, _totalSpent);
       }
 
-      AppLogger.info('Saved star transaction: ${transaction.type} ${transaction.amount} stars - ${transaction.reason}');
+      AppLogger.info(
+          'Saved star transaction: ${transaction.type} ${transaction.amount} stars - ${transaction.reason}');
     } catch (e) {
       AppLogger.error('Error saving transaction: $e');
     }
@@ -221,7 +225,7 @@ class StarTransactionService {
         userMessage: 'Failed to add stars',
         context: {'operation': 'add_stars', 'amount': amount, 'reason': reason},
       );
-      
+
       AppLogger.error('Error adding stars: $e');
       return false;
     }
@@ -240,7 +244,8 @@ class StarTransactionService {
     }
 
     if (currentBalance < amount) {
-      AppLogger.warning('Insufficient stars: have $currentBalance, need $amount');
+      AppLogger.warning(
+          'Insufficient stars: have $currentBalance, need $amount');
       return false;
     }
 
@@ -273,9 +278,13 @@ class StarTransactionService {
         e,
         type: AppErrorType.storage,
         userMessage: 'Failed to spend stars',
-        context: {'operation': 'spend_stars', 'amount': amount, 'reason': reason},
+        context: {
+          'operation': 'spend_stars',
+          'amount': amount,
+          'reason': reason
+        },
       );
-      
+
       AppLogger.error('Error spending stars: $e');
       return false;
     }
@@ -350,10 +359,16 @@ class StarTransactionService {
       'totalEarned': _totalEarned,
       'totalSpent': _totalSpent,
       'netTotal': _totalEarned - _totalSpent,
-      'transactionsLast24h': _transactions.where((t) => t.timestamp.isAfter(last24h)).length,
-      'transactionsLast7d': _transactions.where((t) => t.timestamp.isAfter(last7d)).length,
-      'transactionsLast30d': _transactions.where((t) => t.timestamp.isAfter(last30d)).length,
-      'averageTransactionAmount': _transactions.isEmpty ? 0 : _transactions.map((t) => t.amount.abs()).reduce((a, b) => a + b) / _transactions.length,
+      'transactionsLast24h':
+          _transactions.where((t) => t.timestamp.isAfter(last24h)).length,
+      'transactionsLast7d':
+          _transactions.where((t) => t.timestamp.isAfter(last7d)).length,
+      'transactionsLast30d':
+          _transactions.where((t) => t.timestamp.isAfter(last30d)).length,
+      'averageTransactionAmount': _transactions.isEmpty
+          ? 0
+          : _transactions.map((t) => t.amount.abs()).reduce((a, b) => a + b) /
+              _transactions.length,
     };
   }
 
@@ -373,7 +388,8 @@ class StarTransactionService {
     try {
       // This would be a complex operation requiring careful merging
       // For now, we'll just log that import was requested
-      AppLogger.info('Transaction data import requested - implement based on specific requirements');
+      AppLogger.info(
+          'Transaction data import requested - implement based on specific requirements');
     } catch (e) {
       AppLogger.error('Error importing transaction data: $e');
     }

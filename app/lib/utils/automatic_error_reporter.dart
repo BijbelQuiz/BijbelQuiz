@@ -19,13 +19,15 @@ class AutomaticErrorReporter {
       // Check if automatic bug reporting is enabled
       final isEnabled = await SettingsProvider.isAutomaticBugReportingEnabled();
       if (!isEnabled) {
-        AppLogger.info('Automatic bug reporting is disabled, skipping biblical reference error report');
+        AppLogger.info(
+            'Automatic bug reporting is disabled, skipping biblical reference error report');
         return;
       }
 
       await ErrorReportingService().reportSimpleError(
         message: message,
-        type: AppErrorType.api, // Most biblical reference issues are API related
+        type:
+            AppErrorType.api, // Most biblical reference issues are API related
         userMessage: userMessage ?? 'Biblical reference error',
         questionId: questionId,
         additionalInfo: {
@@ -53,7 +55,8 @@ class AutomaticErrorReporter {
       // Check if automatic bug reporting is enabled
       final isEnabled = await SettingsProvider.isAutomaticBugReportingEnabled();
       if (!isEnabled) {
-        AppLogger.info('Automatic bug reporting is disabled, skipping question error report');
+        AppLogger.info(
+            'Automatic bug reporting is disabled, skipping question error report');
         return;
       }
 
@@ -87,7 +90,8 @@ class AutomaticErrorReporter {
       // Check if automatic bug reporting is enabled
       final isEnabled = await SettingsProvider.isAutomaticBugReportingEnabled();
       if (!isEnabled) {
-        AppLogger.info('Automatic bug reporting is disabled, skipping network error report');
+        AppLogger.info(
+            'Automatic bug reporting is disabled, skipping network error report');
         return;
       }
 
@@ -122,7 +126,8 @@ class AutomaticErrorReporter {
       // Check if automatic bug reporting is enabled
       final isEnabled = await SettingsProvider.isAutomaticBugReportingEnabled();
       if (!isEnabled) {
-        AppLogger.info('Automatic bug reporting is disabled, skipping storage error report');
+        AppLogger.info(
+            'Automatic bug reporting is disabled, skipping storage error report');
         return;
       }
 

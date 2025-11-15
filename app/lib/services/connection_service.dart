@@ -9,34 +9,35 @@ class ConnectionService {
   static const Duration _connectionTimeout = Duration(seconds: 5);
   static const Duration _retryDelay = Duration(seconds: 2);
   static const int _maxRetries = 3;
-  
+
   bool _isConnected = true;
   bool _isSlowConnection = false;
   ConnectionType _connectionType = ConnectionType.unknown;
   Timer? _connectionCheckTimer;
   final List<ConnectionStatus> _connectionHistory = [];
   static bool disableTimersForTest = false;
-  Function(bool isConnected, ConnectionType connectionType)? _onConnectionStatusChanged;
-  
+  Function(bool isConnected, ConnectionType connectionType)?
+      _onConnectionStatusChanged;
+
   /// Whether the device is currently connected to the internet
   bool get isConnected => _isConnected;
-  
+
   /// Whether the connection is slow
   bool get isSlowConnection => _isSlowConnection;
-  
+
   /// The current connection type
   ConnectionType get connectionType => _connectionType;
-  
+
   /// Whether to use offline mode
   bool get shouldUseOfflineMode => !_isConnected || _isSlowConnection;
-  
+
   /// Whether we're connected to WiFi
   bool get isWiFiConnected => _connectionType == ConnectionType.fast;
 
   /// Initialize the connection service
   Future<void> initialize() async {
     if (disableTimersForTest) return;
-    
+
     // Skip connection checking on web for now
     if (kIsWeb) {
       _isConnected = true;
@@ -45,7 +46,7 @@ class ConnectionService {
       AppLogger.info('Connection service initialized for web platform');
       return;
     }
-    
+
     await _checkConnection();
     _startConnectionMonitoring();
   }
@@ -60,19 +61,21 @@ class ConnectionService {
       final connectivityResults = await (Connectivity().checkConnectivity());
 
       // Get the first result or none if empty
-      final connectivityResult = connectivityResults.isNotEmpty ? connectivityResults.first : ConnectivityResult.none;
-      
+      final connectivityResult = connectivityResults.isNotEmpty
+          ? connectivityResults.first
+          : ConnectivityResult.none;
+
       if (connectivityResult == ConnectivityResult.none) {
         _isConnected = false;
         _connectionType = ConnectionType.none;
         AppLogger.info('Connection checked: not connected');
       } else {
         _isConnected = true;
-        
+
         // Test connection with a simple ping
         final result = await InternetAddress.lookup('google.com')
             .timeout(_connectionTimeout);
-        
+
         if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
           // Determine connection type based on connectivity result
           if (connectivityResult == ConnectivityResult.wifi) {
@@ -81,7 +84,8 @@ class ConnectionService {
           } else {
             await _determineConnectionType();
           }
-          AppLogger.info('Connection checked: connected via ${connectivityResult.toString()}');
+          AppLogger.info(
+              'Connection checked: connected via ${connectivityResult.toString()}');
         } else {
           _isConnected = false;
           _connectionType = ConnectionType.none;
@@ -97,7 +101,8 @@ class ConnectionService {
     _recordConnectionStatus();
 
     // Track connection status changes if state changed
-    if (previousConnectionState != _isConnected || previousConnectionType != _connectionType) {
+    if (previousConnectionState != _isConnected ||
+        previousConnectionType != _connectionType) {
       // Note: This would need to be called from a widget that has access to BuildContext
       // For now, we'll add a callback mechanism
       _onConnectionStatusChanged?.call(_isConnected, _connectionType);
@@ -109,14 +114,14 @@ class ConnectionService {
     try {
       // Simple speed test by timing a small request
       final stopwatch = Stopwatch()..start();
-      
+
       final socket = await Socket.connect('google.com', 80)
           .timeout(const Duration(seconds: 3));
       await socket.close();
-      
+
       stopwatch.stop();
       final responseTime = stopwatch.elapsedMilliseconds;
-      
+
       if (responseTime < 100) {
         _connectionType = ConnectionType.fast;
         _isSlowConnection = false;
@@ -159,10 +164,10 @@ class ConnectionService {
   }
 
   /// Set callback for connection status changes
-  void setConnectionStatusCallback(Function(bool isConnected, ConnectionType connectionType)? callback) {
+  void setConnectionStatusCallback(
+      Function(bool isConnected, ConnectionType connectionType)? callback) {
     _onConnectionStatusChanged = callback;
   }
-
 
   /// Execute a network request with connection-aware retry logic
   Future<T> executeWithRetry<T>(
@@ -172,29 +177,29 @@ class ConnectionService {
   }) async {
     int attempts = 0;
     final delay = retryDelay ?? _retryDelay;
-    
+
     while (attempts < maxRetries) {
       try {
         if (!_isConnected) {
           throw Exception('No internet connection');
         }
-        
+
         return await request().timeout(_getOptimalTimeout());
       } catch (e) {
         attempts++;
-        
+
         if (attempts >= maxRetries) {
           rethrow;
         }
-        
+
         // Wait before retrying, with exponential backoff
         await Future.delayed(delay * attempts);
-        
+
         // Re-check connection before retry
         await _checkConnection();
       }
     }
-    
+
     throw Exception('Max retries exceeded');
   }
 
@@ -234,10 +239,10 @@ class ConnectionService {
         'averageResponseTime': 0,
       };
     }
-    
+
     final successful = _connectionHistory.where((s) => s.isConnected).length;
     final failed = _connectionHistory.where((s) => !s.isConnected).length;
-    
+
     return {
       'totalChecks': _connectionHistory.length,
       'successfulConnections': successful,
@@ -279,7 +284,7 @@ class ConnectionStatus {
   final bool isConnected;
   final ConnectionType connectionType;
   final bool isSlow;
-  
+
   /// Creates a new [ConnectionStatus] record.
   ConnectionStatus({
     required this.timestamp,
@@ -287,4 +292,4 @@ class ConnectionStatus {
     required this.connectionType,
     required this.isSlow,
   });
-} 
+}

@@ -42,7 +42,8 @@ class QuizMetricsDisplay extends StatelessWidget {
     final gameStats = Provider.of<GameStatsProvider>(context);
 
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 250), // Optimized for better responsiveness
+      duration: const Duration(
+          milliseconds: 250), // Optimized for better responsiveness
       switchInCurve: Curves.easeIn,
       switchOutCurve: Curves.easeOut,
       transitionBuilder: (child, animation) => FadeTransition(
@@ -87,7 +88,8 @@ class QuizMetricsDisplay extends StatelessWidget {
     );
   }
 
-  Widget _buildDesktopTabletMetrics(ColorScheme colorScheme, GameStatsProvider gameStats) {
+  Widget _buildDesktopTabletMetrics(
+      ColorScheme colorScheme, GameStatsProvider gameStats) {
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 16,
@@ -142,7 +144,8 @@ class QuizMetricsDisplay extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileMetrics(ColorScheme colorScheme, GameStatsProvider gameStats) {
+  Widget _buildMobileMetrics(
+      ColorScheme colorScheme, GameStatsProvider gameStats) {
     return Builder(
       builder: (context) {
         final size = MediaQuery.of(context).size;

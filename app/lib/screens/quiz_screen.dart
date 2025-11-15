@@ -52,12 +52,12 @@ class QuizScreen extends StatefulWidget {
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
-class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, WidgetsBindingObserver {
+class _QuizScreenState extends State<QuizScreen>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   int currentQuestionIndex = 0;
   bool _isLoading = true;
   String? _error;
   String? _lastLanguage;
-  
 
   // Lesson session mode (cap session to N questions with completion screen)
   bool get _lessonMode => widget.lesson != null && widget.sessionLimit != null;
@@ -65,24 +65,23 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
   int _sessionCorrect = 0;
   int _sessionCurrentStreakLocal = 0;
   int _sessionBestStreak = 0;
-  
-  
+
   // Previous values for comparison
   int _previousScore = 0;
   int _previousStreak = 0;
   int _previousLongestStreak = 0;
   int _previousTime = 20;
-  
+
   // Track if we've initialized previous values after loading
   bool _initializedStats = false;
   // New state management
   late QuizState _quizState;
   bool _hasLoggedScreenView = false;
-  
+
   // Performance optimization: track loading states to reduce debug logging
   bool _lastLoadingState = true;
   bool _lastGameStatsLoadingState = true;
-  
+
   // Performance and connection services
   late QuestionCacheService _questionCacheService;
   late PerformanceService _performanceService;
@@ -99,17 +98,20 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
   @override
   void initState() {
     super.initState();
-    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    final analyticsService =
+        Provider.of<AnalyticsService>(context, listen: false);
 
     // Track screen view
     analyticsService.screen(context, 'QuizScreen');
 
     // Track quiz gameplay feature access
-    analyticsService.trackFeatureStart(context, AnalyticsService.featureQuizGameplay, additionalProperties: {
-      'lesson_mode': _lessonMode,
-      'lesson_id': widget.lesson?.id ?? 'free_play',
-      'session_limit': widget.sessionLimit ?? 0,
-    });
+    analyticsService.trackFeatureStart(
+        context, AnalyticsService.featureQuizGameplay,
+        additionalProperties: {
+          'lesson_mode': _lessonMode,
+          'lesson_id': widget.lesson?.id ?? 'free_play',
+          'session_limit': widget.sessionLimit ?? 0,
+        });
 
     WidgetsBinding.instance.addObserver(this);
     AppLogger.info('QuizScreen loaded');
@@ -117,34 +119,34 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     // Log performance metrics periodically and track performance
     Future.delayed(const Duration(seconds: 30), () {
       if (mounted) {
-        final performanceService = Provider.of<PerformanceService>(context, listen: false);
+        final performanceService =
+            Provider.of<PerformanceService>(context, listen: false);
         final metrics = performanceService.getPerformanceMetrics();
         AppLogger.info('QuizScreen performance metrics: $metrics');
-
       }
     });
-    
+
     // Initialize services
     _performanceService = PerformanceService();
     _connectionService = ConnectionService();
     _platformFeedbackService = PlatformFeedbackService();
     _questionCacheService = QuestionCacheService(_connectionService);
-    
+
     _initializeServices();
     _initializeManagers();
     _initializeQuiz();
-    
+
     // Add frame callback to monitor performance
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _monitorPerformance();
     });
-    
+
     // Listen for game stats reset to reset question pool
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
       gameStats.addListener(_onGameStatsChanged);
     });
-    
+
     // Attach error handler for sound service
     _soundService.onError = (message) {
       if (mounted) {
@@ -158,9 +160,12 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     if (!mounted) return;
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
     // If score and streak are both 0, it might be a new game
-    if (gameStats.score == 0 && gameStats.currentStreak == 0 && gameStats.incorrectAnswers == 0) {
+    if (gameStats.score == 0 &&
+        gameStats.currentStreak == 0 &&
+        gameStats.incorrectAnswers == 0) {
       // Check if this is a fresh reset (not just initialization)
-      if (_questionSelector.allQuestionsLoaded && _questionSelector.usedQuestions.isNotEmpty) {
+      if (_questionSelector.allQuestionsLoaded &&
+          _questionSelector.usedQuestions.isNotEmpty) {
         _resetForNewGame();
       }
     }
@@ -176,8 +181,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
         _soundService.initialize(),
       ]);
       AppLogger.info('QuizScreen services initialized');
-
-
     } catch (e) {
       AppLogger.error('Failed to initialize services in QuizScreen', e);
     }
@@ -208,7 +211,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       platformFeedbackService: _platformFeedbackService,
     );
   }
-
 
   // Monitor performance by tracking frame times
   void _monitorPerformance() {
@@ -268,7 +270,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     }
   }
 
-
   // Live timer tick: update timeRemaining once per second using controller value
   // PERFORMANCE OPTIMIZATION: Only update when the second actually changes
   void _onTimeTick() {
@@ -276,9 +277,10 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     final duration = _timerManager.timeAnimationController.duration;
     if (duration == null) return;
 
-    final elapsedMs = (_timerManager.timeAnimationController.value * duration.inMilliseconds)
-        .clamp(0.0, duration.inMilliseconds.toDouble())
-        .toInt();
+    final elapsedMs =
+        (_timerManager.timeAnimationController.value * duration.inMilliseconds)
+            .clamp(0.0, duration.inMilliseconds.toDouble())
+            .toInt();
     final remainingMs = duration.inMilliseconds - elapsedMs;
     final remainingSeconds = (remainingMs / 1000).ceil();
 
@@ -288,7 +290,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
         _previousTime = _quizState.timeRemaining;
         _quizState = _quizState.copyWith(timeRemaining: remainingSeconds);
       });
-      
+
       // Trigger animation when time reaches critical threshold (5 seconds)
       if (remainingSeconds == 5) {
         _animationController.triggerTimeAnimation();
@@ -296,23 +298,27 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     }
   }
 
-
   Future<void> _showTimeUpDialog() async {
-    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'show_time_up_dialog');
+    Provider.of<AnalyticsService>(context, listen: false)
+        .capture(context, 'show_time_up_dialog');
     final localContext = context;
     if (ModalRoute.of(localContext)?.isCurrent != true) return;
 
     final settings = Provider.of<SettingsProvider>(localContext, listen: false);
-    final gameStats = Provider.of<GameStatsProvider>(localContext, listen: false);
+    final gameStats =
+        Provider.of<GameStatsProvider>(localContext, listen: false);
     final hasEnoughPoints = gameStats.score >= 50;
 
     OverlayEntry? tooltipEntry;
 
-    void showInsufficientPointsTooltip(BuildContext context, RenderBox buttonBox) {
+    void showInsufficientPointsTooltip(
+        BuildContext context, RenderBox buttonBox) {
       tooltipEntry?.remove();
 
-      final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-      final buttonPosition = buttonBox.localToGlobal(Offset.zero, ancestor: overlay);
+      final RenderBox overlay =
+          Overlay.of(context).context.findRenderObject() as RenderBox;
+      final buttonPosition =
+          buttonBox.localToGlobal(Offset.zero, ancestor: overlay);
 
       tooltipEntry = OverlayEntry(
         builder: (context) => Positioned(
@@ -364,61 +370,75 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
           actions: [
             Builder(
               builder: (ctx) => TextButton(
-                onPressed: hasEnoughPoints ? () {
-                  final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
-                  analyticsService.capture(context, 'retry_with_points');
-                  analyticsService.trackFeatureAttempt(context, AnalyticsService.featureRetryWithPoints, additionalProperties: {
-                    'time_remaining': 0, // Time is up
-                    'current_streak': gameStats.currentStreak,
-                    'current_score': gameStats.score,
-                  });
-                  gameStats.spendPointsForRetry().then((success) {
-                    if (!dialogContext.mounted) return;
-                    if (success) {
-                      // Track successful retry with points
-                      final localAnalytics = analyticsService;
-                      final localGameStats = gameStats;
-                      localAnalytics.trackFeatureSuccess(dialogContext, AnalyticsService.featureRetryWithPoints, additionalProperties: {
-                        'time_remaining': 0, // Time is up
-                        'current_streak': localGameStats.currentStreak,
-                        'current_score': localGameStats.score,
-                      });
+                onPressed: hasEnoughPoints
+                    ? () {
+                        final analyticsService = Provider.of<AnalyticsService>(
+                            context,
+                            listen: false);
+                        analyticsService.capture(context, 'retry_with_points');
+                        analyticsService.trackFeatureAttempt(
+                            context, AnalyticsService.featureRetryWithPoints,
+                            additionalProperties: {
+                              'time_remaining': 0, // Time is up
+                              'current_streak': gameStats.currentStreak,
+                              'current_score': gameStats.score,
+                            });
+                        gameStats.spendPointsForRetry().then((success) {
+                          if (!dialogContext.mounted) return;
+                          if (success) {
+                            // Track successful retry with points
+                            final localAnalytics = analyticsService;
+                            final localGameStats = gameStats;
+                            localAnalytics.trackFeatureSuccess(dialogContext,
+                                AnalyticsService.featureRetryWithPoints,
+                                additionalProperties: {
+                                  'time_remaining': 0, // Time is up
+                                  'current_streak':
+                                      localGameStats.currentStreak,
+                                  'current_score': localGameStats.score,
+                                });
 
-                      Navigator.of(dialogContext).pop();
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) {
-                          setState(() {
-                            final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
-                              Duration(seconds: settings.gameSpeedTimerDuration)
-                            );
-                            _quizState = _quizState.copyWith(
-                              timeRemaining: optimalTimerDuration.inSeconds,
-                            );
-                          });
-                          if (mounted) {
-                            _timerManager.startTimer(context: context, reset: true);
-                            _animationController.triggerTimeAnimation();
+                            Navigator.of(dialogContext).pop();
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) {
+                                setState(() {
+                                  final optimalTimerDuration =
+                                      _performanceService
+                                          .getOptimalTimerDuration(Duration(
+                                              seconds: settings
+                                                  .gameSpeedTimerDuration));
+                                  _quizState = _quizState.copyWith(
+                                    timeRemaining:
+                                        optimalTimerDuration.inSeconds,
+                                  );
+                                });
+                                if (mounted) {
+                                  _timerManager.startTimer(
+                                      context: context, reset: true);
+                                  _animationController.triggerTimeAnimation();
+                                }
+                              }
+                            });
+                          }
+                        });
+                      }
+                    : () {
+                        // Create a local function to handle the tooltip display
+                        void showTooltip() {
+                          if (ctx.mounted) {
+                            try {
+                              final RenderBox buttonBox =
+                                  ctx.findRenderObject() as RenderBox;
+                              showInsufficientPointsTooltip(ctx, buttonBox);
+                            } catch (e) {
+                              // Ignore errors in finding render object
+                            }
                           }
                         }
-                      });
-                    }
-                  });
-                } : () {
-                  // Create a local function to handle the tooltip display
-                  void showTooltip() {
-                    if (ctx.mounted) {
-                      try {
-                        final RenderBox buttonBox = ctx.findRenderObject() as RenderBox;
-                        showInsufficientPointsTooltip(ctx, buttonBox);
-                      } catch (e) {
-                        // Ignore errors in finding render object
-                      }
-                    }
-                  }
 
-                  // Call the function immediately
-                  showTooltip();
-                },
+                        // Call the function immediately
+                        showTooltip();
+                      },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -426,8 +446,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                       strings.AppStrings.retry,
                       style: TextStyle(
                         color: hasEnoughPoints
-                          ? Theme.of(localContext).colorScheme.primary
-                          : Theme.of(localContext).colorScheme.outline,
+                            ? Theme.of(localContext).colorScheme.primary
+                            : Theme.of(localContext).colorScheme.outline,
                         fontSize: 16,
                       ),
                     ),
@@ -436,15 +456,15 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                       Icons.star,
                       size: 16,
                       color: hasEnoughPoints
-                        ? Theme.of(localContext).colorScheme.primary
-                        : Theme.of(localContext).colorScheme.outline,
+                          ? Theme.of(localContext).colorScheme.primary
+                          : Theme.of(localContext).colorScheme.outline,
                     ),
                     Text(
                       ' 50',
                       style: TextStyle(
                         color: hasEnoughPoints
-                          ? Theme.of(localContext).colorScheme.primary
-                          : Theme.of(localContext).colorScheme.outline,
+                            ? Theme.of(localContext).colorScheme.primary
+                            : Theme.of(localContext).colorScheme.outline,
                         fontSize: 16,
                       ),
                     ),
@@ -454,7 +474,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
             ),
             TextButton(
               onPressed: () {
-                Provider.of<AnalyticsService>(context, listen: false).capture(context, 'next_question_from_time_up');
+                Provider.of<AnalyticsService>(context, listen: false)
+                    .capture(context, 'next_question_from_time_up');
                 Navigator.of(dialogContext).pop();
                 // For time up scenario, we call handleNextQuestion which will record the result
                 _handleNextQuestion(false, _quizState.currentDifficulty);
@@ -482,27 +503,31 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     super.didChangeDependencies();
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     final language = settings.language;
-    
+
     // Telemetry logging
     void tryLogScreenView() {
       if (!_hasLoggedScreenView && ModalRoute.of(context)?.isCurrent == true) {
-        
         _hasLoggedScreenView = true;
       } else if (!_hasLoggedScreenView && ModalRoute.of(context) != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) => tryLogScreenView());
       }
     }
+
     tryLogScreenView();
-    
+
     // Reset question pool if language changed
     if (_lastLanguage != null && _lastLanguage != language) {
       final analytics = Provider.of<AnalyticsService>(context, listen: false);
-      analytics.capture(context, 'language_changed', properties: {'from': _lastLanguage!, 'to': language});
-      analytics.trackFeatureSuccess(context, AnalyticsService.featureLanguageSettings, additionalProperties: {
-        'from_language': _lastLanguage!,
-        'to_language': language,
-      });
-      AppLogger.info('Language changed from $_lastLanguage to $language, resetting question pool');
+      analytics.capture(context, 'language_changed',
+          properties: {'from': _lastLanguage!, 'to': language});
+      analytics.trackFeatureSuccess(
+          context, AnalyticsService.featureLanguageSettings,
+          additionalProperties: {
+            'from_language': _lastLanguage!,
+            'to_language': language,
+          });
+      AppLogger.info(
+          'Language changed from $_lastLanguage to $language, resetting question pool');
       _resetQuestionPool();
     }
     _lastLanguage = language;
@@ -523,7 +548,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
 
   /// Initialize animations with performance optimizations
   Future<void> _initializeQuiz() async {
-    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    final analyticsService =
+        Provider.of<AnalyticsService>(context, listen: false);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
 
     try {
@@ -534,28 +560,30 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
 
       final language = settings.language;
 
-
       // Load questions - if in lesson mode with a specific category, load category questions
       // Otherwise load questions in batches for better performance
       if (!_questionSelector.allQuestionsLoaded) {
-        if (_lessonMode && widget.lesson?.category != null && widget.lesson!.category != 'Algemeen') {
+        if (_lessonMode &&
+            widget.lesson?.category != null &&
+            widget.lesson!.category != 'Algemeen') {
           // Load questions for specific category
-          _questionSelector.allQuestions = await _questionCacheService.getQuestionsByCategory(
-            language,
-            widget.lesson!.category
-          );
-          AppLogger.info('Loaded category questions for language: $language, category: ${widget.lesson!.category}, count: ${_questionSelector.allQuestions.length}');
+          _questionSelector.allQuestions = await _questionCacheService
+              .getQuestionsByCategory(language, widget.lesson!.category);
+          AppLogger.info(
+              'Loaded category questions for language: $language, category: ${widget.lesson!.category}, count: ${_questionSelector.allQuestions.length}');
         } else {
           // Load ALL questions for this language up-front to guarantee
           // no duplicates are served within a session. If the device/network
           // allows, this ensures the full question pool is available and we
           // never have to repeat before exhausting the entire DB.
-          _questionSelector.allQuestions = await _questionCacheService.getQuestions(
+          _questionSelector.allQuestions =
+              await _questionCacheService.getQuestions(
             language,
             startIndex: 0,
             // Passing no count loads all remaining questions from the cache/service
           );
-          AppLogger.info('Loaded full set of questions for language: $language, count: ${_questionSelector.allQuestions.length}');
+          AppLogger.info(
+              'Loaded full set of questions for language: $language, count: ${_questionSelector.allQuestions.length}');
         }
         _questionSelector.allQuestions.shuffle(Random());
         _questionSelector.allQuestionsLoaded = true;
@@ -568,8 +596,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       // Initialize quiz state with PQU (Progressive Question Up-selection)
       final isSlowMode = settings.slowMode;
       final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
-        Duration(seconds: settings.gameSpeedTimerDuration)
-      );
+          Duration(seconds: settings.gameSpeedTimerDuration));
 
       // Track slow mode usage
       if (isSlowMode) {
@@ -577,26 +604,33 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
         // Don't pass context in async operation - trackFeatureUsage will handle context internally
         // or we need to call this before any await operations
         if (mounted) {
-          localAnalytics.trackFeatureUsage(context, AnalyticsService.featureSettings, AnalyticsService.actionUsed, additionalProperties: {
-            'setting': 'slow_mode',
-            'enabled': true,
-          });
+          localAnalytics.trackFeatureUsage(context,
+              AnalyticsService.featureSettings, AnalyticsService.actionUsed,
+              additionalProperties: {
+                'setting': 'slow_mode',
+                'enabled': true,
+              });
         }
       }
 
       if (!mounted) return;
       // Select the first question; the selector ensures no duplicates and handles
       // exhaustion by widening scope and then resetting when necessary.
-      final QuizQuestion firstQuestion = _questionSelector.pickNextQuestion(0.0, context);
+      final QuizQuestion firstQuestion =
+          _questionSelector.pickNextQuestion(0.0, context);
 
       // Track question category usage
       if (firstQuestion.category.isNotEmpty) {
         final localAnalytics = analyticsService;
         // Track immediately, not after async operations
-        localAnalytics.trackFeatureUsage(context, AnalyticsService.featureQuestionCategories, AnalyticsService.actionUsed, additionalProperties: {
-          'category': firstQuestion.category,
-          'difficulty': firstQuestion.difficulty,
-        });
+        localAnalytics.trackFeatureUsage(
+            context,
+            AnalyticsService.featureQuestionCategories,
+            AnalyticsService.actionUsed,
+            additionalProperties: {
+              'category': firstQuestion.category,
+              'difficulty': firstQuestion.difficulty,
+            });
       }
       _quizState = QuizState(
         question: firstQuestion,
@@ -618,10 +652,9 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       _animationController.triggerTimeAnimation();
 
       // Quiz initialization completed successfully
-
     } catch (e) {
       if (!mounted) return;
-      
+
       // Use the new error handling system
       final appError = ErrorHandler().fromException(
         e,
@@ -632,7 +665,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
           'error_type': e.runtimeType.toString(),
         },
       );
-      
+
       setState(() {
         _error = appError.userMessage;
       });
@@ -666,7 +699,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
 
       // Mark today as used (lesson completion counts as using BijbelQuiz)
       final today = DateTime.now();
-      final todayStr = '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      final todayStr =
+          '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
       if (!activeDays.contains(todayStr)) {
         activeDays.add(todayStr);
         await prefs.setStringList(activeDaysKey, activeDays.toList());
@@ -677,11 +711,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     }
   }
 
-
-
   void _handleAnswer(int selectedIndex) {
     Provider.of<AnalyticsService>(context, listen: false);
-
 
     _answerHandler.handleAnswer(
       selectedIndex: selectedIndex,
@@ -699,7 +730,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
   Future<void> _handleNextQuestion(bool isCorrect, double newDifficulty) async {
     final localContext = context;
     Provider.of<AnalyticsService>(localContext, listen: false);
-    final gameStats = Provider.of<GameStatsProvider>(localContext, listen: false);
+    final gameStats =
+        Provider.of<GameStatsProvider>(localContext, listen: false);
     final settings = Provider.of<SettingsProvider>(localContext, listen: false);
 
     // Update game stats first
@@ -724,14 +756,18 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       // Track lesson completion - capture context before any async operations
       if (mounted) {
         final analytics = Provider.of<AnalyticsService>(context, listen: false);
-        analytics.trackFeatureCompletion(context, AnalyticsService.featureLessonSystem, additionalProperties: {
-          'lesson_id': widget.lesson?.id ?? 'unknown',
-          'lesson_category': widget.lesson?.category ?? 'unknown',
-          'questions_answered': _sessionAnswered,
-          'questions_correct': _sessionCorrect,
-          'accuracy_rate': _sessionAnswered > 0 ? (_sessionCorrect / _sessionAnswered) : 0,
-          'best_streak': _sessionBestStreak,
-        });
+        analytics.trackFeatureCompletion(
+            context, AnalyticsService.featureLessonSystem,
+            additionalProperties: {
+              'lesson_id': widget.lesson?.id ?? 'unknown',
+              'lesson_category': widget.lesson?.category ?? 'unknown',
+              'questions_answered': _sessionAnswered,
+              'questions_correct': _sessionCorrect,
+              'accuracy_rate': _sessionAnswered > 0
+                  ? (_sessionCorrect / _sessionAnswered)
+                  : 0,
+              'best_streak': _sessionBestStreak,
+            });
       }
 
       await _completeLessonSession();
@@ -747,7 +783,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     });
 
     // Phase 3: Brief pause before transition (platform-optimized)
-    final transitionPause = _platformFeedbackService.getTransitionPauseDuration();
+    final transitionPause =
+        _platformFeedbackService.getTransitionPauseDuration();
     await Future.delayed(transitionPause);
     if (!mounted) return;
 
@@ -755,7 +792,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     if (!mounted) return;
     AppLogger.info('Transitioning to next question');
     // Record the answer result so the question selector knows if the previous question was answered correctly
-    _questionSelector.recordAnswerResult(_quizState.question.question, isCorrect);
+    _questionSelector.recordAnswerResult(
+        _quizState.question.question, isCorrect);
 
     // Calculate new difficulty
     final calculatedNewDifficulty = _questionSelector.calculateNextDifficulty(
@@ -772,19 +810,23 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     // Track progressive difficulty adjustments - use context before any async gaps
     if (calculatedNewDifficulty != _quizState.currentDifficulty) {
       final analytics = Provider.of<AnalyticsService>(context, listen: false);
-      analytics.trackFeatureUsage(context, AnalyticsService.featureProgressiveDifficulty, isCorrect ? 'increased' : 'decreased', additionalProperties: {
-        'previous_difficulty': _quizState.currentDifficulty,
-        'new_difficulty': calculatedNewDifficulty,
-        'current_streak': gameStats.currentStreak,
-        'question_category': _quizState.question.category,
-      });
+      analytics.trackFeatureUsage(
+          context,
+          AnalyticsService.featureProgressiveDifficulty,
+          isCorrect ? 'increased' : 'decreased',
+          additionalProperties: {
+            'previous_difficulty': _quizState.currentDifficulty,
+            'new_difficulty': calculatedNewDifficulty,
+            'current_streak': gameStats.currentStreak,
+            'question_category': _quizState.question.category,
+          });
     }
     // Compute next question; selector enforces uniqueness and auto-resets as needed
-    final QuizQuestion nextQuestion = _questionSelector.pickNextQuestion(calculatedNewDifficulty, context);
+    final QuizQuestion nextQuestion =
+        _questionSelector.pickNextQuestion(calculatedNewDifficulty, context);
     setState(() {
       final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
-        Duration(seconds: settings.gameSpeedTimerDuration)
-      );
+          Duration(seconds: settings.gameSpeedTimerDuration));
       _quizState = QuizState(
         question: nextQuestion,
         timeRemaining: optimalTimerDuration.inSeconds,
@@ -794,8 +836,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       _animationController.triggerTimeAnimation();
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -828,8 +868,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     final isSmallPhone = context.isSmallPhone;
 
     // PERFORMANCE OPTIMIZATION: Reduce debug logging frequency
-    if (kDebugMode && (_isLoading != _lastLoadingState || gameStats.isLoading != _lastGameStatsLoadingState)) {
-      AppLogger.info('QuizScreen build: _isLoading=$_isLoading, gameStats.isLoading=${gameStats.isLoading}');
+    if (kDebugMode &&
+        (_isLoading != _lastLoadingState ||
+            gameStats.isLoading != _lastGameStatsLoadingState)) {
+      AppLogger.info(
+          'QuizScreen build: _isLoading=$_isLoading, gameStats.isLoading=${gameStats.isLoading}');
       _lastLoadingState = _isLoading;
       _lastGameStatsLoadingState = gameStats.isLoading;
     }
@@ -898,7 +941,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
             ),
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: context.responsiveHorizontalPadding(isDesktop ? 32 : (isTablet ? 24 : 16)),
+                horizontal: context.responsiveHorizontalPadding(
+                    isDesktop ? 32 : (isTablet ? 24 : 16)),
                 vertical: context.responsiveVerticalPadding(20),
               ),
               child: Center(
@@ -912,7 +956,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
                       MetricsWidget(
                         scoreAnimation: _animationController.scoreAnimation,
                         streakAnimation: _animationController.streakAnimation,
-                        longestStreakAnimation: _animationController.longestStreakAnimation,
+                        longestStreakAnimation:
+                            _animationController.longestStreakAnimation,
                         timeAnimation: _animationController.timeAnimation,
                         timeColorAnimation: _timerManager.timeColorAnimation,
                         previousScore: _previousScore,
@@ -949,35 +994,34 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     );
   }
 
-
   Map<String, dynamic>? _parseBiblicalReference(String reference) {
     try {
       // Handle different reference formats:
       // "Genesis 1:1" -> book: Genesis, chapter: 1, startVerse: 1
       // "Genesis 1:1-3" -> book: Genesis, chapter: 1, startVerse: 1, endVerse: 3
       // "Genesis 1" -> book: Genesis, chapter: 1
-      
+
       // Remove extra spaces and split by space
       reference = reference.trim();
       final parts = reference.split(' ');
-      
+
       if (parts.length < 2) return null;
-      
+
       // Extract book name (everything except the last part)
       final book = parts.sublist(0, parts.length - 1).join(' ');
       final chapterAndVerses = parts.last;
-      
+
       // Split chapter and verses by colon
       final chapterVerseParts = chapterAndVerses.split(':');
-      
+
       if (chapterVerseParts.isEmpty) return null;
-      
+
       final chapter = int.tryParse(chapterVerseParts[0]);
       if (chapter == null) return null;
-      
+
       int? startVerse;
       int? endVerse;
-      
+
       if (chapterVerseParts.length > 1) {
         // Has verse information
         final versePart = chapterVerseParts[1];
@@ -991,7 +1035,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
           startVerse = int.tryParse(versePart);
         }
       }
-      
+
       return {
         'book': book,
         'chapter': chapter,
@@ -1002,8 +1046,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       return null;
     }
   }
- 
-
 
   Future<void> _completeLessonSession() async {
     // Mark today's streak as active since lesson was completed
@@ -1017,12 +1059,15 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     final total = widget.sessionLimit ?? _sessionAnswered;
     final correct = _sessionCorrect;
     final bestStreak = _sessionBestStreak;
-    final stars = LessonProgressProvider().computeStars(correct: correct, total: total);
+    final stars =
+        LessonProgressProvider().computeStars(correct: correct, total: total);
 
     // Persist lesson progress - this must happen after await, so use mounted check
     if (!mounted) return;
-    final progress = Provider.of<LessonProgressProvider>(context, listen: false);
-    await progress.markCompleted(lesson: lesson, correct: correct, total: total);
+    final progress =
+        Provider.of<LessonProgressProvider>(context, listen: false);
+    await progress.markCompleted(
+        lesson: lesson, correct: correct, total: total);
 
     // Show full-screen completion screen - capture context before navigation
     if (!mounted) return;
@@ -1054,10 +1099,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
   Future<void> _handleFlag() async {
     final question = _quizState.question;
     final questionId = question.id;
-    
+
     try {
       // Report the issue to the Supabase database
-      final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
+      final gameStatsProvider =
+          Provider.of<GameStatsProvider>(context, listen: false);
       await AutomaticErrorReporter.reportQuestionError(
         message: 'User reported issue with question',
         userMessage: 'Question reported by user',
@@ -1094,30 +1140,36 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
   }
 
   Future<void> _handleSkip() async {
-    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    final analyticsService =
+        Provider.of<AnalyticsService>(context, listen: false);
     final question = _quizState.question;
 
     // Track skip feature usage
-    analyticsService.trackFeatureAttempt(context, AnalyticsService.featureSkipQuestion, additionalProperties: {
-      'question_category': question.category,
-      'question_difficulty': question.difficulty,
-      'time_remaining': _quizState.timeRemaining,
-    });
+    analyticsService.trackFeatureAttempt(
+        context, AnalyticsService.featureSkipQuestion,
+        additionalProperties: {
+          'question_category': question.category,
+          'question_difficulty': question.difficulty,
+          'time_remaining': _quizState.timeRemaining,
+        });
 
-    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'skip_question');
+    Provider.of<AnalyticsService>(context, listen: false)
+        .capture(context, 'skip_question');
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     final isDev = kDebugMode;
 
-    final success = isDev ? true : await gameStats.spendStarsWithTransaction(
-      amount: 35,
-      reason: 'Vraag overslaan',
-      metadata: {
-        'question_category': question.category,
-        'question_difficulty': question.difficulty,
-        'time_remaining': _quizState.timeRemaining,
-      },
-    );
+    final success = isDev
+        ? true
+        : await gameStats.spendStarsWithTransaction(
+            amount: 35,
+            reason: 'Vraag overslaan',
+            metadata: {
+              'question_category': question.category,
+              'question_difficulty': question.difficulty,
+              'time_remaining': _quizState.timeRemaining,
+            },
+          );
     if (success) {
       _timerManager.timeAnimationController.stop();
       setState(() {
@@ -1126,17 +1178,20 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
           isTransitioning: true,
         );
       });
-      await Future.delayed(_performanceService.getOptimalAnimationDuration(const Duration(milliseconds: 300)));
+      await Future.delayed(_performanceService
+          .getOptimalAnimationDuration(const Duration(milliseconds: 300)));
       if (!mounted) return;
       final newDifficulty = _quizState.currentDifficulty;
       final localAnalytics = analyticsService;
       setState(() {
         // Record that the current question was not answered correctly (since it was skipped)
-        _questionSelector.recordAnswerResult(_quizState.question.question, false);
-        final nextQuestion = _questionSelector.pickNextQuestion(newDifficulty, context);
-        final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
-          Duration(seconds: settings.gameSpeedTimerDuration)
-        );
+        _questionSelector.recordAnswerResult(
+            _quizState.question.question, false);
+        final nextQuestion =
+            _questionSelector.pickNextQuestion(newDifficulty, context);
+        final optimalTimerDuration =
+            _performanceService.getOptimalTimerDuration(
+                Duration(seconds: settings.gameSpeedTimerDuration));
         _quizState = QuizState(
           question: nextQuestion,
           timeRemaining: optimalTimerDuration.inSeconds,
@@ -1145,39 +1200,48 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
         _timerManager.startTimer(context: context, reset: true);
         _animationController.triggerTimeAnimation();
       });
-      
+
       // Track successful question skip after setState
-      localAnalytics.trackFeatureSuccess(context, AnalyticsService.featureSkipQuestion, additionalProperties: {
-        'question_category': question.category,
-        'question_difficulty': question.difficulty,
-        'time_remaining': _quizState.timeRemaining,
-      });
+      localAnalytics.trackFeatureSuccess(
+          context, AnalyticsService.featureSkipQuestion,
+          additionalProperties: {
+            'question_category': question.category,
+            'question_difficulty': question.difficulty,
+            'time_remaining': _quizState.timeRemaining,
+          });
     } else {
       if (mounted) {
-        showTopSnackBar(context, strings.AppStrings.notEnoughStarsForSkip, style: TopSnackBarStyle.warning);
+        showTopSnackBar(context, strings.AppStrings.notEnoughStarsForSkip,
+            style: TopSnackBarStyle.warning);
       }
     }
   }
 
   Future<void> _handleUnlockBiblicalReference() async {
-    final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    final analyticsService =
+        Provider.of<AnalyticsService>(context, listen: false);
     final question = _quizState.question;
 
     // Track biblical reference unlock attempt
-    analyticsService.trackFeatureAttempt(context, AnalyticsService.featureBiblicalReferences, additionalProperties: {
-      'question_category': question.category,
-      'question_difficulty': question.difficulty,
-      'biblical_reference': question.biblicalReference ?? 'none',
-      'time_remaining': _quizState.timeRemaining,
-    });
+    analyticsService.trackFeatureAttempt(
+        context, AnalyticsService.featureBiblicalReferences,
+        additionalProperties: {
+          'question_category': question.category,
+          'question_difficulty': question.difficulty,
+          'biblical_reference': question.biblicalReference ?? 'none',
+          'time_remaining': _quizState.timeRemaining,
+        });
 
-    Provider.of<AnalyticsService>(context, listen: false).capture(context, 'unlock_biblical_reference');
+    Provider.of<AnalyticsService>(context, listen: false)
+        .capture(context, 'unlock_biblical_reference');
     final localContext = context;
-    final gameStats = Provider.of<GameStatsProvider>(localContext, listen: false);
+    final gameStats =
+        Provider.of<GameStatsProvider>(localContext, listen: false);
     final isDev = kDebugMode;
 
     // First check if the reference can be parsed
-    final parsed = _parseBiblicalReference(_quizState.question.biblicalReference!);
+    final parsed =
+        _parseBiblicalReference(_quizState.question.biblicalReference!);
     if (parsed == null) {
       // Report this error automatically since it indicates issues with question data
       await AutomaticErrorReporter.reportBiblicalReferenceError(
@@ -1190,24 +1254,27 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
           'question_text': question.question,
         },
       );
-      
+
       if (mounted) {
-        showTopSnackBar(context, strings.AppStrings.invalidBiblicalReference, style: TopSnackBarStyle.error);
+        showTopSnackBar(context, strings.AppStrings.invalidBiblicalReference,
+            style: TopSnackBarStyle.error);
       }
       return;
     }
 
     // Spend 10 stars for unlocking the biblical reference (free in debug mode)
-    final success = isDev ? true : await gameStats.spendStarsWithTransaction(
-      amount: 10,
-      reason: 'Bijbelse referentie ontgrendelen',
-      metadata: {
-        'question_category': question.category,
-        'question_difficulty': question.difficulty,
-        'biblical_reference': question.biblicalReference ?? 'none',
-        'time_remaining': _quizState.timeRemaining,
-      },
-    );
+    final success = isDev
+        ? true
+        : await gameStats.spendStarsWithTransaction(
+            amount: 10,
+            reason: 'Bijbelse referentie ontgrendelen',
+            metadata: {
+              'question_category': question.category,
+              'question_difficulty': question.difficulty,
+              'biblical_reference': question.biblicalReference ?? 'none',
+              'time_remaining': _quizState.timeRemaining,
+            },
+          );
     if (success) {
       // Pause the timer
       if (mounted) {
@@ -1238,21 +1305,23 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
       final localQuestion = question;
       final localTimeRemaining = _quizState.timeRemaining;
       if (mounted) {
-        localAnalytics.trackFeatureSuccess(context, AnalyticsService.featureBiblicalReferences, additionalProperties: {
-          'question_category': localQuestion.category,
-          'question_difficulty': localQuestion.difficulty,
-          'biblical_reference': localQuestion.biblicalReference ?? 'none',
-          'time_remaining': localTimeRemaining,
-        });
+        localAnalytics.trackFeatureSuccess(
+            context, AnalyticsService.featureBiblicalReferences,
+            additionalProperties: {
+              'question_category': localQuestion.category,
+              'question_difficulty': localQuestion.difficulty,
+              'biblical_reference': localQuestion.biblicalReference ?? 'none',
+              'time_remaining': localTimeRemaining,
+            });
       }
     } else {
       // Not enough stars - this is a user state issue, not an error to report automatically
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          showTopSnackBar(context, strings.AppStrings.notEnoughStars, style: TopSnackBarStyle.warning);
+          showTopSnackBar(context, strings.AppStrings.notEnoughStars,
+              style: TopSnackBarStyle.warning);
         }
       });
     }
   }
 }
-

@@ -32,11 +32,13 @@ class _AdWidgetState extends State<AdWidget> {
       }
       // Track ad view
       if (mounted) {
-        final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
-        analyticsService.trackFeatureUsage(context, 'custom_ads', 'viewed', additionalProperties: {
-          'ad_id': widget.ad.id,
-          'ad_title': widget.ad.title,
-        });
+        final analyticsService =
+            Provider.of<AnalyticsService>(context, listen: false);
+        analyticsService.trackFeatureUsage(context, 'custom_ads', 'viewed',
+            additionalProperties: {
+              'ad_id': widget.ad.id,
+              'ad_title': widget.ad.title,
+            });
       }
     });
   }
@@ -48,15 +50,17 @@ class _AdWidgetState extends State<AdWidget> {
       final uri = Uri.parse(widget.ad.linkUrl!);
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
-        
+
         // Track ad click after confirming launch
         if (mounted) {
-          final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
-          analyticsService.trackFeatureSuccess(context, 'custom_ads', additionalProperties: {
-            'ad_id': widget.ad.id,
-            'ad_title': widget.ad.title,
-            'action': 'clicked',
-          });
+          final analyticsService =
+              Provider.of<AnalyticsService>(context, listen: false);
+          analyticsService.trackFeatureSuccess(context, 'custom_ads',
+              additionalProperties: {
+                'ad_id': widget.ad.id,
+                'ad_title': widget.ad.title,
+                'action': 'clicked',
+              });
         }
       }
     } catch (e) {
@@ -147,9 +151,9 @@ class _AdWidgetState extends State<AdWidget> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Large, prominent ad title with better typography
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -166,9 +170,9 @@ class _AdWidgetState extends State<AdWidget> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Enhanced ad text with better readability
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -185,9 +189,9 @@ class _AdWidgetState extends State<AdWidget> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Enhanced action buttons with better styling
           if (widget.ad.linkUrl != null) ...[
             SizedBox(
@@ -217,7 +221,7 @@ class _AdWidgetState extends State<AdWidget> {
           ] else ...[
             const SizedBox(height: 24),
           ],
-          
+
           // Polished dismiss button
           if (widget.onDismiss != null)
             SizedBox(
@@ -225,11 +229,13 @@ class _AdWidgetState extends State<AdWidget> {
               child: OutlinedButton(
                 onPressed: () {
                   if (!mounted) return;
-                  final analyticsService = Provider.of<AnalyticsService>(context, listen: false);
-                  analyticsService.trackFeatureDismissal(context, 'custom_ads', additionalProperties: {
-                    'ad_id': widget.ad.id,
-                    'ad_title': widget.ad.title,
-                  });
+                  final analyticsService =
+                      Provider.of<AnalyticsService>(context, listen: false);
+                  analyticsService.trackFeatureDismissal(context, 'custom_ads',
+                      additionalProperties: {
+                        'ad_id': widget.ad.id,
+                        'ad_title': widget.ad.title,
+                      });
                   widget.onDismiss!();
                 },
                 style: OutlinedButton.styleFrom(
@@ -246,9 +252,10 @@ class _AdWidgetState extends State<AdWidget> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                child: Text('Sluiten', style: TextStyle(
-                  color: cs.onSurface.withValues(alpha: 0.85),
-                )),
+                child: Text('Sluiten',
+                    style: TextStyle(
+                      color: cs.onSurface.withValues(alpha: 0.85),
+                    )),
               ),
             ),
         ],

@@ -68,12 +68,14 @@ class QuizSkeleton extends StatelessWidget {
                           color: colorScheme.surface,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: colorScheme.outline.withAlpha((0.1 * 255).round()),
+                            color: colorScheme.outline
+                                .withAlpha((0.1 * 255).round()),
                             width: 1,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: colorScheme.shadow.withAlpha((0.03 * 255).round()),
+                              color: colorScheme.shadow
+                                  .withAlpha((0.03 * 255).round()),
                               blurRadius: 12,
                               offset: const Offset(0, 3),
                             ),
@@ -83,31 +85,34 @@ class QuizSkeleton extends StatelessWidget {
                           alignment: WrapAlignment.center,
                           spacing: 16,
                           runSpacing: 12,
-                          children: List.generate(metricsCount, (i) => Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: baseColor,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Container(
-                                width: 40,
-                                height: 12,
-                                color: baseColor,
-                              ),
-                              const SizedBox(height: 4),
-                              Container(
-                                width: 32,
-                                height: 8,
-                                color: baseColor,
-                              ),
-                            ],
-                          )),
+                          children: List.generate(
+                              metricsCount,
+                              (i) => Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: baseColor,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Container(
+                                        width: 40,
+                                        height: 12,
+                                        color: baseColor,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Container(
+                                        width: 32,
+                                        height: 8,
+                                        color: baseColor,
+                                      ),
+                                    ],
+                                  )),
                         ),
                       )
                     else
@@ -120,12 +125,14 @@ class QuizSkeleton extends StatelessWidget {
                           color: colorScheme.surface,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: colorScheme.outline.withAlpha((0.1 * 255).round()),
+                            color: colorScheme.outline
+                                .withAlpha((0.1 * 255).round()),
                             width: 1,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: colorScheme.shadow.withAlpha((0.03 * 255).round()),
+                              color: colorScheme.shadow
+                                  .withAlpha((0.03 * 255).round()),
                               blurRadius: 12,
                               offset: const Offset(0, 3),
                             ),
@@ -145,7 +152,8 @@ class QuizSkeleton extends StatelessWidget {
                                         height: 40,
                                         decoration: BoxDecoration(
                                           color: baseColor,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                       ),
                                       const SizedBox(height: 8),
@@ -173,7 +181,8 @@ class QuizSkeleton extends StatelessWidget {
                                         height: 40,
                                         decoration: BoxDecoration(
                                           color: baseColor,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                       ),
                                       const SizedBox(height: 8),
@@ -206,7 +215,8 @@ class QuizSkeleton extends StatelessWidget {
                                         height: 40,
                                         decoration: BoxDecoration(
                                           color: baseColor,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                       ),
                                       const SizedBox(height: 8),
@@ -234,7 +244,8 @@ class QuizSkeleton extends StatelessWidget {
                                         height: 40,
                                         decoration: BoxDecoration(
                                           color: baseColor,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                       ),
                                       const SizedBox(height: 8),
@@ -260,23 +271,27 @@ class QuizSkeleton extends StatelessWidget {
                     SizedBox(height: isDesktop ? 24 : 20),
                     // Question card skeleton
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: isDesktop ? 20 : 16),
+                      margin:
+                          EdgeInsets.symmetric(horizontal: isDesktop ? 20 : 16),
                       decoration: BoxDecoration(
                         color: baseColor,
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: colorScheme.outline.withAlpha((0.1 * 255).round()),
+                          color: colorScheme.outline
+                              .withAlpha((0.1 * 255).round()),
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: colorScheme.shadow.withAlpha((0.08 * 255).round()),
+                            color: colorScheme.shadow
+                                .withAlpha((0.08 * 255).round()),
                             blurRadius: 24,
                             offset: const Offset(0, 8),
                             spreadRadius: 0,
                           ),
                           BoxShadow(
-                            color: colorScheme.shadow.withAlpha((0.04 * 255).round()),
+                            color: colorScheme.shadow
+                                .withAlpha((0.04 * 255).round()),
                             blurRadius: 48,
                             offset: const Offset(0, 16),
                             spreadRadius: 0,
@@ -292,7 +307,8 @@ class QuizSkeleton extends StatelessWidget {
                             Container(
                               width: double.infinity,
                               height: isDesktop ? 32 : 28,
-                              margin: EdgeInsets.symmetric(horizontal: isDesktop ? 12 : 8),
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: isDesktop ? 12 : 8),
                               decoration: BoxDecoration(
                                 color: baseColor,
                                 borderRadius: BorderRadius.circular(8),
@@ -300,17 +316,21 @@ class QuizSkeleton extends StatelessWidget {
                             ),
                             SizedBox(height: isDesktop ? 36 : 32),
                             // Answer buttons skeleton
-                            ...List.generate(answerCount, (index) => Padding(
-                              padding: EdgeInsets.only(bottom: isDesktop ? 14.0 : 12.0),
-                              child: Container(
-                                width: double.infinity,
-                                height: isSmallPhone ? 36 : 44,
-                                decoration: BoxDecoration(
-                                  color: baseColor,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            )),
+                            ...List.generate(
+                                answerCount,
+                                (index) => Padding(
+                                      padding: EdgeInsets.only(
+                                          bottom: isDesktop ? 14.0 : 12.0),
+                                      child: Container(
+                                        width: double.infinity,
+                                        height: isSmallPhone ? 36 : 44,
+                                        decoration: BoxDecoration(
+                                          color: baseColor,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                    )),
                           ],
                         ),
                       ),
@@ -324,4 +344,4 @@ class QuizSkeleton extends StatelessWidget {
       ),
     );
   }
-} 
+}

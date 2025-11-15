@@ -15,7 +15,8 @@ typedef UpdateQuizStateCallback = void Function(QuizState newState);
 typedef TriggerAnimationsCallback = void Function();
 
 /// Callback for handling next question transition
-typedef HandleNextQuestionCallback = Future<void> Function(bool isCorrect, double newDifficulty);
+typedef HandleNextQuestionCallback = Future<void> Function(
+    bool isCorrect, double newDifficulty);
 
 /// Handles quiz answer processing, sound feedback, and state transitions
 class QuizAnswerHandler {
@@ -28,7 +29,7 @@ class QuizAnswerHandler {
     required SoundService soundService,
     required PlatformFeedbackService platformFeedbackService,
     bool enableSounds = true,
-  }) : _platformFeedbackService = platformFeedbackService,
+  })  : _platformFeedbackService = platformFeedbackService,
         _quizSoundService = QuizSoundService(soundService),
         _enableSounds = enableSounds;
 
@@ -52,7 +53,8 @@ class QuizAnswerHandler {
         isAnswering: true,
       ));
 
-      if (quizState.question.type == QuestionType.mc || quizState.question.type == QuestionType.fitb) {
+      if (quizState.question.type == QuestionType.mc ||
+          quizState.question.type == QuestionType.fitb) {
         final selectedAnswer = quizState.question.allOptions[selectedIndex];
         final isCorrect = selectedAnswer == quizState.question.correctAnswer;
 
@@ -68,7 +70,10 @@ class QuizAnswerHandler {
         // For true/false: index 0 = 'Goed', index 1 = 'Fout'
         // Determine if the answer is correct by comparing indices rather than text
         final lcCorrect = quizState.question.correctAnswer.toLowerCase();
-        final correctIndex = (lcCorrect == 'waar' || lcCorrect == 'true' || lcCorrect == 'goed') ? 0 : 1;
+        final correctIndex =
+            (lcCorrect == 'waar' || lcCorrect == 'true' || lcCorrect == 'goed')
+                ? 0
+                : 1;
         final isCorrect = selectedIndex == correctIndex;
 
         // Handle the answer sequence
@@ -95,7 +100,8 @@ class QuizAnswerHandler {
     required HandleNextQuestionCallback handleNextQuestion,
     required BuildContext context,
   }) async {
-    AppLogger.info('Answer selected: ${isCorrect ? 'correct' : 'incorrect'} for question');
+    AppLogger.info(
+        'Answer selected: ${isCorrect ? 'correct' : 'incorrect'} for question');
 
     // Start sound playing in background (don't await to prevent blocking)
     if (_enableSounds) {
@@ -114,9 +120,10 @@ class QuizAnswerHandler {
 
     // Use platform-standardized feedback duration for consistent cross-platform experience
     // This timing is independent of sound playback duration
-    final feedbackDuration = _platformFeedbackService.getStandardizedFeedbackDuration(
-      slowMode: false // Will be passed from settings
-    );
+    final feedbackDuration =
+        _platformFeedbackService.getStandardizedFeedbackDuration(
+            slowMode: false // Will be passed from settings
+            );
 
     // Phase 1: Show feedback (wait for standardized feedback duration)
     // This ensures consistent visual feedback timing regardless of sound file duration
@@ -133,7 +140,8 @@ class QuizAnswerHandler {
     await Future.microtask(() {});
 
     // Phase 3: Brief pause before transition (platform-optimized)
-    final transitionPause = _platformFeedbackService.getTransitionPauseDuration();
+    final transitionPause =
+        _platformFeedbackService.getTransitionPauseDuration();
     await Future.delayed(transitionPause);
 
     // Phase 4: Now clear the selectedAnswerIndex and set transitioning
@@ -147,7 +155,7 @@ class QuizAnswerHandler {
 
     // Phase 6: Transition to next question
     await handleNextQuestion(isCorrect, quizState.currentDifficulty);
-    
+
     // Phase 7: Reset processing flag (now that the full sequence is complete)
     _isProcessingAnswer = false;
   }

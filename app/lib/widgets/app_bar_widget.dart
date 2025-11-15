@@ -49,9 +49,9 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
           Text(
             strings.AppStrings.appName,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: colorScheme.onSurface.withAlpha((0.7 * 255).round()),
-            ),
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.onSurface.withAlpha((0.7 * 255).round()),
+                ),
           ),
         ],
       ),

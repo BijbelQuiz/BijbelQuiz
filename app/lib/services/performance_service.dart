@@ -6,50 +6,54 @@ import 'logger.dart';
 
 /// Types of animations for optimized duration selection
 enum AnimationType {
-  fast,      // Quick interactions (200ms base)
-  normal,    // Standard transitions (400ms base)
-  slow,      // Noticeable changes (600ms base)
-  verySlow,  // Major state changes (800ms base)
+  fast, // Quick interactions (200ms base)
+  normal, // Standard transitions (400ms base)
+  slow, // Noticeable changes (600ms base)
+  verySlow, // Major state changes (800ms base)
 }
 
 /// A lightweight service for optimizing app performance with event-driven monitoring
 class PerformanceService {
   static const int _maxSamples = 10; // Reduced from 30 for efficiency
-  static const int _lowFrameRateThreshold = 45; // FPS below which we consider performance issues
-  static const int _highFrameTimeThreshold = 22; // ms - frame time above which we have issues
-  
+  static const int _lowFrameRateThreshold =
+      45; // FPS below which we consider performance issues
+  static const int _highFrameTimeThreshold =
+      22; // ms - frame time above which we have issues
+
   bool _isLowEndDevice = false;
   double _averageFrameRate = 60.0; // Simplified to 60fps default
   double _frameTimeMs = 16.67; // Default to 60fps
   bool _monitoringEnabled = false;
   bool _performanceIssueDetected = false;
-  
+
   // Simple circular buffers for basic averages
   final List<double> _frameRateSamples = [];
   final List<double> _frameTimeSamples = [];
   DateTime? _lastFrameTime;
   Timer? _monitoringTimer;
-  
+
   /// Whether the device is detected as low-end
   bool get isLowEndDevice => _isLowEndDevice;
-  
+
   /// Current average frame rate
   double get averageFrameRate => _averageFrameRate;
-  
+
   /// Initialize the performance service
   Future<void> initialize() async {
     await _detectDeviceCapabilities();
     _detectRefreshRate();
-    AppLogger.info('PerformanceService initialized with refresh rate: ${_averageFrameRate}Hz');
+    AppLogger.info(
+        'PerformanceService initialized with refresh rate: ${_averageFrameRate}Hz');
     // Don't start monitoring immediately - only when needed
   }
-  
+
   /// Detect the device's refresh rate
   void _detectRefreshRate() {
     try {
       // Get the platform's frame rate
-      final double platformFrameRate = SchedulerBinding.instance.platformDispatcher.views.first.display.refreshRate;
-      
+      final double platformFrameRate = SchedulerBinding
+          .instance.platformDispatcher.views.first.display.refreshRate;
+
       // Use the platform frame rate if it's valid, otherwise keep the default
       if (platformFrameRate > 0) {
         _averageFrameRate = platformFrameRate;
@@ -58,7 +62,7 @@ class PerformanceService {
           _averageFrameRate = 120.0;
         }
       }
-      
+
       AppLogger.info('Detected refresh rate: ${_averageFrameRate}Hz');
     } catch (e) {
       AppLogger.error('Error detecting refresh rate', e);
@@ -66,39 +70,42 @@ class PerformanceService {
       _averageFrameRate = 60.0;
     }
   }
-  
+
   /// Detect if the device is low-end based on available resources
   Future<void> _detectDeviceCapabilities() async {
     try {
       // Skip platform-specific detection on web
       if (kIsWeb) {
         _isLowEndDevice = false; // Default to standard device on web
-        AppLogger.info('Device capabilities: Web platform, Low-end: $_isLowEndDevice');
+        AppLogger.info(
+            'Device capabilities: Web platform, Low-end: $_isLowEndDevice');
         return;
       }
-      
+
       // Simple detection based on available memory and CPU cores
       final processorCount = Platform.numberOfProcessors;
-      
+
       // Consider device low-end if it has limited resources
       _isLowEndDevice = processorCount <= 2; // Less than 2 CPU cores
-      
-      AppLogger.info('Device capabilities: CPU cores: $processorCount, Low-end: $_isLowEndDevice');
+
+      AppLogger.info(
+          'Device capabilities: CPU cores: $processorCount, Low-end: $_isLowEndDevice');
     } catch (e) {
       AppLogger.error('Error detecting device capabilities', e);
       _isLowEndDevice = false; // Default to standard device
     }
   }
-  
+
   /// Enable monitoring only when performance issues are detected
   void _enableMonitoring() {
     if (!_monitoringEnabled) {
       _monitoringEnabled = true;
       _startConditionalMonitoring();
-      AppLogger.info('Performance monitoring enabled due to performance issues');
+      AppLogger.info(
+          'Performance monitoring enabled due to performance issues');
     }
   }
-  
+
   /// Disable monitoring to save resources
   void _disableMonitoring() {
     if (_monitoringEnabled) {
@@ -107,11 +114,11 @@ class PerformanceService {
       AppLogger.info('Performance monitoring disabled');
     }
   }
-  
+
   /// Start conditional monitoring timer
   void _startConditionalMonitoring() {
     if (_monitoringTimer != null) return;
-    
+
     _monitoringTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
       if (_performanceIssueDetected) {
         _checkPerformanceHealth();
@@ -121,7 +128,7 @@ class PerformanceService {
       }
     });
   }
-  
+
   /// Check performance health (lightweight operation)
   void _checkPerformanceHealth() {
     // Simple check - if we've been having issues, see if they've resolved
@@ -135,7 +142,7 @@ class PerformanceService {
       }
     }
   }
-  
+
   /// Calculate simple average of a list of values
   double _calculateSimpleAverage(List<double> values) {
     if (values.isEmpty) return 0.0;
@@ -145,7 +152,7 @@ class PerformanceService {
     }
     return sum / values.length;
   }
-  
+
   /// Add value to circular buffer with max size
   void _addToCircularBuffer(List<double> buffer, double value, int maxSize) {
     buffer.add(value);
@@ -153,19 +160,20 @@ class PerformanceService {
       buffer.removeAt(0);
     }
   }
-  
+
   /// Check for performance issues and enable monitoring if needed
   void _checkPerformanceIssues(double frameRate, double frameTime) {
     // Check if we should enable monitoring based on current performance
-    if (!_monitoringEnabled && (
-        frameRate < _lowFrameRateThreshold || 
-        frameTime > _highFrameTimeThreshold)) {
+    if (!_monitoringEnabled &&
+        (frameRate < _lowFrameRateThreshold ||
+            frameTime > _highFrameTimeThreshold)) {
       _performanceIssueDetected = true;
       _enableMonitoring();
-      AppLogger.warning('Performance issues detected, enabling monitoring. FPS: $frameRate, Frame time: ${frameTime}ms');
+      AppLogger.warning(
+          'Performance issues detected, enabling monitoring. FPS: $frameRate, Frame time: ${frameTime}ms');
     }
   }
-  
+
   /// Get optimal animation duration based on device capabilities and refresh rate
   Duration getOptimalAnimationDuration(Duration defaultDuration) {
     // For very short durations, don't adjust to maintain responsiveness
@@ -195,7 +203,8 @@ class PerformanceService {
       final double frameTime = _frameTimeMs;
       final int frameTimeInt = frameTime.toInt();
       if (frameTimeInt > 0) {
-        durationMs = ((durationMs + frameTimeInt / 2) ~/ frameTimeInt) * frameTimeInt;
+        durationMs =
+            ((durationMs + frameTimeInt / 2) ~/ frameTimeInt) * frameTimeInt;
       }
     }
 
@@ -216,7 +225,7 @@ class PerformanceService {
         return getOptimalAnimationDuration(const Duration(milliseconds: 800));
     }
   }
-  
+
   /// Get optimal timer duration based on device capabilities
   Duration getOptimalTimerDuration(Duration defaultDuration) {
     if (_isLowEndDevice) {
@@ -224,13 +233,14 @@ class PerformanceService {
     }
     return defaultDuration;
   }
-  
+
   /// Update frame timing (event-driven, only when performance issues detected)
   void updateFrameTime() {
     final now = DateTime.now();
 
     if (_lastFrameTime != null) {
-      final frameTime = now.difference(_lastFrameTime!).inMilliseconds.toDouble();
+      final frameTime =
+          now.difference(_lastFrameTime!).inMilliseconds.toDouble();
 
       // Skip invalid frame times (too fast or too slow)
       if (frameTime < 1.0 || frameTime > 100.0) {
@@ -259,7 +269,7 @@ class PerformanceService {
 
     _lastFrameTime = now;
   }
-  
+
   /// Update simple averages instead of complex median calculations
   void _updateSimpleAverages() {
     if (_frameRateSamples.isEmpty) return;
@@ -272,10 +282,10 @@ class PerformanceService {
     _averageFrameRate = _averageFrameRate.clamp(30.0, 120.0);
     _frameTimeMs = _frameTimeMs.clamp(8.33, 33.33); // 30fps to 120fps
   }
-  
+
   /// Get the current frame time in milliseconds
   double get frameTimeMs => _frameTimeMs;
-  
+
   /// Get current memory usage estimate (simplified)
   double get estimatedMemoryUsageMB {
     // Simplified memory estimation - no complex calculations
@@ -285,8 +295,10 @@ class PerformanceService {
     memoryUsage += 100; // Base PerformanceService object
 
     // Collections memory (simplified estimation)
-    memoryUsage += _frameRateSamples.length * 8 + 64; // 8 bytes per double + list overhead
-    memoryUsage += _frameTimeSamples.length * 8 + 64; // 8 bytes per double + list overhead
+    memoryUsage +=
+        _frameRateSamples.length * 8 + 64; // 8 bytes per double + list overhead
+    memoryUsage +=
+        _frameTimeSamples.length * 8 + 64; // 8 bytes per double + list overhead
 
     // Other fields (simplified)
     memoryUsage += 8 * 4; // double fields

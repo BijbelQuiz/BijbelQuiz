@@ -10,24 +10,28 @@ import '../services/question_loading_service.dart';
 /// Thrown when there are no more unique questions available in the current session
 class NoMoreUniqueQuestionsException implements Exception {
   final String message;
-  NoMoreUniqueQuestionsException([this.message = 'No more unique questions available in this session.']);
+  NoMoreUniqueQuestionsException(
+      [this.message = 'No more unique questions available in this session.']);
   @override
   String toString() => 'NoMoreUniqueQuestionsException: $message';
 }
 
 /// Manages the Progressive Question Up-selection (PQU) algorithm
 /// for dynamic difficulty adjustment and question selection
-/// 
+///
 /// The algorithm supports all difficulty levels (1-5 including 2 and 4)
-/// using cumulative selection where users get questions from level 1 
+/// using cumulative selection where users get questions from level 1
 /// up to their current target level.
 class ProgressiveQuestionSelector {
   final QuestionLoadingService _questionLoadingService;
 
   // Track used questions to avoid repetition
-  final Set<String> _correctlyAnsweredQuestions = {}; // Questions answered correctly (should not appear again)
-  final Set<String> _shownQuestions = {}; // Questions that have been shown (regardless of answer correctness)
-  final List<String> _recentlyUsedQuestions = []; // Recently used questions to prevent immediate repetition
+  final Set<String> _correctlyAnsweredQuestions =
+      {}; // Questions answered correctly (should not appear again)
+  final Set<String> _shownQuestions =
+      {}; // Questions that have been shown (regardless of answer correctness)
+  final List<String> _recentlyUsedQuestions =
+      []; // Recently used questions to prevent immediate repetition
   static const int _recentlyUsedLimit = 50;
 
   // All loaded questions - made public instead of using getters/setters
@@ -56,9 +60,7 @@ class ProgressiveQuestionSelector {
   Set<String> get shownQuestions => _shownQuestions;
   List<String> get recentlyUsedQuestions => _recentlyUsedQuestions;
 
-  
-
-    /// PQU: Progressive Question Up-selection algorithm
+  /// PQU: Progressive Question Up-selection algorithm
   /// This algorithm dynamically adjusts question difficulty based on player performance
   /// to maintain an optimal challenge level and prevent boredom or frustration.
   ///
@@ -73,7 +75,8 @@ class ProgressiveQuestionSelector {
   ///
   /// @param currentDifficulty The current normalized difficulty [0..2]
   /// @return The next question selected by the algorithm
-  QuizQuestion pickNextQuestion(double currentDifficulty, BuildContext context) {
+  QuizQuestion pickNextQuestion(
+      double currentDifficulty, BuildContext context) {
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
     double targetDifficulty = currentDifficulty;
     final totalQuestions = gameStats.score + gameStats.incorrectAnswers;
@@ -138,8 +141,9 @@ class ProgressiveQuestionSelector {
 
     // PHASE 6: Select available questions (not answered correctly in current session)
     // Questions that were answered incorrectly can be shown again
-    List<QuizQuestion> availableQuestions =
-        allQuestions.where((q) => !_correctlyAnsweredQuestions.contains(q.question)).toList();
+    List<QuizQuestion> availableQuestions = allQuestions
+        .where((q) => !_correctlyAnsweredQuestions.contains(q.question))
+        .toList();
 
     // PHASE 7: Handle question pool exhaustion (3-phase strategy)
     // 1) Use unique questions filtered by level (handled below in PHASE 8)
@@ -156,7 +160,9 @@ class ProgressiveQuestionSelector {
         );
       }
       // Recompute after background load attempt
-      availableQuestions = allQuestions.where((q) => !_correctlyAnsweredQuestions.contains(q.question)).toList();
+      availableQuestions = allQuestions
+          .where((q) => !_correctlyAnsweredQuestions.contains(q.question))
+          .toList();
       if (availableQuestions.isEmpty) {
         // Phase 3: all unique questions exhausted -> reset session usage and start over
         _correctlyAnsweredQuestions.clear();
@@ -180,7 +186,7 @@ class ProgressiveQuestionSelector {
       return clampedLevel <= targetLevel;
     }).toList();
 
-    // Fallback: if no questions available at or below target level, 
+    // Fallback: if no questions available at or below target level,
     // use questions at the next possible level(s)
     if (eligibleQuestions.isEmpty) {
       // Find questions at any level higher than target as a temporary fallback
@@ -197,8 +203,9 @@ class ProgressiveQuestionSelector {
 
     // PHASE 9: Apply anti-repetition filter
     // Prevent showing recently used questions to maintain engagement
-    List<QuizQuestion> filteredQuestions = eligibleQuestions.where((q) =>
-        !_recentlyUsedQuestions.contains(q.question)).toList();
+    List<QuizQuestion> filteredQuestions = eligibleQuestions
+        .where((q) => !_recentlyUsedQuestions.contains(q.question))
+        .toList();
 
     // Emergency fallback: if all eligible questions are recent, clear recent list
     if (filteredQuestions.isEmpty && eligibleQuestions.isNotEmpty) {
@@ -217,7 +224,8 @@ class ProgressiveQuestionSelector {
 
     // PHASE 10: Random selection from eligible questions
     final random = Random();
-    final selectedQuestion = filteredQuestions[random.nextInt(filteredQuestions.length)];
+    final selectedQuestion =
+        filteredQuestions[random.nextInt(filteredQuestions.length)];
 
     // PHASE 11: Update usage tracking
     // Add to shown questions but not necessarily to correctly answered questions
@@ -264,7 +272,8 @@ class ProgressiveQuestionSelector {
     required BuildContext? context,
   }) {
     double targetDifficulty = currentDifficulty;
-    final correctRatio = totalQuestions > 0 ? correctAnswers / totalQuestions : 0.5;
+    final correctRatio =
+        totalQuestions > 0 ? correctAnswers / totalQuestions : 0.5;
 
     // PHASE 1: Immediate performance-based adjustment
     if (isCorrect) {
@@ -339,8 +348,6 @@ class ProgressiveQuestionSelector {
     return targetDifficulty.clamp(0.0, 2.0);
   }
 
-
-
   /// Reset question pool for new game or language change
   void resetQuestionPool() {
     _correctlyAnsweredQuestions.clear();
@@ -357,7 +364,7 @@ class ProgressiveQuestionSelector {
     if (isCorrect) {
       _correctlyAnsweredQuestions.add(questionText);
     } else {
-      // If the answer was incorrect, remove from shown questions 
+      // If the answer was incorrect, remove from shown questions
       // to allow it to potentially be shown again (though it will still be in recently used for a while)
       // We don't need to remove from shown set because availability is based on _correctlyAnsweredQuestions only
     }
