@@ -61,14 +61,14 @@ class LessonSessionManager {
     required Lesson lesson,
     required int sessionLimit,
   }) async {
-    // Mark today's streak as active
-    await _markStreakActive();
+    // Get providers before async gap
+    final analytics = Provider.of<AnalyticsService>(context, listen: false);
+    final progress = Provider.of<LessonProgressProvider>(context, listen: false);
 
     // Calculate stars
     final stars = calculateStars(sessionLimit);
 
     // Track lesson completion
-    final analytics = Provider.of<AnalyticsService>(context, listen: false);
     analytics.trackFeatureCompletion(
       context,
       AnalyticsService.featureLessonSystem,
@@ -79,11 +79,14 @@ class LessonSessionManager {
         'questions_correct': _sessionCorrect,
         'accuracy_rate': sessionLimit > 0 ? (_sessionCorrect / sessionLimit) : 0,
         'best_streak': _sessionBestStreak,
+        'stars': stars,
       },
     );
 
+    // Mark today's streak as active
+    await _markStreakActive();
+
     // Persist lesson progress
-    final progress = Provider.of<LessonProgressProvider>(context, listen: false);
     await progress.markCompleted(
       lesson: lesson,
       correct: _sessionCorrect,
