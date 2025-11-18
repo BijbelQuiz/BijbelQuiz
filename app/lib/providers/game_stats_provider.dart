@@ -217,8 +217,8 @@ class GameStatsProvider extends ChangeNotifier {
       await _prefs?.setInt(_currentStreakKey, _currentStreak);
       notifyListeners();
 
-      // Sync data if in a room
-      if (syncService.isInRoom) {
+      // Sync data if user is authenticated
+      if (syncService.isAuthenticated) {
         await syncService.syncData('game_stats', getExportData());
       }
     } catch (e) {

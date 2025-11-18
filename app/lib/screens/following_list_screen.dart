@@ -52,11 +52,6 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
         setState(() {
           _followingList = followingList ?? [];
           _isLoading = false;
-
-          // Show warning if not in a room since followers/following requires being in a room
-          if (!gameStatsProvider.syncService.isInRoom) {
-            _error = strings.AppStrings.joinRoomToViewFollowing;
-          }
         });
       }
     } catch (e) {
@@ -69,35 +64,37 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
     }
   }
 
-  /// Get usernames for the followed devices
-  Future<List<Map<String, String>>> _getUsernamesForDevices(
-      List<String> deviceIds) async {
+  /// Get user profiles for the followed users
+  Future<List<Map<String, dynamic>>> _getUserProfilesForUsers(
+      List<String> userIds) async {
     final gameStatsProvider =
         Provider.of<GameStatsProvider>(context, listen: false);
-    final usernames = <Map<String, String>>[];
+    final userProfiles = <Map<String, dynamic>>[];
 
-    for (final deviceId in deviceIds) {
+    for (final userId in userIds) {
       try {
-        final username =
-            await gameStatsProvider.syncService.getUsernameByDeviceId(deviceId);
-        if (username != null) {
-          usernames.add({'deviceId': deviceId, 'username': username});
+        final userProfile =
+            await gameStatsProvider.syncService.getUserProfile(userId);
+        if (userProfile != null) {
+          userProfiles.add(userProfile);
         } else {
-          usernames.add({
-            'deviceId': deviceId,
-            'username': 'Unknown User ($deviceId.substring(0, 8))...'
+          userProfiles.add({
+            'user_id': userId,
+            'username': 'Unknown User',
+            'display_name': 'Unknown User',
           });
         }
       } catch (e) {
-        AppLogger.error('Error getting username for device $deviceId', e);
-        usernames.add({
-          'deviceId': deviceId,
-          'username': 'Unknown User ($deviceId.substring(0, 8))...'
+        AppLogger.error('Error getting user profile for $userId', e);
+        userProfiles.add({
+          'user_id': userId,
+          'username': 'Unknown User',
+          'display_name': 'Unknown User',
         });
       }
     }
 
-    return usernames;
+    return userProfiles;
   }
 
   @override
@@ -187,8 +184,8 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
               else
                 // Following list
                 Expanded(
-                  child: FutureBuilder<List<Map<String, String>>>(
-                    future: _getUsernamesForDevices(_followingList),
+                  child: FutureBuilder<List<Map<String, dynamic>>>(
+                    future: _getUserProfilesForUsers(_followingList),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(
@@ -199,7 +196,7 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                       if (snapshot.hasError) {
                         return Center(
                           child: Text(
-                              'Error loading usernames: ${snapshot.error}'),
+                              'Error loading user profiles: ${snapshot.error}'),
                         );
                       }
 
@@ -211,8 +208,13 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                             const Divider(height: 1),
                         itemBuilder: (context, index) {
                           final user = users[index];
-                          final deviceId = user['deviceId']!;
-                          final username = user['username']!;
+                          final userId = user['user_id'] as String?;
+                          final username = user['username'] as String?;
+                          final displayName = user['display_name'] as String? ?? username;
+
+                          if (userId == null || username == null) {
+                            return const SizedBox.shrink();
+                          }
 
                           return ListTile(
                             contentPadding: const EdgeInsets.symmetric(
@@ -232,18 +234,13 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                               ),
                             ),
                             title: Text(
-                              username,
+                              displayName ?? username,
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             subtitle: Text(
-                              deviceId.substring(
-                                  0,
-                                  _min(
-                                      8,
-                                      deviceId
-                                          .length)), // Show partial device ID
+                              '@$username',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: colorScheme.onSurface
                                     .withValues(alpha: 0.6),
@@ -262,6 +259,4 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
     );
   }
 
-  /// Helper to limit string length
-  int _min(int a, int b) => a < b ? a : b;
 }

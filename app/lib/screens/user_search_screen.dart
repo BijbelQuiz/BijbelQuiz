@@ -21,12 +21,14 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
   List<String> _followingList = [];
   bool _isLoading = false;
   String? _error;
+  String? _currentUserId;
 
   @override
   void initState() {
     super.initState();
     _analyticsService = Provider.of<AnalyticsService>(context, listen: false);
     _trackScreenAccess();
+    _loadCurrentUserId();
     _loadFollowingList();
   }
 
@@ -36,6 +38,19 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
       _analyticsService.screen(context, 'UserSearchScreen');
       _analyticsService.trackFeatureUsage(
           context, 'user_search', 'screen_accessed');
+    }
+  }
+
+  /// Load the current user ID
+  Future<void> _loadCurrentUserId() async {
+    final gameStatsProvider =
+        Provider.of<GameStatsProvider>(context, listen: false);
+    final userId = gameStatsProvider.syncService.currentUserId;
+
+    if (mounted) {
+      setState(() {
+        _currentUserId = userId;
+      });
     }
   }
 
@@ -91,17 +106,17 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
   }
 
   /// Handle follow/unfollow action
-  Future<void> _toggleFollow(String targetDeviceId, String username) async {
+  Future<void> _toggleFollow(String targetUserId, String username) async {
     final gameStatsProvider =
         Provider.of<GameStatsProvider>(context, listen: false);
-    final isFollowing = _followingList.contains(targetDeviceId);
+    final isFollowing = _followingList.contains(targetUserId);
 
     _analyticsService.capture(
       context,
       isFollowing ? 'unfollow_user' : 'follow_user',
       properties: {
-        'target_device_id': targetDeviceId.substring(
-            0, 8), // Only track partial device ID for privacy
+        'target_user_id': targetUserId.substring(
+            0, 8), // Only track partial user ID for privacy
         'username': username,
       },
     );
@@ -109,17 +124,17 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     bool success;
     if (isFollowing) {
       success =
-          await gameStatsProvider.syncService.unfollowUser(targetDeviceId);
+          await gameStatsProvider.syncService.unfollowUser(targetUserId);
       if (success) {
         setState(() {
-          _followingList.remove(targetDeviceId);
+          _followingList.remove(targetUserId);
         });
       }
     } else {
-      success = await gameStatsProvider.syncService.followUser(targetDeviceId);
+      success = await gameStatsProvider.syncService.followUser(targetUserId);
       if (success) {
         setState(() {
-          _followingList.add(targetDeviceId);
+          _followingList.add(targetUserId);
         });
       }
     }
@@ -275,13 +290,15 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                     itemBuilder: (context, index) {
                       final user = _searchResults[index];
                       final username = user['username'] as String?;
-                      final deviceId = user['device_id'] as String?;
+                      final userId = user['user_id'] as String?;
+                      final displayName = user['display_name'] as String? ?? username;
 
-                      if (username == null || deviceId == null) {
+                      if (username == null || userId == null) {
                         return const SizedBox.shrink();
                       }
 
-                      final isFollowing = _followingList.contains(deviceId);
+                      final isFollowing = _followingList.contains(userId);
+                      final isCurrentUser = _currentUserId == userId;
 
                       return ListTile(
                         contentPadding: const EdgeInsets.symmetric(
@@ -300,63 +317,51 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                           ),
                         ),
                         title: Text(
-                          username,
+                          displayName ?? username,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         subtitle: Text(
-                          deviceId.substring(
-                              0,
-                              _min(8,
-                                  deviceId.length)), // Show partial device ID
+                          '@$username',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
-                        trailing: FutureBuilder<String>(
-                          future: Provider.of<GameStatsProvider>(context,
-                                  listen: false)
-                              .syncService
-                              .getCurrentDeviceId(),
-                          builder: (context, snapshot) {
-                            final currentDeviceId = snapshot.data;
-                            return currentDeviceId != deviceId
-                                ? OutlinedButton(
-                                    onPressed: () =>
-                                        _toggleFollow(deviceId, username),
-                                    style: OutlinedButton.styleFrom(
-                                      side: BorderSide(
-                                          color: isFollowing
-                                              ? colorScheme.error
-                                              : colorScheme.primary),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 8),
-                                    ),
-                                    child: Text(
-                                      isFollowing
-                                          ? strings.AppStrings.unfollow
-                                          : strings.AppStrings.follow,
-                                      style: TextStyle(
-                                        color: isFollowing
-                                            ? colorScheme.error
-                                            : colorScheme.primary,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  )
-                                : Text(
-                                    strings.AppStrings.yourself,
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: colorScheme.onSurface
-                                          .withValues(alpha: 0.5),
-                                    ),
-                                  );
-                          },
-                        ),
+                        trailing: !isCurrentUser
+                            ? OutlinedButton(
+                                onPressed: () =>
+                                    _toggleFollow(userId, displayName ?? username),
+                                style: OutlinedButton.styleFrom(
+                                  side: BorderSide(
+                                      color: isFollowing
+                                          ? colorScheme.error
+                                          : colorScheme.primary),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                ),
+                                child: Text(
+                                  isFollowing
+                                      ? strings.AppStrings.unfollow
+                                      : strings.AppStrings.follow,
+                                  style: TextStyle(
+                                    color: isFollowing
+                                        ? colorScheme.error
+                                        : colorScheme.primary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              )
+                            : Text(
+                                strings.AppStrings.yourself,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: colorScheme.onSurface
+                                      .withValues(alpha: 0.5),
+                                ),
+                              ),
                       );
                     },
                   ),
@@ -368,8 +373,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     );
   }
 
-  /// Helper to limit string length
-  int _min(int a, int b) => a < b ? a : b;
 
   @override
   void dispose() {

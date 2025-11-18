@@ -114,12 +114,6 @@ Future<void> main() async {
             messagesProvider.initialize();
             return messagesProvider;
           }),
-
-          // Star transaction service initialization (deferred until providers are ready)
-          ChangeNotifierProvider(create: (context) {
-            // This will be initialized later with proper dependencies
-            return gameStatsProvider;
-          }),
         ],
         child: BijbelQuizApp(),
       ),

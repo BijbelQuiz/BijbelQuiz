@@ -388,29 +388,6 @@ class _GuidePageViewState extends State<GuidePageView> {
                   ),
                 ),
               ),
-              const TextSpan(text: ' en '),
-              WidgetSpan(
-                alignment: PlaceholderAlignment.baseline,
-                baseline: TextBaseline.alphabetic,
-                child: GestureDetector(
-                  onTap: () async {
-                    final url = AppUrls.privacyUrl;
-                    if (await canLaunchUrl(Uri.parse(url))) {
-                      await launchUrl(
-                        Uri.parse(url),
-                        mode: LaunchMode.externalApplication,
-                      );
-                    }
-                  },
-                  child: Text(
-                    'privacybeleid',
-                    style: TextStyle(
-                      color: colorScheme.primary,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),

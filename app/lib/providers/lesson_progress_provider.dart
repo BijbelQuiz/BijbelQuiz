@@ -101,8 +101,8 @@ class LessonProgressProvider extends ChangeNotifier {
     await _persist();
     notifyListeners();
 
-    // Sync data if in a room
-    if (syncService.isInRoom) {
+    // Sync data if user is authenticated
+    if (syncService.isAuthenticated) {
       await syncService.syncData('lesson_progress', getExportData());
     }
   }

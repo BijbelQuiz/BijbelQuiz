@@ -507,8 +507,8 @@ class SettingsProvider extends ChangeNotifier {
         await _prefs?.setInt(_themeModeKey, mode.index);
         AppLogger.info('Theme mode saved successfully: $mode');
 
-        // Sync data if in a room
-        if (syncService.isInRoom) {
+        // Sync data if user is authenticated
+        if (syncService.isAuthenticated) {
           await syncService.syncData('settings', getExportData());
         }
       },

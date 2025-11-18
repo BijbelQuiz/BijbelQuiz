@@ -2,7 +2,6 @@ import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../l10n/strings_nl.dart' as strings;
-import '../config/supabase_config.dart';
 import 'sync_screen.dart';
 import 'user_search_screen.dart';
 import 'following_list_screen.dart';
@@ -435,7 +434,7 @@ class _SocialScreenState extends State<SocialScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  user['username'] ??
+                                  user['displayName'] ?? user['username'] ??
                                       strings.AppStrings.unknownUser,
                                   style: textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w500,
@@ -513,15 +512,22 @@ class _SocialScreenState extends State<SocialScreen> {
 
       final usersWithScores = <Map<String, dynamic>>[];
 
-      for (final deviceId in followingList) {
-        // Get username
-        String? username;
+      for (final userId in followingList) {
+        // Get user profile
+        Map<String, dynamic>? userProfile;
         try {
-          username = await syncService.getUsernameByDeviceId(deviceId);
+          userProfile = await syncService.getUserProfile(userId);
         } catch (e) {
-          AppLogger.error('Error getting username for device $deviceId', e);
-          username = null;
+          AppLogger.error('Error getting user profile for $userId', e);
+          userProfile = null;
         }
+
+        if (userProfile == null) {
+          continue; // Skip users without profiles
+        }
+
+        final username = userProfile['username'] as String?;
+        final displayName = userProfile['display_name'] as String? ?? username;
 
         if (username == null) {
           continue; // Skip users without usernames
@@ -529,24 +535,17 @@ class _SocialScreenState extends State<SocialScreen> {
 
         // Check if we have cached data for this user
         Map<String, dynamic>? stats;
-        if (userScores.containsKey(deviceId)) {
-          stats = userScores[deviceId];
+        if (userScores.containsKey(userId)) {
+          stats = userScores[userId];
         } else {
-          // Fetch fresh stats from the database - try global lookup if room-specific fails
+          // Fetch fresh stats from the database
           try {
-            // First try the regular room-based lookup
-            stats = await syncService.getGameStatsForDevice(deviceId);
-
-            // If that returns null or empty, try to get stats from all rooms globally
-            if (stats == null || stats.isEmpty) {
-              stats = await _getGameStatsForDeviceGlobally(deviceId);
-            }
-
+            stats = await syncService.getGameStatsForUser(userId);
             // Cache the result
-            userScores[deviceId] = stats ?? <String, dynamic>{};
+            userScores[userId] = stats ?? <String, dynamic>{};
           } catch (e) {
             AppLogger.error(
-                'Error fetching game stats for device $deviceId', e);
+                'Error fetching game stats for user $userId', e);
             // Use empty stats on error
             stats = <String, dynamic>{};
           }
@@ -557,7 +556,8 @@ class _SocialScreenState extends State<SocialScreen> {
 
         usersWithScores.add({
           'username': username,
-          'deviceId': deviceId,
+          'displayName': displayName,
+          'userId': userId,
           'score': score,
           'stars': score, // Stars are represented by the score field
         });
@@ -573,38 +573,6 @@ class _SocialScreenState extends State<SocialScreen> {
     }
   }
 
-  /// Gets game stats for a specific device from all rooms globally
-  Future<Map<String, dynamic>?> _getGameStatsForDeviceGlobally(
-      String deviceId) async {
-    try {
-      // Use the Supabase client directly to search across all rooms for game stats
-      final client = SupabaseConfig.client;
-      const tableName = 'sync_rooms'; // Same table used by sync service
-
-      // Get all rooms that have game stats data
-      final response =
-          await client.from(tableName).select('data').not('data', 'is', null);
-
-      for (final row in response) {
-        final data = row['data'] as Map<String, dynamic>?;
-        if (data != null) {
-          final gameStatsMap = data['game_stats'] as Map<String, dynamic>?;
-          if (gameStatsMap != null) {
-            // Check if the target device has stats in this room
-            final deviceStats = gameStatsMap[deviceId] as Map<String, dynamic>?;
-            if (deviceStats != null) {
-              return deviceStats['value'] as Map<String, dynamic>?;
-            }
-          }
-        }
-      }
-      return null;
-    } catch (e) {
-      AppLogger.error(
-          'Failed to get game stats globally for device: $deviceId', e);
-      return null;
-    }
-  }
 
   /// Builds a single feature button with responsive sizing
   Widget _buildFeatureButton({
