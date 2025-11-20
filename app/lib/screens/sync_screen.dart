@@ -43,8 +43,8 @@ class _SyncScreenState extends State<SyncScreen> {
   bool _isUpdatingProfile = false;
 
   // Sync status tracking
-  Map<String, DateTime> _lastSyncTimes = {};
-  List<String> _syncedDataTypes = [];
+  final Map<String, DateTime> _lastSyncTimes = {};
+  final List<String> _syncedDataTypes = [];
   bool _isManualSync = false;
 
   @override
@@ -65,7 +65,7 @@ class _SyncScreenState extends State<SyncScreen> {
 
   void _setupAuthListener() {
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
-      AppLogger.debug('Auth state changed: ${event.event} for user: ${event.session?.user?.email ?? 'none'}');
+      AppLogger.debug('Auth state changed: ${event.event} for user: ${event.session?.user.email ?? 'none'}');
 
       // Prevent race conditions by checking if we're already loading profile
       if (_isLoadingProfile) {
