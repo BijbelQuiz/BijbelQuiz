@@ -66,13 +66,14 @@ class _SyncScreenState extends State<SyncScreen> {
   void _setupAuthListener() {
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
       AppLogger.debug('Auth state changed: ${event.event} for user: ${event.session?.user?.email ?? 'none'}');
-      
+
       // Prevent race conditions by checking if we're already loading profile
       if (_isLoadingProfile) {
         AppLogger.debug('Skipping profile load - already in progress');
         return;
       }
-      
+
+      AppLogger.debug('Setting current user and calling _loadUserProfile');
       setState(() {
         _currentUser = event.session?.user;
       });
@@ -752,9 +753,7 @@ class _SyncScreenState extends State<SyncScreen> {
       if (response.user != null) {
         AppLogger.info('Successfully signed in user: ${response.user!.email}');
         // Sync will be handled automatically by auth state change
-        if (mounted) {
-          Navigator.of(context).pop(true); // Return success
-        }
+        // Stay on the account screen after login
       }
     } catch (e) {
       setState(() {
@@ -899,9 +898,7 @@ class _SyncScreenState extends State<SyncScreen> {
     try {
       await Supabase.instance.client.auth.signOut();
       AppLogger.info('Successfully signed out');
-      if (mounted) {
-        Navigator.of(context).pop(false); // Return signed out
-      }
+      // Stay on the screen - auth state change will update UI to show login form
     } catch (e) {
       AppLogger.error('Sign out failed', e);
       setState(() {
