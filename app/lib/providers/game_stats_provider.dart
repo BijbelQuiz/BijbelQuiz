@@ -130,7 +130,37 @@ class GameStatsProvider extends ChangeNotifier {
       _longestStreak = _prefs?.getInt(_longestStreakKey) ?? 0;
       _incorrectAnswers = _prefs?.getInt(_incorrectAnswersKey) ?? 0;
       AppLogger.info(
-          'Game stats loaded: score=$_score, streak=$_currentStreak, longest=$_longestStreak, incorrect=$_incorrectAnswers');
+          'Game stats loaded from local storage: score=$_score, streak=$_currentStreak, longest=$_longestStreak, incorrect=$_incorrectAnswers');
+
+      // Check for synced data and merge if available
+      if (syncService.isAuthenticated) {
+        AppLogger.info('User authenticated, checking for synced game stats');
+        final syncedStats = await syncService.getGameStatsForUser(syncService.currentUserId!);
+        if (syncedStats != null) {
+          AppLogger.info('Found synced game stats: ${syncedStats.keys.toList()}');
+          // Merge local and synced data, taking the maximum values
+          final mergedStats = {
+            'score': (_score > (syncedStats['score'] as int? ?? 0)) ? _score : syncedStats['score'],
+            'currentStreak': (_currentStreak > (syncedStats['currentStreak'] as int? ?? 0)) ? _currentStreak : syncedStats['currentStreak'],
+            'longestStreak': (_longestStreak > (syncedStats['longestStreak'] as int? ?? 0)) ? _longestStreak : syncedStats['longestStreak'],
+            'incorrectAnswers': _incorrectAnswers + (syncedStats['incorrectAnswers'] as int? ?? 0),
+          };
+          _score = mergedStats['score'];
+          _currentStreak = mergedStats['currentStreak'];
+          _longestStreak = mergedStats['longestStreak'];
+          _incorrectAnswers = mergedStats['incorrectAnswers'];
+
+          // Save merged data to local storage
+          await _prefs?.setInt(_scoreKey, _score);
+          await _prefs?.setInt(_currentStreakKey, _currentStreak);
+          await _prefs?.setInt(_longestStreakKey, _longestStreak);
+          await _prefs?.setInt(_incorrectAnswersKey, _incorrectAnswers);
+
+          AppLogger.info('Merged local and synced game stats: score=$_score, streak=$_currentStreak');
+        } else {
+          AppLogger.debug('No synced game stats found');
+        }
+      }
     } catch (e) {
       // Use the new error handling system
       final appError = ErrorHandler().fromException(
@@ -219,7 +249,10 @@ class GameStatsProvider extends ChangeNotifier {
 
       // Sync data if user is authenticated
       if (syncService.isAuthenticated) {
+        AppLogger.info('Syncing game stats after update: score=$_score, streak=$_currentStreak');
         await syncService.syncData('game_stats', getExportData());
+      } else {
+        AppLogger.debug('Not syncing game stats: user not authenticated');
       }
     } catch (e) {
       // Use the new error handling system
@@ -482,10 +515,14 @@ class GameStatsProvider extends ChangeNotifier {
 
   /// Loads game stats data from import
   Future<void> loadImportData(Map<String, dynamic> data) async {
+    final oldScore = _score;
+    final oldStreak = _currentStreak;
     _score = data['score'] ?? 0;
     _currentStreak = data['currentStreak'] ?? 0;
     _longestStreak = data['longestStreak'] ?? 0;
     _incorrectAnswers = data['incorrectAnswers'] ?? 0;
+
+    AppLogger.info('Loading synced game stats: score $_score (was $oldScore), streak $_currentStreak (was $oldStreak)');
 
     await _prefs?.setInt(_scoreKey, _score);
     await _prefs?.setInt(_currentStreakKey, _currentStreak);
@@ -494,32 +531,14 @@ class GameStatsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Joins a sync room
-  Future<bool> joinSyncRoom(String code) async {
-    return await syncService.joinRoom(code);
-  }
-
-  /// Leaves the sync room
-  Future<void> leaveSyncRoom() async {
-    await syncService.leaveRoom();
-  }
-
   /// Sets up sync listener
   void setupSyncListener() {
+    AppLogger.info('Setting up game stats sync listener');
     syncService.addListener('game_stats', (data) {
+      AppLogger.info('Received synced game stats update: ${data.keys.toList()}');
       loadImportData(data);
     });
   }
-
-  /// Gets the list of devices in the current room
-  Future<List<String>?> getDevicesInRoom() => syncService.getDevicesInRoom();
-
-  /// Gets the current device ID
-  Future<String> getCurrentDeviceId() => syncService.getCurrentDeviceId();
-
-  /// Removes a specific device from the current room
-  Future<bool> removeDevice(String deviceId) =>
-      syncService.removeDevice(deviceId);
 }
 
 // Powerup model

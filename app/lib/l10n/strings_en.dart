@@ -501,26 +501,13 @@ class AppStrings {
 
   // Sync Screen
   static const String multiDeviceSync = 'Multi-Device Sync';
-  static const String enterSyncCode =
-      'Enter a sync code to connect to another device. Both devices must use the same code.';
-  static const String syncCode = 'Sync Code';
-  static const String joinSyncRoom = 'Join Sync Room';
-  static const String or = 'Or';
-  static const String startSyncRoom = 'Start Sync Room';
   static const String currentlySynced =
       'You are currently synced. Data is shared in real-time between devices.';
   static const String yourSyncId = 'Your Sync ID:';
   static const String shareSyncId = 'Share this ID with other devices to join.';
-  static const String leaveSyncRoom = 'Leave Sync Room';
 
   // Sync Error Messages
-  static const String pleaseEnterSyncCode = 'Please enter a sync code';
-  static const String failedToJoinSyncRoom =
-      'Failed to join sync room. Check the code and try again.';
   static const String errorGeneric = 'Error: ';
-  static const String errorLeavingSyncRoom = 'Error leaving sync room: ';
-  static const String failedToStartSyncRoom =
-      'Failed to start sync room. Please try again.';
 
   // Settings Screen Sync Button
   static const String multiDeviceSyncButton = 'Multi-Device Sync';
@@ -530,18 +517,6 @@ class AppStrings {
   // Sync Screen Additional Strings
   static const String syncDescription =
       'Connect to another device to sync your progress and statistics.';
-  static const String createSyncRoom = 'Create a new sync room';
-  static const String createSyncDescription =
-      'Start a new sync room and share the code with others to connect.';
-
-  // Sync Screen Device List Strings
-  static const String connectedDevices = 'Connected Devices';
-  static const String thisDevice = 'This Device';
-  static const String noDevicesConnected = 'No devices connected';
-  static const String removeDevice = 'Remove Device';
-  static const String removeDeviceConfirmation =
-      'Are you sure you want to remove this device from the sync room? This device will no longer have access to the shared data.';
-  static const String remove = 'Remove';
 
   // User ID Screen (rebranded from sync)
   static const String userId = 'BQID';

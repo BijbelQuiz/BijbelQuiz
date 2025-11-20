@@ -56,6 +56,35 @@ class LessonProgressProvider extends ChangeNotifier {
           _bestStarsByLesson[k.toString()] = stars.clamp(0, 3);
         });
       }
+
+      // Check for synced data and merge if available
+      if (syncService.isAuthenticated) {
+        AppLogger.info('User authenticated, checking for synced lesson progress');
+        final syncedProgress = await syncService.getUserData();
+        if (syncedProgress != null && syncedProgress.containsKey('lesson_progress')) {
+          final syncedData = syncedProgress['lesson_progress']?['value'] as Map<String, dynamic>?;
+          if (syncedData != null) {
+            AppLogger.info('Found synced lesson progress, merging with local data');
+            // Merge: take maximum unlocked count and best stars
+            final syncedUnlockedCount = syncedData['unlockedCount'] as int? ?? 1;
+            if (syncedUnlockedCount > _unlockedCount) {
+              _unlockedCount = syncedUnlockedCount;
+            }
+
+            final syncedBestStars = Map<String, int>.from(syncedData['bestStarsByLesson'] ?? {});
+            syncedBestStars.forEach((lessonId, stars) {
+              final currentStars = _bestStarsByLesson[lessonId] ?? 0;
+              if (stars > currentStars) {
+                _bestStarsByLesson[lessonId] = stars;
+              }
+            });
+
+            // Save merged data
+            await _persist();
+            AppLogger.info('Merged lesson progress: unlocked $_unlockedCount, stars for ${_bestStarsByLesson.length} lessons');
+          }
+        }
+      }
     } catch (e) {
       _error = 'Failed to load lesson progress: $e';
       AppLogger.error(_error!, e);
@@ -148,6 +177,7 @@ class LessonProgressProvider extends ChangeNotifier {
 
   /// Loads lesson progress data from import
   Future<void> loadImportData(Map<String, dynamic> data) async {
+    final oldUnlockedCount = _unlockedCount;
     _unlockedCount = data['unlockedCount'] ?? 1;
     _bestStarsByLesson.clear();
     final bestStars = Map<String, int>.from(data['bestStarsByLesson'] ?? {});
@@ -157,5 +187,15 @@ class LessonProgressProvider extends ChangeNotifier {
 
     await _persist();
     notifyListeners();
+    AppLogger.info('Loaded synced lesson progress: unlocked $_unlockedCount (was $oldUnlockedCount)');
+  }
+
+  /// Sets up sync listener
+  void setupSyncListener() {
+    AppLogger.info('Setting up lesson progress sync listener');
+    syncService.addListener('lesson_progress', (data) {
+      AppLogger.info('Received synced lesson progress update');
+      loadImportData(data);
+    });
   }
 }

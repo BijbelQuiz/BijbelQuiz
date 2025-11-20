@@ -227,6 +227,7 @@ class SettingsProvider extends ChangeNotifier {
         _aiThemes[theme.id] = theme;
         await _saveAIThemesToStorage();
         AppLogger.info('AI theme saved: ${theme.name} (${theme.id})');
+        await _syncSettings();
       },
       errorMessage: 'Failed to save AI theme',
     );
@@ -245,6 +246,7 @@ class SettingsProvider extends ChangeNotifier {
         }
 
         AppLogger.info('AI theme removed: $themeId');
+        await _syncSettings();
       },
       errorMessage: 'Failed to remove AI theme',
     );
@@ -361,6 +363,14 @@ class SettingsProvider extends ChangeNotifier {
       _error = appError.userMessage;
       notifyListeners();
       rethrow;
+    }
+  }
+
+  /// Syncs settings data if user is authenticated
+  Future<void> _syncSettings() async {
+    if (syncService.isAuthenticated) {
+      AppLogger.info('Syncing settings after change');
+      await syncService.syncData('settings', getExportData());
     }
   }
 
@@ -506,11 +516,7 @@ class SettingsProvider extends ChangeNotifier {
         _themeMode = mode;
         await _prefs?.setInt(_themeModeKey, mode.index);
         AppLogger.info('Theme mode saved successfully: $mode');
-
-        // Sync data if user is authenticated
-        if (syncService.isAuthenticated) {
-          await syncService.syncData('settings', getExportData());
-        }
+        await _syncSettings();
       },
       errorMessage: 'Failed to save theme setting',
     );
@@ -540,6 +546,7 @@ class SettingsProvider extends ChangeNotifier {
         _gameSpeed = speed;
         await _prefs?.setString(_slowModeKey, speed);
         AppLogger.info('Game speed saved successfully: $speed');
+        await _syncSettings();
       },
       errorMessage: 'Failed to save game speed setting',
     );
@@ -553,6 +560,7 @@ class SettingsProvider extends ChangeNotifier {
         _mute = enabled;
         await _prefs?.setBool(_muteKey, enabled);
         AppLogger.info('Mute setting saved successfully: $enabled');
+        await _syncSettings();
       },
       errorMessage: 'Failed to save mute setting',
     );
@@ -1071,16 +1079,6 @@ class SettingsProvider extends ChangeNotifier {
     }
 
     notifyListeners();
-  }
-
-  /// Joins a sync room
-  Future<bool> joinSyncRoom(String code) async {
-    return await syncService.joinRoom(code);
-  }
-
-  /// Leaves the sync room
-  Future<void> leaveSyncRoom() async {
-    await syncService.leaveRoom();
   }
 
   /// Sets up sync listener

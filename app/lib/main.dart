@@ -79,6 +79,11 @@ Future<void> main() async {
     final settingsProvider = serviceContainer.settingsProvider;
     final lessonProgressProvider = LessonProgressProvider();
 
+    // Set up sync listeners for real-time updates
+    gameStatsProvider.setupSyncListener();
+    settingsProvider.setupSyncListener();
+    lessonProgressProvider.setupSyncListener();
+
     AppLogger.info('Starting Flutter app with service container...');
     runApp(
       MultiProvider(

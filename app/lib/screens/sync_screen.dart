@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:async';
 import '../providers/game_stats_provider.dart';
 import '../providers/lesson_progress_provider.dart';
+import '../providers/settings_provider.dart';
 import '../services/logger.dart';
 import '../utils/automatic_error_reporter.dart';
 
@@ -135,16 +136,18 @@ class _SyncScreenState extends State<SyncScreen> {
 
     try {
       final gameStatsProvider = Provider.of<GameStatsProvider>(context, listen: false);
-      
-      // Sync each data type
+      final lessonProgressProvider = Provider.of<LessonProgressProvider>(context, listen: false);
+      final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+
+      // Sync each data type with correct provider data
       await _trackSyncStatus('game_stats');
       await gameStatsProvider.syncService.syncData('game_stats', gameStatsProvider.getExportData());
-      
+
       await _trackSyncStatus('lesson_progress');
-      await gameStatsProvider.syncService.syncData('lesson_progress', gameStatsProvider.getExportData());
-      
+      await gameStatsProvider.syncService.syncData('lesson_progress', lessonProgressProvider.getExportData());
+
       await _trackSyncStatus('settings');
-      await gameStatsProvider.syncService.syncData('settings', gameStatsProvider.getExportData());
+      await gameStatsProvider.syncService.syncData('settings', settingsProvider.getExportData());
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
