@@ -10,7 +10,9 @@ import '../services/logger.dart';
 import '../utils/automatic_error_reporter.dart';
 
 class SyncScreen extends StatefulWidget {
-  const SyncScreen({super.key});
+  const SyncScreen({super.key, this.requiredForSocial = false});
+
+  final bool requiredForSocial;
 
   @override
   State<SyncScreen> createState() => _SyncScreenState();
@@ -1192,6 +1194,51 @@ class _SyncScreenState extends State<SyncScreen> {
                   ),
                   child: Column(
                     children: [
+                      // Social features requirement message
+                      if (widget.requiredForSocial) ...[
+                        // Large header
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: Text(
+                            'Login met je BQID',
+                            style: theme.textTheme.displaySmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.primary,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: colorScheme.primary.withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.group_rounded,
+                                color: colorScheme.primary,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Maak een account aan om sociale functies te gebruiken, zoals het zoeken naar gebruikers, vrienden maken en berichten versturen.',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onSurface,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       // Mode toggle
                       Row(
                         children: [

@@ -1,6 +1,7 @@
 import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/strings_nl.dart' as strings;
 import 'sync_screen.dart';
 import 'user_search_screen.dart';
@@ -23,14 +24,30 @@ class _SocialScreenState extends State<SocialScreen> {
   bool _socialFeaturesEnabled = false;
   late AnalyticsService _analyticsService;
   Map<String, Map<String, dynamic>>? _cachedUserScores;
+  User? _currentUser;
 
   @override
   void initState() {
     super.initState();
     _analyticsService = Provider.of<AnalyticsService>(context, listen: false);
+    _checkAuthState();
     _trackScreenAccess();
     // Social features enabled since feature flags removed
     _socialFeaturesEnabled = true;
+
+    // Navigate to sync screen immediately if not authenticated
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_currentUser == null) {
+        _navigateToSyncScreen();
+      }
+    });
+  }
+
+  void _checkAuthState() {
+    final user = Supabase.instance.client.auth.currentUser;
+    setState(() {
+      _currentUser = user;
+    });
   }
 
   /// Track screen access and feature usage.
@@ -41,10 +58,27 @@ class _SocialScreenState extends State<SocialScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Check auth state when dependencies change
+    _checkAuthState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
+
+    // If not authenticated, show loading while navigating to sync screen
+    if (_currentUser == null) {
+      return Scaffold(
+        backgroundColor: colorScheme.surface,
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -128,6 +162,7 @@ class _SocialScreenState extends State<SocialScreen> {
     );
   }
 
+
   /// Builds the BQID management card.
   Widget _buildBqidManagementCard(
       ColorScheme colorScheme, TextTheme textTheme) {
@@ -197,6 +232,16 @@ class _SocialScreenState extends State<SocialScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// Navigates to the sync screen for authentication.
+  void _navigateToSyncScreen() {
+    _analyticsService.capture(context, 'open_sync_screen_from_social');
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const SyncScreen(requiredForSocial: true),
       ),
     );
   }
