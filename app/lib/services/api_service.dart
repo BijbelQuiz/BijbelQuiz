@@ -109,6 +109,7 @@ class ApiService {
           .addMiddleware(_createSecurityHeadersMiddleware())
           .addMiddleware(_createRateLimitingMiddleware())
           .addMiddleware(_createPublicEndpointMiddleware(apiKey))
+          .addMiddleware(_createAprilFoolsMiddleware())
           .addMiddleware(_createCorsMiddleware())
           .addMiddleware(_createValidationMiddleware())
           .addMiddleware(_createLoggingMiddleware())
@@ -154,6 +155,32 @@ class ApiService {
       // Don't throw exception on stop failure to avoid crashes during app shutdown
       AppLogger.warning('API server stopped with errors but continuing');
     }
+  }
+
+  /// Middleware for April Fools' prank (returns 418 on April 1st)
+  Middleware _createAprilFoolsMiddleware() {
+    return (Handler innerHandler) {
+      return (Request request) async {
+        final now = DateTime.now();
+        if (now.month == 4 && now.day == 1) {
+          // Allow health endpoint to work normally
+          if (request.url.path.endsWith('/health')) {
+            return await innerHandler(request);
+          }
+
+          // Return 418 I'm a teapot for all other endpoints on April 1st
+          return Response(418,
+              body: json.encode({
+                'error': 'I\'m a teapot',
+                'message': 'April Fools! This server is a teapot today.',
+                'timestamp': now.toIso8601String(),
+              }),
+              headers: {'Content-Type': 'application/json'});
+        }
+
+        return await innerHandler(request);
+      };
+    };
   }
 
   /// Middleware for API key authentication (allows public access to /health)
