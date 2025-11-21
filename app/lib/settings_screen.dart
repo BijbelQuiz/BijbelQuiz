@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -435,6 +436,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: _buildActionButton(
                 context,
                 icon: Icons.upload,
+              ),
+            ),
+            _SettingItem(
+              title: strings.AppStrings.exportAllDataJson,
+              subtitle: strings.AppStrings.exportAllDataJsonDesc,
+              onTap: () => _exportAllDataJson(context),
+              child: _buildActionButton(
+                context,
+                icon: Icons.download,
               ),
             ),
             _SettingItem(
@@ -1129,6 +1139,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  void _exportAllDataJson(BuildContext context) async {
+    final analytics = Provider.of<AnalyticsService>(context, listen: false);
+    analytics.capture(context, 'export_all_data_json');
+
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
+    final lessonProgress = Provider.of<LessonProgressProvider>(context, listen: false);
+
+    final allData = {
+      'settings': settings.getExportData(),
+      'gameStats': gameStats.getExportData(),
+      'lessonProgress': lessonProgress.getExportData(),
+      'exportTimestamp': DateTime.now().toIso8601String(),
+      'appVersion': '1.0.0', // You might want to get this from package_info
+    };
+
+    final jsonString = json.encode(allData);
+
+    if (context.mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ExportAllDataScreen(jsonData: jsonString),
+        ),
+      );
+    }
+  }
+
   void _importStats(BuildContext context) async {
     final analytics = Provider.of<AnalyticsService>(context, listen: false);
     analytics.capture(context, 'import_stats');
@@ -1598,6 +1635,71 @@ class _ImportStatsScreenState extends State<ImportStatsScreen> {
                       }
                     },
                     child: Text(strings.AppStrings.importButton),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ExportAllDataScreen extends StatelessWidget {
+  final String jsonData;
+
+  const ExportAllDataScreen({super.key, required this.jsonData});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(strings.AppStrings.exportAllDataJsonTitle)),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text(
+              strings.AppStrings.exportAllDataJsonMessage,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SingleChildScrollView(
+                  child: SelectableText(
+                    jsonData,
+                    style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      await Clipboard.setData(ClipboardData(text: jsonData));
+                      if (context.mounted) {
+                        showTopSnackBar(context, strings.AppStrings.jsonDataCopied,
+                            style: TopSnackBarStyle.success);
+                      }
+                    },
+                    icon: const Icon(Icons.copy),
+                    label: Text(strings.AppStrings.copyToClipboard),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(strings.AppStrings.close),
                   ),
                 ),
               ],

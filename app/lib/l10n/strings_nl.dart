@@ -519,6 +519,16 @@ class AppStrings {
   static const String copyCode = 'Code kopiëren';
   static const String codeCopied = 'Code gekopieerd naar klembord';
 
+  // Export All Data (JSON)
+  static const String exportAllDataJson = 'Alle gegevens exporteren (JSON)';
+  static const String exportAllDataJsonDesc =
+      'Exporteer alle app-gegevens inclusief instellingen, statistieken en voortgang als JSON';
+  static const String exportAllDataJsonTitle = 'Alle gegevens exporteren (JSON)';
+  static const String exportAllDataJsonMessage =
+      'Je volledige app-gegevens zijn geëxporteerd als JSON. Je kunt deze gegevens kopiëren om ze op te slaan of te delen.';
+  static const String copyToClipboard = 'Naar klembord kopiëren';
+  static const String jsonDataCopied = 'JSON-gegevens gekopieerd naar klembord';
+
   // Sync Screen
   static const String multiDeviceSync = 'Multi-Apparaat Sync';
   static const String currentlySynced =

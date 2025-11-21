@@ -499,6 +499,16 @@ class AppStrings {
   static const String copyCode = 'Copy Code';
   static const String codeCopied = 'Code copied to clipboard';
 
+  // Export All Data (JSON)
+  static const String exportAllDataJson = 'Export All Data (JSON)';
+  static const String exportAllDataJsonDesc =
+      'Export all app data including settings, stats, and progress as JSON';
+  static const String exportAllDataJsonTitle = 'Export All Data (JSON)';
+  static const String exportAllDataJsonMessage =
+      'Your complete app data has been exported as JSON. You can copy this data to save it or share it.';
+  static const String copyToClipboard = 'Copy to Clipboard';
+  static const String jsonDataCopied = 'JSON data copied to clipboard';
+
   // Sync Screen
   static const String multiDeviceSync = 'Multi-Device Sync';
   static const String currentlySynced =
