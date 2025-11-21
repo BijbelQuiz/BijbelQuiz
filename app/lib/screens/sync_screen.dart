@@ -756,7 +756,14 @@ class _SyncScreenState extends State<SyncScreen> {
       if (response.user != null) {
         AppLogger.info('Successfully signed in user: ${response.user!.email}');
         // Sync will be handled automatically by auth state change
-        // Stay on the account screen after login
+
+        // Navigate to social screen after login
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const MainNavigationScreen(initialIndex: 2)),
+            (route) => false,
+          );
+        }
       }
     } catch (e) {
       setState(() {
