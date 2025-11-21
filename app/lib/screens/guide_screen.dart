@@ -12,6 +12,7 @@ import '../widgets/quiz_skeleton.dart';
 import '../widgets/top_snackbar.dart';
 import '../constants/urls.dart';
 import '../l10n/strings_nl.dart' as strings;
+import '../screens/main_navigation_screen.dart';
 
 class GuideScreen extends StatefulWidget {
   const GuideScreen({super.key});
@@ -180,10 +181,13 @@ class _GuideScreenState extends State<GuideScreen> {
       // if (settings.notificationEnabled && !kIsWeb && !Platform.isLinux) {
       //   await NotificationService.requestNotificationPermission();
       // }
-      // Navigate back
+      // Navigate to main app screen
       if (!mounted) return;
       if (localContext.mounted) {
-        Navigator.of(localContext).pop();
+        Navigator.of(localContext).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+          (route) => false,
+        );
       }
     } catch (e) {
       if (!mounted) return;
