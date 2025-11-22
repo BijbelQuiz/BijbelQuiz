@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
 import 'dart:async';
-import 'package:xml/xml.dart' as xml;
+import 'dart:convert';
 import '../l10n/strings_nl.dart' as strings;
 import '../constants/urls.dart';
+import '../utils/scriptura_book_mapper.dart';
 import '../utils/bible_book_mapper.dart';
 import '../utils/automatic_error_reporter.dart';
 
@@ -55,41 +56,50 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
       }
 
       final book = parsed['book'];
+      // Translate Dutch book name to English for Scriptura API
+      final englishBook = ScripturaBookNameMapper.toEnglish(book);
+      if (englishBook == null) {
+        await AutomaticErrorReporter.reportBiblicalReferenceError(
+          message: 'Ongeldig boeknaam voor Scriptura API: "$book"',
+          userMessage: 'Invalid book name for biblical reference',
+          reference: widget.reference,
+          additionalInfo: {
+            'book': book,
+            'validDutchBooks': ScripturaBookMapper.validBooks.take(10).join(', '),
+          },
+        );
+        throw Exception('Ongeldig boeknaam: "$book"');
+      }
+      // Validate the translated English book name against Scriptura API list
+      if (!ScripturaBookMapper.isValidBook(englishBook)) {
+        await AutomaticErrorReporter.reportBiblicalReferenceError(
+          message: 'Book not supported by Scriptura API after translation: "$englishBook"',
+          userMessage: 'Book not supported',
+          reference: widget.reference,
+          additionalInfo: {
+            'englishBook': englishBook,
+          },
+        );
+        throw Exception('Unsupported book: "$englishBook"');
+      }
       final chapter = parsed['chapter'];
       final startVerse = parsed['startVerse'];
       final endVerse = parsed['endVerse'];
 
-      // Convert book name to book number for the new API
-      final bookNumber = BibleBookMapper.getBookNumber(book);
-      if (bookNumber == null) {
-        // Auto-report book mapping errors
-        await AutomaticErrorReporter.reportBiblicalReferenceError(
-          message: 'Ongeldig boeknaam: "$book"',
-          userMessage: 'Invalid book name in biblical reference',
-          reference: widget.reference,
-          additionalInfo: {
-            'book': book,
-            'available_books':
-                BibleBookMapper.getAllBookNames().take(10).join(", "),
-          },
-        );
-        // Debug: show what book name was received and what valid names are available
-        final validBooks = BibleBookMapper.getAllBookNames();
-        throw Exception(
-            'Ongeldig boeknaam: "$book". Geldige boeken: ${validBooks.take(10).join(", ")}...');
-      }
-
+      // Scriptura API uses English book names, so we may need to translate
+      // For now, we'll try using the book name as-is since BibleBookMapper may handle this
+      
       String url;
       if (startVerse != null && endVerse != null) {
-        // Multiple verses - format as "startVerse-endVerse"
+        // Multiple verses - use passage endpoint
         url =
-            '${AppUrls.bibleApiBase}?b=$bookNumber&h=$chapter&v=$startVerse-$endVerse';
+            '${AppUrls.bibleApiBase}/passage?book=$englishBook&chapter=$chapter&start=$startVerse&end=$endVerse';
       } else if (startVerse != null) {
-        // Single verse
-        url = '${AppUrls.bibleApiBase}?b=$bookNumber&h=$chapter&v=$startVerse';
+        // Single verse - use verse endpoint
+        url = '${AppUrls.bibleApiBase}/verse?book=$englishBook&chapter=$chapter&verse=$startVerse';
       } else {
         // Entire chapter - request a reasonable sample (first 10 verses)
-        url = '${AppUrls.bibleApiBase}?b=$bookNumber&h=$chapter&v=1-10';
+        url = '${AppUrls.bibleApiBase}/passage?book=$englishBook&chapter=$chapter&start=1&end=10';
       }
 
       // Validate URL to ensure it's from our trusted domain
@@ -129,10 +139,10 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
       );
 
       if (response.statusCode == 200) {
-        // Validate content type - be more flexible
+        // Validate content type - expect JSON
         final contentType = response.headers['content-type'];
         if (contentType == null ||
-            (!contentType.contains('xml') && !contentType.contains('text'))) {
+            (!contentType.contains('json') && !contentType.contains('text'))) {
           // Auto-report content type errors
           AutomaticErrorReporter.reportBiblicalReferenceError(
             message:
@@ -152,69 +162,33 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
               'Ongeldig antwoord van de server. Content-Type: $contentType. Response: ${response.body.substring(0, 300)}...');
         }
 
-        // Parse XML response
+        // Parse JSON response
         String content = '';
         try {
-          // Clean the response body first (remove BOM or other artifacts)
-          String cleanBody = response.body.trim();
-          if (cleanBody.startsWith('\uFEFF')) {
-            cleanBody = cleanBody.substring(1);
+          final jsonData = json.decode(response.body);
+
+          // Handle single verse response
+          if (jsonData.containsKey('verse') && jsonData.containsKey('text')) {
+            final verseNumber = jsonData['verse'];
+            final verseText = jsonData['text'];
+            content = '$verseNumber. $verseText\n';
           }
-
-          final document = xml.XmlDocument.parse(cleanBody);
-
-          // Find all verse elements in the XML structure: bijbel > bijbelboek > hoofdstuk > vers
-          final verses = document.findAllElements('vers');
-
-          for (final verse in verses) {
-            final verseNumber = verse.getAttribute('name');
-            final verseText = verse.innerText.trim();
-
-            if (verseNumber != null && verseText.isNotEmpty) {
-              // Sanitize text to prevent XSS
-              final sanitizedText = _sanitizeText(verseText);
-              content += '$verseNumber. $sanitizedText\n';
-            }
-          }
-
-          // If no verses found with 'vers' elements, try alternative element names
-          if (content.isEmpty) {
-            final alternativeVerseElements = document.findAllElements('verse');
-            for (final verse in alternativeVerseElements) {
-              final verseNumber =
-                  verse.getAttribute('name') ?? verse.getAttribute('number');
-              final verseText = verse.innerText.trim();
-
-              if (verseNumber != null && verseText.isNotEmpty) {
-                final sanitizedText = _sanitizeText(verseText);
-                content += '$verseNumber. $sanitizedText\n';
+          // Handle passage (multiple verses) response
+          else if (jsonData.containsKey('verses')) {
+            final verses = jsonData['verses'] as List<dynamic>;
+            for (final verse in verses) {
+              final verseNumber = verse['verse'];
+              final verseText = verse['text'];
+              if (verseNumber != null && verseText != null) {
+                content += '$verseNumber. $verseText\n';
               }
             }
           }
 
-          // If still no content, try to extract any meaningful text
-          if (content.isEmpty) {
-            final allElements = <xml.XmlElement>[];
-            _collectAllElements(document.rootElement, allElements);
-
-            for (final element in allElements) {
-              final elementText = element.innerText.trim();
-              // Look for elements that contain actual Bible text (not just markup)
-              if (elementText.isNotEmpty &&
-                  elementText.length > 10 &&
-                  !elementText.contains('<') &&
-                  !elementText.contains('xml') &&
-                  !elementText.contains('bijbel')) {
-                final sanitizedText = _sanitizeText(elementText);
-                content += '$sanitizedText\n';
-              }
-            }
-          }
-
-          // If still no content, show debug info
+          // If no content was found, report it
           if (content.isEmpty) {
             AutomaticErrorReporter.reportBiblicalReferenceError(
-              message: 'Geen tekst gevonden in XML na parsing',
+              message: 'Geen tekst gevonden in JSON response',
               userMessage: 'No text found in biblical reference response',
               reference: widget.reference,
               additionalInfo: {
@@ -226,29 +200,23 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
               // Don't let reporting errors affect the main functionality
             });
             throw Exception(
-                'Geen tekst gevonden in XML na parsing. XML length: ${response.body.length}, First 300 chars: ${response.body.substring(0, 300)}');
+                'Geen tekst gevonden in JSON response. Response: ${response.body.substring(0, 300)}');
           }
         } catch (e) {
-          // If XML parsing fails, try to extract text directly from response
-          String extractedText = _extractTextFromResponse(response.body);
-          if (extractedText.isNotEmpty) {
-            content = _sanitizeText(extractedText);
-          } else {
-            // Report XML parsing errors
-            AutomaticErrorReporter.reportBiblicalReferenceError(
-              message: 'XML parsing mislukt en geen tekst gevonden',
-              userMessage: 'XML parsing failed for biblical reference',
-              reference: widget.reference,
-              additionalInfo: {
-                'url': url,
-                'error': e.toString(),
-                'response_preview': response.body.substring(0, 300),
-              },
-            ).catchError((e) {
-              // Don't let reporting errors affect the main functionality
-            });
-            throw Exception('XML parsing mislukt en geen tekst gevonden: $e');
-          }
+          // Report JSON parsing errors
+          AutomaticErrorReporter.reportBiblicalReferenceError(
+            message: 'JSON parsing mislukt',
+            userMessage: 'JSON parsing failed for biblical reference',
+            reference: widget.reference,
+            additionalInfo: {
+              'url': url,
+              'error': e.toString(),
+              'response_preview': response.body.substring(0, 300),
+            },
+          ).catchError((e) {
+            // Don't let reporting errors affect the main functionality
+          });
+          throw Exception('JSON parsing mislukt: $e');
         }
 
         if (mounted) {
@@ -351,62 +319,6 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
           _isLoading = false;
         });
       }
-    }
-  }
-
-  // Simple text sanitization to prevent XSS
-  String _sanitizeText(String text) {
-    // First decode Unicode escape sequences
-    String decodedText = _decodeUnicodeEscapes(text);
-
-    return decodedText
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#x27;');
-  }
-
-  // Decode Unicode escape sequences like \u00ebl
-  String _decodeUnicodeEscapes(String text) {
-    final RegExp unicodeRegex = RegExp(r'\u([0-9a-fA-F]{4})');
-    return text.replaceAllMapped(unicodeRegex, (Match match) {
-      final String hexCode = match.group(1)!;
-      final int charCode = int.parse(hexCode, radix: 16);
-      return String.fromCharCode(charCode);
-    });
-  }
-
-  void _collectAllElements(
-      xml.XmlElement element, List<xml.XmlElement> collection) {
-    collection.add(element);
-    for (final child in element.childElements) {
-      _collectAllElements(child, collection);
-    }
-  }
-
-  String _extractTextFromResponse(String responseBody) {
-    // Try to extract meaningful text from various response formats
-    try {
-      // If it's XML, try to parse and extract text content
-      if (responseBody.contains('<') && responseBody.contains('>')) {
-        final document = xml.XmlDocument.parse(responseBody);
-        final allElements = <xml.XmlElement>[];
-        _collectAllElements(document.rootElement, allElements);
-
-        for (final element in allElements) {
-          final text = element.innerText.trim();
-          if (text.isNotEmpty && text.length > 10) {
-            return text;
-          }
-        }
-      }
-
-      // If not XML or no text found, return the whole body (it might be plain text)
-      return responseBody.trim();
-    } catch (e) {
-      // If all parsing fails, return the original body
-      return responseBody.trim();
     }
   }
 

@@ -8,7 +8,7 @@ class AppUrls {
 
   // ===== API ENDPOINTS =====
   // Bible API
-  static final String bibleApiBase = 'https://www.online-bijbel.nl/api.php';
+  static final String bibleApiBase = 'https://www.scriptura-api.com/api';
 
   // AI API
   static final String geminiApiBase =
