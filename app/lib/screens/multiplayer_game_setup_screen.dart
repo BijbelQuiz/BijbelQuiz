@@ -22,7 +22,7 @@ class _MultiplayerGameSetupScreenState
   bool _isCreatingGame = false;
   bool _isJoiningGame = false;
   String? _errorMessage;
-  int _selectedQuestionTime = 20; // Default 20 seconds
+  final int _selectedQuestionTime = 20; // Default 20 seconds
   int _selectedNumQuestions = 10; // Default 10 questions
   bool _useQuestionLimit = true; // true = limit by questions, false = limit by time
   bool _isAuthenticated = false;

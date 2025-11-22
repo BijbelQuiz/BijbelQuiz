@@ -195,6 +195,11 @@ class MultiplayerProvider with ChangeNotifier {
   static const Duration _heartbeatInterval = Duration(seconds: 30);
   static const Duration _disconnectTimeout = Duration(seconds: 90);
 
+  // Rate limiting for game joining
+  final Map<String, List<DateTime>> _joinAttempts = {};
+  static const int _maxJoinAttempts = 5;
+  static const Duration _joinAttemptWindow = Duration(minutes: 15);
+
   bool _isLoading = false;
   String? _error;
 
@@ -278,6 +283,43 @@ class MultiplayerProvider with ChangeNotifier {
       _error = null;
       notifyListeners();
 
+      // Server-side rate limiting check using user/device identifier
+      try {
+        final rateLimitResult = await _supabase.rpc('check_join_rate_limit', params: {
+          'p_user_identifier': playerId, // Use player ID as identifier
+          'p_game_code': gameCode,
+        });
+
+        if (!(rateLimitResult as bool? ?? true)) {
+          AppLogger.warning('Server-side rate limit exceeded for player $playerId, game code: $gameCode');
+          _error = 'Te veel join pogingen. Probeer het over 15 minuten opnieuw.';
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
+      } catch (e) {
+        AppLogger.warning('Failed to check server-side rate limit, falling back to client-side: $e');
+        // Fallback to client-side rate limiting
+        if (!_checkJoinRateLimit(gameCode)) {
+          _error = 'Te veel join pogingen. Probeer het later opnieuw.';
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
+      }
+
+      // Record join attempt server-side
+      try {
+        await _supabase.rpc('record_join_attempt', params: {
+          'p_user_identifier': playerId,
+          'p_game_code': gameCode,
+        });
+      } catch (e) {
+        AppLogger.warning('Failed to record join attempt server-side: $e');
+        // Fallback to client-side recording
+        _recordJoinAttempt(gameCode);
+      }
+
       final success = await _joinGameSession(gameCode, playerId, playerName, isOrganizer: false);
 
       if (success) {
@@ -306,6 +348,8 @@ class MultiplayerProvider with ChangeNotifier {
 
   Future<bool> _joinGameSession(String gameCode, String playerId, String playerName, {required bool isOrganizer}) async {
     try {
+      AppLogger.info('Player $playerName ($playerId) attempting to join game session $gameCode');
+
       // First, get the game session
       final sessionResponse = await _supabase
           .from('multiplayer_game_sessions')
@@ -314,6 +358,34 @@ class MultiplayerProvider with ChangeNotifier {
           .single();
 
       _currentGameSession = MultiplayerGameSession.fromJson(sessionResponse);
+      AppLogger.info('Found game session: ${_currentGameSession!.id}, status: ${_currentGameSession!.status}');
+
+      // Check if player can join (server-side validation)
+      if (!isOrganizer) {
+        try {
+          final canJoinResult = await _supabase.rpc('can_join_game_session', params: {
+            'p_game_session_id': _currentGameSession!.id,
+            'p_player_id': playerId,
+          });
+
+          if (canJoinResult == null || canJoinResult.isEmpty) {
+            AppLogger.warning('Server-side join validation failed for player $playerId');
+            return false;
+          }
+
+          final result = canJoinResult[0] as Map<String, dynamic>;
+          final canJoin = result['can_join'] as bool? ?? false;
+          final reason = result['reason'] as String?;
+
+          if (!canJoin) {
+            AppLogger.warning('Player $playerId cannot join game $gameCode: $reason');
+            _error = reason ?? 'Kan niet deelnemen aan dit spel';
+            return false;
+          }
+        } catch (e) {
+          AppLogger.warning('Failed to check join eligibility server-side, proceeding with caution: $e');
+        }
+      }
 
       // Check if player already exists
       final existingPlayer = await _supabase
@@ -324,6 +396,7 @@ class MultiplayerProvider with ChangeNotifier {
           .maybeSingle();
 
       if (existingPlayer != null) {
+        AppLogger.info('Reconnecting existing player: ${existingPlayer['player_name']}');
         // Reconnect existing player
         await _supabase
             .from('multiplayer_game_players')
@@ -335,6 +408,7 @@ class MultiplayerProvider with ChangeNotifier {
 
         _currentPlayer = MultiplayerPlayer.fromJson(existingPlayer);
       } else {
+        AppLogger.info('Adding new player: $playerName');
         // Add new player
         final playerResponse = await _supabase
             .from('multiplayer_game_players')
@@ -353,9 +427,10 @@ class MultiplayerProvider with ChangeNotifier {
       // Load all players
       await _loadPlayers();
 
+      AppLogger.info('Player $playerName successfully joined game session $gameCode');
       return true;
     } catch (e) {
-      AppLogger.error('Failed to join game session internally', e);
+      AppLogger.error('Failed to join game session $gameCode for player $playerName', e);
       return false;
     }
   }
@@ -396,58 +471,84 @@ class MultiplayerProvider with ChangeNotifier {
 
   // Submit answer for current question
   Future<bool> submitAnswer(String answer, int answerTimeSeconds) async {
-    if (_currentGameSession == null || _currentPlayer == null || currentQuestion == null) return false;
+    if (_currentGameSession == null || _currentPlayer == null || currentQuestion == null) {
+      AppLogger.warning('submitAnswer called with invalid state: gameSession=${_currentGameSession != null}, player=${_currentPlayer != null}, question=${currentQuestion != null}');
+      return false;
+    }
+
+    final submitTime = DateTime.now();
+    AppLogger.info('Player ${_currentPlayer!.playerName} (${_currentPlayer!.playerId}) attempting to submit answer for question $currentQuestionIndex at $submitTime');
 
     // Prevent multiple submissions for the same question
     if (_currentPlayer!.currentAnswer != null && _currentPlayer!.currentAnswer!.isNotEmpty) {
+      AppLogger.warning('Player ${_currentPlayer!.playerName} prevented from submitting - already answered: "${_currentPlayer!.currentAnswer}"');
       return false; // Already answered
     }
 
     try {
-      final isCorrect = _isAnswerCorrect(answer, currentQuestion!);
+      // Server-side validation and scoring using RPC call
+      final validationResult = await _supabase.rpc('validate_and_score_answer', params: {
+        'p_game_session_id': _currentGameSession!.id,
+        'p_player_id': _currentPlayer!.playerId,
+        'p_question_index': currentQuestionIndex,
+        'p_answer': answer,
+        'p_answer_time_seconds': answerTimeSeconds,
+      });
 
-      // Calculate points
-      final points = _calculatePoints(isCorrect, answerTimeSeconds);
+      if (validationResult == null || validationResult.isEmpty) {
+        AppLogger.error('Server-side validation failed - no result returned');
+        return false;
+      }
 
-      // Use a transaction-like approach to prevent race conditions
-      final currentScore = _currentPlayer!.score;
+      final result = validationResult[0] as Map<String, dynamic>;
+      final isCorrect = result['is_correct'] as bool? ?? false;
+      final points = result['points_earned'] as int? ?? 0;
+      final validationError = result['validation_error'] as String?;
 
-      // Update player score and answer
-      await _supabase
-          .from('multiplayer_game_players')
-          .update({
-            'score': (currentScore + points),
-            'current_answer': answer,
-            'answer_time_seconds': answerTimeSeconds,
-            'last_seen_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', _currentPlayer!.id);
+      if (validationError != null) {
+        AppLogger.warning('Server-side validation error: $validationError');
+        return false;
+      }
 
-      // Record answer (only if update succeeded)
-      await _supabase
-          .from('multiplayer_game_answers')
-          .insert({
-            'game_session_id': _currentGameSession!.id,
-            'player_id': _currentPlayer!.playerId,
-            'question_index': currentQuestionIndex,
-            'answer': answer,
-            'is_correct': isCorrect,
-            'answer_time_seconds': answerTimeSeconds,
-            'points_earned': points,
-          });
+      AppLogger.info('Server-side validation: answer="$answer", isCorrect=$isCorrect, points=$points');
 
-      // Update local player
+      // Use database transaction for atomic updates
+      final transactionResult = await _supabase.rpc('submit_answer_transaction', params: {
+        'p_player_id': _currentPlayer!.id,
+        'p_game_session_id': _currentGameSession!.id,
+        'p_question_index': currentQuestionIndex,
+        'p_answer': answer,
+        'p_is_correct': isCorrect,
+        'p_answer_time_seconds': answerTimeSeconds,
+        'p_points_earned': points,
+      });
+
+      if (transactionResult == null) {
+        AppLogger.error('Transaction failed - no result returned');
+        return false;
+      }
+
+      final newScore = transactionResult['new_score'] as int?;
+      if (newScore == null) {
+        AppLogger.error('Transaction failed - invalid score returned');
+        return false;
+      }
+
+      // Update local player state
       _currentPlayer = _currentPlayer!.copyWith(
-        score: currentScore + points,
+        score: newScore,
         currentAnswer: answer,
         answerTimeSeconds: answerTimeSeconds,
       );
 
-      notifyListeners();
+      final totalTime = DateTime.now().difference(submitTime);
+      AppLogger.info('Answer submission completed successfully for player ${_currentPlayer!.playerName} in ${totalTime.inMilliseconds}ms');
 
+      notifyListeners();
       return true;
     } catch (e) {
-      AppLogger.error('Failed to submit answer', e);
+      final totalTime = DateTime.now().difference(submitTime);
+      AppLogger.error('Failed to submit answer for player ${_currentPlayer!.playerName} after ${totalTime.inMilliseconds}ms', e);
       return false;
     }
   }
@@ -531,10 +632,15 @@ class MultiplayerProvider with ChangeNotifier {
     if (_currentGameSession == null) return;
 
     try {
-      // For now, load questions from cache service
-      // In a real implementation, you might want to store questions in the database
-      // or ensure all players get the same questions
-      final settings = {}; // Get from provider if needed
+      // First try to load from server-side storage
+      final serverQuestions = await _loadQuestionsFromServer();
+      if (serverQuestions.isNotEmpty) {
+        _questions = serverQuestions;
+        AppLogger.info('Loaded ${serverQuestions.length} questions from server');
+        return;
+      }
+
+      // Load questions from cache service
       final language = 'nl'; // Default language
 
       _questions = await _questionCacheService.getQuestions(
@@ -543,16 +649,68 @@ class MultiplayerProvider with ChangeNotifier {
         count: _currentGameSession!.gameSettings['num_questions'] ?? 10,
       );
 
-      _questions.shuffle(); // Ensure same order for all players
+      // Store and shuffle questions server-side for validation
+      await _shuffleAndStoreQuestionsServerSide();
+
+      AppLogger.info('Loaded and stored ${questions.length} questions with server-side shuffling');
     } catch (e) {
       AppLogger.error('Failed to load questions', e);
     }
   }
 
-  Future<void> _loadPlayers() async {
-    if (_currentGameSession == null) return;
+  Future<List<QuizQuestion>> _loadQuestionsFromServer() async {
+    try {
+      final response = await _supabase
+          .from('game_session_questions')
+          .select('question_index, question_text, correct_answer, options')
+          .eq('game_session_id', _currentGameSession!.id)
+          .order('question_index');
+
+      return response.map((json) => QuizQuestion(
+        id: 'server_${json['question_index']}', // Generate ID from index
+        question: json['question_text'],
+        correctAnswer: json['correct_answer'],
+        incorrectAnswers: [], // Not stored, will be empty for now
+        difficulty: 'medium', // Default difficulty
+        type: QuestionType.fitb, // Default to fill-in-the-blank
+      )).toList();
+    } catch (e) {
+      AppLogger.warning('Failed to load questions from server, will use cache: $e');
+      return [];
+    }
+  }
+
+  Future<void> _shuffleAndStoreQuestionsServerSide() async {
+    if (_currentGameSession == null || _questions.isEmpty) return;
 
     try {
+      // Convert questions to JSONB format for server-side processing
+      final questionsJson = _questions.map((question) => {
+        'question': question.question,
+        'correctAnswer': question.correctAnswer,
+        'incorrectAnswers': question.incorrectAnswers,
+      }).toList();
+
+      // Use server-side function for shuffling and storage
+      await _supabase.rpc('shuffle_and_store_questions', params: {
+        'p_game_session_id': _currentGameSession!.id,
+        'p_questions': questionsJson,
+      });
+
+      AppLogger.info('Stored and shuffled ${_questions.length} questions server-side');
+    } catch (e) {
+      AppLogger.error('Failed to shuffle and store questions server-side', e);
+    }
+  }
+
+  Future<void> _loadPlayers() async {
+    if (_currentGameSession == null) {
+      AppLogger.warning('_loadPlayers called with no current game session');
+      return;
+    }
+
+    try {
+      AppLogger.debug('Loading players for game session ${_currentGameSession!.gameCode}');
       final response = await _supabase
           .from('multiplayer_game_players')
           .select()
@@ -560,83 +718,102 @@ class MultiplayerProvider with ChangeNotifier {
           .order('joined_at');
 
       _players = response.map((json) => MultiplayerPlayer.fromJson(json)).toList();
+      AppLogger.info('Loaded ${_players.length} players for game session ${_currentGameSession!.gameCode}');
       notifyListeners();
     } catch (e) {
-      AppLogger.error('Failed to load players', e);
+      AppLogger.error('Failed to load players for game session ${_currentGameSession!.gameCode}', e);
     }
   }
 
   void _setupRealtimeSubscriptions() {
     if (_currentGameSession == null) return;
 
-    // Subscribe to game session changes
-    _gameChannel = _supabase
-        .channel('game_session_${_currentGameSession!.id}')
-        .onPostgresChanges(
-          event: PostgresChangeEvent.update,
-          schema: 'public',
-          table: 'multiplayer_game_sessions',
-          filter: PostgresChangeFilter(
-            type: PostgresChangeFilterType.eq,
-            column: 'id',
-            value: _currentGameSession!.id,
-          ),
-          callback: (payload) {
-            final updatedSession = MultiplayerGameSession.fromJson(payload.newRecord);
-            _currentGameSession = updatedSession;
-            notifyListeners();
-          },
-        )
-        .subscribe();
+    AppLogger.info('Setting up real-time subscriptions for game session ${_currentGameSession!.gameCode}');
 
-    // Subscribe to player changes
-    _playersChannel = _supabase
-        .channel('game_players_${_currentGameSession!.id}')
-        .onPostgresChanges(
-          event: PostgresChangeEvent.all,
-          schema: 'public',
-          table: 'multiplayer_game_players',
-          filter: PostgresChangeFilter(
-            type: PostgresChangeFilterType.eq,
-            column: 'game_session_id',
-            value: _currentGameSession!.id,
-          ),
-          callback: (payload) {
-            _loadPlayers(); // Reload all players
-          },
-        )
-        .subscribe();
-  }
+    // Clean up existing subscriptions first
+    _cleanupRealtimeSubscriptions();
 
-  bool _isAnswerCorrect(String answer, QuizQuestion question) {
-    // Simple correctness check - in a real implementation,
-    // you might want more sophisticated answer validation
-    return answer.toLowerCase().trim() == question.correctAnswer.toLowerCase().trim();
-  }
+    try {
+      // Subscribe to game session changes
+      _gameChannel = _supabase
+          .channel('game_session_${_currentGameSession!.id}')
+          .onPostgresChanges(
+            event: PostgresChangeEvent.update,
+            schema: 'public',
+            table: 'multiplayer_game_sessions',
+            filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'id',
+              value: _currentGameSession!.id,
+            ),
+            callback: (payload) {
+              AppLogger.debug('Game session update received: ${payload.eventType} for session ${_currentGameSession!.gameCode}');
+              try {
+                final updatedSession = MultiplayerGameSession.fromJson(payload.newRecord);
+                AppLogger.info('Game session updated: status=${updatedSession.status}, questionIndex=${updatedSession.currentQuestionIndex}');
+                _currentGameSession = updatedSession;
+                notifyListeners();
+              } catch (e) {
+                AppLogger.error('Failed to parse game session update', e);
+              }
+            },
+          )
+          .subscribe();
 
-  int _calculatePoints(bool isCorrect, int answerTimeSeconds) {
-    if (!isCorrect) return 0;
+      // Subscribe to player changes
+      _playersChannel = _supabase
+          .channel('game_players_${_currentGameSession!.id}')
+          .onPostgresChanges(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'multiplayer_game_players',
+            filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'game_session_id',
+              value: _currentGameSession!.id,
+            ),
+            callback: (payload) {
+              AppLogger.debug('Player change received: ${payload.eventType} for session ${_currentGameSession!.gameCode}');
+              try {
+                _loadPlayers(); // Reload all players
+              } catch (e) {
+                AppLogger.error('Failed to reload players after change', e);
+              }
+            },
+          )
+          .subscribe();
 
-    // Base points: 100
-    // Speed bonus: up to 50 points for answering within 2 seconds
-    const basePoints = 100;
-    const maxSpeedBonus = 50;
-    const speedThresholdSeconds = 2;
-
-    if (answerTimeSeconds <= speedThresholdSeconds) {
-      return basePoints + maxSpeedBonus;
-    } else {
-      // Linear decrease in bonus points
-      final timeRatio = (answerTimeSeconds - speedThresholdSeconds) / (20 - speedThresholdSeconds);
-      final speedBonus = maxSpeedBonus * (1 - timeRatio);
-      return basePoints + speedBonus.round();
+      AppLogger.info('Real-time subscriptions set up successfully');
+    } catch (e) {
+      AppLogger.error('Failed to set up real-time subscriptions', e);
+      _cleanupRealtimeSubscriptions();
     }
   }
 
+  void _cleanupRealtimeSubscriptions() {
+    try {
+      _gameChannel?.unsubscribe();
+      _gameChannel = null;
+    } catch (e) {
+      AppLogger.warning('Error cleaning up game channel: $e');
+    }
+
+    try {
+      _playersChannel?.unsubscribe();
+      _playersChannel = null;
+    } catch (e) {
+      AppLogger.warning('Error cleaning up players channel: $e');
+    }
+  }
+
+
   void _startHeartbeat() {
+    AppLogger.info('Starting heartbeat for player ${_currentPlayer?.playerName}');
     _heartbeatTimer?.cancel();
     _heartbeatTimer = Timer.periodic(_heartbeatInterval, (_) async {
       if (_currentPlayer != null) {
+        final heartbeatTime = DateTime.now();
+        AppLogger.debug('Sending heartbeat for player ${_currentPlayer!.playerName} at $heartbeatTime');
         try {
           await _supabase
               .from('multiplayer_game_players')
@@ -645,38 +822,161 @@ class MultiplayerProvider with ChangeNotifier {
                 'is_connected': true,
               })
               .eq('id', _currentPlayer!.id);
+          AppLogger.debug('Heartbeat sent successfully for player ${_currentPlayer!.playerName}');
         } catch (e) {
-          AppLogger.error('Failed to send heartbeat', e);
+          AppLogger.error('Failed to send heartbeat for player ${_currentPlayer!.playerName}', e);
           // If heartbeat fails, mark as disconnected
           _handleDisconnection();
         }
+      } else {
+        AppLogger.warning('Heartbeat timer triggered but no current player');
       }
     });
 
     // Set up disconnect timer
     _disconnectTimer?.cancel();
     _disconnectTimer = Timer(_disconnectTimeout, () {
+      AppLogger.warning('Disconnect timeout reached for player ${_currentPlayer?.playerName}');
       _handleDisconnection();
     });
+    AppLogger.info('Heartbeat and disconnect timer started');
   }
 
   void _handleDisconnection() {
-    AppLogger.warning('Player disconnected from game session');
-    _cleanup();
-    // TODO: Show reconnection dialog to user
+    AppLogger.warning('Player ${_currentPlayer?.playerName} disconnected from game session ${_currentGameSession?.gameCode}');
+
+    if (_currentPlayer != null && _currentGameSession != null) {
+      // Mark as disconnected but don't clean up completely
+      _currentPlayer = _currentPlayer!.copyWith(isConnected: false);
+      notifyListeners();
+
+      // Attempt automatic reconnection after a delay
+      Future.delayed(const Duration(seconds: 5), () {
+        if (_currentPlayer != null && !_currentPlayer!.isConnected) {
+          _attemptReconnection();
+        }
+      });
+    } else {
+      _cleanup();
+    }
+  }
+
+  Future<void> _attemptReconnection() async {
+    if (_currentPlayer == null || _currentGameSession == null) return;
+
+    try {
+      AppLogger.info('Attempting to reconnect player ${_currentPlayer!.playerName} to game ${_currentGameSession!.gameCode}');
+
+      // Update connection status
+      await _supabase
+          .from('multiplayer_game_players')
+          .update({
+            'is_connected': true,
+            'last_seen_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', _currentPlayer!.id);
+
+      _currentPlayer = _currentPlayer!.copyWith(isConnected: true);
+
+      // Re-setup subscriptions if needed
+      if (_gameChannel == null || _playersChannel == null) {
+        _setupRealtimeSubscriptions();
+      }
+
+      // Restart heartbeat
+      _startHeartbeat();
+
+      AppLogger.info('Successfully reconnected player ${_currentPlayer!.playerName}');
+      notifyListeners();
+    } catch (e) {
+      AppLogger.error('Failed to reconnect player ${_currentPlayer!.playerName}', e);
+
+      // If reconnection fails, wait longer and try again
+      Future.delayed(const Duration(seconds: 30), () {
+        if (_currentPlayer != null && !_currentPlayer!.isConnected) {
+          _attemptReconnection();
+        }
+      });
+    }
+  }
+
+  // Manual reconnection method for user-initiated reconnection
+  Future<bool> reconnectToGame() async {
+    if (_currentPlayer == null || _currentGameSession == null) return false;
+
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      await _attemptReconnection();
+
+      _isLoading = false;
+      notifyListeners();
+
+      return _currentPlayer?.isConnected ?? false;
+    } catch (e) {
+      _error = 'Kon niet opnieuw verbinden: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Rate limiting methods
+  bool _checkJoinRateLimit(String gameCode) {
+    final now = DateTime.now();
+    final attempts = _joinAttempts[gameCode] ?? [];
+
+    // Remove old attempts outside the window
+    final validAttempts = attempts.where((attempt) =>
+        now.difference(attempt) <= _joinAttemptWindow).toList();
+
+    _joinAttempts[gameCode] = validAttempts;
+
+    return validAttempts.length < _maxJoinAttempts;
+  }
+
+  void _recordJoinAttempt(String gameCode) {
+    final now = DateTime.now();
+    _joinAttempts.putIfAbsent(gameCode, () => []).add(now);
+
+    // Clean up old entries periodically
+    if (_joinAttempts.length > 100) {
+      _cleanupOldJoinAttempts();
+    }
+  }
+
+  void _cleanupOldJoinAttempts() {
+    final now = DateTime.now();
+    _joinAttempts.removeWhere((gameCode, attempts) {
+      final validAttempts = attempts.where((attempt) =>
+          now.difference(attempt) <= _joinAttemptWindow).toList();
+      return validAttempts.isEmpty;
+    });
   }
 
   void _cleanup() {
-    _gameChannel?.unsubscribe();
-    _playersChannel?.unsubscribe();
+    AppLogger.info('Cleaning up multiplayer provider resources');
+
+    // Cancel timers first
     _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+
     _disconnectTimer?.cancel();
+    _disconnectTimer = null;
+
+    // Clean up real-time subscriptions
+    _cleanupRealtimeSubscriptions();
+
+    // Clear data
     _currentGameSession = null;
     _currentPlayer = null;
     _players = [];
     _questions = [];
     _error = null;
+
     notifyListeners();
+    AppLogger.info('Multiplayer provider cleanup completed');
   }
 
   @override

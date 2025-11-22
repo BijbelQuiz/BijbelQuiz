@@ -22,6 +22,7 @@ import 'services/time_tracking_service.dart';
 import 'services/api_service.dart';
 import 'services/messaging_service.dart';
 import 'services/question_cache_service.dart';
+import 'services/connection_service.dart';
 import 'utils/bijbelquiz_gen_utils.dart';
 import 'screens/bijbelquiz_gen_screen.dart';
 import 'screens/store_screen.dart';
@@ -75,13 +76,20 @@ Future<void> main() async {
 
     await serviceContainer.initializeCriticalServices();
 
+    // Initialize services needed for multiplayer synchronously
+    AppLogger.info('Initializing multiplayer-required services...');
+    final connectionService = ConnectionService();
+    await connectionService.initialize();
+    final questionCacheService = QuestionCacheService(connectionService);
+    await questionCacheService.initialize();
+
     // Create providers for the app
     final gameStatsProvider = serviceContainer.gameStatsProvider;
     final settingsProvider = serviceContainer.settingsProvider;
     final lessonProgressProvider = LessonProgressProvider();
     final multiplayerProvider = MultiplayerProvider(
-      serviceContainer.questionCacheService!,
-      serviceContainer.connectionService!,
+      questionCacheService,
+      connectionService,
     );
 
     // Set up sync listeners for real-time updates
