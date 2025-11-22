@@ -126,9 +126,7 @@ class _QuizScreenState extends State<QuizScreen>
     // Log performance metrics periodically and track performance
     Future.delayed(const Duration(seconds: 30), () {
       if (mounted) {
-        final performanceService =
-            Provider.of<PerformanceService>(context, listen: false);
-        final metrics = performanceService.getPerformanceMetrics();
+        final metrics = _performanceService.getPerformanceMetrics();
         AppLogger.info('QuizScreen performance metrics: $metrics');
       }
     });

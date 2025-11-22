@@ -1,6 +1,6 @@
--- SQL INSERT statements for questions table
+-- SQL INSERT statements for nl questions table
 -- Generated from questions-nl-sv.json
--- Generated on: 1763177993.002822
+-- Generated on: 1763806680.095157
 
 INSERT INTO questions (id, vraag, juiste_antwoord, foute_antwoorden, moeilijkheidsgraad, type, categories, biblical_reference)
 VALUES ('000001', 'Hoeveel Bijbelboeken heeft het Nieuwe Testament?', '27', ARRAY['26','66','39'], 3, 'mc', '{}', NULL)
@@ -1587,7 +1587,7 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = NOW();
 
 INSERT INTO questions (id, vraag, juiste_antwoord, foute_antwoorden, moeilijkheidsgraad, type, categories, biblical_reference)
-VALUES ('000133', '3 namen zijn voor hetzelfde meer/zee. Welke hoort er niet bij?', 'De Dode Zee', ARRAY['Meer van Galiléa','Meer van Gennésaret','Zee van Tiberias'], 1, 'mc', '{}', 'In de Evangeliën')
+VALUES ('000133', '3 namen zijn voor hetzelfde meer/zee. Welke hoort er niet bij?', 'De Dode Zee', ARRAY['Meer van Galiléa','Meer van Gennésaret','Zee van Tiberias'], 1, 'mc', '{}', NULL)
 ON CONFLICT (id) DO UPDATE SET
     vraag = EXCLUDED.vraag,
     juiste_antwoord = EXCLUDED.juiste_antwoord,
@@ -3243,7 +3243,7 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = NOW();
 
 INSERT INTO questions (id, vraag, juiste_antwoord, foute_antwoorden, moeilijkheidsgraad, type, categories, biblical_reference)
-VALUES ('000271', 'Het boek Esther noemt nooit de naam van God', 'Waar', ARRAY['Niet waar'], 1, 'tf', ARRAY['Esther'], 'Esther')
+VALUES ('000271', 'Het boek Esther noemt nooit de naam van God', 'Waar', ARRAY['Niet waar'], 1, 'tf', ARRAY['Esther'], 'Esther 1')
 ON CONFLICT (id) DO UPDATE SET
     vraag = EXCLUDED.vraag,
     juiste_antwoord = EXCLUDED.juiste_antwoord,
@@ -3759,7 +3759,7 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = NOW();
 
 INSERT INTO questions (id, vraag, juiste_antwoord, foute_antwoorden, moeilijkheidsgraad, type, categories, biblical_reference)
-VALUES ('000314', 'Maleáchi is het laatste bijbelboek van het Nieuwe Testament', 'Niet waar', ARRAY['Waar'], 1, 'tf', '{}', 'Maleachi')
+VALUES ('000314', 'Maleáchi is het laatste bijbelboek van het Nieuwe Testament', 'Niet waar', ARRAY['Waar'], 1, 'tf', '{}', 'Maleachi 1')
 ON CONFLICT (id) DO UPDATE SET
     vraag = EXCLUDED.vraag,
     juiste_antwoord = EXCLUDED.juiste_antwoord,
@@ -6447,7 +6447,7 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = NOW();
 
 INSERT INTO questions (id, vraag, juiste_antwoord, foute_antwoorden, moeilijkheidsgraad, type, categories, biblical_reference)
-VALUES ('000538', 'Wie stond borg voor Benjamin toen ze bij Jozef waren?', 'Juda', ARRAY['Simeon','Ruben','Naftali'], 1, 'mc', ARRAY['Genesis'], 'Genesis 43: 8,9')
+VALUES ('000538', 'Wie stond borg voor Benjamin toen ze bij Jozef waren?', 'Juda', ARRAY['Simeon','Ruben','Naftali'], 1, 'mc', ARRAY['Genesis'], 'Genesis 43:8-9')
 ON CONFLICT (id) DO UPDATE SET
     vraag = EXCLUDED.vraag,
     juiste_antwoord = EXCLUDED.juiste_antwoord,

@@ -173,14 +173,14 @@ class QuizQuestion {
   /// The JSON keys 'id', 'vraag', 'juisteAntwoord', 'fouteAntwoorden', 'moeilijkheidsgraad', and 'type' are used to populate the question's properties.
   factory QuizQuestion.fromJson(Map<String, dynamic> json) {
     final type = _parseQuestionType(json['type']?.toString());
-    final correctAnswer = json['juisteAntwoord']?.toString() ?? '';
+    final correctAnswer = json['juisteAntwoord']?.toString() ?? json['correctAnswer']?.toString() ?? '';
     final incorrectAnswers =
-        _parseIncorrectAnswers(json['fouteAntwoorden'], type, correctAnswer);
+        _parseIncorrectAnswers(json['fouteAntwoorden'] ?? json['incorrectAnswers'], type, correctAnswer);
     final categories = _parseCategories(json['categories']);
     final biblicalReference = json['biblicalReference'] as String?;
     final id = json['id']?.toString() ?? '';
-    final question = json['vraag']?.toString() ?? '';
-    final difficulty = json['moeilijkheidsgraad']?.toString() ?? '';
+    final question = json['vraag']?.toString() ?? json['question']?.toString() ?? '';
+    final difficulty = json['moeilijkheidsgraad']?.toString() ?? json['difficulty']?.toString() ?? '';
 
     // Validate parsed data before creating instance
     _validateId(id);

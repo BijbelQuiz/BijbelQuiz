@@ -482,25 +482,45 @@ class QuestionCacheService {
           .map((index) => '000${(index + 1).toString().padLeft(3, '0')}')
           .toList();
 
+      final isEnglish = language == 'en';
+      final tableName = isEnglish ? 'questions_en' : 'questions';
+      final columns = isEnglish
+          ? 'id, question, correct_answer, incorrect_answers, difficulty, type, categories, biblical_reference'
+          : 'id, vraag, juiste_antwoord, foute_antwoorden, moeilijkheidsgraad, type, categories, biblical_reference';
+
       final response = await client
-          .from('questions')
-          .select(
-              'id, vraag, juiste_antwoord, foute_antwoorden, moeilijkheidsgraad, type, categories, biblical_reference')
+          .from(tableName)
+          .select(columns)
           .inFilter('id', ids);
 
       final questions = <QuizQuestion>[];
       for (final row in response) {
         try {
-          final question = QuizQuestion.fromJson({
-            'id': row['id'],
-            'vraag': row['vraag'],
-            'juisteAntwoord': row['juiste_antwoord'],
-            'fouteAntwoorden': row['foute_antwoorden'] ?? [],
-            'moeilijkheidsgraad': row['moeilijkheidsgraad'],
-            'type': row['type'] ?? 'mc',
-            'categories': row['categories'] ?? [],
-            'biblicalReference': row['biblical_reference'],
-          });
+          final Map<String, dynamic> questionData;
+          if (isEnglish) {
+            questionData = {
+              'id': row['id'],
+              'question': row['question'],
+              'correctAnswer': row['correct_answer'],
+              'incorrectAnswers': row['incorrect_answers'] ?? [],
+              'difficulty': row['difficulty'],
+              'type': row['type'] ?? 'mc',
+              'categories': row['categories'] ?? [],
+              'biblicalReference': row['biblical_reference'],
+            };
+          } else {
+            questionData = {
+              'id': row['id'],
+              'vraag': row['vraag'],
+              'juisteAntwoord': row['juiste_antwoord'],
+              'fouteAntwoorden': row['foute_antwoorden'] ?? [],
+              'moeilijkheidsgraad': row['moeilijkheidsgraad'],
+              'type': row['type'] ?? 'mc',
+              'categories': row['categories'] ?? [],
+              'biblicalReference': row['biblical_reference'],
+            };
+          }
+          final question = QuizQuestion.fromJson(questionData);
           questions.add(question);
         } catch (e) {
           AppLogger.error('Error parsing database question: $e', e);
@@ -517,8 +537,9 @@ class QuestionCacheService {
   /// Load questions from JSON by indices
   Future<List<QuizQuestion>> _loadQuestionsFromJsonByIndices(
       String language, List<int> indices) async {
+    final fileName = language == 'en' ? 'assets/questions-en.json' : 'assets/questions-nl-sv.json';
     final String response =
-        await rootBundle.loadString('assets/questions-nl-sv.json');
+        await rootBundle.loadString(fileName);
     final List<dynamic> data = json.decode(response) as List;
 
     if (data.isEmpty) {
@@ -547,17 +568,23 @@ class QuestionCacheService {
       String language) async {
     try {
       final client = SupabaseConfig.getClient();
+      final isEnglish = language == 'en';
+      final tableName = isEnglish ? 'questions_en' : 'questions';
+      final columns = isEnglish
+          ? 'id, difficulty, categories, type, biblical_reference'
+          : 'id, moeilijkheidsgraad, categories, type, biblical_reference';
+      final orderColumn = isEnglish ? 'difficulty' : 'moeilijkheidsgraad';
+
       final response = await client
-          .from('questions')
-          .select(
-              'id, moeilijkheidsgraad, categories, type, biblical_reference')
-          .order('moeilijkheidsgraad');
+          .from(tableName)
+          .select(columns)
+          .order(orderColumn);
 
       final metadata = <Map<String, dynamic>>[];
       for (final row in response) {
         metadata.add({
           'id': row['id'],
-          'difficulty': row['moeilijkheidsgraad']?.toString() ?? '',
+          'difficulty': isEnglish ? (row['difficulty']?.toString() ?? '') : (row['moeilijkheidsgraad']?.toString() ?? ''),
           'categories':
               (row['categories'] as List<dynamic>?)?.cast<String>() ?? [],
           'type': row['type']?.toString() ?? 'mc',
@@ -577,8 +604,9 @@ class QuestionCacheService {
   /// Load metadata from JSON
   Future<List<Map<String, dynamic>>> _loadMetadataFromJson(
       String language) async {
+    final fileName = language == 'en' ? 'assets/questions-en.json' : 'assets/questions-nl-sv.json';
     final String response =
-        await rootBundle.loadString('assets/questions-nl-sv.json');
+        await rootBundle.loadString(fileName);
     final List<dynamic> data = json.decode(response);
 
     if (data.isEmpty) {
@@ -590,7 +618,7 @@ class QuestionCacheService {
       try {
         return {
           'id': json['id'] ?? '',
-          'difficulty': json['moeilijkheidsgraad']?.toString() ?? '',
+          'difficulty': json['moeilijkheidsgraad']?.toString() ?? json['difficulty']?.toString() ?? '',
           'categories':
               (json['categories'] as List<dynamic>?)?.cast<String>() ?? [],
           'type': json['type']?.toString() ?? 'mc',
