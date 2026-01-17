@@ -1,0 +1,57 @@
+name: bijbelbook
+description: "Ontdek en deel christelijke boeken"
+publish_to: 'none'
+
+package_name: app.bijbelbook.play
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  shared_preferences: ^2.5.3
+  provider: ^6.1.5+1
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+
+  flutter_dotenv: ^6.0.0
+  supabase_flutter: ^2.10.3
+
+  logging: any
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^6.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/.env
+
+  fonts:
+    - family: Quicksand
+      fonts:
+        - asset: assets/fonts/Quicksand-Regular.ttf
+        - asset: assets/fonts/Quicksand-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Quicksand-Medium.ttf
+          weight: 500
+
+homepage: https://bijbelbook.app
