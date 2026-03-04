@@ -1683,7 +1683,7 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = NOW();
 
 INSERT INTO questions_en (id, question, correct_answer, incorrect_answers, difficulty, type, categories, biblical_reference)
-VALUES ('000141', 'Elijah, Ahab and the people went to offer on Mount ...', 'Carmel', ARRAY['Horeb','Sinai','Tabor'], 3, 'fitb', ARRAY['1 Kings'], '1 Kings 18: 20 -40')
+VALUES ('000141', 'Elijah, Ahab and the people went to offer on Mount ...', 'Carmel', ARRAY['Horeb','Sinai','Tabor'], 3, 'fitb', ARRAY['1 Kings'], '1 Kings 18:20-40')
 ON CONFLICT (id) DO UPDATE SET
     question = EXCLUDED.question,
     correct_answer = EXCLUDED.correct_answer,
@@ -3063,7 +3063,7 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = NOW();
 
 INSERT INTO questions_en (id, question, correct_answer, incorrect_answers, difficulty, type, categories, biblical_reference)
-VALUES ('000256', 'Absalom, David''s son, rose in rebellion against David', 'True', ARRAY['Not true'], 1, 'tf', ARRAY['2 Samuel'], '2 Samuel 13 - 18')
+VALUES ('000256', 'Absalom, David''s son, rose in rebellion against David', 'True', ARRAY['Not true'], 1, 'tf', ARRAY['2 Samuel'], '2 Samuel 13:18')
 ON CONFLICT (id) DO UPDATE SET
     question = EXCLUDED.question,
     correct_answer = EXCLUDED.correct_answer,

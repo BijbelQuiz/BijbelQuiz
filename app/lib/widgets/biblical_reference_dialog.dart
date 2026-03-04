@@ -421,6 +421,24 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
 
       reference = reference.trim();
 
+      // Handle references without chapter:verse like "2 Samuel 13 - 18"
+      // This is a chapter range, not verse range
+      final chapterRangeMatch =
+          RegExp(r'^(\D+?)\s+(\d+)\s*-\s*(\d+)$').firstMatch(reference);
+      if (chapterRangeMatch != null) {
+        final book = chapterRangeMatch.group(1)!.trim();
+        final startChapter = int.tryParse(chapterRangeMatch.group(2)!);
+        final endChapter = int.tryParse(chapterRangeMatch.group(3)!);
+        if (startChapter != null && endChapter != null) {
+          return {
+            'book': book,
+            'chapter': startChapter,
+            'startVerse': null,
+            'endVerse': null,
+          };
+        }
+      }
+
       // Special case for "book chapter en chapter" format
       if (reference.contains(' en ')) {
         final parts = reference.split(' en ');
@@ -480,8 +498,8 @@ class _BiblicalReferenceDialogState extends State<BiblicalReferenceDialog> {
       int? endVerse;
 
       if (chapterVerseParts.length > 1) {
-        // Has verse information
-        final versePart = chapterVerseParts[1];
+        // Has verse information - clean up extra spaces
+        final versePart = chapterVerseParts[1].replaceAll(' ', '');
         if (versePart.contains('-')) {
           // Range of verses
           final verseRange = versePart.split('-');

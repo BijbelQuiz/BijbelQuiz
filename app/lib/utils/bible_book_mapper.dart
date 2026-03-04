@@ -1,4 +1,73 @@
 class BibleBookMapper {
+  // Mapping of English book names to Dutch book names
+  static const Map<String, String> _englishToDutch = {
+    'Genesis': 'Genesis',
+    'Exodus': 'Exodus',
+    'Leviticus': 'Leviticus',
+    'Numbers': 'Numeri',
+    'Deuteronomy': 'Deuteronomium',
+    'Joshua': 'Jozua',
+    'Judges': 'Richteren',
+    'Ruth': 'Ruth',
+    '1 Samuel': '1 Samuel',
+    '2 Samuel': '2 Samuel',
+    '1 Kings': '1 Koningen',
+    '2 Kings': '2 Koningen',
+    '1 Chronicles': '1 Kronieken',
+    '2 Chronicles': '2 Kronieken',
+    'Ezra': 'Ezra',
+    'Nehemiah': 'Nehemia',
+    'Esther': 'Esther',
+    'Job': 'Job',
+    'Psalms': 'Psalmen',
+    'Proverbs': 'Spreuken',
+    'Ecclesiastes': 'Prediker',
+    'Song of Solomon': 'Hooglied',
+    'Isaiah': 'Jesaja',
+    'Jeremiah': 'Jeremia',
+    'Lamentations': 'Klaagliederen',
+    'Ezekiel': 'Ezechiel',
+    'Daniel': 'Daniel',
+    'Hosea': 'Hosea',
+    'Joel': 'Joel',
+    'Amos': 'Amos',
+    'Obadiah': 'Obadja',
+    'Jonah': 'Jona',
+    'Micah': 'Micha',
+    'Nahum': 'Nahum',
+    'Habakkuk': 'Habakuk',
+    'Haggai': 'Haggai',
+    'Zechariah': 'Zacharia',
+    'Malachi': 'Maleachi',
+    'Matthew': 'Mattheus',
+    'Mark': 'Markus',
+    'Luke': 'Lukas',
+    'John': 'Johannes',
+    'Acts': 'Handelingen',
+    'Romans': 'Romeinen',
+    '1 Corinthians': '1 Korintiers',
+    '2 Corinthians': '2 Korintiers',
+    'Galatians': 'Galaten',
+    'Ephesians': 'Efeziers',
+    'Philippians': 'Filippenzen',
+    'Colossians': 'Kolossenzen',
+    '1 Thessalonians': '1 Tessalonicenzen',
+    '2 Thessalonians': '2 Tessalonicenzen',
+    '1 Timothy': '1 Timoteus',
+    '2 Timothy': '2 Timoteus',
+    'Titus': 'Titus',
+    'Philemon': 'Filemon',
+    'Hebrews': 'Hebreeen',
+    'James': 'Jakobus',
+    '1 Peter': '1 Petrus',
+    '2 Peter': '2 Petrus',
+    '1 John': '1 Johannes',
+    '2 John': '2 Johannes',
+    '3 John': '3 Johannes',
+    'Jude': 'Judas',
+    'Revelation': 'Openbaring',
+  };
+
   // Mapping of Dutch book names to their corresponding numbers for online-bijbel.nl API
   // Using normalized names (without special characters) as keys for API compatibility
   static const Map<String, int> _bookNameToNumber = {
@@ -76,13 +145,26 @@ class BibleBookMapper {
 
   /// Convert Dutch book name to book number for online-bijbel.nl API
   static int? getBookNumber(String bookName) {
-    final normalizedName = _normalizeBookName(bookName.trim());
+    // First try to convert English book name to Dutch
+    String normalizedName = _normalizeBookName(bookName.trim());
+
+    // Check if it's an English name and convert to Dutch
+    if (_englishToDutch.containsKey(normalizedName)) {
+      normalizedName = _englishToDutch[normalizedName]!;
+    }
+
     return _bookNameToNumber[normalizedName];
   }
 
   /// Check if a book name is valid
   static bool isValidBookName(String bookName) {
-    final normalizedName = _normalizeBookName(bookName.trim());
+    String normalizedName = _normalizeBookName(bookName.trim());
+
+    // Check if it's an English name and convert to Dutch
+    if (_englishToDutch.containsKey(normalizedName)) {
+      normalizedName = _englishToDutch[normalizedName]!;
+    }
+
     return _bookNameToNumber.containsKey(normalizedName);
   }
 

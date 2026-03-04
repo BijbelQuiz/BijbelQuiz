@@ -1683,7 +1683,7 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = NOW();
 
 INSERT INTO questions (id, vraag, juiste_antwoord, foute_antwoorden, moeilijkheidsgraad, type, categories, biblical_reference)
-VALUES ('000141', 'Elia, Achab en het volk gingen offeren op de berg ... ', 'Karmel', ARRAY['Horeb','Sinaï','Tabor'], 3, 'fitb', ARRAY['1 Koningen'], '1 Koningen 18: 20 -40')
+VALUES ('000141', 'Elia, Achab en het volk gingen offeren op de berg ... ', 'Karmel', ARRAY['Horeb','Sinaï','Tabor'], 3, 'fitb', ARRAY['1 Koningen'], '1 Koningen 18:20-40')
 ON CONFLICT (id) DO UPDATE SET
     vraag = EXCLUDED.vraag,
     juiste_antwoord = EXCLUDED.juiste_antwoord,
@@ -1983,7 +1983,7 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = NOW();
 
 INSERT INTO questions (id, vraag, juiste_antwoord, foute_antwoorden, moeilijkheidsgraad, type, categories, biblical_reference)
-VALUES ('000166', 'Hoeveel zendingsreizen maakte Paulus?', '3', ARRAY['2','4','5'], 1, 'mc', ARRAY['Handelingen'], 'Handelingen')
+VALUES ('000166', 'Hoeveel zendingsreizen maakte Paulus?', '3', ARRAY['2','4','5'], 1, 'mc', ARRAY['Handelingen'], 'Handelingen 13:1')
 ON CONFLICT (id) DO UPDATE SET
     vraag = EXCLUDED.vraag,
     juiste_antwoord = EXCLUDED.juiste_antwoord,
@@ -2019,7 +2019,7 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = NOW();
 
 INSERT INTO questions (id, vraag, juiste_antwoord, foute_antwoorden, moeilijkheidsgraad, type, categories, biblical_reference)
-VALUES ('000169', 'Hoeveel dagen zijn er tussen Hemelvaart en Pinksteren?', '10', ARRAY['40','3','12'], 1, 'mc', ARRAY['Pinksteren','Hemelvaart'], 'Handelingen 1 en 2')
+VALUES ('000169', 'Hoeveel dagen zijn er tussen Hemelvaart en Pinksteren?', '10', ARRAY['40','3','12'], 1, 'mc', ARRAY['Pinksteren','Hemelvaart'], 'Handelingen 1:9-12')
 ON CONFLICT (id) DO UPDATE SET
     vraag = EXCLUDED.vraag,
     juiste_antwoord = EXCLUDED.juiste_antwoord,
@@ -3063,7 +3063,7 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = NOW();
 
 INSERT INTO questions (id, vraag, juiste_antwoord, foute_antwoorden, moeilijkheidsgraad, type, categories, biblical_reference)
-VALUES ('000256', 'Absalom, Davids zoon, kwam in opstand tegen David', 'Waar', ARRAY['Niet waar'], 1, 'tf', ARRAY['2 Samuël'], '2 Samuel 13 - 18')
+VALUES ('000256', 'Absalom, Davids zoon, kwam in opstand tegen David', 'Waar', ARRAY['Niet waar'], 1, 'tf', ARRAY['2 Samuël'], '2 Samuel 13:18')
 ON CONFLICT (id) DO UPDATE SET
     vraag = EXCLUDED.vraag,
     juiste_antwoord = EXCLUDED.juiste_antwoord,
