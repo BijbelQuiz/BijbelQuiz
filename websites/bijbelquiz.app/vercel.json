@@ -70,7 +70,15 @@
     },
     {
       "source": "/github",
-      "destination": "https://github.com/thomasboom/BijbelQuiz"
+      "destination": "https://codeberg.org/thomasboom/BijbelQuiz"
+    },
+    {
+      "source": "/git",
+      "destination": "https://codeberg.org/thomasboom/BijbelQuiz"
+    },
+    {
+      "source": "/codeberg",
+      "destination": "https://codeberg.org/thomasboom/BijbelQuiz"
     },
     {
       "source": "/vragenlijst",

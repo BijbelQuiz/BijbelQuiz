@@ -14,7 +14,7 @@ BijbelQuiz is a cross-platform Bible quiz app designed to test and improve your 
 
 - **Google Play Store**: [Install](https://bijbelquiz.app/playstore)
 - **Website**: [Play](https://bijbelquiz.app/play)
-- **APK**: [GitHub Releases](https://github.com/thomasboom/BijbelQuiz/releases)
+- **APK**: [Codeberg Releases](https://codeberg.org/thomasboom/BijbelQuiz/releases)
 
 ## 🚀 Getting Started
 
@@ -31,7 +31,7 @@ BijbelQuiz is a cross-platform Bible quiz app designed to test and improve your 
 1. **Clone the repository**:
 
     ```bash
-    git clone https://github.com/thomasboom/BijbelQuiz
+    git clone https://codeberg.org/thomasboom/BijbelQuiz
     cd BijbelQuiz
     ```
 
