@@ -1,0 +1,20 @@
+jobs:
+  deploy:
+    runs-on: codeberg-small-lazy
+    strategy:
+      matrix:
+        include:
+          - dir: websites/bijbelquiz.app
+            project_id: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
+          - dir: websites/backend.bijbelquiz.app
+            project_id: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
+          - dir: websites/status.bijbelquiz.app
+            project_id: ${{ secrets.VERCEL_PROJECT_ID_STATUS }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --global vercel@latest
+      - run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ${{ matrix.dir }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ matrix.project_id }}
