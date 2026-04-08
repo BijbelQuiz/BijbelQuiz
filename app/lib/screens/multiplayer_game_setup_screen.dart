@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../services/analytics_service.dart';
 import 'multiplayer_quiz_screen.dart';
 import 'package:bijbelquiz/l10n/app_localizations.dart';
 
@@ -20,11 +18,6 @@ class _MultiplayerGameSetupScreenState
   @override
   void initState() {
     super.initState();
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.screen(context, 'MultiplayerGameSetupScreen');
-    analyticsService.trackFeatureStart(
-        context, AnalyticsService.featureMultiplayerGame);
   }
 
   @override
@@ -230,12 +223,6 @@ class _MultiplayerGameSetupScreenState
   }
 
   void _startMultiplayerGame() {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.capture(context, 'start_multiplayer_game', properties: {
-      'duration_minutes': _selectedDuration,
-    });
-
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => MultiplayerQuizScreen(

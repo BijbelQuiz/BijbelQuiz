@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/lesson.dart';
 import '../providers/lesson_progress_provider.dart';
-import '../services/analytics_service.dart';
 
 /// Manages lesson session state and logic
 class LessonSessionManager {
@@ -62,28 +61,8 @@ class LessonSessionManager {
     required int sessionLimit,
   }) async {
     // Get providers before async gap
-    final analytics = Provider.of<AnalyticsService>(context, listen: false);
     final progress =
         Provider.of<LessonProgressProvider>(context, listen: false);
-
-    // Calculate stars
-    final stars = calculateStars(sessionLimit);
-
-    // Track lesson completion
-    analytics.trackFeatureCompletion(
-      context,
-      AnalyticsService.featureLessonSystem,
-      additionalProperties: {
-        'lesson_id': lesson.id,
-        'lesson_category': lesson.category,
-        'questions_answered': _sessionAnswered,
-        'questions_correct': _sessionCorrect,
-        'accuracy_rate':
-            sessionLimit > 0 ? (_sessionCorrect / sessionLimit) : 0,
-        'best_streak': _sessionBestStreak,
-        'stars': stars,
-      },
-    );
 
     // Mark today's streak as active
     await _markStreakActive();

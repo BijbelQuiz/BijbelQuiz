@@ -7,7 +7,6 @@ import '../services/logger.dart';
 import '../services/star_transaction_service.dart';
 import '../services/sync_service_v2.dart';
 
-import '../services/analytics_service.dart';
 import '../utils/automatic_error_reporter.dart';
 import '../error/error_handler.dart';
 import '../error/error_types.dart';
@@ -242,25 +241,6 @@ class GameStatsProvider extends ChangeNotifier {
             clearPowerup();
           }
           if (_activePowerup != null) {
-            // Track power-up usage
-            final context = navigatorKey.currentContext;
-            if (context != null) {
-              final analyticsService =
-                  Provider.of<AnalyticsService>(context, listen: false);
-              analyticsService.trackFeatureUsage(context,
-                  AnalyticsService.featurePowerUps, AnalyticsService.actionUsed,
-                  additionalProperties: {
-                    'powerup_multiplier': _activePowerup!.multiplier,
-                    'powerup_type': _activePowerup!.byQuestions
-                        ? 'question_based'
-                        : 'time_based',
-                    'questions_remaining':
-                        _activePowerup!.questionsRemaining ?? 0,
-                    'time_remaining_seconds':
-                        _activePowerup!.timeRemaining?.inSeconds ?? 0,
-                  });
-            }
-
             pointsToAdd = _activePowerup!.multiplier;
             if (_activePowerup!.byQuestions) {
               _decrementPowerup();

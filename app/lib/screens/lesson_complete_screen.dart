@@ -1,4 +1,3 @@
-import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -37,11 +36,6 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen>
     with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-
-    analyticsService.screen(context, 'LessonCompleteScreen');
-
     final cs = Theme.of(context).colorScheme;
     final pctValue =
         widget.total > 0 ? (widget.correct / widget.total * 100.0) : 0.0;
@@ -239,20 +233,13 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen>
                           ),
 
                           // Buttons at bottom
-                          if (isMobile)
+                            if (isMobile)
                             // Mobile: Compact buttons with short labels
                             Row(
                               children: [
                                 Expanded(
                                   child: OutlinedButton(
                                     onPressed: () {
-                                      Provider.of<AnalyticsService>(context,
-                                          listen: false);
-
-                                      Provider.of<AnalyticsService>(context,
-                                              listen: false)
-                                          .capture(context,
-                                              'retry_lesson_from_complete');
                                       widget.onRetry();
                                     },
                                     style: OutlinedButton.styleFrom(
@@ -277,15 +264,6 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen>
                                   child: ElevatedButton(
                                     onPressed: widget.stars > 0
                                         ? () {
-                                            Provider.of<AnalyticsService>(
-                                                context,
-                                                listen: false);
-
-                                            Provider.of<AnalyticsService>(
-                                                    context,
-                                                    listen: false)
-                                                .capture(context,
-                                                    'start_next_lesson_from_complete');
                                             _startNextQuiz();
                                           }
                                         : null,
@@ -315,13 +293,6 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen>
                                 Expanded(
                                   child: OutlinedButton(
                                     onPressed: () {
-                                      Provider.of<AnalyticsService>(context,
-                                          listen: false);
-
-                                      Provider.of<AnalyticsService>(context,
-                                              listen: false)
-                                          .capture(context,
-                                              'retry_lesson_from_complete');
                                       widget.onRetry();
                                     },
                                     style: OutlinedButton.styleFrom(
@@ -346,15 +317,6 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen>
                                   child: ElevatedButton(
                                     onPressed: widget.stars > 0
                                         ? () {
-                                            Provider.of<AnalyticsService>(
-                                                context,
-                                                listen: false);
-
-                                            Provider.of<AnalyticsService>(
-                                                    context,
-                                                    listen: false)
-                                                .capture(context,
-                                                    'start_next_lesson_from_complete');
                                             _startNextQuiz();
                                           }
                                         : null,

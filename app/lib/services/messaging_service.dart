@@ -2,7 +2,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
 import '../config/supabase_config.dart';
 import '../utils/automatic_error_reporter.dart';
-import '../services/analytics_service.dart';
 import '../services/anonymous_user_service.dart';
 
 /// Represents a message in the system with expiration capability
@@ -322,34 +321,6 @@ class MessagingService {
     }
 
     return true;
-  }
-
-  /// Tracks when a user views messages
-  void trackMessagesViewed(
-      AnalyticsService analyticsService, BuildContext? context) {
-    if (context != null) {
-      analyticsService.trackFeatureUsage(
-          context, 'messaging', 'messages_viewed');
-    }
-  }
-
-  /// Tracks when a user refreshes messages
-  void trackMessagesRefreshed(
-      AnalyticsService analyticsService, BuildContext? context) {
-    if (context != null) {
-      analyticsService.trackFeatureUsage(
-          context, 'messaging', 'refresh_triggered');
-    }
-  }
-
-  /// Tracks when a message is viewed in detail
-  void trackMessageDetailView(AnalyticsService analyticsService,
-      BuildContext? context, String messageId) {
-    if (context != null) {
-      analyticsService.trackFeatureUsage(
-          context, 'messaging', 'message_detail_viewed',
-          additionalProperties: {'message_id': messageId});
-    }
   }
 
   /// Gets reaction counts for a specific message

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:bijbelquiz/services/connection_service.dart';
 import 'package:bijbelquiz/providers/settings_provider.dart';
 import 'package:bijbelquiz/providers/messages_provider.dart';
@@ -67,52 +66,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
-
-      String screenName;
-      String? featureName;
-
-      if (_isOnline) {
-        switch (index) {
-          case 0:
-            screenName = 'LessonSelectScreen';
-            featureName = AnalyticsService.featureLessonSystem;
-            break;
-          case 1:
-            screenName = 'StoreScreen';
-            featureName = AnalyticsService.featureThemePurchases;
-            break;
-          case 2:
-            screenName = 'SocialScreen';
-            featureName = AnalyticsService.featureSocialFeatures;
-            break;
-          case 3:
-            screenName = 'SettingsScreen';
-            featureName = AnalyticsService.featureSettings;
-            break;
-          default:
-            screenName = 'Unknown';
-        }
-      } else {
-        switch (index) {
-          case 0:
-            screenName = 'LessonSelectScreen';
-            featureName = AnalyticsService.featureLessonSystem;
-            break;
-          case 1:
-            screenName = 'SettingsScreen';
-            featureName = AnalyticsService.featureSettings;
-            break;
-          default:
-            screenName = 'Unknown';
-        }
-      }
-
-      final analyticsService =
-          Provider.of<AnalyticsService>(context, listen: false);
-      analyticsService.screen(context, screenName);
-      if (featureName != null) {
-        analyticsService.trackFeatureStart(context, featureName);
-      }
     });
   }
 

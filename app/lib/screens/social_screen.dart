@@ -1,4 +1,3 @@
-import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -16,7 +15,6 @@ class SocialScreen extends StatefulWidget {
 }
 
 class _SocialScreenState extends State<SocialScreen> {
-  late AnalyticsService _analyticsService;
   late MessagingService _messagingService;
 
   User? _currentUser;
@@ -58,10 +56,8 @@ class _SocialScreenState extends State<SocialScreen> {
   @override
   void initState() {
     super.initState();
-    _analyticsService = Provider.of<AnalyticsService>(context, listen: false);
     _messagingService = Provider.of<MessagingService>(context, listen: false);
     _checkAuthState();
-    _trackScreenAccess();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_currentUser == null) {
@@ -86,10 +82,6 @@ class _SocialScreenState extends State<SocialScreen> {
     }
   }
 
-  void _trackScreenAccess() {
-    _analyticsService.screen(context, 'SocialScreen');
-  }
-
   Future<void> _loadMessages() async {
     try {
       setState(() {
@@ -101,7 +93,6 @@ class _SocialScreenState extends State<SocialScreen> {
       await _loadReactionsForMessages(messages);
 
       if (mounted) {
-        _messagingService.trackMessagesViewed(_analyticsService, context);
         setState(() {
           _activeMessages = messages;
           _isLoadingMessages = false;
@@ -175,16 +166,6 @@ class _SocialScreenState extends State<SocialScreen> {
 
       final currentUserId = _messagingService.getCurrentUserId();
       if (mounted && currentUserId != null) {
-        _analyticsService.trackFeatureUsage(
-          context,
-          'messaging',
-          'message_reaction_${result.action}',
-          additionalProperties: {
-            'message_id': messageId,
-            'emoji': emoji,
-            'action': result.action,
-          },
-        );
       }
     } catch (e) {
       AppLogger.error(
@@ -291,8 +272,6 @@ class _SocialScreenState extends State<SocialScreen> {
 
             return RefreshIndicator(
               onRefresh: () {
-                _messagingService.trackMessagesRefreshed(
-                    _analyticsService, context);
                 return _loadMessages();
               },
               child: SingleChildScrollView(
@@ -341,7 +320,6 @@ class _SocialScreenState extends State<SocialScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            _analyticsService.capture(context, 'open_sync_screen');
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => const SyncScreen(),
@@ -621,7 +599,6 @@ class _SocialScreenState extends State<SocialScreen> {
   }
 
   void _navigateToSyncScreen() {
-    _analyticsService.capture(context, 'open_sync_screen_from_social');
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const SyncScreen(requiredForSocial: true),

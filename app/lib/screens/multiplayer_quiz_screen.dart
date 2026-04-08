@@ -15,7 +15,6 @@ import '../services/connection_service.dart';
 import '../services/platform_feedback_service.dart';
 import '../providers/settings_provider.dart';
 import '../providers/game_stats_provider.dart';
-import '../services/analytics_service.dart';
 import '../services/quiz_animation_controller.dart';
 import '../services/progressive_question_selector.dart';
 import '../services/quiz_answer_handler.dart';
@@ -117,15 +116,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
       DeviceOrientation.landscapeRight,
     ]);
 
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-
-    // Track screen view
-    analyticsService.screen(context, 'MultiplayerQuizScreen');
-    analyticsService.capture(context, 'multiplayer_game_started', properties: {
-      'duration_minutes': widget.gameDurationMinutes,
-    });
-
     WidgetsBinding.instance.addObserver(this);
     AppLogger.info('MultiplayerQuizScreen loaded');
 
@@ -175,30 +165,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
     _gameTimer.cancel();
 
     _showResults = true;
-
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.capture(context, 'multiplayer_game_ended', properties: {
-      'duration_minutes': widget.gameDurationMinutes,
-      'player1_score': _player1Score,
-      'player2_score': _player2Score,
-      'winner': _player1Score > _player2Score
-          ? 'player1'
-          : (_player2Score > _player1Score ? 'player2' : 'tie'),
-    });
-
-    // Track multiplayer game completion
-    analyticsService.trackFeatureCompletion(
-        context, AnalyticsService.featureMultiplayerGame,
-        additionalProperties: {
-          'duration_minutes': widget.gameDurationMinutes,
-          'player1_score': _player1Score,
-          'player2_score': _player2Score,
-          'winner': _player1Score > _player2Score
-              ? 'player1'
-              : (_player2Score > _player1Score ? 'player2' : 'tie'),
-          'total_questions_answered': _player1Score + _player2Score,
-        });
 
     // Update UI to show results instead of dialog
     setState(() {});
@@ -252,8 +218,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
   }
 
   Future<void> _initializeQuiz() async {
-    Provider.of<AnalyticsService>(context, listen: false);
-
     try {
       setState(() {
         _isLoading = true;
@@ -328,12 +292,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
 
       setState(() {
         _error = appError.userMessage;
-      });
-
-      final analytics = Provider.of<AnalyticsService>(context, listen: false);
-      analytics.capture(context, 'multiplayer_quiz_loading_error', properties: {
-        'error_type': e.runtimeType.toString(),
-        'error_message': e.toString(),
       });
 
       // The error is now logged by the ErrorHandler, but we can add additional logging if needed
@@ -458,8 +416,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
   }
 
   void _handleAnswer(int selectedIndex, bool isPlayer1) {
-    Provider.of<AnalyticsService>(context, listen: false);
-
     // Prevent race conditions - check if already processing
     if (isPlayer1 && _player1IsProcessingAnswer) {
       return;
@@ -1051,26 +1007,11 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
 
   // Player-specific handler methods
   Future<void> _handleSkipForPlayer(bool isPlayer1) async {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
     final QuizState quizState =
         isPlayer1 ? _player1QuizState : _player2QuizState;
     final ProgressiveQuestionSelector questionSelector =
         isPlayer1 ? _player1QuestionSelector : _player2QuestionSelector;
-    final String playerName = isPlayer1 ? 'Player1' : 'Player2';
 
-    // Track skip feature usage
-    analyticsService.trackFeatureAttempt(
-        context, AnalyticsService.featureSkipQuestion,
-        additionalProperties: {
-          'question_category': quizState.question.category,
-          'question_difficulty': quizState.question.difficulty,
-          'time_remaining': quizState.timeRemaining,
-          'player': playerName,
-        });
-
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'skip_question_$playerName');
     Provider.of<SettingsProvider>(context, listen: false);
 
     // Skip is now free in multiplayer mode
@@ -1090,18 +1031,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
           );
         }
       });
-
-      // Track successful question skip after state update
-      if (mounted) {
-        analyticsService.trackFeatureSuccess(
-            context, AnalyticsService.featureSkipQuestion,
-            additionalProperties: {
-              'question_category': quizState.question.category,
-              'question_difficulty': quizState.question.difficulty,
-              'time_remaining': quizState.timeRemaining,
-              'player': playerName,
-            });
-      }
 
       await Future.delayed(_performanceService
           .getOptimalAnimationDuration(const Duration(milliseconds: 300)));
@@ -1137,22 +1066,8 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
   }
 
   Future<void> _handleUnlockBiblicalReferenceForPlayer(bool isPlayer1) async {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
     final QuizState quizState =
         isPlayer1 ? _player1QuizState : _player2QuizState;
-    final String playerName = isPlayer1 ? 'Player1' : 'Player2';
-
-    // Track biblical reference unlock attempt
-    analyticsService.trackFeatureAttempt(
-        context, AnalyticsService.featureBiblicalReferences,
-        additionalProperties: {
-          'question_category': quizState.question.category,
-          'question_difficulty': quizState.question.difficulty,
-          'biblical_reference': quizState.question.biblicalReference ?? 'none',
-          'time_remaining': quizState.timeRemaining,
-          'player': playerName,
-        });
 
     // First check if the reference can be parsed
     final parsed =
@@ -1189,20 +1104,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
               context, quizState.question.biblicalReference!, isPlayer1);
         }
       });
-
-      // Track successful biblical reference unlock
-      if (mounted) {
-        analyticsService.trackFeatureSuccess(
-            context, AnalyticsService.featureBiblicalReferences,
-            additionalProperties: {
-              'question_category': quizState.question.category,
-              'question_difficulty': quizState.question.difficulty,
-              'biblical_reference':
-                  quizState.question.biblicalReference ?? 'none',
-              'time_remaining': quizState.timeRemaining,
-              'player': playerName,
-            });
-      }
     }
   }
 
@@ -1277,20 +1178,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
     _loadBiblicalReferenceForPlayer(biblicalReference, isPlayer1);
 
     // Track successful biblical reference unlock
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
     final quizState = isPlayer1 ? _player1QuizState : _player2QuizState;
-    final String playerName = isPlayer1 ? 'Player1' : 'Player2';
-
-    analyticsService.trackFeatureSuccess(
-        context, AnalyticsService.featureBiblicalReferences,
-        additionalProperties: {
-          'question_category': quizState.question.category,
-          'question_difficulty': quizState.question.difficulty,
-          'biblical_reference': biblicalReference,
-          'time_remaining': quizState.timeRemaining,
-          'player': playerName,
-        });
   }
 
   Future<void> _loadBiblicalReferenceForPlayer(

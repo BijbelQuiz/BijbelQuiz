@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:cryptography/cryptography.dart';
-import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:bijbelquiz/screens/local_api_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -44,11 +43,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     AppLogger.info('SettingsScreen initialized');
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.screen(context, 'SettingsScreen');
-    analyticsService.trackFeatureStart(
-        context, AnalyticsService.featureSettings);
   }
 
   @override
@@ -58,8 +52,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _openStatusPage() async {
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'open_status_page');
     final Uri url = Uri.parse(AppUrls.statusPageUrl);
     if (!await launchUrl(url)) {
       if (mounted) {
@@ -72,8 +64,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _checkForUpdates(
       BuildContext context, SettingsProvider settings) async {
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'check_for_updates');
     try {
       final info = await PackageInfo.fromPlatform();
       final version = info.version;
@@ -846,14 +836,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // Helper methods
   void _changeTheme(SettingsProvider settings, String value) {
-    final analytics = Provider.of<AnalyticsService>(context, listen: false);
-    analytics.capture(context, 'change_theme', properties: {'theme': value});
-    analytics.trackFeatureSuccess(
-        context, AnalyticsService.featureThemeSelection,
-        additionalProperties: {
-          'theme': value,
-        });
-
     if (value == ThemeMode.light.name) {
       settings.setCustomTheme(null);
       settings.setThemeMode(ThemeMode.light);
@@ -884,34 +866,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _updateSetting(
       SettingsProvider settings, String action, VoidCallback updateFunction) {
-    final analytics = Provider.of<AnalyticsService>(context, listen: false);
-    analytics.capture(context, action);
-    analytics.trackFeatureSuccess(context, AnalyticsService.featureSettings);
     updateFunction();
   }
 
   void _updateAnalyticsSetting(SettingsProvider settings, bool value) {
-    final analytics = Provider.of<AnalyticsService>(context, listen: false);
-    analytics.trackFeatureSuccess(
-        context, AnalyticsService.featureAnalyticsSettings,
-        additionalProperties: {
-          'enabled': value,
-        });
-    if (value) {
-      analytics.enableAnalytics();
-    } else {
-      analytics.disableAnalytics();
-    }
     settings.setAnalyticsEnabled(value);
   }
 
   // Dialog and navigation methods (simplified implementations)
   void _showDonateDialog(BuildContext context) async {
-    final analytics = Provider.of<AnalyticsService>(context, listen: false);
-    analytics.trackFeatureSuccess(
-        context, AnalyticsService.featureDonationSystem);
-    analytics.capture(context, 'donate');
-
     final Uri url = Uri.parse(AppUrls.donateUrl);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     await settings.markAsDonated();
@@ -926,9 +889,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showIntroduction(BuildContext context) {
-    final analytics = Provider.of<AnalyticsService>(context, listen: false);
-    analytics.capture(context, 'show_introduction');
-
     if (widget.onOpenGuide != null) widget.onOpenGuide!();
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -938,9 +898,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _exportAllDataJson(BuildContext context) async {
-    final analytics = Provider.of<AnalyticsService>(context, listen: false);
-    analytics.capture(context, 'export_all_data_json');
-
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
     final lessonProgress =
@@ -968,9 +925,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _importStats(BuildContext context) async {
-    final analytics = Provider.of<AnalyticsService>(context, listen: false);
-    analytics.capture(context, 'import_stats');
-
     if (context.mounted) {
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -981,9 +935,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showSocialMediaDialog(BuildContext context) {
-    final analytics = Provider.of<AnalyticsService>(context, listen: false);
-    analytics.capture(context, 'show_social_media_dialog');
-
     final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
@@ -1105,9 +1056,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _shareStats(BuildContext context) async {
-    final analytics = Provider.of<AnalyticsService>(context, listen: false);
-    analytics.capture(context, 'share_stats');
-
     try {
       final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
 
@@ -1163,8 +1111,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showBijbelQuizGen(BuildContext context) {
-    final analytics = Provider.of<AnalyticsService>(context, listen: false);
-    analytics.capture(context, 'replay_bijbelquiz_gen');
     if (context.mounted) {
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -1192,8 +1138,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             TextButton(
               onPressed: () async {
                 AppLogger.info('User initiated reset and logout');
-                Provider.of<AnalyticsService>(context, listen: false)
-                    .capture(context, 'reset_and_logout');
                 final nav = Navigator.of(dialogContext);
                 try {
                   await gameStats.resetStats();
@@ -1250,9 +1194,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       title: Text(platform),
       trailing: Icon(Icons.open_in_new, size: 16, color: colorScheme.primary),
       onTap: () async {
-        final analytics = Provider.of<AnalyticsService>(context, listen: false);
-        analytics.capture(context, 'follow_social_media',
-            properties: {'platform': platform});
         final Uri uri = Uri.parse(url);
         if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
           if (context.mounted) {

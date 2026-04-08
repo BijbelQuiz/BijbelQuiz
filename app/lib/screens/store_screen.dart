@@ -1,4 +1,3 @@
-import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -38,14 +37,6 @@ class _StoreScreenState extends State<StoreScreen> {
     _connectionService = ConnectionService();
     _connectionService.initialize();
     AppLogger.info('StoreScreen initialized');
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.screen(context, 'StoreScreen');
-
-    // Track store access
-    analyticsService.trackFeatureStart(
-        context, AnalyticsService.featureThemePurchases);
-
     // Load store items from Supabase
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final storeProvider = Provider.of<StoreProvider>(context, listen: false);
@@ -930,17 +921,6 @@ class _StoreScreenState extends State<StoreScreen> {
           onTap: () async {
             AppLogger.info('Power-up purchase attempted: $title, cost: $cost');
 
-            final analytics =
-                Provider.of<AnalyticsService>(context, listen: false);
-            analytics.capture(context, 'purchase_powerup',
-                properties: {'title': title, 'cost': cost});
-            analytics.trackFeaturePurchase(
-                context, AnalyticsService.featurePowerUps,
-                additionalProperties: {
-                  'powerup_type': title,
-                  'cost': cost,
-                  'current_score': gameStats.score,
-                });
             final localContext = context;
             final localGameStats = gameStats;
             final canAfford = isDev || localGameStats.score >= cost;
@@ -1239,18 +1219,6 @@ class _StoreScreenState extends State<StoreScreen> {
           onTap: () async {
             AppLogger.info(
                 'Theme purchase attempted: $title, theme: $themeKey, cost: $cost');
-            final analytics =
-                Provider.of<AnalyticsService>(context, listen: false);
-            analytics.capture(context, 'purchase_theme',
-                properties: {'theme': themeKey, 'cost': cost});
-            analytics.trackFeaturePurchase(
-                context, AnalyticsService.featureThemePurchases,
-                additionalProperties: {
-                  'theme_key': themeKey,
-                  'theme_name': title,
-                  'cost': cost,
-                  'current_score': gameStats.score,
-                });
             final localContext = context;
             final localGameStats = gameStats;
             final localSettings = settings;
@@ -1521,16 +1489,6 @@ class _StoreScreenState extends State<StoreScreen> {
           borderRadius: BorderRadius.circular(16),
           onTap: () async {
             AppLogger.info('AI Theme Generator tapped, cost: $cost');
-            final analytics =
-                Provider.of<AnalyticsService>(context, listen: false);
-            analytics.capture(context, 'ai_theme_generator_tapped',
-                properties: {'cost': cost});
-            analytics.trackFeatureAttempt(
-                context, AnalyticsService.featureAiThemeGenerator,
-                additionalProperties: {
-                  'cost': cost,
-                  'current_score': gameStats.score,
-                });
             final localContext = context;
             final localGameStats = gameStats;
             final canAfford = isDev || localGameStats.score >= cost;

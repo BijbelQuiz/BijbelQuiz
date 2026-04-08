@@ -1,4 +1,3 @@
-import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -28,15 +27,6 @@ class _GuideScreenState extends State<GuideScreen> {
   @override
   void initState() {
     super.initState();
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-
-    analyticsService.screen(context, 'GuideScreen');
-
-    // Track guide screen access and feature usage
-    analyticsService.trackFeatureStart(
-        context, AnalyticsService.featureOnboarding);
-
     AppLogger.info('GuideScreen loaded');
 
     final isLoggedIn = Supabase.instance.client.auth.currentUser != null;
@@ -54,8 +44,6 @@ class _GuideScreenState extends State<GuideScreen> {
   }
 
   void _onPageChanged(int page) {
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'guide_page_viewed', properties: {'page': page});
     setState(() {
       _currentPage = page;
     });
@@ -68,7 +56,6 @@ class _GuideScreenState extends State<GuideScreen> {
     // final textTheme = theme.textTheme; // Not used
     final pages = _pages; // Get the current pages
     final isLastPage = _currentPage == pages.length - 1;
-    // Log screen view for analytics
 
     return Scaffold(
       body: SafeArea(
@@ -179,21 +166,11 @@ class _GuideScreenState extends State<GuideScreen> {
   }
 
   Future<void> _handleGuideCompletion(BuildContext context) async {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-
-    // Track guide completion feature usage
-    analyticsService.trackFeatureCompletion(
-        context, AnalyticsService.featureOnboarding);
-
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'guide_completed');
     final localContext = context;
     final settings = Provider.of<SettingsProvider>(localContext, listen: false);
     try {
       // Mark guide as seen
       await settings.markGuideAsSeen();
-      // Initialize telemetry service with default setting (disabled)
 
       // Navigate to main app screen
       if (!mounted) return;
@@ -306,8 +283,6 @@ class _GuidePageViewState extends State<GuidePageView> {
   bool _isLoading = false;
 
   Future<void> _handleDonation() async {
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'guide_donation_button_clicked');
     if (_isLoading) return;
 
     setState(() {
@@ -582,14 +557,6 @@ class _GuidePageViewState extends State<GuidePageView> {
                                     ],
                                     onChanged: (String? value) {
                                       if (value != null) {
-                                        final analytics =
-                                            Provider.of<AnalyticsService>(
-                                                context,
-                                                listen: false);
-                                        analytics.capture(
-                                            context, 'change_language');
-                                        analytics.trackFeatureSuccess(context,
-                                            AnalyticsService.featureSettings);
                                         settings.setLanguage(value);
                                       }
                                     },
@@ -750,18 +717,6 @@ class _GuidePageViewState extends State<GuidePageView> {
                                   Switch(
                                     value: settings.analyticsEnabled,
                                     onChanged: (bool value) {
-                                      // Track analytics setting change
-                                      final analytics =
-                                          Provider.of<AnalyticsService>(context,
-                                              listen: false);
-                                      analytics.trackFeatureSuccess(
-                                          context,
-                                          AnalyticsService
-                                              .featureAnalyticsSettings,
-                                          additionalProperties: {
-                                            'enabled': value,
-                                            'source': 'guide_screen',
-                                          });
                                       settings.setAnalyticsEnabled(value);
                                     },
                                     activeThumbColor: colorScheme.primary,

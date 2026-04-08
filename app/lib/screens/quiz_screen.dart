@@ -1,4 +1,3 @@
-import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
@@ -109,21 +108,6 @@ class _QuizScreenState extends State<QuizScreen>
   @override
   void initState() {
     super.initState();
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-
-    // Track screen view
-    analyticsService.screen(context, 'QuizScreen');
-
-    // Track quiz gameplay feature access
-    analyticsService.trackFeatureStart(
-        context, AnalyticsService.featureQuizGameplay,
-        additionalProperties: {
-          'lesson_mode': _lessonMode,
-          'lesson_id': widget.lesson?.id ?? 'free_play',
-          'session_limit': widget.sessionLimit ?? 0,
-        });
-
     WidgetsBinding.instance.addObserver(this);
     AppLogger.info('QuizScreen loaded');
 
@@ -302,8 +286,6 @@ class _QuizScreenState extends State<QuizScreen>
   }
 
   Future<void> _showTimeUpDialog() async {
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'show_time_up_dialog');
     if (ModalRoute.of(context)?.isCurrent != true) return;
 
     final settings = Provider.of<SettingsProvider>(context, listen: false);
@@ -376,35 +358,15 @@ class _QuizScreenState extends State<QuizScreen>
           ),
           actions: [
             Builder(
-              builder: (ctx) => TextButton(
+                builder: (ctx) => TextButton(
                 onPressed: hasEnoughPoints
                     ? () {
-                        final analyticsService = Provider.of<AnalyticsService>(
-                            dialogContext,
-                            listen: false);
-                        analyticsService.capture(
-                            dialogContext, 'retry_with_points');
-                        analyticsService.trackFeatureAttempt(dialogContext,
-                            AnalyticsService.featureRetryWithPoints,
-                            additionalProperties: {
-                              'time_remaining': 0, // Time is up
-                              'current_streak': gameStats.currentStreak,
-                              'current_score': gameStats.score,
-                            });
                         gameStats
                             .spendPointsForRetry(amount: retryPrice)
                             .then((success) {
                           if (!dialogContext.mounted) return;
                           if (success) {
-                            // Track successful retry with points
-                            final localAnalytics = analyticsService;
-                            final localGameStats = gameStats;
-                            localAnalytics.trackFeatureSuccess(dialogContext,
-                                AnalyticsService.featureRetryWithPoints,
-                                additionalProperties: {
-                                  'time_remaining': 0, // Time is up
-                                  'current_streak':
-                                      localGameStats.currentStreak,
+                            Navigator.of(dialogContext).pop();
                                   'current_score': localGameStats.score,
                                 });
 
@@ -484,8 +446,6 @@ class _QuizScreenState extends State<QuizScreen>
             ),
             TextButton(
               onPressed: () {
-                Provider.of<AnalyticsService>(dialogContext, listen: false)
-                    .capture(dialogContext, 'next_question_from_time_up');
                 Navigator.of(dialogContext).pop();
                 // For time up scenario, we call handleNextQuestion which will record the result
                 _handleNextQuestion(false, _quizState.currentDifficulty);
@@ -527,15 +487,6 @@ class _QuizScreenState extends State<QuizScreen>
 
     // Reset question pool if language changed
     if (_lastLanguage != null && _lastLanguage != language) {
-      final analytics = Provider.of<AnalyticsService>(context, listen: false);
-      analytics.capture(context, 'language_changed',
-          properties: {'from': _lastLanguage!, 'to': language});
-      analytics.trackFeatureSuccess(
-          context, AnalyticsService.featureLanguageSettings,
-          additionalProperties: {
-            'from_language': _lastLanguage!,
-            'to_language': language,
-          });
       AppLogger.info(
           'Language changed from $_lastLanguage to $language, resetting question pool');
       _resetQuestionPool();
@@ -558,8 +509,6 @@ class _QuizScreenState extends State<QuizScreen>
 
   /// Initialize animations with performance optimizations
   Future<void> _initializeQuiz() async {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
 
     try {
@@ -610,40 +559,12 @@ class _QuizScreenState extends State<QuizScreen>
       final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
           Duration(seconds: settings.gameSpeedTimerDuration));
 
-      // Track slow mode usage
-      if (isSlowMode) {
-        final localAnalytics = analyticsService;
-        // Don't pass context in async operation - trackFeatureUsage will handle context internally
-        // or we need to call this before any await operations
-        if (mounted) {
-          localAnalytics.trackFeatureUsage(context,
-              AnalyticsService.featureSettings, AnalyticsService.actionUsed,
-              additionalProperties: {
-                'setting': 'slow_mode',
-                'enabled': true,
-              });
-        }
-      }
-
       if (!mounted) return;
       // Select the first question; the selector ensures no duplicates and handles
       // exhaustion by widening scope and then resetting when necessary.
       final QuizQuestion firstQuestion =
           _questionSelector.pickNextQuestion(0.0, context);
 
-      // Track question category usage
-      if (firstQuestion.category.isNotEmpty) {
-        final localAnalytics = analyticsService;
-        // Track immediately, not after async operations
-        localAnalytics.trackFeatureUsage(
-            context,
-            AnalyticsService.featureQuestionCategories,
-            AnalyticsService.actionUsed,
-            additionalProperties: {
-              'category': firstQuestion.category,
-              'difficulty': firstQuestion.difficulty,
-            });
-      }
       _quizState = QuizState(
         question: firstQuestion,
         timeRemaining: optimalTimerDuration.inSeconds,
@@ -682,14 +603,6 @@ class _QuizScreenState extends State<QuizScreen>
         _error = appError.userMessage;
       });
 
-      // Track quiz loading errors
-      final analytics = Provider.of<AnalyticsService>(context, listen: false);
-      analytics.capture(context, 'quiz_loading_error', properties: {
-        'error_type': e.runtimeType.toString(),
-        'error_message': e.toString(),
-        'lesson_mode': _lessonMode,
-      });
-
       // The error is now logged by the ErrorHandler, but we can add additional logging if needed
       AppLogger.error('Failed to load questions in QuizScreen', e);
     } finally {
@@ -724,8 +637,6 @@ class _QuizScreenState extends State<QuizScreen>
   }
 
   void _handleAnswer(int selectedIndex) {
-    Provider.of<AnalyticsService>(context, listen: false);
-
     _answerHandler.handleAnswer(
       selectedIndex: selectedIndex,
       quizState: _quizState,
@@ -741,7 +652,6 @@ class _QuizScreenState extends State<QuizScreen>
 
   Future<void> _handleNextQuestion(bool isCorrect, double newDifficulty) async {
     final localContext = context;
-    Provider.of<AnalyticsService>(localContext, listen: false);
     final gameStats =
         Provider.of<GameStatsProvider>(localContext, listen: false);
     final settings = Provider.of<SettingsProvider>(localContext, listen: false);
@@ -770,23 +680,6 @@ class _QuizScreenState extends State<QuizScreen>
 
     // If in lesson mode and session reached limit, show completion screen
     if (_lessonMode && _sessionAnswered >= (widget.sessionLimit ?? 0)) {
-      // Track lesson completion - capture context before any async operations
-      if (mounted) {
-        final analytics = Provider.of<AnalyticsService>(context, listen: false);
-        analytics.trackFeatureCompletion(
-            context, AnalyticsService.featureLessonSystem,
-            additionalProperties: {
-              'lesson_id': widget.lesson?.id ?? 'unknown',
-              'lesson_category': widget.lesson?.category ?? 'unknown',
-              'questions_answered': _sessionAnswered,
-              'questions_correct': _sessionCorrect,
-              'accuracy_rate': _sessionAnswered > 0
-                  ? (_sessionCorrect / _sessionAnswered)
-                  : 0,
-              'best_streak': _sessionBestStreak,
-            });
-      }
-
       await _completeLessonSession();
       return;
     }
@@ -824,20 +717,6 @@ class _QuizScreenState extends State<QuizScreen>
       context: context,
     );
 
-    // Track progressive difficulty adjustments - use context before any async gaps
-    if (calculatedNewDifficulty != _quizState.currentDifficulty) {
-      final analytics = Provider.of<AnalyticsService>(context, listen: false);
-      analytics.trackFeatureUsage(
-          context,
-          AnalyticsService.featureProgressiveDifficulty,
-          isCorrect ? 'increased' : 'decreased',
-          additionalProperties: {
-            'previous_difficulty': _quizState.currentDifficulty,
-            'new_difficulty': calculatedNewDifficulty,
-            'current_streak': gameStats.currentStreak,
-            'question_category': _quizState.question.category,
-          });
-    }
     // Compute next question; selector enforces uniqueness and auto-resets as needed
     final QuizQuestion nextQuestion =
         _questionSelector.pickNextQuestion(calculatedNewDifficulty, context);
@@ -1197,21 +1076,7 @@ class _QuizScreenState extends State<QuizScreen>
   }
 
   Future<void> _handleSkip() async {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
     final question = _quizState.question;
-
-    // Track skip feature usage
-    analyticsService.trackFeatureAttempt(
-        context, AnalyticsService.featureSkipQuestion,
-        additionalProperties: {
-          'question_category': question.category,
-          'question_difficulty': question.difficulty,
-          'time_remaining': _quizState.timeRemaining,
-        });
-
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'skip_question');
     final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     final isDev = kDebugMode;
@@ -1243,7 +1108,6 @@ class _QuizScreenState extends State<QuizScreen>
           .getOptimalAnimationDuration(const Duration(milliseconds: 300)));
       if (!mounted) return;
       final newDifficulty = _quizState.currentDifficulty;
-      final localAnalytics = analyticsService;
       setState(() {
         // Record that the current question was not answered correctly (since it was skipped)
         _questionSelector.recordAnswerResult(
@@ -1262,14 +1126,6 @@ class _QuizScreenState extends State<QuizScreen>
         _animationController.triggerTimeAnimation();
       });
 
-      // Track successful question skip after setState
-      localAnalytics.trackFeatureSuccess(
-          context, AnalyticsService.featureSkipQuestion,
-          additionalProperties: {
-            'question_category': question.category,
-            'question_difficulty': question.difficulty,
-            'time_remaining': _quizState.timeRemaining,
-          });
     } else {
       if (mounted) {
         showTopSnackBar(
@@ -1280,22 +1136,7 @@ class _QuizScreenState extends State<QuizScreen>
   }
 
   Future<void> _handleUnlockBiblicalReference() async {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
     final question = _quizState.question;
-
-    // Track biblical reference unlock attempt
-    analyticsService.trackFeatureAttempt(
-        context, AnalyticsService.featureBiblicalReferences,
-        additionalProperties: {
-          'question_category': question.category,
-          'question_difficulty': question.difficulty,
-          'biblical_reference': question.biblicalReference ?? 'none',
-          'time_remaining': _quizState.timeRemaining,
-        });
-
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'unlock_biblical_reference');
     final localContext = context;
     final gameStats =
         Provider.of<GameStatsProvider>(localContext, listen: false);
@@ -1368,20 +1209,6 @@ class _QuizScreenState extends State<QuizScreen>
         }
       });
 
-      // Track successful biblical reference unlock
-      final localAnalytics = analyticsService;
-      final localQuestion = question;
-      final localTimeRemaining = _quizState.timeRemaining;
-      if (mounted) {
-        localAnalytics.trackFeatureSuccess(
-            context, AnalyticsService.featureBiblicalReferences,
-            additionalProperties: {
-              'question_category': localQuestion.category,
-              'question_difficulty': localQuestion.difficulty,
-              'biblical_reference': localQuestion.biblicalReference ?? 'none',
-              'time_remaining': localTimeRemaining,
-            });
-      }
     } else {
       // Not enough stars - this is a user state issue, not an error to report automatically
       WidgetsBinding.instance.addPostFrameCallback((_) {

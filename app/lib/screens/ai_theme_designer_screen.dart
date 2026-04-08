@@ -1,4 +1,3 @@
-import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -41,14 +40,6 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
     // Check authentication first
     _checkAuthState();
 
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.screen(context, 'AIThemeDesignerScreen');
-
-    // Track AI theme designer access
-    analyticsService.trackFeatureStart(
-        context, AnalyticsService.featureAiThemeGenerator);
-
     // Load the current price from store
     _loadCost();
 
@@ -69,10 +60,6 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
 
   /// Navigates to the auth screen for authentication.
   void _navigateToAuthScreen() {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.capture(context, 'open_auth_screen_from_ai_theme');
-
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => AuthScreen(
@@ -480,12 +467,7 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
     AppLogger.info('AI Theme generation requested: $description');
 
     // Get all providers before any async operations to avoid context issues
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
-
-    analyticsService.capture(context, 'ai_theme_generated',
-        properties: {'description': description});
 
     // Spend stars first
     bool transactionSuccess = false;
@@ -600,14 +582,6 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
       if (context.mounted) {
         showTopSnackBar(context, 'AI thema "$themeName" succesvol aangemaakt!',
             style: TopSnackBarStyle.success);
-
-        analyticsService.trackFeatureSuccess(
-            context, AnalyticsService.featureAiThemeGenerator,
-            additionalProperties: {
-              'theme_name': themeName,
-              'description': description,
-              'cost': cost,
-            });
 
         // Show theme preview dialog
         await _showThemePreviewDialog(context, aiTheme);

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../models/lesson.dart';
 import '../providers/lesson_progress_provider.dart';
 import '../screens/quiz_screen.dart';
-import '../services/analytics_service.dart';
 import '../services/greeting_service.dart';
 import 'package:bijbelquiz/l10n/app_localizations.dart';
 
@@ -307,18 +306,13 @@ class _ProgressHeaderState extends State<ProgressHeader>
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Semantics(
+                    Semantics(
                     label: AppLocalizations.of(context)!
                         .continueWithLesson(widget.continueLesson!.title),
                     hint: AppLocalizations.of(context)!.continueWithLessonHint,
                     button: true,
                     child: _AnimatedButton(
                       onPressed: () async {
-                        Provider.of<AnalyticsService>(context, listen: false)
-                            .capture(context, 'start_quiz', properties: {
-                          if (widget.continueLesson?.id != null)
-                            'lesson_id': widget.continueLesson!.id,
-                        });
                         await Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => QuizScreen(
@@ -343,8 +337,6 @@ class _ProgressHeaderState extends State<ProgressHeader>
                     button: true,
                     child: _AnimatedButton(
                       onPressed: () {
-                        Provider.of<AnalyticsService>(context, listen: false)
-                            .capture(context, 'start_practice_quiz');
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (_) => const QuizScreen()));
                       },
@@ -363,8 +355,6 @@ class _ProgressHeaderState extends State<ProgressHeader>
                       button: true,
                       child: _AnimatedButton(
                         onPressed: () {
-                          Provider.of<AnalyticsService>(context, listen: false)
-                              .capture(context, 'start_multiplayer_quiz');
                           widget.onMultiplayerPressed!();
                         },
                         label: AppLocalizations.of(context)!.multiplayerQuiz,
@@ -402,8 +392,6 @@ class _ProgressHeaderState extends State<ProgressHeader>
                   button: true,
                   child: _AnimatedButton(
                     onPressed: () {
-                      Provider.of<AnalyticsService>(context, listen: false)
-                          .capture(context, 'start_multiplayer_quiz');
                       widget.onMultiplayerPressed!();
                     },
                     label: AppLocalizations.of(context)!.multiplayerQuiz,

@@ -19,7 +19,6 @@ import 'utils/theme_utils.dart';
 import 'utils/font_utils.dart'; // Import font utilities
 import 'services/logger.dart';
 import 'services/service_container.dart';
-import 'services/analytics_service.dart';
 import 'services/time_tracking_service.dart';
 import 'services/messaging_service.dart';
 import 'utils/bijbelquiz_gen_utils.dart';
@@ -282,7 +281,6 @@ Future<void> main() async {
 
           // Service container access
           Provider.value(value: serviceContainer),
-          Provider.value(value: serviceContainer.analyticsService),
           Provider.value(value: serviceContainer.themeManager),
           Provider.value(value: serviceContainer.timeTrackingService),
 
@@ -469,9 +467,8 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
 
   /// Track app lifecycle events for session management
   void _trackAppLifecycle() {
-    final analyticsService = _serviceContainer.analyticsService;
     final timeTrackingService = _serviceContainer.timeTrackingService;
-    AppLifecycleObserver(analyticsService, timeTrackingService).observe();
+    AppLifecycleObserver(timeTrackingService).observe();
   }
 
   @override
@@ -508,11 +505,8 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
 
   /// Builds the MaterialApp with theme configuration
   Widget _buildMaterialApp(SettingsProvider settings) {
-    final analyticsService = _serviceContainer.analyticsService;
-
     return MaterialApp(
       navigatorKey: navigatorKey,
-      navigatorObservers: [analyticsService.getObserver()],
       title: navigatorKey.currentContext != null
           ? AppLocalizations.of(navigatorKey.currentContext!)?.appName
           : null ?? 'BijbelQuiz',
@@ -581,8 +575,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
 class AppLifecycleObserver {
   final TimeTrackingService _timeTrackingService;
 
-  AppLifecycleObserver(
-      AnalyticsService analyticsService, this._timeTrackingService);
+  AppLifecycleObserver(this._timeTrackingService);
 
   void observe() {
     WidgetsBinding.instance.addObserver(_AppLifecycleObserver(this));

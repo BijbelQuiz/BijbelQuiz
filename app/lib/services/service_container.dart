@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'logger.dart';
-import 'analytics_service.dart';
 import 'performance_service.dart';
 import 'connection_service.dart';
 import 'question_cache_service.dart';
@@ -22,7 +21,6 @@ class ServiceContainer {
   ServiceContainer._internal();
 
   // Core services (critical for app startup)
-  AnalyticsService? _analyticsService;
   ThemeManager? _themeManager;
   SettingsProvider? _settingsProvider;
   GameStatsProvider? _gameStatsProvider;
@@ -47,16 +45,6 @@ class ServiceContainer {
     AppLogger.info('Initializing critical services...');
 
     try {
-      // Analytics service (high priority)
-      final analyticsStart = DateTime.now();
-      await _initializeService('analytics', () async {
-        _analyticsService = AnalyticsService();
-        await _analyticsService!.init();
-      });
-      final analyticsDuration = DateTime.now().difference(analyticsStart);
-      AppLogger.info(
-          'Analytics service initialized in ${analyticsDuration.inMilliseconds}ms');
-
       // Theme manager (required for UI)
       final themeStart = DateTime.now();
       await _initializeService('theme_manager', () async {
@@ -232,13 +220,6 @@ class ServiceContainer {
 
   // === Service Accessors ===
 
-  AnalyticsService get analyticsService {
-    if (_analyticsService == null) {
-      throw Exception('Analytics service not initialized');
-    }
-    return _analyticsService!;
-  }
-
   ThemeManager get themeManager {
     if (_themeManager == null) {
       throw Exception('Theme manager not initialized');
@@ -286,8 +267,7 @@ class ServiceContainer {
 
   /// Check if all critical services are ready
   bool get areCriticalServicesReady {
-    return _analyticsService != null &&
-        _themeManager != null &&
+    return _themeManager != null &&
         _settingsProvider != null &&
         _gameStatsProvider != null &&
         _timeTrackingService != null;
@@ -298,8 +278,6 @@ class ServiceContainer {
     if (_failedServices.contains(serviceName)) return false;
 
     switch (serviceName) {
-      case 'analytics':
-        return _analyticsService != null;
       case 'performance':
         return _performanceService != null;
       case 'connection':
@@ -326,7 +304,6 @@ class ServiceContainer {
   Map<String, dynamic> getInitializationStatus() {
     return {
       'critical_services': {
-        'analytics': _analyticsService != null,
         'theme_manager': _themeManager != null,
         'settings_provider': _settingsProvider != null,
         'game_stats_provider': _gameStatsProvider != null,

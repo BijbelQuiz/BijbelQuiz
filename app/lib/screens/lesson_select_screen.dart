@@ -7,7 +7,6 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:bijbelquiz/services/analytics_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bijbelquiz/services/version_check.dart';
@@ -159,13 +158,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
     );
     _fadeController.forward();
 
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-
-    analyticsService.screen(context, 'LessonSelectScreen');
-    analyticsService.trackFeatureStart(
-        context, AnalyticsService.featureLessonSystem);
-
     _scrollController.addListener(_onScroll);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -222,26 +214,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
 
   /// Helper method to track lesson selection analytics
   void _trackLessonSelection(Lesson lesson, bool unlocked) {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-
-    // Track lesson system usage
-    analyticsService.trackFeatureSuccess(
-        context, AnalyticsService.featureLessonSystem,
-        additionalProperties: {
-          'lesson_id': lesson.id,
-          'lesson_category': lesson.category,
-          'lesson_unlocked': unlocked,
-        });
-
-    // Track streak feature if this contributes to streak
-    if (_streakDays > 0) {
-      analyticsService.trackFeatureUsage(context,
-          AnalyticsService.featureStreakTracking, AnalyticsService.actionUsed,
-          additionalProperties: {
-            'current_streak': _streakDays,
-          });
-    }
   }
 
   @override
@@ -479,8 +451,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
   }
 
   Future<void> _loadLessons({int? maxLessons, bool append = false}) async {
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'load_lessons');
     final progress =
         Provider.of<LessonProgressProvider>(context, listen: false);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
@@ -529,9 +499,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
       }
     } catch (e) {
       if (!mounted) return;
-      Provider.of<AnalyticsService>(context, listen: false).capture(
-          context, 'load_lessons_error',
-          properties: {'error': e.toString()});
       setState(() {
         _error = AppLocalizations.of(context)!.couldNotLoadLessons;
         _showSkeletons = false;
@@ -599,48 +566,21 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
   }
 
   void _trackPromoCardShown() {
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'show_promo_card', properties: {
-      'promo_type': _currentPromoType?.analyticsName ?? '',
-    });
   }
 
   void _onPromoDismissed() {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.capture(context, 'dismiss_promo_card');
-    analyticsService.trackFeatureDismissal(
-        context, AnalyticsService.featurePromoCards,
-        additionalProperties: {
-          'promo_type': _currentPromoType?.analyticsName ?? '',
-        });
     setState(() {
       _showPromoCard = false;
     });
   }
 
   void _onUpdateDismissed() {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.capture(context, 'dismiss_update_card');
-    analyticsService.trackFeatureDismissal(
-        context, AnalyticsService.featurePromoCards,
-        additionalProperties: {
-          'promo_type': 'update',
-        });
     setState(() {
       _updateAvailable = false;
     });
   }
 
   void _onPromoViewed() {
-    Provider.of<AnalyticsService>(context, listen: false).trackFeatureUsage(
-        context,
-        AnalyticsService.featurePromoCards,
-        AnalyticsService.actionAccessed,
-        additionalProperties: {
-          'promo_type': _currentPromoType?.analyticsName ?? '',
-        });
   }
 
   Future<void> _onPromoAction(String action) async {
@@ -672,11 +612,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
   }
 
   Future<void> _handleDonationAction() async {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.capture(context, 'tap_donation_promo');
-    analyticsService.trackFeatureSuccess(
-        context, AnalyticsService.featureDonationSystem);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     await settings.markDonationLinkAsClicked();
     await settings.updateLastDonationPopup();
@@ -684,11 +619,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
   }
 
   Future<void> _handleSatisfactionAction() async {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.capture(context, 'tap_satisfaction_promo');
-    analyticsService.trackFeatureSuccess(
-        context, AnalyticsService.featureSatisfactionSurveys);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     await settings.markSatisfactionLinkAsClicked();
     await settings.updateLastSatisfactionPopup();
@@ -696,13 +626,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
   }
 
   Future<void> _handleDifficultyAction(String feedback) async {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.capture(context, 'tap_difficulty_feedback',
-        properties: {'feedback': feedback});
-    analyticsService.trackFeatureSuccess(
-        context, AnalyticsService.featureDifficultyFeedback,
-        additionalProperties: {'feedback_type': feedback});
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     await settings.markDifficultyLinkAsClicked();
     await settings.updateLastDifficultyPopup();
@@ -719,9 +642,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
   }
 
   Future<void> _handleAccountCreationAction() async {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.capture(context, 'tap_create_account_promo');
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const SocialScreen(),
@@ -730,8 +650,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
   }
 
   Future<void> _handleFollowAction(String url) async {
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'tap_follow_promo', properties: {'url': url});
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     await settings.markFollowLinkAsClicked();
     await settings.updateLastFollowPopup();
@@ -739,8 +657,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
   }
 
   Future<void> _handleReferralAction() async {
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'tap_referral_promo');
     final TextEditingController yourNameController = TextEditingController();
     final TextEditingController friendNameController = TextEditingController();
 
@@ -811,9 +727,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
   }
 
   Future<void> _handleShareStatsAction() async {
-    Provider.of<AnalyticsService>(context, listen: false)
-        .capture(context, 'tap_share_stats_promo');
-
     try {
       final gameStats = Provider.of<GameStatsProvider>(context, listen: false);
 
@@ -870,13 +783,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
   /// so we'll store the user's preference to potentially influence future difficulty
   Future<void> _adjustDifficulty(String feedback) async {
     // Get analytics service before any async operations to avoid context issues
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
     final settings = Provider.of<SettingsProvider>(context, listen: false);
-
-    // Capture analytics before async operation to avoid context issues
-    analyticsService.capture(context, 'difficulty_adjusted',
-        properties: {'feedback': feedback});
 
     // Store the user's difficulty preference
     await settings.setDifficultyPreference(feedback);
@@ -884,10 +791,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
 
   /// Helper method to handle analytics for locked lesson taps
   void _handleLockedLessonTap(String lessonId) {
-    final analyticsService =
-        Provider.of<AnalyticsService>(context, listen: false);
-    analyticsService.capture(context, 'tap_locked_lesson',
-        properties: {'lesson_id': lessonId});
     showTopSnackBar(context, AppLocalizations.of(context)!.lessonLocked,
         style: TopSnackBarStyle.warning);
   }
@@ -937,14 +840,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
             _handleLockedLessonTap(lesson.id);
             return;
           }
-
-          // Track lesson selection
-          _trackLessonSelection(lesson, unlocked);
-
-          // Capture tap event
-          Provider.of<AnalyticsService>(context, listen: false).capture(
-              context, 'tap_lesson',
-              properties: {'lesson_id': lesson.id});
 
           // Navigate to quiz
           await _navigateToQuiz(lesson);
@@ -1261,18 +1156,11 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
                                           final url =
                                               '${AppUrls.updateUrl}?version=${packageInfo.version}&platform=linux';
                                           await _launchUrl(url);
-                                        } catch (e) {
-                                          // Log error but don't prevent analytics tracking
-                                          debugPrint(
-                                              'Error getting package info: $e');
-                                        } finally {
-                                          // Report promo action to analytics consistent with other handlers
-                                          Provider.of<AnalyticsService>(context,
-                                                  listen: false)
-                                              .capture(
-                                                  context, 'tap_update_promo');
-                                        }
-                                      },
+                                         } catch (e) {
+                                           debugPrint(
+                                               'Error getting package info: $e');
+                                         }
+                                       },
                                     ),
                                   ),
                                 ),
@@ -1324,12 +1212,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
                                         dayWindow: _getFiveDayWindow(),
                                         onAfterQuizReturn: _refreshStreakData,
                                         onMultiplayerPressed: () {
-                                          final analyticsService =
-                                              Provider.of<AnalyticsService>(
-                                                  context,
-                                                  listen: false);
-                                          analyticsService.capture(context,
-                                              'multiplayer_button_tapped');
                                           Navigator.of(context).push(
                                             MaterialPageRoute(
                                               builder: (_) =>
