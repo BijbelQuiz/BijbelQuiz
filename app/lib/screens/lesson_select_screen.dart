@@ -696,7 +696,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
                 final yourName = yourNameController.text.trim();
                 final friendName = friendNameController.text.trim();
 
-                String inviteUrl = 'https://bijbelquiz.app/invite.html';
+                String inviteUrl = 'https://bijbelquiz.thomasboom.com/invite.html';
                 final Map<String, String> queryParams = {};
                 if (yourName.isNotEmpty) queryParams['yourName'] = yourName;
                 if (friendName.isNotEmpty) {
@@ -743,7 +743,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
       final statsHash = digest.toString().substring(0, 16);
 
       final statsUrl =
-          'https://bijbelquiz.app/score.html?s=$statsString&h=$statsHash';
+          'https://bijbelquiz.thomasboom.com/score.html?s=$statsString&h=$statsHash';
 
       await Clipboard.setData(ClipboardData(text: statsUrl));
 

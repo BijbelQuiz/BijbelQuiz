@@ -24,7 +24,7 @@ Allow: /pages/guides/
 Allow: /dankjewel
 
 # Sitemap location
-Sitemap: https://bijbelquiz.app/sitemap.xml
+Sitemap: https://bijbelquiz.thomasboom.com/sitemap.xml
 
 # Crawl delay for polite crawling
 Crawl-delay: 1

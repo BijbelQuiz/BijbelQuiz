@@ -1,6 +1,6 @@
 # BijbelQuiz
 
-![Tablet image](https://bijbelquiz.app/assets/images/promo-tablet-lesson-select-screen.png)
+![Tablet image](https://bijbelquiz.thomasboom.com/assets/images/promo-tablet-lesson-select-screen.png)
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?logo=flutter)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -12,8 +12,8 @@ BijbelQuiz is a cross-platform Bible quiz app designed to test and improve your 
 
 ## 📱 Install BijbelQuiz
 
-- **Google Play Store**: [Install](https://bijbelquiz.app/playstore)
-- **Website**: [Play](https://bijbelquiz.app/play)
+- **Google Play Store**: [Install](https://bijbelquiz.thomasboom.com/playstore)
+- **Website**: [Play](https://bijbelquiz.thomasboom.com/play)
 - **APK**: [Codeberg Releases](https://codeberg.org/thomasboom/BijbelQuiz/releases)
 
 ## 🚀 Getting Started

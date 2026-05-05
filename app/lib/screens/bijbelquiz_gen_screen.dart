@@ -873,7 +873,7 @@ class _BijbelQuizGenScreenState extends State<BijbelQuizGenScreen> {
         : 0;
 
     // Create a base URL (you may want to use your actual domain)
-    final baseUrl = 'https://bijbelquiz.app/gen.html';
+     final baseUrl = 'https://bijbelquiz.thomasboom.com/gen.html';
 
     // Calculate time spent using simple formula: 5 seconds per question
     final timeSpentHours = _calculateTimeSpentInHours(gameStats);

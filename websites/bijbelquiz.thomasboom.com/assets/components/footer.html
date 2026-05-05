@@ -1,15 +1,15 @@
 <div class="footer-links">
-    <a href="https://bijbelquiz.app/" class="footer-link">Home</a>
+    <a href="https://bijbelquiz.thomasboom.com/" class="footer-link">Home</a>
     <span class="footer-separator">•</span>
-    <a href="https://bijbelquiz.app/algemene-voorwaarden" class="footer-link">Algemene voorwaarden</a>
+    <a href="https://bijbelquiz.thomasboom.com/algemene-voorwaarden" class="footer-link">Algemene voorwaarden</a>
     <span class="footer-separator">•</span>
-    <a href="https://bijbelquiz.app/links" class="footer-link">Social Media</a>
+    <a href="https://bijbelquiz.thomasboom.com/links" class="footer-link">Social Media</a>
     <span class="footer-separator">•</span>
-    <a href="https://bijbelquiz.app/faq" class="footer-link">FAQ</a>
+    <a href="https://bijbelquiz.thomasboom.com/faq" class="footer-link">FAQ</a>
     <span class="footer-separator">•</span>
-    <a href="https://bijbelquiz.app/pers" class="footer-link">Pers</a>
+    <a href="https://bijbelquiz.thomasboom.com/pers" class="footer-link">Pers</a>
     <span class="footer-separator">•</span>
-    <a href="https://status.bijbelquiz.app" class="footer-link" id="service-status-link">
+    <a href="https://status.bijbelquiz.thomasboom.com" class="footer-link" id="service-status-link">
         <span id="service-status" class="service-status" data-status="loading">Status wordt geladen...</span>
     </a>
 </div>
@@ -17,7 +17,7 @@
 <script>
 (function() {
     var statusEl = document.getElementById('service-status');
-    fetch('https://status.bijbelquiz.app/status.json')
+    fetch('https://status.bijbelquiz.thomasboom.com/status.json')
         .then(function(res) { return res.json(); })
         .then(function(data) {
             var status = data.status || 'operational';

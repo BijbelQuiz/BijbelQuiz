@@ -1025,7 +1025,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 final yourName = yourNameController.text.trim();
                 final friendName = friendNameController.text.trim();
 
-                String inviteUrl = 'https://bijbelquiz.app/invite.html';
+                String inviteUrl = 'https://bijbelquiz.thomasboom.com/invite.html';
                 final Map<String, String> queryParams = {};
                 if (yourName.isNotEmpty) queryParams['yourName'] = yourName;
                 if (friendName.isNotEmpty) {
@@ -1079,7 +1079,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       // Create the full URL
 
       final statsUrl =
-          'https://bijbelquiz.app/score.html?s=$statsString&h=$statsHash';
+          'https://bijbelquiz.thomasboom.com/score.html?s=$statsString&h=$statsHash';
 
       await Clipboard.setData(ClipboardData(text: statsUrl));
 

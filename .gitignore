@@ -177,10 +177,13 @@ build/
 dist/
 .next/
 out/
-.nuxt
+.nuxt/
 .vercel/
 .turbo/
 node_modules
+
+# Flutter web build output (websites directory)
+websites/bijbelquiz.thomasboom.com/play
 
 # ==============================================================================
 # SYMBOLS & DEBUG

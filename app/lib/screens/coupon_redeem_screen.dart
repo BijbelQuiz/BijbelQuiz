@@ -798,7 +798,7 @@ class _CouponRedeemScreenState extends State<CouponRedeemScreen>
     _lastProcessedCode = code;
     _isProcessing = true;
 
-    // Validate URL format: bijbelquiz.app?coupon=CODE
+     // Validate URL format: bijbelquiz.thomasboom.com?coupon=CODE
     String urlToParse = code;
     if (!urlToParse.contains('://')) {
       urlToParse = 'https://$urlToParse';
@@ -810,7 +810,7 @@ class _CouponRedeemScreenState extends State<CouponRedeemScreen>
     if (uri != null) {
       // Check host (allow www. and without)
       final isValidHost =
-          uri.host == 'bijbelquiz.app' || uri.host == 'www.bijbelquiz.app';
+          uri.host == 'bijbelquiz.thomasboom.com' || uri.host == 'www.bijbelquiz.thomasboom.com';
       if (isValidHost) {
         couponCode = uri.queryParameters['coupon'];
 

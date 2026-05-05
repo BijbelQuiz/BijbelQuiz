@@ -69,7 +69,7 @@ class VersionInfo {
 }
 
 class VersionCheckService {
-  static const String _baseUrl = 'https://bijbelquiz.app';
+  static const String _baseUrl = 'https://bijbelquiz.thomasboom.com';
   static const String _downloadPath = '/download.html';
   static const String _prefKeyUpdateDismissed = 'update_notification_dismissed';
 

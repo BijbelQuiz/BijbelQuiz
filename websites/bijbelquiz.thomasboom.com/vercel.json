@@ -14,11 +14,11 @@
     },
     {
       "source": "/email",
-      "destination": "https://bijbelquiz.app/e-mail"
+      "destination": "https://bijbelquiz.thomasboom.com/e-mail"
     },
     {
       "source": "/e-mail",
-      "destination": "https://bijbelquiz.app/pages/email/index.html"
+      "destination": "https://bijbelquiz.thomasboom.com/pages/email/index.html"
     },
     {
       "source": "/kwebler",
@@ -30,7 +30,7 @@
     },
     {
       "source": "/bluesky",
-      "destination": "https://bsky.app/profile/bijbelquiz.app"
+      "destination": "https://bsky.app/profile/bijbelquiz.thomasboom.com"
     },
     {
       "source": "/pixelfed",
@@ -50,7 +50,7 @@
     },
     {
       "source": "/status",
-      "destination": "https://status.bijbelquiz.app"
+      "destination": "https://status.bijbelquiz.thomasboom.com"
     },
     {
       "source": "/nooki",
@@ -62,11 +62,11 @@
     },
     {
       "source": "/play",
-      "destination": "https://play.bijbelquiz.app"
+      "destination": "https://bijbelquiz.thomasboom.com/play"
     },
     {
       "source": "/speel",
-      "destination": "https://play.bijbelquiz.app"
+      "destination": "https://bijbelquiz.thomasboom.com/play"
     },
     {
       "source": "/github",
@@ -86,135 +86,135 @@
     },
     {
       "source": "/download",
-      "destination": "https://bijbelquiz.app/download.html"
+      "destination": "https://bijbelquiz.thomasboom.com/download.html"
     },
     {
       "source": "/faq",
-      "destination": "https://bijbelquiz.app/faq.html"
+      "destination": "https://bijbelquiz.thomasboom.com/faq.html"
     },
     {
       "source": "/pers",
-      "destination": "https://bijbelquiz.app/pers.html"
+      "destination": "https://bijbelquiz.thomasboom.com/pers.html"
     },
     {
       "source": "/links",
-      "destination": "https://bijbelquiz.app/links.html"
+      "destination": "https://bijbelquiz.thomasboom.com/links.html"
     },
     {
       "source": "/i/:id",
-      "destination": "https://bijbelquiz.app/invite.html"
+      "destination": "https://bijbelquiz.thomasboom.com/invite.html"
     },
     {
       "source": "/i",
-      "destination": "https://bijbelquiz.app/invite.html"
+      "destination": "https://bijbelquiz.thomasboom.com/invite.html"
     },
     {
       "source": "/wachtlijst",
-      "destination": "https://bijbelquiz.app/download.html"
+      "destination": "https://bijbelquiz.thomasboom.com/download.html"
     },
     {
       "source": "/privacy",
-      "destination": "https://bijbelquiz.app/algemene-voorwaarden"
+      "destination": "https://bijbelquiz.thomasboom.com/algemene-voorwaarden"
     },
     {
       "source": "/terms",
-      "destination": "https://bijbelquiz.app/algemene-voorwaarden"
+      "destination": "https://bijbelquiz.thomasboom.com/algemene-voorwaarden"
     },
     {
       "source": "/voorwaarden",
-      "destination": "https://bijbelquiz.app/algemene-voorwaarden"
+      "destination": "https://bijbelquiz.thomasboom.com/algemene-voorwaarden"
     },
     {
       "source": "/algemene-voorwaarden",
-      "destination": "https://bijbelquiz.app/pages/terms/index.html"
+      "destination": "https://bijbelquiz.thomasboom.com/pages/terms/index.html"
     },
     {
       "source": "/thank-you",
-      "destination": "https://bijbelquiz.app/dankjewel"
+      "destination": "https://bijbelquiz.thomasboom.com/dankjewel"
     },
     {
       "source": "/dankjewel",
-      "destination": "https://bijbelquiz.app/pages/thank-you.html"
+      "destination": "https://bijbelquiz.thomasboom.com/pages/thank-you.html"
     },
     {
       "source": "/guides",
-      "destination": "https://bijbelquiz.app/instructie"
+      "destination": "https://bijbelquiz.thomasboom.com/instructie"
     },
     {
       "source": "/guides/android",
-      "destination": "https://bijbelquiz.app/instructie/android"
+      "destination": "https://bijbelquiz.thomasboom.com/instructie/android"
     },
     {
       "source": "/guides/api",
-      "destination": "https://bijbelquiz.app/instructie/api"
+      "destination": "https://bijbelquiz.thomasboom.com/instructie/api"
     },
     {
       "source": "/guides/windows",
-      "destination": "https://bijbelquiz.app/instructie/windows"
+      "destination": "https://bijbelquiz.thomasboom.com/instructie/windows"
     },
     {
       "source": "/guides/migration",
-      "destination": "https://bijbelquiz.app/instructie/migratie"
+      "destination": "https://bijbelquiz.thomasboom.com/instructie/migratie"
     },
     {
       "source": "/guides/migratie",
-      "destination": "https://bijbelquiz.app/instructie/migratie"
+      "destination": "https://bijbelquiz.thomasboom.com/instructie/migratie"
     },
     {
       "source": "/instructie",
-      "destination": "https://bijbelquiz.app/pages/guides/index.html"
+      "destination": "https://bijbelquiz.thomasboom.com/pages/guides/index.html"
     },
     {
       "source": "/instructie/android",
-      "destination": "https://bijbelquiz.app/pages/guides/android.html"
+      "destination": "https://bijbelquiz.thomasboom.com/pages/guides/android.html"
     },
     {
       "source": "/instructie/api",
-      "destination": "https://bijbelquiz.app/pages/guides/api.html"
+      "destination": "https://bijbelquiz.thomasboom.com/pages/guides/api.html"
     },
     {
       "source": "/instructie/windows",
-      "destination": "https://bijbelquiz.app/pages/guides/windows.html"
+      "destination": "https://bijbelquiz.thomasboom.com/pages/guides/windows.html"
     },
     {
       "source": "/instructie/migratie",
-      "destination": "https://bijbelquiz.app/pages/guides/migratie.html"
+      "destination": "https://bijbelquiz.thomasboom.com/pages/guides/migratie.html"
     },
     {
       "source": "/account/delete",
-      "destination": "https://bijbelquiz.app/account/verwijderen"
+      "destination": "https://bijbelquiz.thomasboom.com/account/verwijderen"
     },
     {
       "source": "/account/registered",
-      "destination": "https://bijbelquiz.app/account/geregistreerd"
+      "destination": "https://bijbelquiz.thomasboom.com/account/geregistreerd"
     },
     {
       "source": "/account",
-      "destination": "https://bijbelquiz.app/pages/account/"
+      "destination": "https://bijbelquiz.thomasboom.com/pages/account/"
     },
     {
       "source": "/account/verwijderen",
-      "destination": "https://bijbelquiz.app/pages/account/verwijderen.html"
+      "destination": "https://bijbelquiz.thomasboom.com/pages/account/verwijderen.html"
     },
     {
       "source": "/account/geregistreerd",
-      "destination": "https://bijbelquiz.app/pages/account/geregistreerd.html"
+      "destination": "https://bijbelquiz.thomasboom.com/pages/account/geregistreerd.html"
     },
     {
       "source": "/tools",
-      "destination": "https://bijbelquiz.app/vraag-editor"
+      "destination": "https://bijbelquiz.thomasboom.com/vraag-editor"
     },
     {
       "source": "/tools/editor",
-      "destination": "https://bijbelquiz.app/vraag-editor"
+      "destination": "https://bijbelquiz.thomasboom.com/vraag-editor"
     },
     {
       "source": "/question-editor",
-      "destination": "https://bijbelquiz.app/vraag-editor"
+      "destination": "https://bijbelquiz.thomasboom.com/vraag-editor"
     },
     {
       "source": "/vraag-editor",
-      "destination": "https://bijbelquiz.app/pages/tools/"
+      "destination": "https://bijbelquiz.thomasboom.com/pages/tools/"
     }
   ],
   "headers": [

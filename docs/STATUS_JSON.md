@@ -3,7 +3,7 @@
 This document describes the public `status.json` endpoint for the BijbelQuiz status site.
 
 **Endpoint**
-- `https://status.bijbelquiz.app/status.json`
+- `https://status.bijbelquiz.thomasboom.com/status.json`
 
 **Purpose**
 - Provide a machine-readable snapshot of current service health.

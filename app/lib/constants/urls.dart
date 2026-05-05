@@ -1,7 +1,7 @@
 class AppUrls {
   // Base domains
-  static const String baseDomain = 'https://bijbelquiz.app';
-  static const String backendDomain = 'https://backend.bijbelquiz.app';
+  static const String baseDomain = 'https://bijbelquiz.thomasboom.com';
+  static const String backendDomain = 'https://backend.bijbelquiz.thomasboom.com';
 
   // Homepage
   static final String homepage = baseDomain;
@@ -23,7 +23,7 @@ class AppUrls {
   static final String termsUrl = '$baseDomain/algemene-voorwaarden';
   static final String statusPageUrl = '$baseDomain/status';
   static const String statusJsonUrl =
-      'https://status.bijbelquiz.app/status.json';
+      'https://status.bijbelquiz.thomasboom.com/status.json';
 
   // ===== SOCIAL MEDIA URLs (redirect through our own domain) =====
   static String get mastodonUrl => '$baseDomain/mastodon';
