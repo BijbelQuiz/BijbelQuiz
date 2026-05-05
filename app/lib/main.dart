@@ -7,7 +7,6 @@ import 'dart:io' show Platform;
 import 'package:app_links/app_links.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:logging/logging.dart' show Level, Logger;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bijbelquiz/l10n/app_localizations.dart';
 
 import 'providers/settings_provider.dart';
@@ -119,7 +118,6 @@ Future<void> main() async {
 
     // Initialize with timeout protection for each critical step
     bool fontLoaded = false;
-    bool envLoaded = false;
     bool supabaseInitialized = false;
     ServiceContainer? serviceContainer;
 
@@ -149,32 +147,7 @@ Future<void> main() async {
     _checkInitializationTimeout(
         initializationStart, initializationTimeout, 'font loading');
 
-    try {
-      // Load environment variables
-      AppLogger.info('Loading environment variables...');
-      final envLoadStart = DateTime.now();
-      await dotenv.load(fileName: "assets/.env").timeout(
-        Duration(seconds: 5),
-        onTimeout: () {
-          AppLogger.error(
-              'ENVIRONMENT LOADING TIMEOUT: Environment variables loading took too long');
-          throw TimeoutException('Environment loading timeout');
-        },
-      );
-      final envLoadDuration = DateTime.now().difference(envLoadStart);
-      AppLogger.info(
-          'Environment variables loaded successfully in ${envLoadDuration.inMilliseconds}ms');
-      envLoaded = true;
-    } catch (e) {
-      AppLogger.error('Failed to load environment variables', e);
-      envLoaded = false;
-      // Continue with default values
-    }
-
-    // Check timeout after environment loading
-    _checkInitializationTimeout(
-        initializationStart, initializationTimeout, 'environment loading');
-
+    // Initialize Supabase (config is loaded from backend inside)
     try {
       // Initialize Supabase
       AppLogger.info('Initializing Supabase...');
@@ -249,7 +222,6 @@ Future<void> main() async {
     // Log initialization summary
     AppLogger.info('Initialization Summary:');
     AppLogger.info('- Font loaded: $fontLoaded');
-    AppLogger.info('- Environment loaded: $envLoaded');
     AppLogger.info('- Supabase initialized: $supabaseInitialized');
     AppLogger.info('- Critical services initialized: $serviceContainer');
 

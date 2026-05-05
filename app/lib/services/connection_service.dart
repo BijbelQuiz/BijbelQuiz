@@ -2,9 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'logger.dart';
 import '../utils/automatic_error_reporter.dart';
+import '../constants/urls.dart';
 
 /// A service for monitoring network connectivity and optimizing for poor connections
 class ConnectionService {
@@ -95,29 +96,39 @@ class ConnectionService {
         AppLogger.info(
             'Connection checked: not connected (platform reported none)');
       } else {
-        // Test connection by querying Supabase
+        // Test connection by pinging our backend
         try {
-          final client = Supabase.instance.client;
-          await client.from('questions').select('id').limit(1).timeout(
-                const Duration(seconds: 3),
-              );
+          final response = await http.get(
+            Uri.parse('${AppUrls.backendDomain}/api/health'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+          ).timeout(const Duration(seconds: 3));
 
-          _isConnected = true;
+          if (response.statusCode == 200) {
+            _isConnected = true;
 
-          if (connectivityResult == ConnectivityResult.wifi ||
-              connectivityResult == ConnectivityResult.ethernet) {
-            _connectionType = ConnectionType.fast;
-            _isSlowConnection = false;
+            if (connectivityResult == ConnectivityResult.wifi ||
+                connectivityResult == ConnectivityResult.ethernet) {
+              _connectionType = ConnectionType.fast;
+              _isSlowConnection = false;
+            } else {
+              await _determineConnectionType();
+            }
+            AppLogger.info(
+                'Connection checked: connected to backend via ${connectivityResult.toString()}');
           } else {
-            await _determineConnectionType();
+            _isConnected = false;
+            _connectionType = ConnectionType.none;
+            AppLogger.info(
+                'Connection checked: not connected (backend returned ${response.statusCode})');
           }
-          AppLogger.info(
-              'Connection checked: connected to Supabase via ${connectivityResult.toString()}');
         } catch (e) {
           _isConnected = false;
           _connectionType = ConnectionType.none;
           AppLogger.info(
-              'Connection checked: not connected (Supabase query failed: $e)');
+              'Connection checked: not connected (backend ping failed: $e)');
         }
       }
     } catch (e) {
