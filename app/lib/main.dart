@@ -357,6 +357,8 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
           Provider.of<GameStatsProvider>(context, listen: false);
       final lessonProgressProvider =
           Provider.of<LessonProgressProvider>(context, listen: false);
+      final settingsProvider =
+          Provider.of<SettingsProvider>(context, listen: false);
 
       await _serviceContainer.initializeStarTransactionService(
         gameStatsProvider: gameStatsProvider,
@@ -369,8 +371,7 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
         localApiService.initialize(
           gameStatsProvider: gameStatsProvider,
           lessonProgressProvider: lessonProgressProvider,
-          settingsProvider:
-              Provider.of<SettingsProvider>(context, listen: false),
+          settingsProvider: settingsProvider,
           questionCacheService: _serviceContainer.questionCacheService!,
         );
         if (localApiService.isEnabled) {
@@ -480,8 +481,9 @@ class _BijbelQuizAppState extends State<BijbelQuizApp> {
     return MaterialApp(
       navigatorKey: navigatorKey,
       title: navigatorKey.currentContext != null
-          ? AppLocalizations.of(navigatorKey.currentContext!)?.appName
-          : null ?? 'BijbelQuiz',
+          ? (AppLocalizations.of(navigatorKey.currentContext!)?.appName ??
+              'BijbelQuiz')
+          : 'BijbelQuiz',
       theme: ThemeUtils.getLightTheme(settings),
       darkTheme: ThemeUtils.getDarkTheme(settings),
       themeMode: ThemeUtils.getThemeMode(settings),

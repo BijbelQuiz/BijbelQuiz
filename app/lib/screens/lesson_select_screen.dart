@@ -6,11 +6,11 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bijbelquiz/services/version_check.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:bijbelquiz/config/supabase_config.dart';
 
 import '../models/lesson.dart';
 import '../providers/lesson_progress_provider.dart';
@@ -210,10 +210,6 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
 
     // No need to show the guide; mark check as completed
     _guideCheckCompleted = true;
-  }
-
-  /// Helper method to track lesson selection analytics
-  void _trackLessonSelection(Lesson lesson, bool unlocked) {
   }
 
   @override
@@ -534,7 +530,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
     if (_updateAvailable) return false;
 
     // Check if user is not logged in - if so, always show account creation promo
-    final isLoggedIn = Supabase.instance.client.auth.currentUser != null;
+    final isLoggedIn = SupabaseConfig.maybeClient?.auth.currentUser != null;
     if (!isLoggedIn) {
       return true;
     }
@@ -543,7 +539,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
   }
 
   PromoType _determinePromoType() {
-    final isLoggedIn = Supabase.instance.client.auth.currentUser != null;
+    final isLoggedIn = SupabaseConfig.maybeClient?.auth.currentUser != null;
     if (!isLoggedIn) {
       return PromoType.accountCreation;
     }
@@ -660,19 +656,19 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
     final TextEditingController yourNameController = TextEditingController();
     final TextEditingController friendNameController = TextEditingController();
 
-    final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
+        final loc = AppLocalizations.of(dialogContext)!;
         return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.customizeInvite),
+          title: Text(loc.customizeInvite),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: yourNameController,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.enterYourName,
+                  labelText: loc.enterYourName,
                   border: const OutlineInputBorder(),
                 ),
               ),
@@ -680,7 +676,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
               TextField(
                 controller: friendNameController,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.enterFriendName,
+                  labelText: loc.enterFriendName,
                   border: const OutlineInputBorder(),
                 ),
               ),
@@ -689,7 +685,7 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(AppLocalizations.of(context)!.cancel),
+              child: Text(loc.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -713,12 +709,12 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
 
                 if (dialogContext.mounted) {
                   showTopSnackBar(dialogContext,
-                      AppLocalizations.of(context)!.inviteLinkCopied,
+                      AppLocalizations.of(dialogContext)!.inviteLinkCopied,
                       style: TopSnackBarStyle.success);
                   Navigator.of(dialogContext).pop();
                 }
               },
-              child: Text(AppLocalizations.of(context)!.sendInvite),
+              child: Text(loc.sendInvite),
             ),
           ],
         );
@@ -747,13 +743,15 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
 
       await Clipboard.setData(ClipboardData(text: statsUrl));
 
-      if (context.mounted) {
-        showTopSnackBar(context, AppLocalizations.of(context)!.statsLinkCopied,
+      if (mounted) {
+        final loc = AppLocalizations.of(context)!;
+        showTopSnackBar(context, loc.statsLinkCopied,
             style: TopSnackBarStyle.success);
       }
     } catch (e) {
-      if (context.mounted) {
-        showTopSnackBar(context, AppLocalizations.of(context)!.errorCopyingLink,
+      if (mounted) {
+        final loc = AppLocalizations.of(context)!;
+        showTopSnackBar(context, loc.errorCopyingLink,
             style: TopSnackBarStyle.error);
       }
     }
@@ -954,13 +952,13 @@ class _LessonSelectScreenState extends State<LessonSelectScreen>
     final Lesson? continueLesson =
         totalLessons > 0 ? _lessons[continueIdx] : null;
 
-    final String? statusTitle =
+    final String statusTitle =
         (_statusEventTitle != null && _statusEventTitle!.trim().isNotEmpty)
             ? _statusEventTitle!.trim()
             : (_statusTitle != null && _statusTitle!.trim().isNotEmpty)
                 ? _statusTitle!.trim()
                 : loc.statusIncidentTitle;
-    final String? statusMessage =
+    final String statusMessage =
         (_statusDescription != null && _statusDescription!.trim().isNotEmpty)
             ? _statusDescription!.trim()
             : (_statusSummary != null && _statusSummary!.trim().isNotEmpty)

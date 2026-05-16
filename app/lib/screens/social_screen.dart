@@ -6,6 +6,7 @@ import 'sync_screen.dart';
 import '../services/logger.dart';
 import '../services/messaging_service.dart';
 import '../utils/automatic_error_reporter.dart';
+import '../config/supabase_config.dart';
 
 class SocialScreen extends StatefulWidget {
   const SocialScreen({super.key});
@@ -70,7 +71,7 @@ class _SocialScreenState extends State<SocialScreen> {
 
   void _checkAuthState() {
     try {
-      final user = Supabase.instance.client.auth.currentUser;
+      final user = SupabaseConfig.maybeClient?.auth.currentUser;
       setState(() {
         _currentUser = user;
       });

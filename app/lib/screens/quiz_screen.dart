@@ -25,7 +25,6 @@ import '../widgets/question_widget.dart';
 import '../widgets/metrics_widget.dart';
 import '../widgets/app_bar_widget.dart';
 import '../utils/responsive_utils.dart';
-import '../widgets/common_widgets.dart';
 import '../utils/quiz_action_price_helper.dart';
 import 'dart:async';
 import 'dart:math';
@@ -364,15 +363,11 @@ class _QuizScreenState extends State<QuizScreen>
                         gameStats
                             .spendPointsForRetry(amount: retryPrice)
                             .then((success) {
-                          if (!dialogContext.mounted) return;
-                          if (success) {
-                            Navigator.of(dialogContext).pop();
-                                  'current_score': localGameStats.score,
-                                });
-
-                            Navigator.of(dialogContext).pop();
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (mounted) {
+                           if (!dialogContext.mounted) return;
+                           if (success) {
+                             Navigator.of(dialogContext).pop();
+                             WidgetsBinding.instance.addPostFrameCallback((_) {
+                               if (mounted) {
                                 setState(() {
                                   final optimalTimerDuration =
                                       _performanceService
@@ -555,7 +550,6 @@ class _QuizScreenState extends State<QuizScreen>
       }
 
       // Initialize quiz state with PQU (Progressive Question Up-selection)
-      final isSlowMode = settings.slowMode;
       final optimalTimerDuration = _performanceService.getOptimalTimerDuration(
           Duration(seconds: settings.gameSpeedTimerDuration));
 

@@ -9,6 +9,7 @@ import '../widgets/top_snackbar.dart';
 import 'package:bijbelquiz/l10n/app_localizations.dart';
 import '../services/logger.dart';
 import '../services/gemini_service.dart';
+import '../config/supabase_config.dart';
 import '../models/ai_theme.dart';
 import '../utils/automatic_error_reporter.dart';
 import '../services/store_service.dart';
@@ -52,7 +53,7 @@ class _AIThemeDesignerScreenState extends State<AIThemeDesignerScreen> {
   }
 
   void _checkAuthState() {
-    final user = Supabase.instance.client.auth.currentUser;
+    final user = SupabaseConfig.maybeClient?.auth.currentUser;
     setState(() {
       _currentUser = user;
     });

@@ -7,6 +7,7 @@ import '../providers/game_stats_provider.dart';
 import '../providers/lesson_progress_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/logger.dart';
+import '../config/supabase_config.dart';
 import '../utils/automatic_error_reporter.dart';
 import '../screens/main_navigation_screen.dart';
 import '../widgets/auth_view.dart';
@@ -59,15 +60,17 @@ class _SyncScreenState extends State<SyncScreen> {
   }
 
   void _checkAuthState() {
-    final user = Supabase.instance.client.auth.currentUser;
+    final user = SupabaseConfig.maybeClient?.auth.currentUser;
     setState(() {
       _currentUser = user;
     });
   }
 
   void _setupAuthListener() {
-    _authSubscription =
-        Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+    final client = SupabaseConfig.maybeClient;
+    if (client == null) return;
+
+    _authSubscription = client.auth.onAuthStateChange.listen((event) {
       AppLogger.debug(
           'Auth state changed: ${event.event} for user: ${event.session?.user.email ?? 'none'}');
 
@@ -608,7 +611,7 @@ class _SyncScreenState extends State<SyncScreen> {
 
   Future<bool> _isUsernameTaken(String username) async {
     try {
-      final client = Supabase.instance.client;
+      final client = SupabaseConfig.getClient();
       final response = await client
           .from('user_profiles')
           .select('username')
@@ -628,7 +631,7 @@ class _SyncScreenState extends State<SyncScreen> {
     });
 
     try {
-      await Supabase.instance.client.auth.signOut();
+      await SupabaseConfig.getClient().auth.signOut();
       AppLogger.info('Successfully signed out');
 
       // Navigate to main app screen after logout
@@ -689,7 +692,7 @@ class _SyncScreenState extends State<SyncScreen> {
       final email = _currentUser!.email!;
       AppLogger.debug('Updating password for user: $email');
 
-      await Supabase.instance.client.auth.updateUser(
+      await SupabaseConfig.getClient().auth.updateUser(
         UserAttributes(password: newPassword),
       );
 
@@ -769,7 +772,7 @@ class _SyncScreenState extends State<SyncScreen> {
     });
 
     try {
-      await Supabase.instance.client.from('user_profiles').update({
+      await SupabaseConfig.getClient().from('user_profiles').update({
         'username': newUsername.toLowerCase().trim(),
         'display_name': newUsername.trim(),
       }).eq('user_id', _currentUser!.id);
@@ -821,7 +824,7 @@ class _SyncScreenState extends State<SyncScreen> {
     });
 
     try {
-      await Supabase.instance.client.from('user_profiles').update({
+      await SupabaseConfig.getClient().from('user_profiles').update({
         'display_name': displayName,
         'bio': bio,
       }).eq('user_id', _currentUser!.id);

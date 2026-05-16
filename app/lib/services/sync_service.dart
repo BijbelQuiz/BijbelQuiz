@@ -24,7 +24,7 @@ class SyncService {
   static const String _tableName = 'user_sync_data';
   static const String _queueKey = 'sync_service_queue';
 
-  late final SupabaseClient _client;
+  SupabaseClient? _client;
   late final ConnectionService _connectionService;
 
   String? _currentUserId;
@@ -58,7 +58,6 @@ class SyncService {
   }
 
   SyncService._internal() {
-    _client = SupabaseConfig.client;
     _connectionService = ConnectionService();
   }
 
@@ -66,7 +65,17 @@ class SyncService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
+    _client = SupabaseConfig.maybeClient;
+
     await _connectionService.initialize();
+    if (_client == null) {
+      await _loadQueue();
+      _isInitialized = true;
+      AppLogger.warning(
+          'SyncService initialized in local-only mode: Supabase unavailable');
+      return;
+    }
+
     _setupAuthListener();
     _setupConnectionListener();
     await _loadQueue();
@@ -126,7 +135,10 @@ class SyncService {
 
   /// Sets up auth state listener to handle user login/logout
   void _setupAuthListener() {
-    Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+    final client = _client;
+    if (client == null) return;
+
+    client.auth.onAuthStateChange.listen((event) {
       final user = event.session?.user;
       if (user != null) {
         _currentUserId = user.id;
@@ -230,6 +242,12 @@ class SyncService {
 
   /// Performs the actual sync operation with retry logic and error handling
   Future<void> _performSync(String key, Map<String, dynamic> data) async {
+    final client = _client;
+    if (client == null) {
+      AppLogger.warning('Cannot sync data: Supabase unavailable');
+      return;
+    }
+
     if (_currentUserId == null) {
       AppLogger.warning('Cannot sync data: no user logged in');
       return;
@@ -282,7 +300,7 @@ class SyncService {
           'Starting sync for key: $key, user: $_currentUserId, data keys: ${data.keys.toList()}');
 
       // Get current user data or create new record
-      final userDataResponse = await _client
+      final userDataResponse = await client
           .from(_tableName)
           .select('data')
           .eq('user_id', _currentUserId!)
@@ -317,7 +335,7 @@ class SyncService {
       }
 
       // Upsert the user data
-      await _client.from(_tableName).upsert({
+      await client.from(_tableName).upsert({
         'user_id': _currentUserId,
         'data': currentData,
         'updated_at': now.toIso8601String(),
@@ -346,7 +364,7 @@ class SyncService {
         AppLogger.warning(
             'Auth error detected during sync, attempting to refresh session...');
         try {
-          await _client.auth.refreshSession();
+          await client.auth.refreshSession();
           // Retry once after refresh
           AppLogger.info('Session refreshed, retrying sync for key: $key');
           // Don't call syncDataImmediate here to avoid infinite recursion,
@@ -401,6 +419,8 @@ class SyncService {
 
   /// Starts listening for real-time updates for the current user
   void _startListening() {
+    final client = _client;
+    if (client == null) return;
     if (_currentUserId == null) return;
     if (_isListening) {
       AppLogger.debug('Already listening for real-time updates, skipping');
@@ -414,7 +434,7 @@ class SyncService {
         'Starting real-time sync listening for user: $_currentUserId');
     _isListening = true;
 
-    _channel = _client
+    _channel = client
         .channel('user_sync_$_currentUserId')
         .onPostgresChanges(
           event: PostgresChangeEvent.update,
@@ -466,7 +486,7 @@ class SyncService {
           AppLogger.warning(
               'JWT expired in realtime channel, attempting refresh...');
           try {
-            await _client.auth.refreshSession();
+            await client.auth.refreshSession();
             // Re-subscribe after refresh
             _startListening();
           } catch (e) {
@@ -519,10 +539,12 @@ class SyncService {
 
   /// Gets the current user's data
   Future<Map<String, dynamic>?> getUserData() async {
+    final client = _client;
+    if (client == null) return null;
     if (_currentUserId == null) return null;
 
     try {
-      final response = await _client
+      final response = await client
           .from(_tableName)
           .select('data')
           .eq('user_id', _currentUserId!)
@@ -542,6 +564,8 @@ class SyncService {
 
   /// Fetches all user data from the server (for on-boot initialization)
   Future<Map<String, Map<String, dynamic>>?> fetchAllData() async {
+    final client = _client;
+    if (client == null) return null;
     if (_currentUserId == null) {
       AppLogger.warning('Cannot fetch data: no user logged in');
       return null;
@@ -551,7 +575,7 @@ class SyncService {
       AppLogger.info(
           'Fetching all user data from server for user: $_currentUserId');
 
-      final response = await _client
+      final response = await client
           .from(_tableName)
           .select('data')
           .eq('user_id', _currentUserId!)
@@ -614,6 +638,8 @@ class SyncService {
 
   /// Gets the current user's profile, creating it if it doesn't exist
   Future<Map<String, dynamic>?> getCurrentUserProfile() async {
+    final client = _client;
+    if (client == null) return null;
     if (_currentUserId == null) return null;
 
     // Concurrency protection: if profile creation is already in progress for this user,
@@ -629,7 +655,7 @@ class SyncService {
       _profileCreationInProgress[_currentUserId!] = true;
 
       // First try to get existing profile
-      final response = await _client
+      final response = await client
           .from('user_profiles')
           .select()
           .eq('user_id', _currentUserId!)
@@ -643,7 +669,7 @@ class SyncService {
       AppLogger.info(
           'User profile not found, creating default profile for user: $_currentUserId');
 
-      final user = Supabase.instance.client.auth.currentUser;
+      final user = client.auth.currentUser;
       if (user == null) return null;
 
       // Extract username from email (before @) as fallback
@@ -659,7 +685,7 @@ class SyncService {
         'updated_at': DateTime.now().toIso8601String(),
       };
 
-      await _client.from('user_profiles').insert(newProfile);
+      await client.from('user_profiles').insert(newProfile);
 
       AppLogger.info('Created default user profile for user: $_currentUserId');
       return newProfile;
@@ -675,7 +701,7 @@ class SyncService {
             'Profile already created by concurrent request for user: $_currentUserId');
         // Try to fetch the profile that was created by the other request
         try {
-          final response = await _client
+          final response = await client
               .from('user_profiles')
               .select()
               .eq('user_id', _currentUserId!)

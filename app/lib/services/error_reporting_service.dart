@@ -166,6 +166,12 @@ class ErrorReportingService {
         buildNumber: actualBuildNumber,
       );
 
+      if (!SupabaseConfig.isInitialized) {
+        AppLogger.warning(
+            'Error saved locally but Supabase is unavailable: ${appError.userMessage}');
+        return;
+      }
+
       // Insert the error report into Supabase
       final response = await SupabaseConfig.getClient()
           .from('error_reports')

@@ -29,7 +29,7 @@ class SyncServiceV2 {
   static const String _syncDataPrefix = 'sync_data_v2_';
 
   // Supabase
-  late final SupabaseClient _client;
+  SupabaseClient? _client;
   late final ConnectionService _connectionService;
 
   // State
@@ -60,6 +60,7 @@ class SyncServiceV2 {
   // Getters
   bool get isInitialized => _isInitialized;
   bool get isAuthenticated => _currentUserId != null;
+  bool get isAvailable => _client != null;
   String? get currentUserId => _currentUserId;
   SyncQueue get queue => _queue;
   SyncConfig get config => _config;
@@ -73,7 +74,6 @@ class SyncServiceV2 {
   factory SyncServiceV2() => _instance;
 
   SyncServiceV2._internal() {
-    _client = SupabaseConfig.client;
     _connectionService = ConnectionService();
   }
 
@@ -85,9 +85,18 @@ class SyncServiceV2 {
       _config = config;
     }
 
+    _client = SupabaseConfig.maybeClient;
+
     await _connectionService.initialize();
     await _queue.initialize();
     await _loadSyncState();
+
+    if (_client == null) {
+      _isInitialized = true;
+      AppLogger.warning(
+          'SyncServiceV2 initialized in local-only mode: Supabase unavailable');
+      return;
+    }
 
     _setupAuthListener();
     _setupConnectionListener();
@@ -210,6 +219,12 @@ class SyncServiceV2 {
 
   /// Fetch all sync data from the server
   Future<Map<String, SyncDataEntry>?> fetchAllData() async {
+    final client = _client;
+    if (client == null) {
+      AppLogger.warning('Cannot fetch data: Supabase unavailable');
+      return null;
+    }
+
     if (_currentUserId == null) {
       AppLogger.warning('Cannot fetch data: not authenticated');
       return null;
@@ -218,7 +233,7 @@ class SyncServiceV2 {
     try {
       AppLogger.info('Fetching all sync data for user: $_currentUserId');
 
-      final response = await _client.rpc(
+      final response = await client.rpc(
         'get_user_sync_data',
         params: {'p_user_id': _currentUserId},
       );
@@ -275,10 +290,12 @@ class SyncServiceV2 {
 
   /// Get sync status for all devices
   Future<List<DeviceSyncMetadata>?> getDeviceSyncStatus() async {
+    final client = _client;
+    if (client == null) return null;
     if (_currentUserId == null) return null;
 
     try {
-      final response = await _client.rpc(
+      final response = await client.rpc(
         'get_user_sync_status',
         params: {'p_user_id': _currentUserId},
       );
@@ -386,7 +403,10 @@ class SyncServiceV2 {
 
   /// Setup auth state listener
   void _setupAuthListener() {
-    Supabase.instance.client.auth.onAuthStateChange.listen(
+    final client = _client;
+    if (client == null) return;
+
+    client.auth.onAuthStateChange.listen(
       (event) async {
         try {
           final user = event.session?.user;
@@ -483,6 +503,12 @@ class SyncServiceV2 {
 
   /// Process a single queue item
   Future<void> _processQueueItem(SyncQueueItem item) async {
+    final client = _client;
+    if (client == null) {
+      await _queue.markFailed(item.id, 'Supabase unavailable');
+      return;
+    }
+
     try {
       // Update state
       _dataKeyStates[item.key] = DataKeySyncState(
@@ -497,7 +523,7 @@ class SyncServiceV2 {
       final deviceId = await _queue.deviceId;
 
       // Call atomic upsert function
-      final response = await _client.rpc(
+      final response = await client.rpc(
         'atomic_sync_upsert',
         params: {
           'p_user_id': _currentUserId,
@@ -640,10 +666,12 @@ class SyncServiceV2 {
   void _startRealtimeSubscription() {
     if (_currentUserId == null) return;
     if (_channel != null) return;
+    final client = _client;
+    if (client == null) return;
 
     AppLogger.info('Starting realtime subscription for user: $_currentUserId');
 
-    _channel = _client
+    _channel = client
         .channel('user_sync_v2_$_currentUserId')
         .onPostgresChanges(
           event: PostgresChangeEvent.all,
@@ -769,10 +797,12 @@ class SyncServiceV2 {
   /// Get the current user's profile
   /// Returns null if not authenticated or profile doesn't exist
   Future<Map<String, dynamic>?> getCurrentUserProfile() async {
+    final client = _client;
+    if (client == null) return null;
     if (_currentUserId == null) return null;
 
     try {
-      final response = await _client
+      final response = await client
           .from('user_profiles')
           .select()
           .eq('user_id', _currentUserId!)

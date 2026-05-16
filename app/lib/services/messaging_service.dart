@@ -1,5 +1,4 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter/material.dart';
 import '../config/supabase_config.dart';
 import '../utils/automatic_error_reporter.dart';
 import '../services/anonymous_user_service.dart';
@@ -134,8 +133,10 @@ class ReactionResult {
 
 /// Service class for handling messaging functionality
 class MessagingService {
+  bool get isAvailable => SupabaseConfig.isInitialized;
+
   /// Gets the Supabase client for database operations
-  SupabaseClient get _client => SupabaseConfig.client;
+  SupabaseClient get _client => SupabaseConfig.getClient();
 
   /// Gets all active messages (not expired) from the database
   Future<List<Message>> getActiveMessages() async {

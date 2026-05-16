@@ -3,11 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/local_api_service.dart';
-import '../services/analytics_service.dart';
 import '../widgets/top_snackbar.dart';
 import '../l10n/app_localizations.dart';
-import '../services/logger.dart';
-import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class LocalApiScreen extends StatefulWidget {
@@ -31,6 +28,7 @@ class _LocalApiScreenState extends State<LocalApiScreen> {
   Future<void> _loadData() async {
     final apiService = LocalApiService.instance;
     await apiService.loadSettings();
+    if (!mounted) return;
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     _portController.text = settings.localApiPort.toString();
     setState(() {});
@@ -158,10 +156,11 @@ class _LocalApiScreenState extends State<LocalApiScreen> {
                             }
                             await settings.setLocalApiEnabled(value);
                           } catch (e) {
-                            if (mounted) {
+                            if (context.mounted) {
+                              final loc = AppLocalizations.of(context)!;
                               showTopSnackBar(
                                 context,
-                                '${AppLocalizations.of(context)!.error}: $e',
+                                '${loc.error}: $e',
                                 style: TopSnackBarStyle.error,
                               );
                             }
@@ -369,7 +368,7 @@ class _LocalApiScreenState extends State<LocalApiScreen> {
             icon: const Icon(Icons.copy),
             onPressed: () async {
               await Clipboard.setData(ClipboardData(text: key.key));
-              if (mounted) {
+              if (context.mounted) {
                 showTopSnackBar(
                   context,
                   AppLocalizations.of(context)!.localApiKeyCopied,
@@ -680,18 +679,6 @@ class _LocalApiScreenState extends State<LocalApiScreen> {
         ],
       ),
     );
-  }
-
-  Future<void> _copyAllKeys(
-      BuildContext context, LocalApiService apiService) async {
-    final keys =
-        apiService.apiKeys.map((k) => '${k.name}: ${k.key}').join('\n');
-    await Clipboard.setData(ClipboardData(text: keys));
-    if (mounted) {
-      showTopSnackBar(
-          context, AppLocalizations.of(context)!.localApiAllKeysCopied,
-          style: TopSnackBarStyle.success);
-    }
   }
 
   String _formatDate(DateTime date) {

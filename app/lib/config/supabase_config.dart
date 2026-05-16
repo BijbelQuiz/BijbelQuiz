@@ -4,8 +4,11 @@ import '../services/logger.dart';
 import '../services/app_config.dart';
 
 class SupabaseConfig {
-  static late SupabaseClient client;
-  static late String supabaseUrl;
+  static SupabaseClient? _client;
+  static String? _supabaseUrl;
+
+  static bool get isInitialized => _client != null;
+  static SupabaseClient? get maybeClient => _client;
 
   static Future<void> initialize() async {
     AppLogger.info('Starting Supabase initialization...');
@@ -23,7 +26,7 @@ class SupabaseConfig {
       throw Exception('SUPABASE_URL environment variable is not set');
     }
 
-    SupabaseConfig.supabaseUrl = appConfig.supabaseUrl;
+    _supabaseUrl = appConfig.supabaseUrl;
 
     if (appConfig.supabasePublishableKey.isEmpty) {
       AppLogger.error('SUPABASE_PUBLISHABLE_KEY environment variable is not set');
@@ -43,7 +46,7 @@ class SupabaseConfig {
     AppLogger.info(
         'Supabase client initialized in ${supabaseClientInitDuration.inMilliseconds}ms');
 
-    client = Supabase.instance.client;
+    _client = Supabase.instance.client;
     AppLogger.info('Supabase client instance obtained');
 
     final totalDuration = DateTime.now().difference(supabaseInitStart);
@@ -52,10 +55,18 @@ class SupabaseConfig {
   }
 
   static SupabaseClient getClient() {
+    final client = _client;
+    if (client == null) {
+      throw StateError('Supabase client is not initialized');
+    }
     return client;
   }
 
   static String getUrl() {
-    return supabaseUrl;
+    final url = _supabaseUrl;
+    if (url == null) {
+      throw StateError('Supabase URL is not initialized');
+    }
+    return url;
   }
 }

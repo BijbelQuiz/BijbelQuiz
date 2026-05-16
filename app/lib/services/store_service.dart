@@ -10,6 +10,11 @@ class StoreService {
 
   /// Fetches all store items with their current pricing from Supabase
   Future<List<StoreItem>> getStoreItems() async {
+    if (!SupabaseConfig.isInitialized) {
+      AppLogger.warning('Store items unavailable: Supabase not initialized');
+      return [];
+    }
+
     try {
       final response = await SupabaseConfig.getClient()
           .from('store_items')
@@ -42,6 +47,8 @@ class StoreService {
 
   /// Fetches a specific store item by its key
   Future<StoreItem?> getStoreItemByKey(String itemKey) async {
+    if (!SupabaseConfig.isInitialized) return null;
+
     try {
       final response = await SupabaseConfig.getClient()
           .from('store_items')
@@ -70,6 +77,8 @@ class StoreService {
 
   /// Updates a store item in the database
   Future<bool> updateStoreItem(StoreItem item) async {
+    if (!SupabaseConfig.isInitialized) return false;
+
     try {
       await SupabaseConfig.getClient()
           .from('store_items')

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
+import '../config/supabase_config.dart';
 import '../services/logger.dart';
 import '../utils/automatic_error_reporter.dart';
 import 'package:bijbelquiz/l10n/app_localizations.dart';
@@ -160,7 +160,7 @@ class _AuthViewState extends State<AuthView> {
 
   Future<bool> _isUsernameTaken(String username) async {
     try {
-      final client = Supabase.instance.client;
+      final client = SupabaseConfig.getClient();
       final response = await client
           .from('user_profiles')
           .select('username')
@@ -198,7 +198,7 @@ class _AuthViewState extends State<AuthView> {
     });
 
     try {
-      final response = await Supabase.instance.client.auth.signInWithPassword(
+      final response = await SupabaseConfig.getClient().auth.signInWithPassword(
         email: email,
         password: password,
       );
@@ -307,7 +307,8 @@ class _AuthViewState extends State<AuthView> {
     });
 
     try {
-      final response = await Supabase.instance.client.auth.signUp(
+      final client = SupabaseConfig.getClient();
+      final response = await client.auth.signUp(
         email: email,
         password: password,
       );
@@ -315,7 +316,7 @@ class _AuthViewState extends State<AuthView> {
       if (response.user != null) {
         try {
           // Create user profile with username
-          await Supabase.instance.client.from('user_profiles').insert({
+          await client.from('user_profiles').insert({
             'user_id': response.user!.id,
             'username': username.toLowerCase().trim(),
             'display_name': username.trim(),
@@ -333,7 +334,7 @@ class _AuthViewState extends State<AuthView> {
               'Failed to create user profile during signup', profileError);
           // Try to create a basic profile as fallback
           try {
-            await Supabase.instance.client.from('user_profiles').insert({
+            await client.from('user_profiles').insert({
               'user_id': response.user!.id,
               'username': username.toLowerCase().trim(),
               'display_name': username.trim(),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/settings_provider.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import '../services/logger.dart';
+import '../config/supabase_config.dart';
 import '../widgets/top_snackbar.dart';
 import '../widgets/auth_view.dart';
 import '../constants/urls.dart';
@@ -22,14 +22,21 @@ class _GuideScreenState extends State<GuideScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  late final List<GuidePage> _pages;
+  List<GuidePage>? _pages;
 
   @override
   void initState() {
     super.initState();
     AppLogger.info('GuideScreen loaded');
+  }
 
-    final isLoggedIn = Supabase.instance.client.auth.currentUser != null;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_pages != null) return;
+
+    final isLoggedIn = SupabaseConfig.maybeClient?.auth.currentUser != null;
 
     _pages = buildGuidePages(
       context: context,
@@ -54,7 +61,7 @@ class _GuideScreenState extends State<GuideScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     // final textTheme = theme.textTheme; // Not used
-    final pages = _pages; // Get the current pages
+    final pages = _pages!; // Get the current pages
     final isLastPage = _currentPage == pages.length - 1;
 
     return Scaffold(

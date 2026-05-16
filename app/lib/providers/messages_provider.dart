@@ -51,6 +51,13 @@ class MessagesProvider with ChangeNotifier {
   /// Loads active messages and tracks which ones have been viewed
   Future<void> loadActiveMessages() async {
     try {
+      if (!_messagingService.isAvailable) {
+        _activeMessages = [];
+        _unreadCount = 0;
+        _errorMessage = null;
+        return;
+      }
+
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
@@ -100,6 +107,8 @@ class MessagesProvider with ChangeNotifier {
   /// Checks for new messages by comparing with current state
   Future<void> checkForNewMessages() async {
     try {
+      if (!_messagingService.isAvailable) return;
+
       final currentMessages = await _messagingService.getActiveMessages();
 
       // Check if we have new messages

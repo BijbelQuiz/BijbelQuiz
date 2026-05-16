@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bijbelquiz/services/connection_service.dart';
 import 'package:bijbelquiz/providers/settings_provider.dart';
 import 'package:bijbelquiz/providers/messages_provider.dart';
 import 'package:bijbelquiz/providers/store_provider.dart';
+import 'package:bijbelquiz/config/supabase_config.dart';
 
 import '../screens/lesson_select_screen.dart';
 import '../screens/store_screen.dart';
@@ -73,7 +73,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   NavigationDestination _buildSocialDestination() {
     final messagesProvider = Provider.of<MessagesProvider>(context);
     final hasUnreadMessages = messagesProvider.hasUnreadMessages;
-    final isLoggedIn = Supabase.instance.client.auth.currentUser != null;
+    final isLoggedIn = SupabaseConfig.maybeClient?.auth.currentUser != null;
     final showAlertDot = !isLoggedIn || hasUnreadMessages;
 
     return NavigationDestination(

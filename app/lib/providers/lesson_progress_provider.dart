@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../config/supabase_config.dart';
 import '../models/lesson.dart';
 import '../services/logger.dart';
 import '../services/sync_service_v2.dart';
@@ -54,8 +54,11 @@ class LessonProgressProvider extends ChangeNotifier {
       },
     );
 
+    final client = SupabaseConfig.maybeClient;
+    if (client == null) return;
+
     // Listen for auth changes to reload data
-    Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+    client.auth.onAuthStateChange.listen((event) {
       final session = event.session;
       if (session?.user != null) {
         AppLogger.info(

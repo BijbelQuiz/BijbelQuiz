@@ -1068,6 +1068,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
   Future<void> _handleUnlockBiblicalReferenceForPlayer(bool isPlayer1) async {
     final QuizState quizState =
         isPlayer1 ? _player1QuizState : _player2QuizState;
+    final String playerName = isPlayer1 ? 'Player1' : 'Player2';
 
     // First check if the reference can be parsed
     final parsed =
@@ -1177,8 +1178,6 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen>
     // Load biblical content for the specific player
     _loadBiblicalReferenceForPlayer(biblicalReference, isPlayer1);
 
-    // Track successful biblical reference unlock
-    final quizState = isPlayer1 ? _player1QuizState : _player2QuizState;
   }
 
   Future<void> _loadBiblicalReferenceForPlayer(
