@@ -144,18 +144,16 @@ class _GuideScreenState extends State<GuideScreen> {
                         ? AppLocalizations.of(context)!.getStarted
                         : AppLocalizations.of(context)!.next,
                     child: TextButton(
-                      onPressed: pages[_currentPage].isAuthPage
-                          ? null
-                          : () {
-                              if (isLastPage) {
-                                _handleGuideCompletion(context);
-                              } else {
-                                _pageController.nextPage(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                );
-                              }
-                            },
+                      onPressed: () {
+                          if (isLastPage) {
+                            _handleGuideCompletion(context);
+                          } else {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        },
                       child: Text(
                         isLastPage
                             ? AppLocalizations.of(context)!.getStarted
@@ -222,15 +220,6 @@ List<GuidePage> buildGuidePages(
     {required BuildContext context, required bool isLoggedIn}) {
   final pages = <GuidePage>[];
 
-  if (!isLoggedIn) {
-    pages.add(GuidePage(
-      title: AppLocalizations.of(context)!.guideAccount,
-      description: AppLocalizations.of(context)!.guideAccountDescription,
-      icon: Icons.account_circle,
-      isAuthPage: true,
-    ));
-  }
-
   pages.addAll([
     GuidePage(
       title: AppLocalizations.of(context)!.welcomeTitle,
@@ -267,6 +256,16 @@ List<GuidePage> buildGuidePages(
         isDonationPage: true,
       ),
     );
+  }
+
+  // Add account creation page last (if not logged in)
+  if (!isLoggedIn) {
+    pages.add(GuidePage(
+      title: AppLocalizations.of(context)!.guideAccount,
+      description: AppLocalizations.of(context)!.guideAccountDescription,
+      icon: Icons.account_circle,
+      isAuthPage: true,
+    ));
   }
 
   return pages;
