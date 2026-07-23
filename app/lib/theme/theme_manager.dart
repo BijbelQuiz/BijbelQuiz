@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/theme_definition.dart';
@@ -259,7 +260,7 @@ class ThemeManager {
   PageTransitionsTheme _buildPageTransitionsTheme(
       Map<String, dynamic> pageTransitions) {
     // Currently using default page transitions
-    return const PageTransitionsTheme(
+    return PageTransitionsTheme(
       builders: {
         TargetPlatform.android: CupertinoPageTransitionsBuilder(),
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
